@@ -1,0 +1,143 @@
+{
+  "design_system": {
+    "identity": {
+      "brand_name": "Ozoxx",
+      "tone": "Clean, Professional, Innovative, Rewarding",
+      "archetype": "The Modern Laboratory",
+      "keywords": ["Ozone", "Franchise", "Growth", "Clarity"]
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Outfit, sans-serif",
+        "body": "Inter, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+        "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+        "h3": "text-2xl font-semibold",
+        "h4": "text-xl font-medium",
+        "body_lg": "text-lg leading-relaxed",
+        "body_base": "text-base leading-relaxed text-slate-600",
+        "caption": "text-sm text-slate-500"
+      }
+    },
+    "colors": {
+      "palette": {
+        "primary": {
+          "name": "Ozoxx Cyan",
+          "hex": "#06b6d4",
+          "tailwind": "cyan-500",
+          "usage": "Primary buttons, active states, brand highlights"
+        },
+        "secondary": {
+          "name": "Slate Grey",
+          "hex": "#64748b",
+          "tailwind": "slate-500",
+          "usage": "Secondary text, borders, inactive icons"
+        },
+        "accent": {
+          "name": "Reward Gold",
+          "hex": "#f59e0b",
+          "tailwind": "amber-500",
+          "usage": "Gamification points, badges, rewards, callouts"
+        },
+        "background": {
+          "light": "#f8fafc",
+          "paper": "#ffffff",
+          "dark": "#0f172a"
+        },
+        "status": {
+          "success": "#10b981",
+          "error": "#ef4444",
+          "warning": "#f59e0b",
+          "info": "#3b82f6"
+        }
+      },
+      "gradients": {
+        "brand": "bg-gradient-to-r from-cyan-500 to-blue-500",
+        "glass": "bg-white/70 backdrop-blur-xl border-white/20",
+        "subtle": "bg-gradient-to-b from-slate-50 to-white"
+      }
+    },
+    "spacing": {
+      "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+      "section_gap": "py-12 md:py-24",
+      "card_padding": "p-6 md:p-8"
+    },
+    "visual_enhancers": {
+      "radius": "rounded-xl",
+      "shadows": {
+        "card": "shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300",
+        "float": "shadow-xl shadow-cyan-500/10"
+      },
+      "borders": "border border-slate-200"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md active:scale-95",
+      "secondary": "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium px-6 py-2.5 rounded-lg transition-all",
+      "ghost": "text-slate-600 hover:bg-slate-100 hover:text-slate-900 px-4 py-2 rounded-lg transition-colors"
+    },
+    "cards": {
+      "dashboard": "bg-white rounded-xl border border-slate-100 shadow-sm p-6",
+      "stat": "bg-white rounded-xl border border-slate-100 p-6 flex items-center justify-between hover:border-cyan-100 transition-colors",
+      "course": "group bg-white rounded-xl overflow-hidden border border-slate-100 hover:shadow-lg transition-all duration-300"
+    },
+    "inputs": {
+      "default": "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    }
+  },
+  "layouts": {
+    "dashboard": {
+      "structure": "Sidebar + Topbar + Main Content Area",
+      "grid": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "bento_modes": {
+        "overview": "Hero (col-span-8), Stats (col-span-4), Recent Activity (col-span-4 row-span-2)"
+      }
+    },
+    "marketing": {
+      "structure": "Hero -> Features -> Testimonials -> CTA",
+      "hero_style": "Split screen: Text Left, Image/3D Right"
+    }
+  },
+  "assets": {
+    "images": {
+      "login_bg": "https://images.pexels.com/photos/9629687/pexels-photo-9629687.jpeg",
+      "dashboard_hero": "https://images.pexels.com/photos/572056/pexels-photo-572056.jpeg",
+      "training_cover": "https://images.pexels.com/photos/7793688/pexels-photo-7793688.jpeg",
+      "file_repo_cover": "https://images.pexels.com/photos/2678468/pexels-photo-2678468.jpeg"
+    },
+    "icons": "Lucide React (default)",
+    "logo_placeholder": "Text 'Ozoxx' in Outfit Bold, Cyan-500"
+  },
+  "instructions_to_main_agent": {
+    "general": [
+      "Use 'Outfit' font for all headings to give a modern, clean look.",
+      "Use 'Inter' for body text for maximum readability.",
+      "Implement the 'Ozoxx Cyan' (#06b6d4) as the primary brand color.",
+      "Use 'Amber-500' for all gamification elements (points, stars, rewards).",
+      "Ensure all dashboards use the 'Bento' grid layout for widgets.",
+      "Use 'Sonner' for all toast notifications.",
+      "Ensure all interactive elements have 'data-testid' attributes."
+    ],
+    "specific_pages": {
+      "login": "Split screen layout. Left side: Branding/Image. Right side: Clean form.",
+      "dashboard": "Sidebar navigation. Top bar with User Profile and Points Display. Main area with widget grid.",
+      "courses": "Grid of cards for modules. Each card shows progress bar and 'Start/Continue' button.",
+      "files": "List or Grid view of downloadable assets. Use clear icons for file types (PDF, JPG, etc.)."
+    },
+    "theme_setup": [
+      "Update 'tailwind.config.js' to include the custom colors (cyan, slate, amber).",
+      "Update 'index.css' to set the CSS variables for the theme."
+    ]
+  },
+  "universal_guidelines": [
+    "Do not use generic centered layouts.",
+    "Create depth through layered design elements.",
+    "Use glass-morphism effects for overlays.",
+    "Add micro-animations to all interactions.",
+    "Ensure accessibility contrast ratios are met."
+  ]
+}
