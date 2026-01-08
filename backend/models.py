@@ -251,4 +251,21 @@ class EmailRequest(BaseModel):
     subject: str
     html_content: str
 
+class Notification(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    title: str
+    message: str
+    type: str
+    read: bool = False
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    related_id: Optional[str] = None
+
+class NotificationCreate(BaseModel):
+    user_id: str
+    title: str
+    message: str
+    type: str
+    related_id: Optional[str] = None
+
 import secrets
