@@ -244,6 +244,3 @@ async def mark_as_read(sid, data):
         await sio.emit('messages_read', {'conversation_id': conversation_id}, room=sid)
     except Exception as e:
         print(f"Erro ao marcar mensagens como lidas: {e}")
-
-# Criar app ASGI do Socket.IO
-sio_asgi_app = socketio.ASGIApp(sio, other_asgi_app=None)
