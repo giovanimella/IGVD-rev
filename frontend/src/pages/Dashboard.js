@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import StageProgressBar from '../components/StageProgressBar';
 import axios from 'axios';
-import { BookOpen, Users, Award, Clock, TrendingUp } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, TrendingUp, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
