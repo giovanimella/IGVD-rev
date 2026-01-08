@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { ChatProvider } from './contexts/ChatContext';
+// import { ChatProvider } from './contexts/ChatContext';
 import { PrivateRoute } from './components/PrivateRoute';
 import { Toaster } from './components/ui/sonner';
-import ChatWidget from './components/ChatWidget';
+// import ChatWidget from './components/ChatWidget';
 
 import Login from './pages/Login';
 import RequestReset from './pages/RequestReset';
