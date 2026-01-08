@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useChat } from '../contexts/ChatContext';
 import {
   Home,
   BookOpen,
@@ -17,6 +18,7 @@ import {
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
+  const { unreadCount } = useChat();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
