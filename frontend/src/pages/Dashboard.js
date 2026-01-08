@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import StageProgressBar from '../components/StageProgressBar';
+import BannerCarousel from '../components/BannerCarousel';
+import PostsList from '../components/PostsList';
 import axios from 'axios';
 import { BookOpen, Users, Award, Clock, TrendingUp, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
