@@ -82,3 +82,50 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
             "total_modules": total_modules,
             "my_rank": my_rank
         }
+
+@router.get("/recent-activity")
+async def get_recent_activity(current_user: dict = Depends(get_current_user)):
+    """Retorna atividades recentes do usuário (módulos/capítulos concluídos)"""
+    user_id = current_user["sub"]
+    
+    # Buscar progresso recente (últimos 10)
+    recent_progress = await db.progress.find(
+        {"user_id": user_id, "completed": True},
+        {"_id": 0}
+    ).sort("completed_at", -1).limit(10).to_list(10)
+    
+    # Enriquecer com dados dos módulos e capítulos
+    for progress in recent_progress:
+        module = await db.modules.find_one({"id": progress["module_id"]}, {"_id": 0})
+        chapter = await db.chapters.find_one({"id": progress["chapter_id"]}, {"_id": 0})
+        progress["module_title"] = module.get("title") if module else "Módulo"
+        progress["chapter_title"] = chapter.get("title") if chapter else "Capítulo"
+    
+    return recent_progress
+
+@router.get("/access-history")
+async def get_access_history(current_user: dict = Depends(get_current_user)):
+    """Retorna histórico de acessos dos últimos 7 dias"""
+    user_id = current_user["sub"]
+    
+    # Calcular últimos 7 dias
+    today = datetime.now()
+    last_7_days = [(today - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
+    
+    # Buscar acessos agrupados por dia
+    access_stats = []
+    for date in last_7_days:
+        count = await db.user_accesses.count_documents({
+            "user_id": user_id,
+            "date": date
+        })
+        # Formatar data para exibição (dd/MM)
+        date_obj = datetime.strptime(date, "%Y-%m-%d")
+        day_label = date_obj.strftime("%d/%m")
+        
+        access_stats.append({
+            "date": day_label,
+            "count": count
+        })
+    
+    return access_stats
