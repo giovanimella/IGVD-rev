@@ -1,16 +1,19 @@
 import React from 'react';
 import { CheckCircle, Circle, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const StageProgressBar = ({ currentStage }) => {
+  const navigate = useNavigate();
+  
   const stages = [
-    { key: 'registro', label: 'Registro', description: 'Cadastro inicial' },
-    { key: 'documentos', label: 'Documentos', description: 'Envio de documentos' },
-    { key: 'pagamento', label: 'Pagamento', description: 'Taxa de licença' },
-    { key: 'acolhimento', label: 'Acolhimento', description: 'Primeiros treinamentos' },
-    { key: 'agendamento', label: 'Agendamento', description: 'Agendar treinamento' },
-    { key: 'treinamento_presencial', label: 'Treinamento', description: 'Presencial na fábrica' },
-    { key: 'vendas_campo', label: 'Vendas', description: '10 vendas em campo' },
-    { key: 'completo', label: 'Completo', description: 'Acesso total' }
+    { key: 'registro', label: 'Registro', description: 'Cadastro inicial', link: '/profile' },
+    { key: 'documentos', label: 'Documentos', description: 'Envio de documentos', link: '/onboarding/documents' },
+    { key: 'pagamento', label: 'Pagamento', description: 'Taxa de licença', link: '/onboarding/payment' },
+    { key: 'acolhimento', label: 'Acolhimento', description: 'Primeiros treinamentos', link: '/modules' },
+    { key: 'agendamento', label: 'Agendamento', description: 'Agendar treinamento', link: '/profile' },
+    { key: 'treinamento_presencial', label: 'Treinamento', description: 'Presencial na fábrica', link: '/profile' },
+    { key: 'vendas_campo', label: 'Vendas', description: '10 vendas em campo', link: '/profile' },
+    { key: 'completo', label: 'Completo', description: 'Acesso total', link: '/modules' }
   ];
 
   const currentIndex = stages.findIndex(s => s.key === currentStage);
