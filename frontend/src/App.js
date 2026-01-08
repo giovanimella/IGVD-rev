@@ -152,11 +152,20 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/admin/chat"
+            element={
+              <PrivateRoute roles={['admin', 'supervisor']}>
+                <AdminChat />
+              </PrivateRoute>
+            }
+          />
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
+      </ChatProvider>
     </AuthProvider>
   );
 }
