@@ -335,4 +335,10 @@ class MessageCreate(BaseModel):
     conversation_id: str
     message: str
 
+class UserAccess(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    accessed_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    date: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d"))
+
 import secrets
