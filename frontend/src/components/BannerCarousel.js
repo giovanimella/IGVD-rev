@@ -47,7 +47,7 @@ const BannerCarousel = () => {
   }
 
   return (
-    <div className="relative w-full h-64 rounded-xl overflow-hidden shadow-lg mb-6">
+    <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-lg mb-6">
       {/* Imagem do Banner */}
       <img
         src={`${API_URL}${banners[currentIndex].image_url}`}
