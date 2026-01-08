@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from motor.motor_asyncio import AsyncIOMotorClient
 from models import UserCreate, User, UserResponse
-from auth import get_current_user, require_role, get_password_hash
+from auth import get_current_user, require_role, get_password_hash, verify_password
 import os
 import pandas as pd
 import io
