@@ -51,7 +51,7 @@ const Sidebar = () => {
     { path: '/profile', icon: Settings, label: 'Perfil' },
   ];
 
-  const links = user?.role === 'admin' ? adminLinks : user?.role === 'supervisor' ? supervisorLinks : franchiseeLinks;
+  const links = user?.role === 'admin' ? adminLinks : user?.role === 'supervisor' ? supervisorLinks : licenseeLinks;
 
   const NavLinks = () => (
     <>
