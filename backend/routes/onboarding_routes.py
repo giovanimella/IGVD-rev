@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from motor.motor_asyncio import AsyncIOMotorClient
-from models import SupervisorLink, FranchiseeRegistration, TrainingClass, TrainingClassCreate, FieldSaleNote
+from models import SupervisorLink, LicenseeRegistration, TrainingClass, TrainingClassCreate, FieldSaleNote
 from auth import get_current_user, require_role, get_password_hash
 import os
 import secrets
@@ -59,7 +59,7 @@ async def validate_supervisor_link(token: str):
     }
 
 @router.post("/register")
-async def register_franchisee(registration: FranchiseeRegistration):
+async def register_licensee(registration: LicenseeRegistration):
     link = await db.supervisor_links.find_one({
         "token": registration.registration_token,
         "active": True

@@ -55,7 +55,7 @@ class PasswordResetConfirm(BaseModel):
     token: str
     new_password: str
 
-class FranchiseeRegistration(BaseModel):
+class LicenseeRegistration(BaseModel):
     full_name: str
     email: EmailStr
     phone: str

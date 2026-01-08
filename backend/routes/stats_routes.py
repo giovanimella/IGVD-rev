@@ -34,22 +34,22 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         }
     
     elif current_user.get("role") == "supervisor":
-        total_franchisees = await db.users.count_documents({"role": "licenciado"})
+        total_licensees = await db.users.count_documents({"role": "licenciado"})
         total_modules = await db.modules.count_documents({})
         
-        franchisees = await db.users.find({"role": "licenciado"}, {"_id": 0, "password_hash": 0}).to_list(1000)
+        licensees = await db.users.find({"role": "licenciado"}, {"_id": 0, "password_hash": 0}).to_list(1000)
         
-        for franchisee in franchisees:
+        for licensee in licensees:
             completed = await db.user_progress.count_documents({
-                "user_id": franchisee["id"],
+                "user_id": licensee["id"],
                 "completed": True
             })
-            franchisee["completed_chapters"] = completed
+            licensee["completed_chapters"] = completed
         
         return {
-            "total_franchisees": total_franchisees,
+            "total_licensees": total_licensees,
             "total_modules": total_modules,
-            "franchisees": franchisees
+            "licensees": licensees
         }
     
     else:
