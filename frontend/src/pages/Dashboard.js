@@ -319,6 +319,12 @@ const Dashboard = () => {
             <p className="text-slate-600 mt-2">Acompanhe seu progresso e conquistas</p>
           </div>
 
+          {/* Banner Rotativo */}
+          <BannerCarousel />
+
+          {/* Novidades e Comunicados */}
+          <PostsList />
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 p-6">
               <div className="flex items-center gap-3 mb-4">
