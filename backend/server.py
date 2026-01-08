@@ -48,7 +48,6 @@ app.include_router(chat_routes.router, prefix="/api")
 
 # Importar e configurar Socket.IO DEPOIS de criar o app
 from socket_handler import sio
-sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app, socketio_path='socket.io')
 
 @app.get("/api/health")
 async def health_check():
@@ -59,3 +58,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Criar aplicação combinada FastAPI + Socket.IO
+# Esta é a aplicação que o uvicorn vai usar
+app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app, socketio_path='socket.io')
