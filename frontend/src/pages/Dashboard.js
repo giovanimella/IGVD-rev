@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
+import StageProgressBar from '../components/StageProgressBar';
 import axios from 'axios';
 import { BookOpen, Users, Award, Clock, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
+  const [stageInfo, setStageInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     fetchDashboardStats();
+    if (user?.role === 'licenciado') {
+      fetchStageInfo();
+    }
   }, []);
 
   const fetchDashboardStats = async () => {
@@ -24,6 +30,15 @@ const Dashboard = () => {
       console.error('Erro ao buscar estatísticas:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStageInfo = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/onboarding/my-stage`);
+      setStageInfo(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar estágio:', error);
     }
   };
 
@@ -38,6 +53,24 @@ const Dashboard = () => {
   }
 
   if (user?.role === 'admin') {
+    // Dados mockados para gráficos (em produção, vir da API)
+    const progressData = [
+      { month: 'Jan', licenciados: 10, modulos: 15 },
+      { month: 'Fev', licenciados: 15, modulos: 20 },
+      { month: 'Mar', licenciados: 25, modulos: 30 },
+      { month: 'Abr', licenciados: 30, modulos: 35 },
+      { month: 'Mai', licenciados: 40, modulos: 45 },
+      { month: 'Jun', licenciados: 50, modulos: 50 }
+    ];
+
+    const stageDistribution = [
+      { name: 'Registro', value: 5, color: '#06b6d4' },
+      { name: 'Documentos', value: 8, color: '#0ea5e9' },
+      { name: 'Pagamento', value: 12, color: '#3b82f6' },
+      { name: 'Acolhimento', value: 20, color: '#8b5cf6' },
+      { name: 'Completo', value: stats?.total_users || 35, color: '#22c55e' }
+    ];
+
     return (
       <Layout>
         <div className="space-y-6">
@@ -88,6 +121,47 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-6">Crescimento ao Longo do Tempo</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={progressData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="month" stroke="#64748b" />
+                  <YAxis stroke="#64748b" />
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                  <Legend />
+                  <Line type="monotone" dataKey="licenciados" stroke="#06b6d4" strokeWidth={2} name="Licenciados" />
+                  <Line type="monotone" dataKey="modulos" stroke="#8b5cf6" strokeWidth={2} name="Módulos Concluídos" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-6">Distribuição por Etapa</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={stageDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {stageDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-xl border border-slate-100 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Ações Rápidas</h3>
@@ -101,7 +175,7 @@ const Dashboard = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
-                <Link to="/modules" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                <Link to="/admin/modules" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                   <div className="flex items-center gap-3">
                     <BookOpen className="w-5 h-5 text-cyan-600" />
                     <span className="font-medium text-slate-900">Gerenciar Módulos</span>
@@ -128,9 +202,18 @@ const Dashboard = () => {
   }
 
   if (user?.role === 'licenciado') {
+    const progressChartData = [
+      { name: 'Completos', value: stats?.completed_modules || 0, color: '#22c55e' },
+      { name: 'Pendentes', value: (stats?.total_modules || 0) - (stats?.completed_modules || 0), color: '#e2e8f0' }
+    ];
+
     return (
       <Layout>
         <div className="space-y-6">
+          {stageInfo && stageInfo.current_stage !== 'completo' && (
+            <StageProgressBar currentStage={stageInfo.current_stage} />
+          )}
+
           <div>
             <h1 className="text-3xl font-outfit font-bold text-slate-900">Meu Dashboard</h1>
             <p className="text-slate-600 mt-2">Acompanhe seu progresso e conquistas</p>
@@ -186,6 +269,30 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Progress Chart */}
+          <div className="bg-white rounded-xl border border-slate-100 p-6">
+            <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-6">Meu Progresso de Módulos</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={progressChartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value}`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {progressChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
