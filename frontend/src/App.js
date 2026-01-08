@@ -21,6 +21,7 @@ import AdminFiles from './pages/admin/AdminFiles';
 import AdminModules from './pages/admin/AdminModules';
 import AdminChapters from './pages/admin/AdminChapters';
 import AdminChat from './pages/admin/AdminChat';
+import SupervisorLicensees from './pages/supervisor/SupervisorLicensees';
 import PublicRegistration from './pages/PublicRegistration';
 import OnboardingDocuments from './pages/OnboardingDocuments';
 import OnboardingPayment from './pages/OnboardingPayment';
