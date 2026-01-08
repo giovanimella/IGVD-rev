@@ -69,17 +69,25 @@ const StageProgressBar = ({ currentStage }) => {
       </div>
 
       {/* Current Stage Info */}
-      <div className="mt-8 bg-cyan-50 rounded-lg p-4 border border-cyan-100">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center">
-            <Circle className="w-6 h-6 text-white" />
+      <div 
+        onClick={() => navigate(stages[currentIndex]?.link || '/dashboard')}
+        className="mt-8 bg-cyan-50 rounded-lg p-4 border border-cyan-100 cursor-pointer hover:bg-cyan-100 transition-all duration-200 hover:shadow-md"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center">
+              <Circle className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-sm text-cyan-700 font-medium">Etapa Atual - Clique para acessar</p>
+              <p className="text-lg font-outfit font-bold text-cyan-900">
+                {stages[currentIndex]?.label || 'Completo'}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm text-cyan-700 font-medium">Etapa Atual</p>
-            <p className="text-lg font-outfit font-bold text-cyan-900">
-              {stages[currentIndex]?.label || 'Completo'}
-            </p>
-          </div>
+          <svg className="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </div>
       </div>
     </div>
