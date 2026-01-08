@@ -1,8 +1,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ChatProvider } from './contexts/ChatContext';
 import { PrivateRoute } from './components/PrivateRoute';
 import { Toaster } from './components/ui/sonner';
+import ChatWidget from './components/ChatWidget';
 
 import Login from './pages/Login';
 import RequestReset from './pages/RequestReset';
@@ -18,6 +20,7 @@ import AdminRewards from './pages/admin/AdminRewards';
 import AdminFiles from './pages/admin/AdminFiles';
 import AdminModules from './pages/admin/AdminModules';
 import AdminChapters from './pages/admin/AdminChapters';
+import AdminChat from './pages/admin/AdminChat';
 import PublicRegistration from './pages/PublicRegistration';
 import OnboardingDocuments from './pages/OnboardingDocuments';
 import OnboardingPayment from './pages/OnboardingPayment';
@@ -26,9 +29,11 @@ import Profile from './pages/Profile';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Toaster position="top-right" richColors />
-        <Routes>
+      <ChatProvider>
+        <BrowserRouter>
+          <Toaster position="top-right" richColors />
+          <ChatWidget />
+          <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/request-reset" element={<RequestReset />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
