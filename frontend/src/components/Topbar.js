@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Award, Bell } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const Topbar = () => {
   const { user } = useAuth();
@@ -14,6 +15,8 @@ const Topbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <NotificationBell />
+          
           {user?.role === 'licenciado' && (
             <div className="flex items-center gap-3 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
               <Award className="w-5 h-5 text-amber-600" />
