@@ -30,6 +30,7 @@ const Sidebar = () => {
 
   const adminLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/admin/system', icon: Settings, label: 'Painel Sistema' },
     { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
