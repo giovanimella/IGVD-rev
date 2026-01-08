@@ -37,7 +37,7 @@ const SupervisorLicensees = () => {
 
   const fetchLicensees = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/users`);
+      const response = await axios.get(`${API_URL}/api/users/`);
       const licenseesData = response.data.filter((u) => u.role === 'licenciado');
       setLicensees(licenseesData);
       setFilteredLicensees(licenseesData);
