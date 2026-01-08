@@ -29,6 +29,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/request-reset" element={<RequestReset />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/register/:token" element={<PublicRegistration />} />
           
           <Route
             path="/dashboard"
@@ -75,6 +76,22 @@ function App() {
             element={
               <PrivateRoute roles={['licenciado']}>
                 <FileRepository />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/onboarding/documents"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <OnboardingDocuments />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/onboarding/payment"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <OnboardingPayment />
               </PrivateRoute>
             }
           />
