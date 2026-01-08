@@ -220,7 +220,12 @@ const SupervisorLicensees = () => {
                     <tr key={licensee.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-semibold text-slate-900">{licensee.full_name}</p>
+                          <button
+                            onClick={() => navigate(`/supervisor/licensee/${licensee.id}`)}
+                            className="font-semibold text-cyan-600 hover:text-cyan-700 hover:underline"
+                          >
+                            {licensee.full_name}
+                          </button>
                           <p className="text-sm text-slate-500">{licensee.email}</p>
                         </div>
                       </td>
