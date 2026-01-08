@@ -46,8 +46,9 @@ app.include_router(payment_routes.router, prefix="/api")
 app.include_router(notification_routes.router, prefix="/api")
 app.include_router(chat_routes.router, prefix="/api")
 
-# Integrar Socket.IO com FastAPI
-app.mount('/', sio_asgi_app)
+# Importar e configurar Socket.IO DEPOIS de criar o app
+from socket_handler import sio
+sio_asgi_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app, socketio_path='socket.io')
 
 @app.get("/api/health")
 async def health_check():
