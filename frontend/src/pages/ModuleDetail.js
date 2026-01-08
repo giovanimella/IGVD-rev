@@ -1,0 +1,210 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Layout from '../components/Layout';
+import axios from 'axios';
+import { ArrowLeft, BookOpen, Play, CheckCircle, Clock, Award } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Progress } from '../components/ui/progress';
+import { toast } from 'sonner';
+
+const ModuleDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [module, setModule] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+  useEffect(() => {
+    fetchModule();
+  }, [id]);
+
+  const fetchModule = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/modules/${id}`);
+      setModule(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar módulo:', error);
+      toast.error('Erro ao carregar módulo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMarkComplete = async (chapterId) => {
+    try {
+      await axios.post(`${API_URL}/api/progress/update`, {
+        chapter_id: chapterId,
+        module_id: id,
+        completed: true,
+        watched_percentage: 100
+      });
+      toast.success('Capítulo marcado como completo!');
+      fetchModule();
+    } catch (error) {
+      toast.error('Erro ao atualizar progresso');
+    }
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!module) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-outfit font-bold text-slate-900">Módulo não encontrado</h2>
+          <Button onClick={() => navigate('/modules')} className="mt-4">
+            Voltar para Módulos
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  const completedChapters = module.chapters?.filter(ch => ch.user_progress?.completed).length || 0;
+  const totalChapters = module.chapters?.length || 0;
+  const progress = totalChapters > 0 ? (completedChapters / totalChapters * 100) : 0;
+
+  return (
+    <Layout>
+      <div className="space-y-6">
+        <div>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/modules')}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+
+          <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl p-8 text-white">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-4xl font-outfit font-bold mb-4">{module.title}</h1>
+                <p className="text-white/90 text-lg mb-6">{module.description}</p>
+                
+                <div className="flex items-center gap-6 text-white/90">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    <span>{totalChapters} capítulos</span>
+                  </div>
+                  {module.has_certificate && (
+                    <div className="flex items-center gap-2">
+                      <Award className="w-5 h-5" />
+                      <span>Certificado disponível</span>
+                    </div>
+                  )}
+                  {module.points_reward > 0 && (
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <span>{module.points_reward} pontos</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {progress > 0 && (
+              <div className="mt-6 bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span>Seu Progresso</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="h-2 bg-white/30" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-outfit font-bold text-slate-900 mb-6">Capítulos</h2>
+          <div className="space-y-4">
+            {module.chapters && module.chapters.length > 0 ? (
+              module.chapters.map((chapter, index) => {
+                const isCompleted = chapter.user_progress?.completed;
+                return (
+                  <div
+                    key={chapter.id}
+                    data-testid={`chapter-item-${chapter.id}`}
+                    className={`bg-white rounded-xl border p-6 transition-all ${
+                      isCompleted ? 'border-green-200 bg-green-50/50' : 'border-slate-200 hover:shadow-md'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          isCompleted ? 'bg-green-500' : 'bg-cyan-100'
+                        }`}>
+                          {isCompleted ? (
+                            <CheckCircle className="w-6 h-6 text-white" />
+                          ) : (
+                            <span className="text-cyan-600 font-semibold text-lg">{index + 1}</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-2">
+                            {chapter.title}
+                          </h3>
+                          <p className="text-slate-600 text-sm mb-3">{chapter.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-slate-500">
+                            <div className="flex items-center gap-1">
+                              {chapter.content_type === 'video' && <Play className="w-4 h-4" />}
+                              {chapter.content_type === 'document' && <BookOpen className="w-4 h-4" />}
+                              <span className="capitalize">{chapter.content_type}</span>
+                            </div>
+                            {chapter.duration_minutes > 0 && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                <span>{chapter.duration_minutes} min</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        {!isCompleted && (
+                          <Button
+                            onClick={() => handleMarkComplete(chapter.id)}
+                            size="sm"
+                            data-testid={`complete-chapter-${chapter.id}`}
+                          >
+                            Marcar como Completo
+                          </Button>
+                        )}
+                        {isCompleted && (
+                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                            <CheckCircle className="w-4 h-4" />
+                            Completo
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2">Nenhum capítulo disponível</h3>
+                <p className="text-slate-600">Os capítulos estarão disponíveis em breve.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default ModuleDetail;
