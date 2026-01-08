@@ -179,6 +179,14 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/supervisor/licensee/:id"
+            element={
+              <PrivateRoute roles={['supervisor']}>
+                <LicenseeDetail />
+              </PrivateRoute>
+            }
+          />
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
