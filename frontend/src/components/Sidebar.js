@@ -37,6 +37,8 @@ const Sidebar = () => {
     { path: '/admin/users', icon: Users, label: 'Usuários' },
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
     { path: '/admin/files', icon: FileText, label: 'Arquivos' },
+    { path: '/admin/banners', icon: Image, label: 'Banners' },
+    { path: '/admin/posts', icon: Megaphone, label: 'Comunicados' },
     // { path: '/admin/chat', icon: MessageCircle, label: 'Chat Suporte' },
     { path: '/profile', icon: Settings, label: 'Perfil' },
   ];
