@@ -6,7 +6,7 @@ import uuid
 class UserCreate(BaseModel):
     email: EmailStr
     full_name: str
-    role: str = "franqueado"
+    role: str = "licenciado"
 
 class UserLogin(BaseModel):
     email: EmailStr

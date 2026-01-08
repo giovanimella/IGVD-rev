@@ -112,7 +112,7 @@ async def import_users_csv(file: UploadFile = File(...), current_user: dict = De
             user = User(
                 email=email,
                 full_name=full_name,
-                role="franqueado"
+                role="licenciado"
             )
             
             user_dict = user.model_dump()

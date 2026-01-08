@@ -12,7 +12,7 @@ router = APIRouter(prefix="/stats", tags=["stats"])
 @router.get("/leaderboard")
 async def get_leaderboard(current_user: dict = Depends(get_current_user)):
     users = await db.users.find(
-        {"role": "franqueado"},
+        {"role": "licenciado"},
         {"_id": 0, "password_hash": 0, "reset_token": 0, "reset_token_expires": 0}
     ).sort("points", -1).limit(100).to_list(100)
     
@@ -21,7 +21,7 @@ async def get_leaderboard(current_user: dict = Depends(get_current_user)):
 @router.get("/dashboard")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     if current_user.get("role") == "admin":
-        total_users = await db.users.count_documents({"role": "franqueado"})
+        total_users = await db.users.count_documents({"role": "licenciado"})
         total_modules = await db.modules.count_documents({})
         total_rewards = await db.rewards.count_documents({"active": True})
         pending_redemptions = await db.reward_redemptions.count_documents({"status": "pending"})
@@ -34,10 +34,10 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         }
     
     elif current_user.get("role") == "supervisor":
-        total_franchisees = await db.users.count_documents({"role": "franqueado"})
+        total_franchisees = await db.users.count_documents({"role": "licenciado"})
         total_modules = await db.modules.count_documents({})
         
-        franchisees = await db.users.find({"role": "franqueado"}, {"_id": 0, "password_hash": 0}).to_list(1000)
+        franchisees = await db.users.find({"role": "licenciado"}, {"_id": 0, "password_hash": 0}).to_list(1000)
         
         for franchisee in franchisees:
             completed = await db.user_progress.count_documents({
@@ -70,7 +70,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
                 completed_modules_count += 1
         
         my_rank = await db.users.count_documents({
-            "role": "franqueado",
+            "role": "licenciado",
             "points": {"$gt": user.get("points", 0)}
         }) + 1
         

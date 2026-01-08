@@ -77,7 +77,7 @@ async def register_franchisee(registration: FranchiseeRegistration):
         email=registration.email,
         full_name=registration.full_name,
         phone=registration.phone,
-        role="franqueado",
+        role="licenciado",
         supervisor_id=link["supervisor_id"],
         registration_link_token=registration.registration_token,
         current_stage="documentos"
@@ -297,4 +297,4 @@ async def approve_field_sales(user_id: str, current_user: dict = Depends(require
         }}
     )
     
-    return {"message": "Vendas aprovadas. Franqueado agora tem acesso completo"}
+    return {"message": "Vendas aprovadas. Licenciado agora tem acesso completo"}

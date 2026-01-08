@@ -17,7 +17,7 @@ async def get_all_modules(current_user: dict = Depends(get_current_user)):
     current_stage = user.get("current_stage", "completo") if user else "completo"
     
     query = {}
-    if current_user.get("role") == "franqueado":
+    if current_user.get("role") == "licenciado":
         if current_stage == "acolhimento":
             query["is_acolhimento"] = True
         elif current_stage != "completo":

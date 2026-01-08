@@ -12,20 +12,20 @@ async def seed_data():
     client = AsyncIOMotorClient(mongo_url)
     db = client[os.environ['DB_NAME']]
     
-    # Criar franqueado de teste
-    existing = await db.users.find_one({"email": "franqueado@teste.com"})
+    # Criar licenciado de teste
+    existing = await db.users.find_one({"email": "licenciado@teste.com"})
     if not existing:
-        franqueado = User(
-            email="franqueado@teste.com",
+        licenciado = User(
+            email="licenciado@teste.com",
             full_name="João Silva",
-            role="franqueado",
+            role="licenciado",
             points=150,
             level_title="Bronze"
         )
-        franqueado_dict = franqueado.model_dump()
-        franqueado_dict["password_hash"] = get_password_hash("senha123")
-        await db.users.insert_one(franqueado_dict)
-        print("✓ Franqueado criado")
+        licenciado_dict = licenciado.model_dump()
+        licenciado_dict["password_hash"] = get_password_hash("senha123")
+        await db.users.insert_one(licenciado_dict)
+        print("✓ Licenciado criado")
     
     # Criar módulo de teste
     existing_module = await db.modules.find_one({"title": "Introdução aos Geradores de Ozônio"})
