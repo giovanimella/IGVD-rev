@@ -71,7 +71,7 @@ async def redeem_reward(reward_id: str, current_user: dict = Depends(get_current
     return {"message": "Solicitação de resgate enviada com sucesso", "redemption": redemption}
 
 @router.get("/redemptions")
-async def get_redemptions(current_user: dict = Depends(require_role(["admin"]))):
+async def get_redemptions(current_user: dict = Depends(require_role(["admin", "supervisor"]))):
     redemptions = await db.reward_redemptions.find({}, {"_id": 0}).to_list(1000)
     
     for redemption in redemptions:
