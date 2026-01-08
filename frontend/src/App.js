@@ -22,6 +22,8 @@ import AdminModules from './pages/admin/AdminModules';
 import AdminChapters from './pages/admin/AdminChapters';
 import AdminChat from './pages/admin/AdminChat';
 import AdminSystem from './pages/admin/AdminSystem';
+import AdminBanners from './pages/admin/AdminBanners';
+import AdminPosts from './pages/admin/AdminPosts';
 import SupervisorLicensees from './pages/supervisor/SupervisorLicensees';
 import LicenseeDetail from './pages/supervisor/LicenseeDetail';
 import PublicRegistration from './pages/PublicRegistration';
