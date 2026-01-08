@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
+  const [supervisors, setSupervisors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -13,7 +14,8 @@ const AdminUsers = () => {
     email: '',
     full_name: '',
     role: 'licenciado',
-    phone: ''
+    phone: '',
+    supervisor_id: ''
   });
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -26,6 +28,8 @@ const AdminUsers = () => {
     try {
       const response = await axios.get(`${API_URL}/api/users/`);
       setUsers(response.data);
+      // Filtrar supervisores para o dropdown
+      setSupervisors(response.data.filter(u => u.role === 'supervisor'));
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
       toast.error('Erro ao carregar usuários');
@@ -36,7 +40,7 @@ const AdminUsers = () => {
 
   const openCreateModal = () => {
     setEditingUser(null);
-    setFormData({ email: '', full_name: '', role: 'licenciado', phone: '' });
+    setFormData({ email: '', full_name: '', role: 'licenciado', phone: '', supervisor_id: '' });
     setShowModal(true);
   };
 
@@ -46,7 +50,8 @@ const AdminUsers = () => {
       email: user.email,
       full_name: user.full_name,
       role: user.role,
-      phone: user.phone || ''
+      phone: user.phone || '',
+      supervisor_id: user.supervisor_id || ''
     });
     setShowModal(true);
   };
@@ -101,6 +106,12 @@ const AdminUsers = () => {
       licenciado: 'Licenciado'
     };
     return labels[role] || role;
+  };
+
+  const getSupervisorName = (supervisorId) => {
+    if (!supervisorId) return '-';
+    const supervisor = supervisors.find(s => s.id === supervisorId);
+    return supervisor ? supervisor.full_name : '-';
   };
 
   if (loading) {
@@ -167,6 +178,7 @@ const AdminUsers = () => {
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Email</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Telefone</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Nível</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Supervisor</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Pontos</th>
                   <th className="text-right px-6 py-4 text-sm font-semibold text-slate-900">Ações</th>
                 </tr>
@@ -189,6 +201,7 @@ const AdminUsers = () => {
                         {getRoleLabel(user.role)}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-slate-600">{getSupervisorName(user.supervisor_id)}</td>
                     <td className="px-6 py-4 text-slate-900 font-semibold">{user.points || 0}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end space-x-2">
@@ -277,6 +290,25 @@ const AdminUsers = () => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
+
+              {/* Campo Supervisor - só aparece se for licenciado */}
+              {formData.role === 'licenciado' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Supervisor</label>
+                  <select
+                    value={formData.supervisor_id}
+                    onChange={(e) => setFormData({ ...formData, supervisor_id: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  >
+                    <option value="">Nenhum supervisor</option>
+                    {supervisors.map((supervisor) => (
+                      <option key={supervisor.id} value={supervisor.id}>
+                        {supervisor.full_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="flex space-x-3 pt-4">
                 <button
