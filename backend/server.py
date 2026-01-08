@@ -48,8 +48,8 @@ app.include_router(payment_routes.router, prefix="/api")
 app.include_router(notification_routes.router, prefix="/api")
 app.include_router(chat_routes.router, prefix="/api")
 
-# Montar o Socket.IO em /socket.io
-app.mount("/socket.io", socket_app)
+# Integrar Socket.IO com FastAPI
+app.mount('/', sio_asgi_app)
 
 @app.get("/api/health")
 async def health_check():
