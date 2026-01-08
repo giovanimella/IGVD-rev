@@ -46,9 +46,6 @@ app.include_router(payment_routes.router, prefix="/api")
 app.include_router(notification_routes.router, prefix="/api")
 app.include_router(chat_routes.router, prefix="/api")
 
-# Importar e configurar Socket.IO DEPOIS de criar o app
-from socket_handler import sio
-
 @app.get("/api/health")
 async def health_check():
     return {"status": "healthy", "service": "Ozoxx LMS API"}
@@ -59,6 +56,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Importar e configurar Socket.IO DEPOIS de definir todas as rotas
+from socket_handler import sio
 # Criar aplicação combinada FastAPI + Socket.IO
 # Esta é a aplicação que o uvicorn vai usar
-app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app, socketio_path='socket.io')
+fastapi_app = app
+app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=fastapi_app, socketio_path='socket.io')
