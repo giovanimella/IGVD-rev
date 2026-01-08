@@ -74,13 +74,14 @@ const Sidebar = () => {
         {links.map((link) => {
           const Icon = link.icon;
           const isActive = location.pathname === link.path;
+          const isChat = link.path === '/admin/chat';
           return (
             <Link
               key={link.path}
               to={link.path}
               data-testid={`sidebar-link-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
               onClick={() => setIsMobileOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
                 isActive
                   ? 'bg-cyan-50 text-cyan-600 font-medium'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -88,6 +89,11 @@ const Sidebar = () => {
             >
               <Icon className="w-5 h-5" />
               <span>{link.label}</span>
+              {isChat && unreadCount > 0 && (
+                <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}
