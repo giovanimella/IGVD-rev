@@ -23,6 +23,8 @@ const Dashboard = () => {
     fetchDashboardStats();
     if (user?.role === 'licenciado') {
       fetchStageInfo();
+      fetchRecentActivity();
+      fetchAccessHistory();
     }
   }, []);
 
