@@ -268,4 +268,38 @@ class NotificationCreate(BaseModel):
     type: str
     related_id: Optional[str] = None
 
+class Conversation(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    user_name: str
+    status: str = "active"
+    last_message: Optional[str] = None
+    last_message_at: Optional[str] = None
+    unread_count: int = 0
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class ConversationResponse(BaseModel):
+    id: str
+    user_id: str
+    user_name: str
+    status: str
+    last_message: Optional[str]
+    last_message_at: Optional[str]
+    unread_count: int
+    created_at: str
+
+class Message(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    conversation_id: str
+    sender_id: str
+    sender_name: str
+    sender_role: str
+    message: str
+    read: bool = False
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class MessageCreate(BaseModel):
+    conversation_id: str
+    message: str
+
 import secrets
