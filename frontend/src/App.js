@@ -158,6 +158,22 @@ function App() {
             }
           />
           <Route
+            path="/admin/banners"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminBanners />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/posts"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminPosts />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/admin/chat"
             element={
               <PrivateRoute roles={['admin', 'supervisor']}>
