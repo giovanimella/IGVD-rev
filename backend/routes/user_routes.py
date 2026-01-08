@@ -81,6 +81,31 @@ async def delete_user(user_id: str, current_user: dict = Depends(require_role(["
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     return {"message": "Usuário deletado com sucesso"}
 
+@router.put("/{user_id}/password")
+async def update_password(user_id: str, password_data: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["sub"] != user_id and current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    if current_user["sub"] == user_id:
+        if not verify_password(password_data.get("current_password", ""), user["password_hash"]):
+            raise HTTPException(status_code=400, detail="Senha atual incorreta")
+    
+    new_password_hash = get_password_hash(password_data["new_password"])
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "password_hash": new_password_hash,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Senha atualizada com sucesso"}
+
 @router.post("/import-csv")
 async def import_users_csv(file: UploadFile = File(...), current_user: dict = Depends(require_role(["admin"]))):
     if not file.filename.endswith('.csv'):
