@@ -17,6 +17,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminRewards from './pages/admin/AdminRewards';
 import AdminFiles from './pages/admin/AdminFiles';
 import AdminModules from './pages/admin/AdminModules';
+import AdminChapters from './pages/admin/AdminChapters';
 import PublicRegistration from './pages/PublicRegistration';
 import OnboardingDocuments from './pages/OnboardingDocuments';
 import OnboardingPayment from './pages/OnboardingPayment';
