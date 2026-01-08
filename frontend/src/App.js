@@ -16,6 +16,9 @@ import FileRepository from './pages/FileRepository';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminRewards from './pages/admin/AdminRewards';
 import AdminFiles from './pages/admin/AdminFiles';
+import PublicRegistration from './pages/PublicRegistration';
+import OnboardingDocuments from './pages/OnboardingDocuments';
+import OnboardingPayment from './pages/OnboardingPayment';
 
 function App() {
   return (
