@@ -11,7 +11,8 @@ import {
   Trophy,
   LogOut,
   Menu,
-  X
+  X,
+  MessageCircle
 } from 'lucide-react';
 
 const Sidebar = () => {
