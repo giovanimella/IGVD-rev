@@ -41,6 +41,11 @@ async def login(credentials: UserLogin):
         "role": user["role"]
     })
     
+    # Registrar acesso
+    from models import UserAccess
+    access = UserAccess(user_id=user["id"])
+    await db.user_accesses.insert_one(access.model_dump())
+    
     return {
         "access_token": access_token,
         "token_type": "bearer",
