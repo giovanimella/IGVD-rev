@@ -35,7 +35,7 @@ const Sidebar = () => {
 
   const supervisorLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/supervisor/franchisees', icon: Users, label: 'Franqueados' },
+    { path: '/supervisor/franchisees', icon: Users, label: 'Licenciados' },
     { path: '/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
   ];

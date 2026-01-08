@@ -106,7 +106,7 @@ const AdminFiles = () => {
               <FileText className="w-8 h-8 text-cyan-500" />
               Gerenciar Arquivos
             </h1>
-            <p className="text-slate-600 mt-2">Faça upload de materiais para os franqueados</p>
+            <p className="text-slate-600 mt-2">Faça upload de materiais para os licenciados</p>
           </div>
 
           <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
@@ -162,7 +162,7 @@ const AdminFiles = () => {
           <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
             <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
             <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2">Nenhum arquivo cadastrado</h3>
-            <p className="text-slate-600">Faça upload de arquivos para disponibilizar aos franqueados.</p>
+            <p className="text-slate-600">Faça upload de arquivos para disponibilizar aos licenciados.</p>
           </div>
         ) : (
           Object.entries(categoryGroups).map(([key, group]) => (

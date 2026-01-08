@@ -14,7 +14,7 @@ const Topbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {user?.role === 'franqueado' && (
+          {user?.role === 'licenciado' && (
             <div className="flex items-center gap-3 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
               <Award className="w-5 h-5 text-amber-600" />
               <div>
@@ -24,7 +24,7 @@ const Topbar = () => {
             </div>
           )}
 
-          {user?.role === 'franqueado' && (
+          {user?.role === 'licenciado' && (
             <div className="flex items-center gap-2 bg-cyan-50 px-4 py-2 rounded-lg border border-cyan-200">
               <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-outfit font-bold">
                 {user?.full_name?.charAt(0).toUpperCase()}
@@ -36,7 +36,7 @@ const Topbar = () => {
             </div>
           )}
 
-          {user?.role !== 'franqueado' && (
+          {user?.role !== 'licenciado' && (
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center text-white font-outfit font-bold text-lg">
                 {user?.full_name?.charAt(0).toUpperCase()}

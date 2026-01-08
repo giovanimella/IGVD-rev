@@ -53,7 +53,7 @@ const Dashboard = () => {
                   <Users className="w-6 h-6 text-cyan-600" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">Total de Franqueados</p>
+              <p className="text-slate-600 text-sm mb-1">Total de Licenciados</p>
               <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_users || 0}</p>
             </div>
 
@@ -127,7 +127,7 @@ const Dashboard = () => {
     );
   }
 
-  if (user?.role === 'franqueado') {
+  if (user?.role === 'licenciado') {
     return (
       <Layout>
         <div className="space-y-6">

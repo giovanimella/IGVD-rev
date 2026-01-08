@@ -40,9 +40,9 @@ const Leaderboard = () => {
         <div>
           <h1 className="text-3xl font-outfit font-bold text-slate-900 flex items-center gap-3">
             <Trophy className="w-8 h-8 text-amber-500" />
-            Ranking de Franqueados
+            Ranking de Licenciados
           </h1>
-          <p className="text-slate-600 mt-2">Veja os franqueados com melhor desempenho</p>
+          <p className="text-slate-600 mt-2">Veja os licenciados com melhor desempenho</p>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
@@ -51,7 +51,7 @@ const Leaderboard = () => {
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Posição</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Franqueado</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Licenciado</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Nível</th>
                   <th className="text-right px-6 py-4 text-sm font-semibold text-slate-700">Pontos</th>
                 </tr>

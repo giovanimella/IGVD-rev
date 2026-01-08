@@ -62,7 +62,7 @@ function App() {
           <Route
             path="/rewards"
             element={
-              <PrivateRoute roles={['franqueado']}>
+              <PrivateRoute roles={['licenciado']}>
                 <Rewards />
               </PrivateRoute>
             }
@@ -70,7 +70,7 @@ function App() {
           <Route
             path="/file-repository"
             element={
-              <PrivateRoute roles={['franqueado']}>
+              <PrivateRoute roles={['licenciado']}>
                 <FileRepository />
               </PrivateRoute>
             }
