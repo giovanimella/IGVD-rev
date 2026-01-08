@@ -268,6 +268,39 @@ class NotificationCreate(BaseModel):
     type: str
     related_id: Optional[str] = None
 
+class Banner(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    image_url: str
+    title: Optional[str] = None
+    link: Optional[str] = None
+    order: int = 0
+    active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class BannerCreate(BaseModel):
+    image_url: str
+    title: Optional[str] = None
+    link: Optional[str] = None
+    order: int = 0
+    active: bool = True
+
+class Post(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    content: str
+    author_id: str
+    author_name: str
+    active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class PostCreate(BaseModel):
+    title: str
+    description: str
+    content: str
+    active: bool = True
+
 class Conversation(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
