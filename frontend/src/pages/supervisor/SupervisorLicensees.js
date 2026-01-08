@@ -56,6 +56,15 @@ const SupervisorLicensees = () => {
       setRegistrationLink(link);
     } catch (error) {
       console.error('Erro ao buscar link:', error);
+      // Se não existe link, criar um automaticamente
+      try {
+        const createResponse = await axios.post(`${API_URL}/api/onboarding/supervisor-links`);
+        const link = `${window.location.origin}/register/${createResponse.data.token}`;
+        setRegistrationLink(link);
+      } catch (createError) {
+        console.error('Erro ao criar link:', createError);
+        setRegistrationLink('');
+      }
     }
   };
 
