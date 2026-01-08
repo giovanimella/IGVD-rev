@@ -42,12 +42,13 @@ const Sidebar = () => {
     { path: '/profile', icon: Settings, label: 'Perfil' },
   ];
 
-  const franchiseeLinks = [
+  const licenseeLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
     { path: '/rewards', icon: Award, label: 'Recompensas' },
     { path: '/file-repository', icon: FileText, label: 'Arquivos' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
+    { path: '/profile', icon: Settings, label: 'Perfil' },
   ];
 
   const links = user?.role === 'admin' ? adminLinks : user?.role === 'supervisor' ? supervisorLinks : franchiseeLinks;
