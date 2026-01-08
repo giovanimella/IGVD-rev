@@ -163,6 +163,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/system"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminSystem />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/supervisor/licensees"
             element={
               <PrivateRoute roles={['supervisor']}>
