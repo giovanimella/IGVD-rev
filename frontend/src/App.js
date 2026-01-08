@@ -161,6 +161,14 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/supervisor/licensees"
+            element={
+              <PrivateRoute roles={['supervisor']}>
+                <SupervisorLicensees />
+              </PrivateRoute>
+            }
+          />
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
