@@ -12,9 +12,12 @@ load_dotenv(ROOT_DIR / '.env')
 from routes import auth_routes, user_routes, module_routes, chapter_routes
 from routes import progress_routes, reward_routes, file_routes, upload_routes, stats_routes
 from routes import assessment_routes, onboarding_routes, payment_routes, notification_routes, chat_routes
-from socket_handler import socket_app
+from socket_handler import sio
 
 app = FastAPI(title="Ozoxx LMS API")
+
+# Integrar Socket.IO diretamente no FastAPI
+sio_asgi_app = sio
 
 UPLOAD_DIR = Path("/app/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
