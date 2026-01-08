@@ -246,4 +246,4 @@ async def mark_as_read(sid, data):
         print(f"Erro ao marcar mensagens como lidas: {e}")
 
 # Criar app ASGI do Socket.IO
-socket_app = socketio.ASGIApp(sio)
+sio_asgi_app = socketio.ASGIApp(sio, other_asgi_app=None)
