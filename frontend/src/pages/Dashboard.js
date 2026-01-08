@@ -48,6 +48,24 @@ const Dashboard = () => {
     }
   };
 
+  const fetchRecentActivity = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/stats/recent-activity`);
+      setRecentActivity(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar atividades recentes:', error);
+    }
+  };
+
+  const fetchAccessHistory = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/stats/access-history`);
+      setAccessHistory(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar histórico de acessos:', error);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
