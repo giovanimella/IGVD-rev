@@ -89,15 +89,15 @@ async def get_recent_activity(current_user: dict = Depends(get_current_user)):
     user_id = current_user["sub"]
     
     # Buscar progresso recente (últimos 10)
-    recent_progress = await db.progress.find(
+    recent_progress = await db.user_progress.find(
         {"user_id": user_id, "completed": True},
         {"_id": 0}
     ).sort("completed_at", -1).limit(10).to_list(10)
     
     # Enriquecer com dados dos módulos e capítulos
     for progress in recent_progress:
-        module = await db.modules.find_one({"id": progress["module_id"]}, {"_id": 0})
-        chapter = await db.chapters.find_one({"id": progress["chapter_id"]}, {"_id": 0})
+        module = await db.modules.find_one({"id": progress.get("module_id")}, {"_id": 0})
+        chapter = await db.chapters.find_one({"id": progress.get("chapter_id")}, {"_id": 0})
         progress["module_title"] = module.get("title") if module else "Módulo"
         progress["chapter_title"] = chapter.get("title") if chapter else "Capítulo"
     
