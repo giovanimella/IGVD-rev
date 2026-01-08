@@ -46,6 +46,8 @@ app.include_router(onboarding_routes.router, prefix="/api")
 app.include_router(payment_routes.router, prefix="/api")
 app.include_router(notification_routes.router, prefix="/api")
 app.include_router(chat_routes.router, prefix="/api")
+app.include_router(banner_routes.router, prefix="/api")
+app.include_router(post_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
