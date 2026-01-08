@@ -341,4 +341,74 @@ class UserAccess(BaseModel):
     accessed_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     date: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d"))
 
+# ==================== GAMIFICAÇÃO ====================
+
+class Badge(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    icon: str  # emoji ou nome do ícone
+    color: str = "#06b6d4"  # cor do badge
+    points_reward: int = 0  # pontos ao conquistar
+    criteria_type: str  # 'modules_completed', 'days_streak', 'points_reached', 'manual', 'first_module', 'all_modules'
+    criteria_value: int = 0  # valor para atingir o critério
+    active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class BadgeCreate(BaseModel):
+    name: str
+    description: str
+    icon: str
+    color: str = "#06b6d4"
+    points_reward: int = 0
+    criteria_type: str
+    criteria_value: int = 0
+    active: bool = True
+
+class UserBadge(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    badge_id: str
+    earned_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class UserStreak(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    current_streak: int = 0
+    longest_streak: int = 0
+    last_access_date: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d"))
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class WeeklyChallenge(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    challenge_type: str  # 'complete_modules', 'complete_chapters', 'earn_points', 'daily_access'
+    target_value: int  # valor alvo para completar
+    points_reward: int  # pontos de recompensa
+    start_date: str
+    end_date: str
+    active: bool = True
+    created_by: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class WeeklyChallengeCreate(BaseModel):
+    title: str
+    description: str
+    challenge_type: str
+    target_value: int
+    points_reward: int
+    start_date: str
+    end_date: str
+    active: bool = True
+
+class UserChallengeProgress(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    challenge_id: str
+    current_progress: int = 0
+    completed: bool = False
+    completed_at: Optional[str] = None
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
 import secrets
