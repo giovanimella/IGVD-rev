@@ -35,7 +35,7 @@ const Sidebar = () => {
     { path: '/admin/users', icon: Users, label: 'Usuários' },
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
     { path: '/admin/files', icon: FileText, label: 'Arquivos' },
-    { path: '/admin/chat', icon: MessageCircle, label: 'Chat Suporte' },
+    // { path: '/admin/chat', icon: MessageCircle, label: 'Chat Suporte' },
     { path: '/profile', icon: Settings, label: 'Perfil' },
   ];
 
@@ -44,7 +44,7 @@ const Sidebar = () => {
     { path: '/supervisor/licensees', icon: Users, label: 'Licenciados' },
     { path: '/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
-    { path: '/admin/chat', icon: MessageCircle, label: 'Chat Suporte' },
+    // { path: '/admin/chat', icon: MessageCircle, label: 'Chat Suporte' },
     { path: '/profile', icon: Settings, label: 'Perfil' },
   ];
 
