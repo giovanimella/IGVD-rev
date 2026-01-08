@@ -46,6 +46,10 @@ async def login(credentials: UserLogin):
     access = UserAccess(user_id=user["id"])
     await db.user_accesses.insert_one(access.model_dump())
     
+    # Atualizar streak
+    from routes.gamification_routes import update_user_streak
+    await update_user_streak(user["id"])
+    
     return {
         "access_token": access_token,
         "token_type": "bearer",
