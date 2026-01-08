@@ -399,36 +399,101 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Progress Chart */}
-          <div className="bg-white rounded-xl border border-slate-100 p-6">
-            <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-6">Meu Progresso de Módulos</h3>
-            {stats?.total_modules > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={progressChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {progressChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-64">
-                <BookOpen className="w-16 h-16 text-slate-300 mb-4" />
-                <p className="text-slate-500 text-center mb-2">Nenhum módulo disponível ainda</p>
-                <p className="text-sm text-slate-400">Os módulos de treinamento aparecerão aqui quando forem adicionados</p>
+          {/* Progress Chart + Atividades Recentes + Gráfico de Acessos */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Gráfico de Pizza - Progresso de Módulos */}
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-6">Progresso de Módulos</h3>
+              {stats?.total_modules > 0 ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie
+                      data={progressChartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, value }) => `${name}: ${value}`}
+                      outerRadius={70}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {progressChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-56">
+                  <BookOpen className="w-12 h-12 text-slate-300 mb-3" />
+                  <p className="text-slate-500 text-center text-sm mb-1">Nenhum módulo disponível</p>
+                  <p className="text-xs text-slate-400">Módulos aparecerão aqui</p>
+                </div>
+              )}
+            </div>
+
+            {/* Lista de Atividades Recentes */}
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                <h3 className="text-xl font-outfit font-semibold text-slate-900">Atividades Recentes</h3>
               </div>
-            )}
+              {recentActivity.length > 0 ? (
+                <div className="space-y-3 max-h-56 overflow-y-auto">
+                  {recentActivity.slice(0, 5).map((activity, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-900 truncate">{activity.chapter_title}</p>
+                        <p className="text-xs text-slate-500 truncate">{activity.module_title}</p>
+                        {activity.completed_at && (
+                          <p className="text-xs text-slate-400 mt-1">
+                            {new Date(activity.completed_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-56">
+                  <Activity className="w-12 h-12 text-slate-300 mb-3" />
+                  <p className="text-slate-500 text-center text-sm mb-1">Nenhuma atividade ainda</p>
+                  <p className="text-xs text-slate-400 text-center">Complete módulos para ver seu histórico</p>
+                </div>
+              )}
+            </div>
+
+            {/* Gráfico de Acessos - Últimos 7 Dias */}
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Activity className="w-5 h-5 text-cyan-500" />
+                <h3 className="text-xl font-outfit font-semibold text-slate-900">Acessos (7 dias)</h3>
+              </div>
+              {accessHistory.length > 0 ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={accessHistory}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
+                    <YAxis stroke="#64748b" fontSize={11} allowDecimals={false} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px' }}
+                      formatter={(value) => [`${value} acesso(s)`, 'Acessos']}
+                    />
+                    <Bar dataKey="count" fill="#06b6d4" radius={[4, 4, 0, 0]} name="Acessos" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-56">
+                  <Activity className="w-12 h-12 text-slate-300 mb-3" />
+                  <p className="text-slate-500 text-center text-sm mb-1">Sem dados de acesso</p>
+                  <p className="text-xs text-slate-400 text-center">Seus acessos aparecerão aqui</p>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
