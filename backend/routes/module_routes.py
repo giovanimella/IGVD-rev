@@ -13,7 +13,17 @@ router = APIRouter(prefix="/modules", tags=["modules"])
 
 @router.get("/")
 async def get_all_modules(current_user: dict = Depends(get_current_user)):
-    modules = await db.modules.find({}, {"_id": 0}).sort("order", 1).to_list(1000)
+    user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
+    current_stage = user.get("current_stage", "completo") if user else "completo"
+    
+    query = {}
+    if current_user.get("role") == "franqueado":
+        if current_stage == "acolhimento":
+            query["is_acolhimento"] = True
+        elif current_stage != "completo":
+            return []
+    
+    modules = await db.modules.find(query, {"_id": 0}).sort("order", 1).to_list(1000)
     
     for module in modules:
         chapters_count = await db.chapters.count_documents({"module_id": module["id"]})
