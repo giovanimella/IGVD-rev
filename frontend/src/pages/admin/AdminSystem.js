@@ -18,9 +18,9 @@ const AdminSystem = () => {
     try {
       const [dashboardRes, usersRes, modulesRes, rewardsRes] = await Promise.all([
         axios.get(`${API_URL}/api/stats/dashboard`),
-        axios.get(`${API_URL}/api/users`),
-        axios.get(`${API_URL}/api/modules`),
-        axios.get(`${API_URL}/api/rewards`)
+        axios.get(`${API_URL}/api/users/`),
+        axios.get(`${API_URL}/api/modules/`),
+        axios.get(`${API_URL}/api/rewards/`)
       ]);
 
       setStats({
