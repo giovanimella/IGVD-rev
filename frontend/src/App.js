@@ -32,10 +32,10 @@ import Profile from './pages/Profile';
 function App() {
   return (
     <AuthProvider>
-      <ChatProvider>
+      {/* <ChatProvider> */}
         <BrowserRouter>
           <Toaster position="top-right" richColors />
-          <ChatWidget />
+          {/* <ChatWidget /> */}
           <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/request-reset" element={<RequestReset />} />
