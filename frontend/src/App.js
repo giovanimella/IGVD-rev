@@ -9,9 +9,13 @@ import RequestReset from './pages/RequestReset';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Modules from './pages/Modules';
+import ModuleDetail from './pages/ModuleDetail';
 import Leaderboard from './pages/Leaderboard';
 import Rewards from './pages/Rewards';
 import FileRepository from './pages/FileRepository';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminRewards from './pages/admin/AdminRewards';
+import AdminFiles from './pages/admin/AdminFiles';
 
 function App() {
   return (
@@ -40,6 +44,14 @@ function App() {
             }
           />
           <Route
+            path="/module/:id"
+            element={
+              <PrivateRoute>
+                <ModuleDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/leaderboard"
             element={
               <PrivateRoute>
@@ -60,6 +72,31 @@ function App() {
             element={
               <PrivateRoute roles={['franqueado']}>
                 <FileRepository />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/admin/users"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminUsers />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/rewards"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminRewards />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/files"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminFiles />
               </PrivateRoute>
             }
           />
