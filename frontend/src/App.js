@@ -82,6 +82,14 @@ function App() {
             }
           />
           <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/onboarding/documents"
             element={
               <PrivateRoute roles={['licenciado']}>
@@ -103,6 +111,14 @@ function App() {
             element={
               <PrivateRoute roles={['admin']}>
                 <AdminUsers />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/modules"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminModules />
               </PrivateRoute>
             }
           />
