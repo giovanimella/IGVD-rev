@@ -47,6 +47,26 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
                         {"id": current_user["sub"]},
                         {"$inc": {"points": module["points_reward"]}}
                     )
+                
+                # Criar notificação para o usuário
+                user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
+                from routes.notification_routes import create_notification, notify_admins
+                
+                await create_notification(
+                    current_user["sub"],
+                    "Módulo Concluído! 🎉",
+                    f"Parabéns! Você concluiu o módulo '{module['title']}' e ganhou {module.get('points_reward', 0)} pontos!",
+                    "module_completed",
+                    module["id"]
+                )
+                
+                # Notificar admins
+                await notify_admins(
+                    "Licenciado completou módulo",
+                    f"{user['full_name']} concluiu o módulo '{module['title']}'",
+                    "admin_notification",
+                    module["id"]
+                )
         
         await db.user_progress.update_one(
             {"id": existing["id"]},
