@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Users, Search, CheckCircle, XCircle, Award, BookOpen, Mail, Phone, Link as LinkIcon, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SupervisorLicensees = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [licensees, setLicensees] = useState([]);
   const [filteredLicensees, setFilteredLicensees] = useState([]);
   const [loading, setLoading] = useState(true);
