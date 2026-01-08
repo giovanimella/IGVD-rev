@@ -14,6 +14,64 @@ db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/gamification", tags=["gamification"])
 
+# ==================== FUNÇÃO AUXILIAR PARA STREAK ====================
+
+async def update_user_streak(user_id: str):
+    """Função auxiliar para atualizar streak (chamada no login)"""
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    streak = await db.user_streaks.find_one({"user_id": user_id})
+    
+    if not streak:
+        # Criar streak inicial
+        streak_obj = UserStreak(user_id=user_id, current_streak=1, longest_streak=1, last_access_date=today)
+        await db.user_streaks.insert_one(streak_obj.model_dump())
+        return {"current_streak": 1, "longest_streak": 1}
+    
+    last_date = streak.get("last_access_date", "")
+    
+    # Se já acessou hoje, não faz nada
+    if last_date == today:
+        return {
+            "current_streak": streak["current_streak"],
+            "longest_streak": streak["longest_streak"]
+        }
+    
+    # Verificar se é dia consecutivo
+    try:
+        last_dt = datetime.strptime(last_date, "%Y-%m-%d")
+        today_dt = datetime.strptime(today, "%Y-%m-%d")
+        diff = (today_dt - last_dt).days
+    except:
+        diff = 999
+    
+    if diff == 1:
+        # Dia consecutivo - incrementa streak
+        new_streak = streak["current_streak"] + 1
+        longest = max(new_streak, streak.get("longest_streak", 0))
+        
+        await db.user_streaks.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "current_streak": new_streak,
+                "longest_streak": longest,
+                "last_access_date": today,
+                "updated_at": datetime.now().isoformat()
+            }}
+        )
+        return {"current_streak": new_streak, "longest_streak": longest}
+    else:
+        # Perdeu o streak - reseta
+        await db.user_streaks.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "current_streak": 1,
+                "last_access_date": today,
+                "updated_at": datetime.now().isoformat()
+            }}
+        )
+        return {"current_streak": 1, "longest_streak": streak.get("longest_streak", 1)}
+
 # ==================== BADGES ====================
 
 @router.get("/badges")
