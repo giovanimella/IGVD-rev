@@ -13,7 +13,9 @@ import {
   LogOut,
   Menu,
   X,
-  MessageCircle
+  MessageCircle,
+  Image,
+  Megaphone
 } from 'lucide-react';
 
 const Sidebar = () => {
