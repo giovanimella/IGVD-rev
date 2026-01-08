@@ -43,6 +43,10 @@ app.include_router(assessment_routes.router, prefix="/api")
 app.include_router(onboarding_routes.router, prefix="/api")
 app.include_router(payment_routes.router, prefix="/api")
 app.include_router(notification_routes.router, prefix="/api")
+app.include_router(chat_routes.router, prefix="/api")
+
+# Montar o Socket.IO em /socket.io
+app.mount("/socket.io", socket_app)
 
 @app.get("/api/health")
 async def health_check():
