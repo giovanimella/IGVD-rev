@@ -21,6 +21,19 @@ class User(BaseModel):
     level_title: str = "Iniciante"
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    
+    current_stage: str = "registro"
+    supervisor_id: Optional[str] = None
+    registration_link_token: Optional[str] = None
+    phone: Optional[str] = None
+    documents_uploaded: List[str] = []
+    payment_status: str = "pending"
+    payment_transaction_id: Optional[str] = None
+    scheduled_training_date: Optional[str] = None
+    training_class_id: Optional[str] = None
+    training_attended: bool = False
+    field_sales_count: int = 0
+    field_sales_notes: List[dict] = []
 
 class UserResponse(BaseModel):
     id: str
@@ -31,6 +44,9 @@ class UserResponse(BaseModel):
     level_title: str
     created_at: str
     updated_at: str
+    current_stage: Optional[str] = None
+    phone: Optional[str] = None
+    payment_status: Optional[str] = None
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
@@ -38,6 +54,13 @@ class PasswordResetRequest(BaseModel):
 class PasswordResetConfirm(BaseModel):
     token: str
     new_password: str
+
+class FranchiseeRegistration(BaseModel):
+    full_name: str
+    email: EmailStr
+    phone: str
+    password: str
+    registration_token: str
 
 class Module(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -49,6 +72,8 @@ class Module(BaseModel):
     points_reward: int = 0
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     created_by: str
+    is_acolhimento: bool = False
+    has_assessment: bool = False
 
 class ModuleCreate(BaseModel):
     title: str
@@ -57,6 +82,8 @@ class ModuleCreate(BaseModel):
     has_certificate: bool = False
     certificate_template_url: Optional[str] = None
     points_reward: int = 0
+    is_acolhimento: bool = False
+    has_assessment: bool = False
 
 class Chapter(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -81,6 +108,52 @@ class ChapterCreate(BaseModel):
     document_url: Optional[str] = None
     text_content: Optional[str] = None
     duration_minutes: int = 0
+
+class Assessment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    module_id: str
+    title: str
+    description: str
+    passing_score: int
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class AssessmentCreate(BaseModel):
+    module_id: str
+    title: str
+    description: str
+    passing_score: int
+
+class Question(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    assessment_id: str
+    question_text: str
+    question_type: str
+    points: int
+    order: int
+    options: List[str] = []
+    correct_answer: Optional[str] = None
+
+class QuestionCreate(BaseModel):
+    assessment_id: str
+    question_text: str
+    question_type: str
+    points: int
+    order: int
+    options: List[str] = []
+    correct_answer: Optional[str] = None
+
+class UserAssessment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    assessment_id: str
+    answers: List[dict]
+    score: int
+    passed: bool
+    completed_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class AssessmentSubmission(BaseModel):
+    assessment_id: str
+    answers: List[dict]
 
 class UserProgress(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -125,6 +198,32 @@ class RewardRedemption(BaseModel):
     approved_by: Optional[str] = None
     delivered_at: Optional[str] = None
 
+class SupervisorLink(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    supervisor_id: str
+    token: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
+    active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    registrations_count: int = 0
+
+class TrainingClass(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    date: str
+    capacity: int = 20
+    enrolled_count: int = 0
+    status: str = "open"
+    closes_at: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class TrainingClassCreate(BaseModel):
+    date: str
+    capacity: int = 20
+
+class FieldSaleNote(BaseModel):
+    date: str
+    note: str
+    sale_number: int
+
 class FileRepository(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     filename: str
@@ -151,3 +250,5 @@ class EmailRequest(BaseModel):
     recipient_email: EmailStr
     subject: str
     html_content: str
+
+import secrets
