@@ -118,31 +118,33 @@ const SupervisorLicensees = () => {
         </div>
 
         {/* Link de Registro */}
-        <div className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl p-6 text-white">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-3">
-                <LinkIcon className="w-6 h-6" />
-                <h3 className="text-xl font-outfit font-semibold">Link de Cadastro</h3>
-              </div>
-              <p className="text-cyan-50 mb-4">
-                Compartilhe este link para que novos licenciados se cadastrem vinculados a você
-              </p>
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between">
-                <code className="text-sm text-white font-mono truncate flex-1 mr-3">
-                  {registrationLink}
-                </code>
-                <button
-                  onClick={copyLink}
-                  className="bg-white text-cyan-600 hover:bg-cyan-50 px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-colors"
-                >
-                  <Copy className="w-4 h-4" />
-                  <span>Copiar</span>
-                </button>
+        {registrationLink && (
+          <div className="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl p-6 text-white">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-3">
+                  <LinkIcon className="w-6 h-6" />
+                  <h3 className="text-xl font-outfit font-semibold">Link de Cadastro</h3>
+                </div>
+                <p className="text-cyan-50 mb-4">
+                  Compartilhe este link para que novos licenciados se cadastrem vinculados a você
+                </p>
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 flex items-center justify-between">
+                  <code className="text-sm text-white font-mono truncate flex-1 mr-3">
+                    {registrationLink}
+                  </code>
+                  <button
+                    onClick={copyLink}
+                    className="bg-white text-cyan-600 hover:bg-cyan-50 px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-colors"
+                  >
+                    <Copy className="w-4 h-4" />
+                    <span>Copiar</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Busca */}
         <div className="bg-white rounded-xl border border-slate-200 p-4">
