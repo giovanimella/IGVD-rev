@@ -39,7 +39,7 @@ const LicenseeDetail = () => {
       const [userRes, modulesRes, redemptionsRes] = await Promise.all([
         axios.get(`${API_URL}/api/users/${id}`),
         axios.get(`${API_URL}/api/modules/`),
-        axios.get(`${API_URL}/api/rewards/redemptions/`)
+        axios.get(`${API_URL}/api/rewards/redemptions`)
       ]);
 
       setLicensee(userRes.data);
