@@ -11,6 +11,7 @@ load_dotenv(ROOT_DIR / '.env')
 
 from routes import auth_routes, user_routes, module_routes, chapter_routes
 from routes import progress_routes, reward_routes, file_routes, upload_routes, stats_routes
+from routes import assessment_routes, onboarding_routes, payment_routes
 
 app = FastAPI(title="Ozoxx LMS API")
 
@@ -37,6 +38,9 @@ app.include_router(reward_routes.router, prefix="/api")
 app.include_router(file_routes.router, prefix="/api")
 app.include_router(upload_routes.router, prefix="/api")
 app.include_router(stats_routes.router, prefix="/api")
+app.include_router(assessment_routes.router, prefix="/api")
+app.include_router(onboarding_routes.router, prefix="/api")
+app.include_router(payment_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
