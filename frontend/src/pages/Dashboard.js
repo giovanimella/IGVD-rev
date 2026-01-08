@@ -5,7 +5,7 @@ import StageProgressBar from '../components/StageProgressBar';
 import BannerCarousel from '../components/BannerCarousel';
 import PostsList from '../components/PostsList';
 import axios from 'axios';
-import { BookOpen, Users, Award, Clock, TrendingUp, Trophy } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, TrendingUp, Trophy, CheckCircle, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -14,6 +14,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [stageInfo, setStageInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [accessHistory, setAccessHistory] = useState([]);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
