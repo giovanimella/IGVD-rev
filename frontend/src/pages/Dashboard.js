@@ -208,7 +208,7 @@ const Dashboard = () => {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-outfit font-bold text-slate-900">Dashboard do Supervisor</h1>
-            <p className="text-slate-600 mt-2">Vis\u00e3o geral dos seus licenciados</p>
+            <p className="text-slate-600 mt-2">Visão geral dos seus licenciados</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -228,7 +228,7 @@ const Dashboard = () => {
                   <BookOpen className="w-6 h-6 text-blue-600" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">M\u00f3dulos Dispon\u00edveis</p>
+              <p className="text-slate-600 text-sm mb-1">Módulos Disponíveis</p>
               <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_modules || 0}</p>
             </div>
 
@@ -247,7 +247,7 @@ const Dashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-4">A\u00e7\u00f5es R\u00e1pidas</h3>
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Ações Rápidas</h3>
               <div className="space-y-3">
                 <Link to="/supervisor/licensees" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                   <div className="flex items-center gap-3">
@@ -261,7 +261,7 @@ const Dashboard = () => {
                 <Link to="/modules" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                   <div className="flex items-center gap-3">
                     <BookOpen className="w-5 h-5 text-cyan-600" />
-                    <span className="font-medium text-slate-900">Ver M\u00f3dulos</span>
+                    <span className="font-medium text-slate-900">Ver Módulos</span>
                   </div>
                   <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
