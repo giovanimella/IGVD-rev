@@ -201,6 +201,104 @@ const Dashboard = () => {
     );
   }
 
+  // Dashboard do Supervisor
+  if (user?.role === 'supervisor') {
+    return (
+      <Layout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900">Dashboard do Supervisor</h1>
+            <p className="text-slate-600 mt-2">Vis\u00e3o geral dos seus licenciados</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-cyan-600" />
+                </div>
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Total de Licenciados</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_licensees || 0}</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+              <p className="text-slate-600 text-sm mb-1">M\u00f3dulos Dispon\u00edveis</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_modules || 0}</p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Award className="w-6 h-6 text-green-600" />
+                </div>
+              </div>
+              <p className="text-slate-600 text-sm mb-1">Licenciados Completos</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900">
+                {stats?.licensees?.filter(l => l.current_stage === 'completo').length || 0}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-4">A\u00e7\u00f5es R\u00e1pidas</h3>
+              <div className="space-y-3">
+                <Link to="/supervisor/licensees" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-cyan-600" />
+                    <span className="font-medium text-slate-900">Gerenciar Licenciados</span>
+                  </div>
+                  <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                <Link to="/modules" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-5 h-5 text-cyan-600" />
+                    <span className="font-medium text-slate-900">Ver M\u00f3dulos</span>
+                  </div>
+                  <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                <Link to="/leaderboard" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Trophy className="w-5 h-5 text-cyan-600" />
+                    <span className="font-medium text-slate-900">Ver Ranking</span>
+                  </div>
+                  <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Licenciados Recentes</h3>
+              <div className="space-y-3">
+                {stats?.licensees?.slice(0, 5).map((licensee) => (
+                  <div key={licensee.id} className="flex items-center justify-between p-3 border border-slate-100 rounded-lg">
+                    <div>
+                      <p className="font-medium text-slate-900">{licensee.full_name}</p>
+                      <p className="text-xs text-slate-500">{licensee.email}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-amber-600">{licensee.points || 0} pts</span>
+                  </div>
+                )) || <p className="text-slate-500 text-center py-4">Nenhum licenciado ainda</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (user?.role === 'licenciado') {
     const progressChartData = [
       { name: 'Completos', value: stats?.completed_modules || 0, color: '#22c55e' },
