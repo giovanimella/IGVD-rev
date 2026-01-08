@@ -16,9 +16,11 @@ import FileRepository from './pages/FileRepository';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminRewards from './pages/admin/AdminRewards';
 import AdminFiles from './pages/admin/AdminFiles';
+import AdminModules from './pages/admin/AdminModules';
 import PublicRegistration from './pages/PublicRegistration';
 import OnboardingDocuments from './pages/OnboardingDocuments';
 import OnboardingPayment from './pages/OnboardingPayment';
+import Profile from './pages/Profile';
 
 function App() {
   return (
