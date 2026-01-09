@@ -5,7 +5,7 @@ import StageProgressBar from '../components/StageProgressBar';
 import BannerCarousel from '../components/BannerCarousel';
 import PostsList from '../components/PostsList';
 import axios from 'axios';
-import { BookOpen, Users, Award, Clock, TrendingUp, Trophy, CheckCircle, Activity } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, TrendingUp, Trophy, CheckCircle, Activity, Flame, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -16,6 +16,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
   const [accessHistory, setAccessHistory] = useState([]);
+  const [gamificationStats, setGamificationStats] = useState(null);
+  const [myBadges, setMyBadges] = useState([]);
+  const [streak, setStreak] = useState(null);
+  const [activeChallenges, setActiveChallenges] = useState([]);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -25,6 +29,7 @@ const Dashboard = () => {
       fetchStageInfo();
       fetchRecentActivity();
       fetchAccessHistory();
+      fetchGamificationData();
     }
   }, []);
 
@@ -45,6 +50,23 @@ const Dashboard = () => {
       setStageInfo(response.data);
     } catch (error) {
       console.error('Erro ao buscar estágio:', error);
+    }
+  };
+
+  const fetchGamificationData = async () => {
+    try {
+      const [statsRes, badgesRes, streakRes, challengesRes] = await Promise.all([
+        axios.get(`${API_URL}/api/gamification/stats`),
+        axios.get(`${API_URL}/api/gamification/my-badges`),
+        axios.get(`${API_URL}/api/gamification/streak`),
+        axios.get(`${API_URL}/api/gamification/challenges/my-progress`)
+      ]);
+      setGamificationStats(statsRes.data);
+      setMyBadges(badgesRes.data);
+      setStreak(streakRes.data);
+      setActiveChallenges(challengesRes.data);
+    } catch (error) {
+      console.error('Erro ao buscar dados de gamificação:', error);
     }
   };
 
