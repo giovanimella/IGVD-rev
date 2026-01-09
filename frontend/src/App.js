@@ -24,6 +24,8 @@ import AdminChat from './pages/admin/AdminChat';
 import AdminSystem from './pages/admin/AdminSystem';
 import AdminBanners from './pages/admin/AdminBanners';
 import AdminPosts from './pages/admin/AdminPosts';
+import AdminBadges from './pages/admin/AdminBadges';
+import AdminChallenges from './pages/admin/AdminChallenges';
 import SupervisorLicensees from './pages/supervisor/SupervisorLicensees';
 import LicenseeDetail from './pages/supervisor/LicenseeDetail';
 import PublicRegistration from './pages/PublicRegistration';
