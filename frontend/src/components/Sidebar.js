@@ -15,7 +15,8 @@ import {
   X,
   MessageCircle,
   Image,
-  Megaphone
+  Megaphone,
+  Target
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -36,6 +37,8 @@ const Sidebar = () => {
     { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
+    { path: '/admin/badges', icon: Trophy, label: 'Badges' },
+    { path: '/admin/challenges', icon: Target, label: 'Desafios' },
     { path: '/admin/files', icon: FileText, label: 'Arquivos' },
     { path: '/admin/banners', icon: Image, label: 'Banners' },
     { path: '/admin/posts', icon: Megaphone, label: 'Comunicados' },
