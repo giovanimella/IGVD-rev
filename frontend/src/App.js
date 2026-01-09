@@ -192,6 +192,22 @@ function App() {
             }
           />
           <Route
+            path="/admin/badges"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminBadges />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/challenges"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminChallenges />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/supervisor/licensees"
             element={
               <PrivateRoute roles={['supervisor']}>
