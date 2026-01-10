@@ -421,6 +421,106 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Seção de Gamificação */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Streak */}
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <Flame className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-orange-700 text-sm font-medium">Streak Atual</p>
+                  <p className="text-3xl font-outfit font-bold text-orange-900">
+                    {streak?.current_streak || 0} {streak?.current_streak === 1 ? 'dia' : 'dias'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-orange-600">Recorde:</span>
+                <span className="font-semibold text-orange-900">{streak?.longest_streak || 0} dias 🔥</span>
+              </div>
+            </div>
+
+            {/* Badges Conquistados */}
+            <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-amber-500" />
+                  <h3 className="font-semibold text-slate-900">Meus Badges</h3>
+                </div>
+                <span className="text-sm text-slate-500">
+                  {gamificationStats?.badges_earned || 0}/{gamificationStats?.total_badges || 0}
+                </span>
+              </div>
+              {myBadges.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {myBadges.slice(0, 6).map((badge, index) => (
+                    <div
+                      key={index}
+                      className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl cursor-pointer hover:scale-110 transition-transform"
+                      style={{ backgroundColor: `${badge.color}20` }}
+                      title={`${badge.name} - ${badge.description}`}
+                    >
+                      {badge.icon}
+                    </div>
+                  ))}
+                  {myBadges.length > 6 && (
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-slate-100 text-slate-600 text-sm font-medium">
+                      +{myBadges.length - 6}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Trophy className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm text-slate-500">Nenhum badge ainda</p>
+                  <p className="text-xs text-slate-400">Complete módulos para ganhar!</p>
+                </div>
+              )}
+            </div>
+
+            {/* Desafio da Semana */}
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border border-purple-200 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="w-5 h-5 text-purple-600" />
+                <h3 className="font-semibold text-purple-900">Desafio da Semana</h3>
+              </div>
+              {activeChallenges.length > 0 ? (
+                <div className="space-y-3">
+                  {activeChallenges.slice(0, 2).map((challenge, index) => (
+                    <div key={index} className="bg-white/60 rounded-lg p-3">
+                      <p className="font-medium text-purple-900 text-sm mb-1">{challenge.title}</p>
+                      <p className="text-xs text-purple-600 mb-2">{challenge.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 bg-purple-200 rounded-full h-2 mr-3">
+                          <div
+                            className="bg-purple-600 h-2 rounded-full transition-all"
+                            style={{ width: `${Math.min((challenge.user_progress / challenge.target_value) * 100, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-medium text-purple-700">
+                          {challenge.user_progress}/{challenge.target_value}
+                        </span>
+                      </div>
+                      {challenge.user_completed && (
+                        <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                          ✓ Completado!
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <Target className="w-10 h-10 text-purple-300 mx-auto mb-2" />
+                  <p className="text-sm text-purple-600">Nenhum desafio ativo</p>
+                  <p className="text-xs text-purple-400">Aguarde novos desafios!</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Progress Chart + Atividades Recentes + Gráfico de Acessos */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Gráfico de Pizza - Progresso de Módulos */}
