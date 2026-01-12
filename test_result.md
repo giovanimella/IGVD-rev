@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Teste o sistema de avaliações da plataforma Ozoxx LMS - Admin: admin@ozoxx.com/admin123, Licenciado: licenciado.teste@ozoxx.com/licenciado123"
+user_problem_statement: "Teste o sistema de certificados da plataforma Ozoxx LMS - Admin: admin@ozoxx.com/admin123, Licenciado: licenciado.teste@ozoxx.com/licenciado123"
 
 frontend:
   - task: "Admin Badges Page"
