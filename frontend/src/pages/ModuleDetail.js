@@ -18,6 +18,7 @@ const ModuleDetail = () => {
 
   useEffect(() => {
     fetchModule();
+    fetchAssessmentResult();
   }, [id]);
 
   const fetchModule = async () => {
@@ -29,6 +30,15 @@ const ModuleDetail = () => {
       toast.error('Erro ao carregar módulo');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAssessmentResult = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/assessments/results/module/${id}`);
+      setAssessmentResult(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar resultado da avaliação:', error);
     }
   };
 
