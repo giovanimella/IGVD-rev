@@ -217,9 +217,6 @@ def generate_certificate_pdf(
     print(f"[Certificate] Saved to {output_path}")
     
     return str(output_path)
-        writer.write(output_file)
-    
-    return str(output_path)
 
 # ==================== LICENCIADO: CERTIFICADOS ====================
 
