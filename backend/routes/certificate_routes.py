@@ -85,13 +85,15 @@ async def update_certificate_config(
     config: dict,
     current_user: dict = Depends(require_role(["admin"]))
 ):
-    """Atualizar configurações de posição do nome/data no certificado"""
+    """Atualizar configurações de posição do nome/módulo/data no certificado"""
     updates = {
         "updated_at": datetime.now().isoformat()
     }
     
     if "certificate_name_y_position" in config:
         updates["certificate_name_y_position"] = config["certificate_name_y_position"]
+    if "certificate_module_y_position" in config:
+        updates["certificate_module_y_position"] = config["certificate_module_y_position"]
     if "certificate_date_y_position" in config:
         updates["certificate_date_y_position"] = config["certificate_date_y_position"]
     
