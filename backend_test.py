@@ -239,6 +239,360 @@ class OzoxxAPITester:
             token=self.franqueado_token
         )
 
+    # ==================== ASSESSMENT SYSTEM TESTS ====================
+    
+    def test_get_system_config(self):
+        """Test getting system configuration"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get System Config",
+            "GET",
+            "api/system/config",
+            200,
+            token=self.admin_token
+        )
+        if success:
+            print(f"   Current minimum passing score: {response.get('minimum_passing_score', 'Not set')}")
+        return success
+
+    def test_update_system_config(self):
+        """Test updating system configuration to 75% minimum score"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        return self.run_test(
+            "Update System Config (75% minimum)",
+            "PUT",
+            "api/system/config",
+            200,
+            data={"minimum_passing_score": 75},
+            token=self.admin_token
+        )
+
+    def test_get_modules_for_assessment(self):
+        """Get modules to find one for testing assessments"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get Modules for Assessment",
+            "GET",
+            "api/modules/",
+            200,
+            token=self.admin_token
+        )
+        
+        if success and response:
+            # Look for "Introdução à Ozoxx" module or use the first available
+            modules = response if isinstance(response, list) else response.get('modules', [])
+            target_module = None
+            
+            for module in modules:
+                if "Introdução" in module.get('title', '') or "ozoxx" in module.get('title', '').lower():
+                    target_module = module
+                    break
+            
+            if not target_module and modules:
+                target_module = modules[0]  # Use first module if target not found
+            
+            if target_module:
+                self.test_module_id = target_module['id']
+                print(f"   Using module: {target_module.get('title', 'Unknown')} (ID: {self.test_module_id})")
+                return True
+        
+        return False
+
+    def test_create_assessment(self):
+        """Test creating an assessment for a module"""
+        if not self.admin_token or not self.test_module_id:
+            print("❌ Skipping - No admin token or module ID")
+            return False
+        
+        assessment_data = {
+            "module_id": self.test_module_id,
+            "title": "Avaliação de Teste - Sistema Ozoxx",
+            "description": "Avaliação criada automaticamente para testar o sistema",
+            "passing_score": 70
+        }
+        
+        success, response = self.run_test(
+            "Create Assessment",
+            "POST",
+            "api/assessments/",
+            200,
+            data=assessment_data,
+            token=self.admin_token
+        )
+        
+        if success and response:
+            self.test_assessment_id = response.get('id')
+            print(f"   Created assessment ID: {self.test_assessment_id}")
+        
+        return success
+
+    def test_create_single_choice_question(self):
+        """Test creating a single choice question"""
+        if not self.admin_token or not self.test_assessment_id:
+            print("❌ Skipping - No admin token or assessment ID")
+            return False
+        
+        question_data = {
+            "assessment_id": self.test_assessment_id,
+            "question_text": "Qual é o principal objetivo da plataforma Ozoxx?",
+            "question_type": "single_choice",
+            "points": 50,
+            "order": 1,
+            "options": [
+                "Vender produtos online",
+                "Capacitar licenciados através de educação",
+                "Gerenciar estoque",
+                "Fazer marketing digital"
+            ],
+            "correct_answers": ["Capacitar licenciados através de educação"]
+        }
+        
+        success, response = self.run_test(
+            "Create Single Choice Question",
+            "POST",
+            "api/assessments/questions",
+            200,
+            data=question_data,
+            token=self.admin_token
+        )
+        
+        if success and response:
+            question_id = response.get('id')
+            self.test_question_ids.append(question_id)
+            print(f"   Created single choice question ID: {question_id}")
+        
+        return success
+
+    def test_create_multiple_choice_question(self):
+        """Test creating a multiple choice question"""
+        if not self.admin_token or not self.test_assessment_id:
+            print("❌ Skipping - No admin token or assessment ID")
+            return False
+        
+        question_data = {
+            "assessment_id": self.test_assessment_id,
+            "question_text": "Quais são os benefícios de ser um licenciado Ozoxx? (Selecione todas as corretas)",
+            "question_type": "multiple_choice",
+            "points": 50,
+            "order": 2,
+            "options": [
+                "Suporte técnico especializado",
+                "Treinamentos regulares",
+                "Acesso a produtos exclusivos",
+                "Garantia de lucro imediato"
+            ],
+            "correct_answers": ["Suporte técnico especializado", "Treinamentos regulares", "Acesso a produtos exclusivos"]
+        }
+        
+        success, response = self.run_test(
+            "Create Multiple Choice Question",
+            "POST",
+            "api/assessments/questions",
+            200,
+            data=question_data,
+            token=self.admin_token
+        )
+        
+        if success and response:
+            question_id = response.get('id')
+            self.test_question_ids.append(question_id)
+            print(f"   Created multiple choice question ID: {question_id}")
+        
+        return success
+
+    def test_get_assessment_as_licensee(self):
+        """Test licensee viewing assessment (should not see correct answers)"""
+        if not self.licensee_token or not self.test_module_id:
+            print("❌ Skipping - No licensee token or module ID")
+            return False
+        
+        success, response = self.run_test(
+            "Get Assessment as Licensee",
+            "GET",
+            f"api/assessments/module/{self.test_module_id}",
+            200,
+            token=self.licensee_token
+        )
+        
+        if success and response:
+            questions = response.get('questions', [])
+            print(f"   Assessment has {len(questions)} questions")
+            
+            # Verify licensee cannot see correct answers
+            for question in questions:
+                if 'correct_answer' in question or 'correct_answers' in question:
+                    print("   ⚠️ WARNING: Licensee can see correct answers!")
+                    return False
+            
+            print("   ✅ Correct: Licensee cannot see correct answers")
+        
+        return success
+
+    def test_submit_assessment_correct_answers(self):
+        """Test licensee submitting assessment with correct answers"""
+        if not self.licensee_token or not self.test_assessment_id:
+            print("❌ Skipping - No licensee token or assessment ID")
+            return False
+        
+        # Submit correct answers
+        submission_data = {
+            "assessment_id": self.test_assessment_id,
+            "answers": [
+                {
+                    "question_id": self.test_question_ids[0] if len(self.test_question_ids) > 0 else "q1",
+                    "answers": ["Capacitar licenciados através de educação"]
+                },
+                {
+                    "question_id": self.test_question_ids[1] if len(self.test_question_ids) > 1 else "q2",
+                    "answers": ["Suporte técnico especializado", "Treinamentos regulares", "Acesso a produtos exclusivos"]
+                }
+            ]
+        }
+        
+        success, response = self.run_test(
+            "Submit Assessment (Correct Answers)",
+            "POST",
+            "api/assessments/submit",
+            200,
+            data=submission_data,
+            token=self.licensee_token
+        )
+        
+        if success and response:
+            score = response.get('score', 0)
+            total_points = response.get('total_points', 0)
+            percentage = response.get('percentage', 0)
+            passed = response.get('passed', False)
+            
+            print(f"   Score: {score}/{total_points} ({percentage}%)")
+            print(f"   Passed: {passed}")
+            
+            if passed and percentage >= 75:  # Should pass with 75% minimum
+                print("   ✅ Correct: Assessment passed with correct answers")
+                return True
+            else:
+                print("   ❌ ERROR: Should have passed with correct answers")
+                return False
+        
+        return success
+
+    def test_submit_assessment_wrong_answers(self):
+        """Test licensee submitting assessment with wrong answers"""
+        if not self.licensee_token or not self.test_assessment_id:
+            print("❌ Skipping - No licensee token or assessment ID")
+            return False
+        
+        # Submit wrong answers
+        submission_data = {
+            "assessment_id": self.test_assessment_id,
+            "answers": [
+                {
+                    "question_id": self.test_question_ids[0] if len(self.test_question_ids) > 0 else "q1",
+                    "answers": ["Vender produtos online"]  # Wrong answer
+                },
+                {
+                    "question_id": self.test_question_ids[1] if len(self.test_question_ids) > 1 else "q2",
+                    "answers": ["Garantia de lucro imediato"]  # Wrong answer
+                }
+            ]
+        }
+        
+        success, response = self.run_test(
+            "Submit Assessment (Wrong Answers)",
+            "POST",
+            "api/assessments/submit",
+            200,
+            data=submission_data,
+            token=self.licensee_token
+        )
+        
+        if success and response:
+            score = response.get('score', 0)
+            total_points = response.get('total_points', 0)
+            percentage = response.get('percentage', 0)
+            passed = response.get('passed', False)
+            
+            print(f"   Score: {score}/{total_points} ({percentage}%)")
+            print(f"   Passed: {passed}")
+            
+            if not passed and percentage < 75:  # Should fail with 75% minimum
+                print("   ✅ Correct: Assessment failed with wrong answers")
+                return True
+            else:
+                print("   ❌ ERROR: Should have failed with wrong answers")
+                return False
+        
+        return success
+
+    def test_get_assessment_results(self):
+        """Test getting assessment results"""
+        if not self.licensee_token or not self.test_module_id:
+            print("❌ Skipping - No licensee token or module ID")
+            return False
+        
+        success, response = self.run_test(
+            "Get Assessment Results",
+            "GET",
+            f"api/assessments/results/module/{self.test_module_id}",
+            200,
+            token=self.licensee_token
+        )
+        
+        if success and response:
+            print(f"   Found assessment result: {response.get('passed', 'Unknown status')}")
+        
+        return success
+
+    def test_edit_question(self):
+        """Test editing a question"""
+        if not self.admin_token or not self.test_question_ids:
+            print("❌ Skipping - No admin token or question IDs")
+            return False
+        
+        question_id = self.test_question_ids[0]
+        updates = {
+            "question_text": "Qual é o PRINCIPAL objetivo da plataforma Ozoxx? (EDITADO)",
+            "points": 60
+        }
+        
+        return self.run_test(
+            "Edit Question",
+            "PUT",
+            f"api/assessments/questions/{question_id}",
+            200,
+            data=updates,
+            token=self.admin_token
+        )
+
+    def test_delete_question(self):
+        """Test deleting a question"""
+        if not self.admin_token or not self.test_question_ids:
+            print("❌ Skipping - No admin token or question IDs")
+            return False
+        
+        # Delete the second question if it exists
+        if len(self.test_question_ids) > 1:
+            question_id = self.test_question_ids[1]
+            return self.run_test(
+                "Delete Question",
+                "DELETE",
+                f"api/assessments/questions/{question_id}",
+                200,
+                token=self.admin_token
+            )
+        
+        print("❌ Skipping - No second question to delete")
+        return False
+
 def main():
     print("🚀 Starting Ozoxx LMS API Tests")
     print("=" * 50)
