@@ -180,6 +180,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/certificates"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminCertificates />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/admin/files"
             element={
               <PrivateRoute roles={['admin']}>
