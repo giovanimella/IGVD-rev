@@ -49,6 +49,7 @@ app.include_router(chat_routes.router, prefix="/api")
 app.include_router(banner_routes.router, prefix="/api")
 app.include_router(post_routes.router, prefix="/api")
 app.include_router(gamification_routes.router, prefix="/api")
+app.include_router(system_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
