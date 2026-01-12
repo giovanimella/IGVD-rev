@@ -107,6 +107,14 @@ function App() {
             }
           />
           <Route
+            path="/certificates"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <MyCertificates />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <PrivateRoute>
