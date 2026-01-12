@@ -419,6 +419,7 @@ class SystemConfig(BaseModel):
     minimum_passing_score: int = 70  # Nota mínima global para passar (porcentagem)
     certificate_template_path: Optional[str] = None  # Caminho do template de certificado
     certificate_name_y_position: int = 400  # Posição Y do nome no certificado (de baixo para cima)
+    certificate_module_y_position: int = 360  # Posição Y do nome do módulo no certificado
     certificate_date_y_position: int = 320  # Posição Y da data no certificado
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
