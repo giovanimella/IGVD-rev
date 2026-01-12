@@ -26,6 +26,7 @@ import AdminBanners from './pages/admin/AdminBanners';
 import AdminPosts from './pages/admin/AdminPosts';
 import AdminBadges from './pages/admin/AdminBadges';
 import AdminChallenges from './pages/admin/AdminChallenges';
+import AdminAssessment from './pages/admin/AdminAssessment';
 import SupervisorLicensees from './pages/supervisor/SupervisorLicensees';
 import LicenseeDetail from './pages/supervisor/LicenseeDetail';
 import PublicRegistration from './pages/PublicRegistration';
