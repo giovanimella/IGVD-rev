@@ -141,9 +141,9 @@ def generate_certificate_pdf(
     user_name: str,
     module_name: str,
     completion_date: str,
-    name_y: int = 400,
-    module_y: int = 360,
-    date_y: int = 320,
+    name_y: int = 350,
+    module_y: int = 310,
+    date_y: int = 270,
     output_filename: str = None
 ) -> str:
     """Gera o certificado com nome, módulo e data sobre o template"""
@@ -161,48 +161,62 @@ def generate_certificate_pdf(
     page_width = float(template_page.mediabox.width)
     page_height = float(template_page.mediabox.height)
     
-    # Criar overlay com texto
+    print(f"[Certificate] Page dimensions: {page_width}x{page_height}")
+    print(f"[Certificate] Positions - Name: {name_y}, Module: {module_y}, Date: {date_y}")
+    
+    # Criar overlay com texto usando ReportLab
     packet = BytesIO()
     can = canvas.Canvas(packet, pagesize=(page_width, page_height))
     
     # ===== NOME DO LICENCIADO =====
-    can.setFillColorRGB(0.1, 0.1, 0.1)  # Cor escura
-    can.setFont("Helvetica-Bold", 36)
-    text_width = can.stringWidth(user_name, "Helvetica-Bold", 36)
+    can.setFillColorRGB(0.15, 0.15, 0.15)  # Cor escura
+    can.setFont("Helvetica-Bold", 32)
+    text_width = can.stringWidth(user_name, "Helvetica-Bold", 32)
     x_position = (page_width - text_width) / 2
     can.drawString(x_position, name_y, user_name)
+    print(f"[Certificate] Drawing name '{user_name}' at ({x_position}, {name_y})")
     
     # ===== NOME DO MÓDULO =====
-    can.setFont("Helvetica", 24)
-    module_text = f"Módulo: {module_name}"
-    module_width = can.stringWidth(module_text, "Helvetica", 24)
+    can.setFont("Helvetica", 20)
+    can.setFillColorRGB(0.3, 0.3, 0.3)  # Cinza
+    module_text = module_name
+    module_width = can.stringWidth(module_text, "Helvetica", 20)
     module_x = (page_width - module_width) / 2
     can.drawString(module_x, module_y, module_text)
+    print(f"[Certificate] Drawing module '{module_text}' at ({module_x}, {module_y})")
     
     # ===== DATA DE CONCLUSÃO =====
-    can.setFont("Helvetica", 18)
+    can.setFont("Helvetica", 16)
+    can.setFillColorRGB(0.4, 0.4, 0.4)  # Cinza mais claro
     date_text = f"Concluído em {completion_date}"
-    date_width = can.stringWidth(date_text, "Helvetica", 18)
+    date_width = can.stringWidth(date_text, "Helvetica", 16)
     date_x = (page_width - date_width) / 2
     can.drawString(date_x, date_y, date_text)
+    print(f"[Certificate] Drawing date '{date_text}' at ({date_x}, {date_y})")
     
     can.save()
     
     # Mover para o início do buffer
     packet.seek(0)
+    
+    # Criar o overlay reader
     overlay_reader = PdfReader(packet)
     overlay_page = overlay_reader.pages[0]
     
-    # Mesclar: primeiro criar uma cópia do template, depois mesclar o overlay
+    # Criar writer e adicionar a página do template
     writer = PdfWriter()
-    
-    # Clonar a página do template
     writer.add_page(template_page)
     
-    # Mesclar o overlay na página
+    # Mesclar o overlay na primeira página
     writer.pages[0].merge_page(overlay_page)
     
+    # Salvar o PDF final
     with open(output_path, "wb") as output_file:
+        writer.write(output_file)
+    
+    print(f"[Certificate] Saved to {output_path}")
+    
+    return str(output_path)
         writer.write(output_file)
     
     return str(output_path)
