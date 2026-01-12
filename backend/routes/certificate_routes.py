@@ -9,8 +9,8 @@ from pathlib import Path
 import uuid
 import shutil
 
-# PDF manipulation
-from PyPDF2 import PdfReader, PdfWriter
+# PDF manipulation - usando pypdf (mais recente) ao invés de PyPDF2
+from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.colors import Color
