@@ -225,12 +225,30 @@ class FieldSaleNote(BaseModel):
     note: str
     sale_number: int
 
+class FileFolder(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    icon: str = "📁"  # emoji do ícone
+    color: str = "#06b6d4"  # cor da pasta
+    order: int = 0
+    created_by: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class FileFolderCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    icon: str = "📁"
+    color: str = "#06b6d4"
+    order: int = 0
+
 class FileRepository(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     filename: str
     original_filename: str
     file_type: str
     category: str
+    folder_id: Optional[str] = None  # ID da pasta (opcional)
     file_url: str
     file_size: int
     uploaded_by: str
