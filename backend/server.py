@@ -14,7 +14,7 @@ load_dotenv(ROOT_DIR / '.env')
 from routes import auth_routes, user_routes, module_routes, chapter_routes
 from routes import progress_routes, reward_routes, file_routes, upload_routes, stats_routes
 from routes import assessment_routes, onboarding_routes, payment_routes, notification_routes, chat_routes
-from routes import banner_routes, post_routes, gamification_routes, system_routes
+from routes import banner_routes, post_routes, gamification_routes, system_routes, certificate_routes
 
 app = FastAPI(title="Ozoxx LMS API")
 
