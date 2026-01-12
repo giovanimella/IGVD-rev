@@ -19,6 +19,7 @@ const AdminCertificates = () => {
 
   const [configForm, setConfigForm] = useState({
     certificate_name_y_position: 400,
+    certificate_module_y_position: 360,
     certificate_date_y_position: 320
   });
 
@@ -37,6 +38,7 @@ const AdminCertificates = () => {
       setConfig(configRes.data);
       setConfigForm({
         certificate_name_y_position: configRes.data.certificate_name_y_position || 400,
+        certificate_module_y_position: configRes.data.certificate_module_y_position || 360,
         certificate_date_y_position: configRes.data.certificate_date_y_position || 320
       });
       setCertificates(certsRes.data);
