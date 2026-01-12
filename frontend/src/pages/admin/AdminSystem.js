@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Settings, Users, BookOpen, Award, FileText, TrendingUp, DollarSign, Calendar } from 'lucide-react';
+import { Settings, Users, BookOpen, Award, FileText, TrendingUp, DollarSign, Calendar, Save, ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminSystem = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [systemConfig, setSystemConfig] = useState({ minimum_passing_score: 70 });
+  const [savingConfig, setSavingConfig] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     fetchSystemStats();
+    fetchSystemConfig();
   }, []);
 
   const fetchSystemStats = async () => {
@@ -34,6 +37,30 @@ const AdminSystem = () => {
       toast.error('Erro ao carregar dados do sistema');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSystemConfig = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/system/config`);
+      setSystemConfig(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar configurações:', error);
+    }
+  };
+
+  const saveSystemConfig = async () => {
+    setSavingConfig(true);
+    try {
+      await axios.put(`${API_URL}/api/system/config`, {
+        minimum_passing_score: systemConfig.minimum_passing_score
+      });
+      toast.success('Configurações salvas com sucesso!');
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error);
+      toast.error('Erro ao salvar configurações');
+    } finally {
+      setSavingConfig(false);
     }
   };
 
