@@ -13,8 +13,7 @@ import shutil
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.colors import Color
 from io import BytesIO
 
 mongo_url = os.environ['MONGO_URL']
