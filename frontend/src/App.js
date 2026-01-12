@@ -12,6 +12,7 @@ import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Modules from './pages/Modules';
 import ModuleDetail from './pages/ModuleDetail';
+import ModuleAssessment from './pages/ModuleAssessment';
 import Leaderboard from './pages/Leaderboard';
 import Rewards from './pages/Rewards';
 import FileRepository from './pages/FileRepository';
