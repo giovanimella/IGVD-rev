@@ -145,6 +145,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/module/:moduleId/assessment"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminAssessment />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/admin/rewards"
             element={
               <PrivateRoute roles={['admin']}>
