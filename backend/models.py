@@ -47,6 +47,7 @@ class UserResponse(BaseModel):
     current_stage: Optional[str] = None
     phone: Optional[str] = None
     payment_status: Optional[str] = None
+    supervisor_id: Optional[str] = None
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
