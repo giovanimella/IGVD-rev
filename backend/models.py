@@ -417,6 +417,21 @@ class UserChallengeProgress(BaseModel):
 class SystemConfig(BaseModel):
     id: str = "system_config"  # ID fixo, só existe uma configuração
     minimum_passing_score: int = 70  # Nota mínima global para passar (porcentagem)
+    certificate_template_path: Optional[str] = None  # Caminho do template de certificado
+    certificate_name_y_position: int = 400  # Posição Y do nome no certificado (de baixo para cima)
+    certificate_date_y_position: int = 320  # Posição Y da data no certificado
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+# ==================== CERTIFICADOS ====================
+
+class Certificate(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    module_id: str
+    user_name: str
+    module_title: str
+    completion_date: str
+    certificate_path: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 import secrets
