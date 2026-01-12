@@ -593,6 +593,226 @@ class OzoxxAPITester:
         print("❌ Skipping - No second question to delete")
         return False
 
+    # ==================== CERTIFICATE SYSTEM TESTS ====================
+    
+    def test_certificate_template_preview_no_template(self):
+        """Test getting certificate template preview when none exists"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        return self.run_test(
+            "Certificate Template Preview (No Template)",
+            "GET",
+            "api/certificates/template/preview",
+            404,
+            token=self.admin_token
+        )
+
+    def test_certificate_template_upload_endpoint(self):
+        """Test certificate template upload endpoint exists (without actual file)"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        # This will fail because we don't have a PDF file, but it confirms the endpoint exists
+        success, response = self.run_test(
+            "Certificate Template Upload Endpoint",
+            "POST",
+            "api/certificates/template/upload",
+            422,  # Expecting validation error for missing file
+            token=self.admin_token
+        )
+        
+        print("   ℹ️ Note: Endpoint exists but requires PDF file upload")
+        return success
+
+    def test_certificate_template_config_update(self):
+        """Test updating certificate template configuration"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        config_data = {
+            "certificate_name_y_position": 400,
+            "certificate_date_y_position": 320
+        }
+        
+        return self.run_test(
+            "Update Certificate Template Config",
+            "PUT",
+            "api/certificates/template/config",
+            200,
+            data=config_data,
+            token=self.admin_token
+        )
+
+    def test_certificate_template_test_no_template(self):
+        """Test generating test certificate when no template exists"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        return self.run_test(
+            "Generate Test Certificate (No Template)",
+            "POST",
+            "api/certificates/template/test",
+            404,
+            token=self.admin_token
+        )
+
+    def test_get_all_certificates_admin(self):
+        """Test admin getting all certificates"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get All Certificates (Admin)",
+            "GET",
+            "api/certificates/all",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            certificates = response if isinstance(response, list) else []
+            print(f"   Found {len(certificates)} certificates in system")
+        
+        return success
+
+    def test_get_certificate_stats_admin(self):
+        """Test admin getting certificate statistics"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get Certificate Stats (Admin)",
+            "GET",
+            "api/certificates/stats",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            total = response.get('total_certificates', 0)
+            by_module = response.get('by_module', [])
+            print(f"   Total certificates: {total}")
+            print(f"   Modules with certificates: {len(by_module)}")
+        
+        return success
+
+    def test_get_my_certificates_licensee(self):
+        """Test licensee getting their certificates"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        success, response = self.run_test(
+            "Get My Certificates (Licensee)",
+            "GET",
+            "api/certificates/my",
+            200,
+            token=self.licensee_token
+        )
+        
+        if success:
+            certificates = response if isinstance(response, list) else []
+            print(f"   Licensee has {len(certificates)} certificates")
+        
+        return success
+
+    def test_check_certificate_eligibility_intro_module(self):
+        """Test checking certificate eligibility for Introdução à Ozoxx module"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        # Use the specific module ID mentioned in the request
+        intro_module_id = "d4301253-c9df-4995-a801-d873edfaf8d5"
+        
+        success, response = self.run_test(
+            "Check Certificate Eligibility (Introdução à Ozoxx)",
+            "GET",
+            f"api/certificates/check/{intro_module_id}",
+            200,
+            token=self.licensee_token
+        )
+        
+        if success:
+            eligible = response.get('eligible', False)
+            reason = response.get('reason', 'No reason provided')
+            print(f"   Eligible: {eligible}")
+            print(f"   Reason: {reason}")
+        
+        return success
+
+    def test_generate_certificate_no_template(self):
+        """Test generating certificate when no template is configured"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        # Use the specific module ID mentioned in the request
+        intro_module_id = "d4301253-c9df-4995-a801-d873edfaf8d5"
+        
+        success, response = self.run_test(
+            "Generate Certificate (No Template)",
+            "POST",
+            f"api/certificates/generate/{intro_module_id}",
+            400,  # Should fail because no template is configured
+            token=self.licensee_token
+        )
+        
+        if success:
+            print("   ✅ Correctly failed due to missing template configuration")
+        
+        return success
+
+    def test_modules_have_certificate_field(self):
+        """Test that modules have has_certificate field"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get Modules (Check Certificate Field)",
+            "GET",
+            "api/modules/",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            modules = response if isinstance(response, list) else response.get('modules', [])
+            intro_module = None
+            modules_with_cert = 0
+            
+            for module in modules:
+                if module.get('has_certificate'):
+                    modules_with_cert += 1
+                
+                # Check for the specific Introdução à Ozoxx module
+                if (module.get('id') == "d4301253-c9df-4995-a801-d873edfaf8d5" or 
+                    "Introdução" in module.get('title', '') or 
+                    "ozoxx" in module.get('title', '').lower()):
+                    intro_module = module
+            
+            print(f"   Total modules: {len(modules)}")
+            print(f"   Modules with certificates enabled: {modules_with_cert}")
+            
+            if intro_module:
+                has_cert = intro_module.get('has_certificate', False)
+                print(f"   'Introdução à Ozoxx' module found: {intro_module.get('title')}")
+                print(f"   Certificate enabled: {has_cert}")
+                if not has_cert:
+                    print("   ⚠️ WARNING: Introdução à Ozoxx module should have certificate enabled")
+            else:
+                print("   ⚠️ WARNING: 'Introdução à Ozoxx' module not found")
+        
+        return success
+
 def main():
     print("🚀 Starting Ozoxx LMS API Tests - Assessment System Focus")
     print("=" * 60)
