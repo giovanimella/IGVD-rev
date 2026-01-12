@@ -39,6 +39,7 @@ const Sidebar = () => {
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
     { path: '/admin/badges', icon: Trophy, label: 'Badges' },
     { path: '/admin/challenges', icon: Target, label: 'Desafios' },
+    { path: '/admin/certificates', icon: Award, label: 'Certificados' },
     { path: '/admin/files', icon: FileText, label: 'Arquivos' },
     { path: '/admin/banners', icon: Image, label: 'Banners' },
     { path: '/admin/posts', icon: Megaphone, label: 'Comunicados' },
@@ -58,6 +59,7 @@ const Sidebar = () => {
   const licenseeLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
+    { path: '/certificates', icon: Award, label: 'Certificados' },
     { path: '/rewards', icon: Award, label: 'Recompensas' },
     { path: '/file-repository', icon: FileText, label: 'Arquivos' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
