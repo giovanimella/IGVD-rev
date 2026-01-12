@@ -259,6 +259,20 @@ const AdminCertificates = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Posição Y do Nome do Módulo (pixels do rodapé)
+                </label>
+                <input
+                  type="number"
+                  value={configForm.certificate_module_y_position}
+                  onChange={(e) => setConfigForm({ ...configForm, certificate_module_y_position: parseInt(e.target.value) || 0 })}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Distância em pixels do rodapé. Fica abaixo do nome do licenciado
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Posição Y da Data (pixels do rodapé)
                 </label>
                 <input
@@ -268,9 +282,18 @@ const AdminCertificates = () => {
                   className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                 />
                 <p className="text-xs text-slate-500 mt-1">
-                  Distância em pixels do rodapé. Geralmente menor que a do nome
+                  Distância em pixels do rodapé. Geralmente menor que a do módulo
                 </p>
               </div>
+            </div>
+
+            {/* Info sobre posições */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>Dica:</strong> O valor em pixels é medido de baixo para cima. 
+                Para um PDF A4 horizontal (842x595), o centro vertical fica em ~297 pixels.
+                Valores típicos: Nome: 350-400, Módulo: 310-360, Data: 270-320.
+              </p>
             </div>
 
             {/* Ações */}
