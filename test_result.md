@@ -190,20 +190,53 @@ backend:
           agent: "testing"
           comment: "✅ TESTED SUCCESSFULLY - POST /api/assessments/submit correctly processes answers and calculates scores. Passing logic works with 75% minimum score (100% passes, 0% fails). GET /api/assessments/results/module/{id} returns results. SECURITY FIX APPLIED: Licensees can no longer see correct answers when viewing assessments."
 
-  - task: "Assessment Security"
+  - task: "Certificate Template Management API (Admin)"
     implemented: true
     working: true
-    file: "/app/backend/routes/assessment_routes.py"
-    stuck_count: 1
+    file: "/app/backend/routes/certificate_routes.py"
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
-        - working: false
-          agent: "testing"
-          comment: "❌ CRITICAL SECURITY ISSUE FOUND - Licensees could see correct_answers field when viewing assessments. This violates assessment integrity."
         - working: true
           agent: "testing"
-          comment: "✅ SECURITY ISSUE FIXED - Updated assessment_routes.py to remove both 'correct_answer' and 'correct_answers' fields for non-admin users. Verified licensees can no longer see correct answers while admins retain full access."
+          comment: "✅ TESTED SUCCESSFULLY - POST /api/certificates/template/upload endpoint exists and requires PDF file (422 validation error expected). GET /api/certificates/template/preview correctly returns 404 when no template configured. PUT /api/certificates/template/config successfully updates name/date positions. POST /api/certificates/template/test correctly returns 404 when no template configured. All admin authentication working properly."
+
+  - task: "Certificate Management API (Admin)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/certificate_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - GET /api/certificates/all returns empty list (expected, no certificates issued yet). GET /api/certificates/stats returns correct statistics (0 total certificates, 0 modules with certificates). Admin can access both endpoints with proper authentication."
+
+  - task: "Certificate Access API (Licensee)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/certificate_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - GET /api/certificates/my returns empty list for licensee (expected). GET /api/certificates/check/{module_id} correctly checks eligibility for 'Introdução à Ozoxx' module (eligible: true). POST /api/certificates/generate/{module_id} correctly fails with 400 error when no template configured. All licensee authentication working properly."
+
+  - task: "Module Certificate Integration"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/module_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ VERIFIED SUCCESSFULLY - Modules have has_certificate field implemented. Found 5 total modules with 4 having certificates enabled. 'Introdução à Ozoxx' module (id: d4301253-c9df-4995-a801-d873edfaf8d5) correctly has certificate enabled (has_certificate: true). Module integration working as expected."
 
 metadata:
   created_by: "testing_agent"
