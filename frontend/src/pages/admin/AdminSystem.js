@@ -206,6 +206,46 @@ const AdminSystem = () => {
           </div>
         </div>
 
+        {/* Configurações do Sistema */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
+              <ClipboardCheck className="w-5 h-5 text-cyan-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-outfit font-semibold text-slate-900">Configurações de Avaliação</h3>
+              <p className="text-sm text-slate-500">Configure a nota mínima global para aprovação</p>
+            </div>
+          </div>
+          
+          <div className="flex items-end gap-4">
+            <div className="flex-1 max-w-xs">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Nota Mínima para Aprovação (%)
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={systemConfig.minimum_passing_score}
+                onChange={(e) => setSystemConfig({ ...systemConfig, minimum_passing_score: parseInt(e.target.value) || 0 })}
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Esta nota será aplicada a todas as avaliações de módulos
+              </p>
+            </div>
+            <button
+              onClick={saveSystemConfig}
+              disabled={savingConfig}
+              className="flex items-center gap-2 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors disabled:opacity-50"
+            >
+              <Save className="w-4 h-4" />
+              {savingConfig ? 'Salvando...' : 'Salvar'}
+            </button>
+          </div>
+        </div>
+
         {/* Ações Rápidas do Sistema */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4">Resumo do Sistema</h3>
