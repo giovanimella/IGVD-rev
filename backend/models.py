@@ -412,4 +412,11 @@ class UserChallengeProgress(BaseModel):
     completed_at: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
+# ==================== CONFIGURAÇÕES DO SISTEMA ====================
+
+class SystemConfig(BaseModel):
+    id: str = "system_config"  # ID fixo, só existe uma configuração
+    minimum_passing_score: int = 70  # Nota mínima global para passar (porcentagem)
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
 import secrets
