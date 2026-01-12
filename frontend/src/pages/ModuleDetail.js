@@ -21,6 +21,7 @@ const ModuleDetail = () => {
   useEffect(() => {
     fetchModule();
     fetchAssessmentResult();
+    fetchCertificateEligibility();
   }, [id]);
 
   const fetchModule = async () => {
@@ -41,6 +42,46 @@ const ModuleDetail = () => {
       setAssessmentResult(response.data);
     } catch (error) {
       console.error('Erro ao buscar resultado da avaliação:', error);
+    }
+  };
+
+  const fetchCertificateEligibility = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/certificates/check/${id}`);
+      setCertificateEligibility(response.data);
+    } catch (error) {
+      console.error('Erro ao verificar elegibilidade de certificado:', error);
+    }
+  };
+
+  const handleGenerateCertificate = async () => {
+    setGeneratingCertificate(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/certificates/generate/${id}`);
+      toast.success('Certificado gerado com sucesso!');
+      
+      // Baixar automaticamente
+      const certId = response.data.certificate.id;
+      const downloadResponse = await axios.get(`${API_URL}/api/certificates/download/${certId}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([downloadResponse.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `certificado_${module.title.replace(/\s+/g, '_')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      // Atualizar elegibilidade
+      fetchCertificateEligibility();
+    } catch (error) {
+      console.error('Erro ao gerar certificado:', error);
+      toast.error(error.response?.data?.detail || 'Erro ao gerar certificado');
+    } finally {
+      setGeneratingCertificate(false);
     }
   };
 
