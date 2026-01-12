@@ -34,6 +34,7 @@ async def get_module_assessment(module_id: str, current_user: dict = Depends(get
     if current_user.get("role") != "admin":
         for question in questions:
             question.pop("correct_answer", None)
+            question.pop("correct_answers", None)
     
     assessment["questions"] = questions
     
@@ -53,6 +54,7 @@ async def get_assessment(assessment_id: str, current_user: dict = Depends(get_cu
     if current_user.get("role") != "admin":
         for question in questions:
             question.pop("correct_answer", None)
+            question.pop("correct_answers", None)
     
     assessment["questions"] = questions
     
