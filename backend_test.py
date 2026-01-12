@@ -7,9 +7,13 @@ class OzoxxAPITester:
         self.base_url = base_url
         self.admin_token = None
         self.franqueado_token = None
+        self.licensee_token = None
         self.tests_run = 0
         self.tests_passed = 0
         self.failed_tests = []
+        self.test_module_id = None
+        self.test_assessment_id = None
+        self.test_question_ids = []
 
     def run_test(self, name, method, endpoint, expected_status, data=None, token=None):
         """Run a single API test"""
