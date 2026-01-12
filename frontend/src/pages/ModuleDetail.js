@@ -302,6 +302,64 @@ const ModuleDetail = () => {
             </div>
           </div>
         )}
+
+        {/* Card de Certificado */}
+        {module.has_certificate && (
+          <div className={`rounded-xl border p-6 ${
+            certificateEligibility?.certificate_id 
+              ? 'bg-amber-50 border-amber-200' 
+              : certificateEligibility?.eligible 
+                ? 'bg-green-50 border-green-200' 
+                : 'bg-slate-50 border-slate-200'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+                  certificateEligibility?.certificate_id 
+                    ? 'bg-amber-500' 
+                    : certificateEligibility?.eligible 
+                      ? 'bg-green-500' 
+                      : 'bg-slate-300'
+                }`}>
+                  <Award className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900">
+                    {certificateEligibility?.certificate_id 
+                      ? 'Certificado Disponível!' 
+                      : 'Certificado do Módulo'}
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    {certificateEligibility?.certificate_id 
+                      ? 'Você já gerou seu certificado. Acesse na página de Certificados.'
+                      : certificateEligibility?.eligible 
+                        ? 'Parabéns! Você pode gerar seu certificado agora!' 
+                        : certificateEligibility?.reason || 'Complete o módulo para gerar o certificado'
+                    }
+                  </p>
+                </div>
+              </div>
+              {certificateEligibility?.eligible && !certificateEligibility?.certificate_id && (
+                <Button 
+                  onClick={handleGenerateCertificate}
+                  disabled={generatingCertificate}
+                  className="bg-amber-500 hover:bg-amber-600"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {generatingCertificate ? 'Gerando...' : 'Gerar Certificado'}
+                </Button>
+              )}
+              {certificateEligibility?.certificate_id && (
+                <Button 
+                  onClick={() => navigate('/certificates')}
+                  variant="outline"
+                >
+                  Ver Meus Certificados
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
