@@ -169,30 +169,24 @@ def generate_certificate_pdf(
     can = canvas.Canvas(packet, pagesize=(page_width, page_height))
     
     # ===== NOME DO LICENCIADO =====
-    can.setFillColorRGB(0.15, 0.15, 0.15)  # Cor escura
+    # Usando cor preta sólida para garantir visibilidade
+    can.setFillColorRGB(0, 0, 0)  # Preto puro
     can.setFont("Helvetica-Bold", 32)
-    text_width = can.stringWidth(user_name, "Helvetica-Bold", 32)
-    x_position = (page_width - text_width) / 2
-    can.drawString(x_position, name_y, user_name)
-    print(f"[Certificate] Drawing name '{user_name}' at ({x_position}, {name_y})")
+    can.drawCentredString(page_width / 2, name_y, user_name)
+    print(f"[Certificate] Drawing name '{user_name}' at y={name_y}")
     
     # ===== NOME DO MÓDULO =====
     can.setFont("Helvetica", 20)
-    can.setFillColorRGB(0.3, 0.3, 0.3)  # Cinza
-    module_text = module_name
-    module_width = can.stringWidth(module_text, "Helvetica", 20)
-    module_x = (page_width - module_width) / 2
-    can.drawString(module_x, module_y, module_text)
-    print(f"[Certificate] Drawing module '{module_text}' at ({module_x}, {module_y})")
+    can.setFillColorRGB(0.2, 0.2, 0.2)  # Cinza escuro
+    can.drawCentredString(page_width / 2, module_y, module_name)
+    print(f"[Certificate] Drawing module '{module_name}' at y={module_y}")
     
     # ===== DATA DE CONCLUSÃO =====
     can.setFont("Helvetica", 16)
-    can.setFillColorRGB(0.4, 0.4, 0.4)  # Cinza mais claro
+    can.setFillColorRGB(0.3, 0.3, 0.3)  # Cinza
     date_text = f"Concluído em {completion_date}"
-    date_width = can.stringWidth(date_text, "Helvetica", 16)
-    date_x = (page_width - date_width) / 2
-    can.drawString(date_x, date_y, date_text)
-    print(f"[Certificate] Drawing date '{date_text}' at ({date_x}, {date_y})")
+    can.drawCentredString(page_width / 2, date_y, date_text)
+    print(f"[Certificate] Drawing date '{date_text}' at y={date_y}")
     
     can.save()
     
@@ -203,12 +197,15 @@ def generate_certificate_pdf(
     overlay_reader = PdfReader(packet)
     overlay_page = overlay_reader.pages[0]
     
-    # Criar writer e adicionar a página do template
+    # IMPORTANTE: Mesclar o template SOBRE o texto (overlay primeiro, template depois)
+    # Isso faz o texto ficar "por baixo", visível nas áreas transparentes do template
     writer = PdfWriter()
-    writer.add_page(template_page)
     
-    # Mesclar o overlay na primeira página
-    writer.pages[0].merge_page(overlay_page)
+    # Adicionar overlay primeiro (texto)
+    writer.add_page(overlay_page)
+    
+    # Mesclar template por cima
+    writer.pages[0].merge_page(template_page)
     
     # Salvar o PDF final
     with open(output_path, "wb") as output_file:
