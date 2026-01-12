@@ -269,6 +269,15 @@ const AdminModules = () => {
                   <Button
                     size="sm"
                     variant="outline"
+                    onClick={() => navigate(`/admin/module/${module.id}/assessment`)}
+                    className="text-amber-600 hover:bg-amber-50"
+                    title="Avaliação"
+                  >
+                    <ClipboardCheck className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => handleEditClick(module)}
                     data-testid={`edit-module-${module.id}`}
                   >
