@@ -88,6 +88,21 @@ class OzoxxAPITester:
             return True
         return False
 
+    def test_licensee_login(self):
+        """Test licensee login with provided credentials"""
+        success, response = self.run_test(
+            "Licensee Login",
+            "POST",
+            "api/auth/login",
+            200,
+            data={"email": "licenciado.teste@ozoxx.com", "password": "licenciado123"}
+        )
+        if success and 'access_token' in response:
+            self.licensee_token = response['access_token']
+            print(f"   Licensee user: {response.get('user', {}).get('full_name', 'Unknown')}")
+            return True
+        return False
+
     def test_invalid_login(self):
         """Test invalid login credentials"""
         return self.run_test(
