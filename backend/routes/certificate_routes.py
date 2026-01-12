@@ -305,11 +305,13 @@ async def generate_certificate(module_id: str, current_user: dict = Depends(get_
     
     output_filename = f"cert_{user_id[:8]}_{module_id[:8]}_{uuid.uuid4().hex[:6]}.pdf"
     
-    certificate_path = await generate_certificate_pdf(
+    certificate_path = generate_certificate_pdf(
         template_path=template_path,
         user_name=user["full_name"],
+        module_name=module["title"],
         completion_date=date_formatted,
         name_y=config.get("certificate_name_y_position", 400),
+        module_y=config.get("certificate_module_y_position", 360),
         date_y=config.get("certificate_date_y_position", 320),
         output_filename=output_filename
     )
