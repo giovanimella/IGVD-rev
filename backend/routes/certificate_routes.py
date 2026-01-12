@@ -14,7 +14,10 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.colors import Color
+from reportlab.lib.utils import ImageReader
 from io import BytesIO
+from pdf2image import convert_from_path
+from PIL import Image
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
