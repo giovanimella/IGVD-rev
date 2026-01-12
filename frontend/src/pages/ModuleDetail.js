@@ -213,6 +213,52 @@ const ModuleDetail = () => {
             )}
           </div>
         </div>
+
+        {/* Card de Avaliação */}
+        {module.has_assessment && (
+          <div className={`rounded-xl border p-6 ${
+            assessmentResult?.passed 
+              ? 'bg-green-50 border-green-200' 
+              : progress === 100 
+                ? 'bg-amber-50 border-amber-200' 
+                : 'bg-slate-50 border-slate-200'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+                  assessmentResult?.passed 
+                    ? 'bg-green-500' 
+                    : progress === 100 
+                      ? 'bg-amber-500' 
+                      : 'bg-slate-300'
+                }`}>
+                  <ClipboardCheck className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900">
+                    {assessmentResult?.passed ? 'Avaliação Concluída!' : 'Avaliação do Módulo'}
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    {assessmentResult?.passed 
+                      ? `Aprovado em ${new Date(assessmentResult.completed_at).toLocaleDateString('pt-BR')}`
+                      : progress === 100 
+                        ? 'Complete a avaliação para finalizar o módulo'
+                        : 'Complete todos os capítulos para liberar a avaliação'
+                    }
+                  </p>
+                </div>
+              </div>
+              {progress === 100 && (
+                <Button 
+                  onClick={() => navigate(`/module/${id}/assessment`)}
+                  className={assessmentResult?.passed ? 'bg-green-600 hover:bg-green-700' : ''}
+                >
+                  {assessmentResult?.passed ? 'Ver Resultado' : 'Fazer Avaliação'}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
