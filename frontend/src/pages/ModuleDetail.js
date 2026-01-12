@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import axios from 'axios';
-import { ArrowLeft, BookOpen, Play, CheckCircle, Clock, Award, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, BookOpen, Play, CheckCircle, Clock, Award, ClipboardCheck, Download } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Progress } from '../components/ui/progress';
 import { toast } from 'sonner';
@@ -11,6 +11,8 @@ const ModuleDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [assessmentResult, setAssessmentResult] = useState(null);
+  const [certificateEligibility, setCertificateEligibility] = useState(null);
+  const [generatingCertificate, setGeneratingCertificate] = useState(false);
   const [module, setModule] = useState(null);
   const [loading, setLoading] = useState(true);
 
