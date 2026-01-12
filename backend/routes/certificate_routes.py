@@ -149,70 +149,79 @@ def generate_certificate_pdf(
     date_y: int = 270,
     output_filename: str = None
 ) -> str:
-    """Gera o certificado com nome, módulo e data sobre o template"""
+    """Gera o certificado convertendo template para imagem e adicionando texto por cima"""
     
     if not output_filename:
         output_filename = f"cert_{uuid.uuid4().hex[:8]}.pdf"
     
     output_path = GENERATED_DIR / output_filename
     
-    # Ler o template
-    template_reader = PdfReader(template_path)
-    template_page = template_reader.pages[0]
+    print(f"[Certificate] Starting generation for {user_name}")
+    print(f"[Certificate] Template: {template_path}")
     
-    # Pegar dimensões da página
-    page_width = float(template_page.mediabox.width)
-    page_height = float(template_page.mediabox.height)
+    # Converter o template PDF para imagem (alta resolução)
+    images = convert_from_path(template_path, dpi=150)
+    if not images:
+        raise Exception("Não foi possível converter o template")
     
-    print(f"[Certificate] Page dimensions: {page_width}x{page_height}")
-    print(f"[Certificate] Positions - Name: {name_y}, Module: {module_y}, Date: {date_y}")
+    template_img = images[0]
+    img_width, img_height = template_img.size
     
-    # Criar overlay com texto usando ReportLab
+    print(f"[Certificate] Image size: {img_width}x{img_height}")
+    
+    # Calcular fator de escala (DPI 150 = 150/72 = 2.083)
+    scale_factor = 150 / 72  # Converter coordenadas PDF para pixels
+    
+    # Ajustar posições Y (inverter porque imagem tem Y invertido)
+    pdf_height = img_height / scale_factor
+    name_y_img = int((pdf_height - name_y) * scale_factor)
+    module_y_img = int((pdf_height - module_y) * scale_factor)
+    date_y_img = int((pdf_height - date_y) * scale_factor)
+    
+    print(f"[Certificate] PDF height: {pdf_height}, Y positions (img): name={name_y_img}, module={module_y_img}, date={date_y_img}")
+    
+    # Criar novo PDF com ReportLab
     packet = BytesIO()
+    
+    # Usar tamanho em pontos (72 DPI)
+    page_width = img_width / scale_factor
+    page_height = img_height / scale_factor
+    
     can = canvas.Canvas(packet, pagesize=(page_width, page_height))
     
+    # Converter imagem PIL para buffer
+    img_buffer = BytesIO()
+    template_img.save(img_buffer, format='PNG')
+    img_buffer.seek(0)
+    
+    # Desenhar imagem de fundo (template)
+    can.drawImage(ImageReader(img_buffer), 0, 0, width=page_width, height=page_height)
+    
     # ===== NOME DO LICENCIADO =====
-    # Usando cor preta sólida para garantir visibilidade
-    can.setFillColorRGB(0, 0, 0)  # Preto puro
+    can.setFillColorRGB(0, 0, 0)  # Preto
     can.setFont("Helvetica-Bold", 32)
     can.drawCentredString(page_width / 2, name_y, user_name)
     print(f"[Certificate] Drawing name '{user_name}' at y={name_y}")
     
     # ===== NOME DO MÓDULO =====
     can.setFont("Helvetica", 20)
-    can.setFillColorRGB(0.2, 0.2, 0.2)  # Cinza escuro
+    can.setFillColorRGB(0.2, 0.2, 0.2)
     can.drawCentredString(page_width / 2, module_y, module_name)
     print(f"[Certificate] Drawing module '{module_name}' at y={module_y}")
     
     # ===== DATA DE CONCLUSÃO =====
     can.setFont("Helvetica", 16)
-    can.setFillColorRGB(0.3, 0.3, 0.3)  # Cinza
+    can.setFillColorRGB(0.3, 0.3, 0.3)
     date_text = f"Concluído em {completion_date}"
     can.drawCentredString(page_width / 2, date_y, date_text)
     print(f"[Certificate] Drawing date '{date_text}' at y={date_y}")
     
     can.save()
     
-    # Mover para o início do buffer
+    # Salvar o PDF
     packet.seek(0)
-    
-    # Criar o overlay reader
-    overlay_reader = PdfReader(packet)
-    overlay_page = overlay_reader.pages[0]
-    
-    # IMPORTANTE: Mesclar o template SOBRE o texto (overlay primeiro, template depois)
-    # Isso faz o texto ficar "por baixo", visível nas áreas transparentes do template
-    writer = PdfWriter()
-    
-    # Adicionar overlay primeiro (texto)
-    writer.add_page(overlay_page)
-    
-    # Mesclar template por cima
-    writer.pages[0].merge_page(template_page)
-    
-    # Salvar o PDF final
     with open(output_path, "wb") as output_file:
-        writer.write(output_file)
+        output_file.write(packet.getvalue())
     
     print(f"[Certificate] Saved to {output_path}")
     
