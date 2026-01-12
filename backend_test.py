@@ -594,8 +594,8 @@ class OzoxxAPITester:
         return False
 
 def main():
-    print("🚀 Starting Ozoxx LMS API Tests")
-    print("=" * 50)
+    print("🚀 Starting Ozoxx LMS API Tests - Assessment System Focus")
+    print("=" * 60)
     
     tester = OzoxxAPITester()
     
@@ -605,6 +605,7 @@ def main():
     # Authentication tests
     admin_login_success = tester.test_admin_login()
     franqueado_login_success = tester.test_franqueado_login()
+    licensee_login_success = tester.test_licensee_login()
     tester.test_invalid_login()
     
     # Password reset
@@ -633,8 +634,38 @@ def main():
         tester.test_leaderboard()
         tester.test_rewards()
     
+    # ==================== ASSESSMENT SYSTEM TESTS ====================
+    print("\n" + "🎯 ASSESSMENT SYSTEM TESTS" + "=" * 40)
+    
+    if admin_login_success:
+        # 1. System Configuration Tests
+        tester.test_get_system_config()
+        tester.test_update_system_config()
+        
+        # 2. Get modules and create assessment
+        if tester.test_get_modules_for_assessment():
+            tester.test_create_assessment()
+            
+            # 3. Create questions
+            tester.test_create_single_choice_question()
+            tester.test_create_multiple_choice_question()
+            
+            # 4. Question management
+            tester.test_edit_question()
+    
+    # 5. Licensee tests
+    if licensee_login_success and tester.test_module_id:
+        tester.test_get_assessment_as_licensee()
+        tester.test_submit_assessment_correct_answers()
+        tester.test_submit_assessment_wrong_answers()
+        tester.test_get_assessment_results()
+    
+    # 6. Admin cleanup tests
+    if admin_login_success:
+        tester.test_delete_question()
+    
     # Print results
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print(f"📊 Test Results: {tester.tests_passed}/{tester.tests_run} passed")
     
     if tester.failed_tests:
@@ -644,6 +675,14 @@ def main():
     
     success_rate = (tester.tests_passed / tester.tests_run * 100) if tester.tests_run > 0 else 0
     print(f"📈 Success Rate: {success_rate:.1f}%")
+    
+    # Assessment-specific summary
+    print(f"\n🎯 Assessment System Summary:")
+    print(f"   - Admin credentials: {'✅ Working' if admin_login_success else '❌ Failed'}")
+    print(f"   - Licensee credentials: {'✅ Working' if licensee_login_success else '❌ Failed'}")
+    print(f"   - Test module found: {'✅ Yes' if tester.test_module_id else '❌ No'}")
+    print(f"   - Assessment created: {'✅ Yes' if tester.test_assessment_id else '❌ No'}")
+    print(f"   - Questions created: {len(tester.test_question_ids)} questions")
     
     return 0 if tester.tests_passed == tester.tests_run else 1
 
