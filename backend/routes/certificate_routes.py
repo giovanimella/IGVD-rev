@@ -115,11 +115,13 @@ async def test_certificate_generation(
         raise HTTPException(status_code=404, detail="Nenhum template configurado. Faça upload primeiro.")
     
     # Gerar certificado de teste
-    test_path = await generate_certificate_pdf(
+    test_path = generate_certificate_pdf(
         template_path=template_path,
         user_name="Nome do Licenciado Teste",
-        completion_date=datetime.now().strftime("%d de %B de %Y"),
+        module_name="Módulo de Exemplo",
+        completion_date="12 de Janeiro de 2026",
         name_y=config.get("certificate_name_y_position", 400),
+        module_y=config.get("certificate_module_y_position", 360),
         date_y=config.get("certificate_date_y_position", 320),
         output_filename="test_certificate.pdf"
     )
@@ -132,15 +134,17 @@ async def test_certificate_generation(
 
 # ==================== GERAÇÃO DE CERTIFICADO ====================
 
-async def generate_certificate_pdf(
+def generate_certificate_pdf(
     template_path: str,
     user_name: str,
+    module_name: str,
     completion_date: str,
     name_y: int = 400,
+    module_y: int = 360,
     date_y: int = 320,
     output_filename: str = None
 ) -> str:
-    """Gera o certificado com nome e data sobre o template"""
+    """Gera o certificado com nome, módulo e data sobre o template"""
     
     if not output_filename:
         output_filename = f"cert_{uuid.uuid4().hex[:8]}.pdf"
@@ -159,20 +163,21 @@ async def generate_certificate_pdf(
     packet = BytesIO()
     can = canvas.Canvas(packet, pagesize=(page_width, page_height))
     
-    # Configurar fonte
-    try:
-        # Tentar usar fonte mais elegante se disponível
-        can.setFont("Helvetica-Bold", 36)
-    except:
-        can.setFont("Helvetica", 36)
-    
-    # Adicionar nome (centralizado)
+    # ===== NOME DO LICENCIADO =====
     can.setFillColorRGB(0.1, 0.1, 0.1)  # Cor escura
+    can.setFont("Helvetica-Bold", 36)
     text_width = can.stringWidth(user_name, "Helvetica-Bold", 36)
     x_position = (page_width - text_width) / 2
     can.drawString(x_position, name_y, user_name)
     
-    # Adicionar data (centralizada, menor)
+    # ===== NOME DO MÓDULO =====
+    can.setFont("Helvetica", 24)
+    module_text = f"Módulo: {module_name}"
+    module_width = can.stringWidth(module_text, "Helvetica", 24)
+    module_x = (page_width - module_width) / 2
+    can.drawString(module_x, module_y, module_text)
+    
+    # ===== DATA DE CONCLUSÃO =====
     can.setFont("Helvetica", 18)
     date_text = f"Concluído em {completion_date}"
     date_width = can.stringWidth(date_text, "Helvetica", 18)
@@ -186,12 +191,14 @@ async def generate_certificate_pdf(
     overlay_reader = PdfReader(packet)
     overlay_page = overlay_reader.pages[0]
     
-    # Mesclar template com overlay
-    template_page.merge_page(overlay_page)
-    
-    # Salvar resultado
+    # Mesclar: primeiro criar uma cópia do template, depois mesclar o overlay
     writer = PdfWriter()
+    
+    # Clonar a página do template
     writer.add_page(template_page)
+    
+    # Mesclar o overlay na página
+    writer.pages[0].merge_page(overlay_page)
     
     with open(output_path, "wb") as output_file:
         writer.write(output_file)
