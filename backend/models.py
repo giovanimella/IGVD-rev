@@ -128,20 +128,20 @@ class Question(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     assessment_id: str
     question_text: str
-    question_type: str
+    question_type: str  # 'single_choice' ou 'multiple_choice'
     points: int
     order: int
     options: List[str] = []
-    correct_answer: Optional[str] = None
+    correct_answers: List[str] = []  # Lista de respostas corretas (para múltipla escolha)
 
 class QuestionCreate(BaseModel):
     assessment_id: str
     question_text: str
-    question_type: str
+    question_type: str  # 'single_choice' ou 'multiple_choice'
     points: int
     order: int
     options: List[str] = []
-    correct_answer: Optional[str] = None
+    correct_answers: List[str] = []
 
 class UserAssessment(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
