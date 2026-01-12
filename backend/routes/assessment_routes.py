@@ -117,6 +117,10 @@ async def submit_assessment(submission: AssessmentSubmission, current_user: dict
     if not assessment:
         raise HTTPException(status_code=404, detail="Avaliação não encontrada")
     
+    # Buscar configuração global de nota mínima
+    system_config = await db.system_config.find_one({"id": "system_config"})
+    minimum_passing_score = system_config.get("minimum_passing_score", 70) if system_config else 70
+    
     questions = await db.questions.find({"assessment_id": submission.assessment_id}, {"_id": 0}).to_list(1000)
     
     score = 0
@@ -128,15 +132,21 @@ async def submit_assessment(submission: AssessmentSubmission, current_user: dict
             continue
         
         is_correct = False
-        if question["question_type"] in ["multiple_choice", "checkbox"]:
-            is_correct = answer.get("answer") == question.get("correct_answer")
-        elif question["question_type"] == "numeric":
-            try:
-                user_answer = float(answer.get("answer", 0))
-                correct_answer = float(question.get("correct_answer", 0))
-                is_correct = abs(user_answer - correct_answer) < 0.01
-            except:
-                is_correct = False
+        user_answers = answer.get("answers", [])  # Lista de respostas do usuário
+        correct_answers = question.get("correct_answers", [])
+        
+        # Para compatibilidade com formato antigo
+        if not user_answers and answer.get("answer"):
+            user_answers = [answer.get("answer")]
+        if not correct_answers and question.get("correct_answer"):
+            correct_answers = [question.get("correct_answer")]
+        
+        if question["question_type"] == "single_choice":
+            # Única resposta correta
+            is_correct = set(user_answers) == set(correct_answers)
+        elif question["question_type"] == "multiple_choice":
+            # Múltiplas respostas corretas - usuário deve acertar todas
+            is_correct = set(user_answers) == set(correct_answers)
         
         if is_correct:
             score += question["points"]
@@ -144,15 +154,18 @@ async def submit_assessment(submission: AssessmentSubmission, current_user: dict
         graded_answers.append({
             "question_id": answer["question_id"],
             "question_text": question["question_text"],
-            "answer": answer.get("answer"),
-            "correct_answer": question.get("correct_answer"),
+            "user_answers": user_answers,
+            "correct_answers": correct_answers,
             "is_correct": is_correct,
             "points": question["points"] if is_correct else 0,
             "max_points": question["points"]
         })
     
     total_points = sum(q["points"] for q in questions)
-    passed = score >= assessment["passing_score"]
+    
+    # Calcular porcentagem e verificar se passou
+    percentage = (score / total_points * 100) if total_points > 0 else 0
+    passed = percentage >= minimum_passing_score
     
     user_assessment = UserAssessment(
         user_id=current_user["sub"],
@@ -164,6 +177,7 @@ async def submit_assessment(submission: AssessmentSubmission, current_user: dict
     
     await db.user_assessments.insert_one(user_assessment.model_dump())
     
+    # Se passou, dar pontos e verificar badges
     if passed:
         module = await db.modules.find_one({"id": assessment["module_id"]}, {"_id": 0})
         if module and module.get("points_reward", 0) > 0:
@@ -171,14 +185,20 @@ async def submit_assessment(submission: AssessmentSubmission, current_user: dict
                 {"id": current_user["sub"]},
                 {"$inc": {"points": module["points_reward"]}}
             )
+        
+        # Verificar badges
+        from routes.gamification_routes import check_and_award_badges
+        await check_and_award_badges(current_user["sub"])
     
     return {
         "score": score,
         "total_points": total_points,
+        "percentage": round(percentage, 1),
         "passed": passed,
-        "passing_score": assessment["passing_score"],
+        "minimum_passing_score": minimum_passing_score,
         "answers": graded_answers
     }
+
 
 @router.get("/results/{assessment_id}")
 async def get_assessment_results(assessment_id: str, current_user: dict = Depends(get_current_user)):
