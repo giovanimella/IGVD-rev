@@ -73,6 +73,14 @@ function App() {
             }
           />
           <Route
+            path="/module/:moduleId/assessment"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <ModuleAssessment />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/leaderboard"
             element={
               <PrivateRoute>
