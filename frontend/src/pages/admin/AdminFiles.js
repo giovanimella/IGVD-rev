@@ -369,12 +369,12 @@ const AdminFiles = () => {
               </div>
               <div>
                 <Label>Pasta</Label>
-                <Select value={selectedFolderId} onValueChange={setSelectedFolderId}>
+                <Select value={selectedFolderId || "none"} onValueChange={(val) => setSelectedFolderId(val === "none" ? "" : val)}>
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Selecione uma pasta (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sem pasta</SelectItem>
+                    <SelectItem value="none">Sem pasta</SelectItem>
                     {data.folders.map((folder) => (
                       <SelectItem key={folder.id} value={folder.id}>
                         {folder.icon} {folder.name}
