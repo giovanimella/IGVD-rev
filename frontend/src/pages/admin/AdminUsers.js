@@ -406,6 +406,81 @@ const AdminUsers = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Importação */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-outfit font-bold text-slate-900">Importar Usuários</h2>
+              <button
+                onClick={() => { setShowImportModal(false); setImportFile(null); }}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-600" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <FileSpreadsheet className="w-6 h-6 text-green-600 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-slate-700 font-medium">Formato aceito: CSV</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Colunas: email, full_name, phone (opcional), role (opcional), password (opcional)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={downloadTemplate}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-cyan-200 text-cyan-700 rounded-lg hover:bg-cyan-50 transition-colors"
+                data-testid="download-template-btn"
+              >
+                <Download className="w-4 h-4" />
+                Baixar Modelo de Importação
+              </button>
+
+              <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center">
+                <input
+                  type="file"
+                  accept=".csv,.xlsx,.xls"
+                  onChange={(e) => setImportFile(e.target.files?.[0])}
+                  className="hidden"
+                  id="import-file"
+                  data-testid="import-file-input"
+                />
+                <label htmlFor="import-file" className="cursor-pointer">
+                  <Upload className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+                  <p className="text-sm text-slate-600">
+                    {importFile ? importFile.name : 'Clique para selecionar arquivo'}
+                  </p>
+                </label>
+              </div>
+
+              <div className="flex space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => { setShowImportModal(false); setImportFile(null); }}
+                  className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleImport}
+                  disabled={!importFile || importing}
+                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                  data-testid="confirm-import-btn"
+                >
+                  {importing ? 'Importando...' : 'Importar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
