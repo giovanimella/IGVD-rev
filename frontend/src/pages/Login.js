@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
@@ -6,14 +6,33 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchLogo();
+  }, []);
+
+  const fetchLogo = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/system/logo`);
+      if (response.data.logo_url) {
+        setLogoUrl(`${API_URL}${response.data.logo_url}`);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar logo:', error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,12 +54,20 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-cyan-500 to-blue-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10 flex flex-col justify-center items-center text-white px-12">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mb-6">
-            <span className="text-4xl font-outfit font-bold">O</span>
-          </div>
-          <h1 className="text-5xl font-outfit font-bold mb-4">Ozoxx</h1>
-          <p className="text-xl text-center text-white/90">Plataforma de Treinamento para Franquias</p>
-          <div className="mt-12 space-y-4 text-center">
+          {logoUrl ? (
+            <img 
+              src={logoUrl} 
+              alt="UniOzoxx" 
+              className="max-w-xs max-h-32 object-contain mb-8"
+              data-testid="login-logo"
+            />
+          ) : (
+            <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mb-6">
+              <span className="text-4xl font-outfit font-bold">U</span>
+            </div>
+          )}
+          <h1 className="text-5xl font-outfit font-bold mb-4">UniOzoxx</h1>
+          <div className="mt-8 space-y-4 text-center">
             <p className="text-white/80">Aprenda, Cresça e Conquiste Recompensas</p>
           </div>
         </div>
@@ -51,6 +78,19 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
         <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            {/* Logo no mobile */}
+            <div className="lg:hidden flex justify-center mb-6">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt="UniOzoxx" 
+                  className="max-w-[200px] max-h-20 object-contain"
+                />
+              ) : (
+                <h1 className="text-2xl font-outfit font-bold text-cyan-600">UniOzoxx</h1>
+              )}
+            </div>
+            
             <div className="text-center mb-8">
               <h2 className="text-3xl font-outfit font-bold text-slate-900 mb-2">Bem-vindo de volta</h2>
               <p className="text-slate-600">Entre com suas credenciais para continuar</p>
