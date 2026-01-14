@@ -1,15 +1,26 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
+from fastapi.responses import FileResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from models import SystemConfig
 from auth import get_current_user, require_role
 import os
 from datetime import datetime
+from pathlib import Path
+import shutil
+from PIL import Image
+import io
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/system", tags=["system"])
+
+# Diretório para logos
+LOGO_DIR = Path("/app/uploads/logos")
+LOGO_DIR.mkdir(parents=True, exist_ok=True)
+
+MAX_LOGO_SIZE = 10 * 1024 * 1024  # 10MB
 
 @router.get("/config")
 async def get_system_config(current_user: dict = Depends(get_current_user)):
@@ -75,3 +86,90 @@ async def get_system_stats(current_user: dict = Depends(require_role(["admin"]))
         "total_challenges": total_challenges,
         "active_users_7d": len(active_users)
     }
+
+
+# ==================== LOGO DA PLATAFORMA ====================
+
+@router.post("/logo")
+async def upload_logo(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Upload da logo da plataforma (PNG, max 10MB)"""
+    
+    # Validar extensão
+    if not file.filename.lower().endswith('.png'):
+        raise HTTPException(status_code=400, detail="Apenas arquivos PNG são aceitos")
+    
+    # Ler arquivo
+    contents = await file.read()
+    
+    # Validar tamanho
+    if len(contents) > MAX_LOGO_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Arquivo muito grande. Máximo: {MAX_LOGO_SIZE // (1024*1024)}MB"
+        )
+    
+    try:
+        # Validar que é uma imagem válida
+        image = Image.open(io.BytesIO(contents))
+        
+        # Salvar o arquivo
+        logo_path = LOGO_DIR / "platform_logo.png"
+        
+        # Remover logo antiga se existir
+        if logo_path.exists():
+            logo_path.unlink()
+        
+        # Salvar nova logo
+        with open(logo_path, "wb") as f:
+            f.write(contents)
+        
+        # Atualizar configuração do sistema
+        logo_url = "/api/uploads/logos/platform_logo.png"
+        await db.system_config.update_one(
+            {"id": "system_config"},
+            {"$set": {
+                "platform_logo": logo_url,
+                "updated_at": datetime.now().isoformat()
+            }},
+            upsert=True
+        )
+        
+        return {
+            "message": "Logo enviada com sucesso",
+            "logo_url": logo_url,
+            "size": f"{len(contents) / 1024:.1f} KB",
+            "dimensions": f"{image.width}x{image.height}"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erro ao processar imagem: {str(e)}")
+
+
+@router.delete("/logo")
+async def delete_logo(current_user: dict = Depends(require_role(["admin"]))):
+    """Remover logo da plataforma"""
+    
+    logo_path = LOGO_DIR / "platform_logo.png"
+    
+    if logo_path.exists():
+        logo_path.unlink()
+    
+    await db.system_config.update_one(
+        {"id": "system_config"},
+        {"$set": {
+            "platform_logo": None,
+            "updated_at": datetime.now().isoformat()
+        }}
+    )
+    
+    return {"message": "Logo removida"}
+
+
+@router.get("/logo")
+async def get_logo():
+    """Retorna a URL da logo (público)"""
+    config = await db.system_config.find_one({"id": "system_config"}, {"_id": 0, "platform_logo": 1})
+    return {"logo_url": config.get("platform_logo") if config else None}
