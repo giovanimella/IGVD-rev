@@ -117,6 +117,81 @@ async def update_password(user_id: str, password_data: dict, current_user: dict 
     
     return {"message": "Senha atualizada com sucesso"}
 
+@router.post("/import")
+async def import_users(file: UploadFile = File(...), current_user: dict = Depends(require_role(["admin"]))):
+    """Importar usuários de arquivo CSV ou XLSX"""
+    
+    filename = file.filename.lower()
+    contents = await file.read()
+    
+    # Detectar formato e carregar DataFrame
+    try:
+        if filename.endswith('.csv'):
+            df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
+        elif filename.endswith(('.xlsx', '.xls')):
+            df = pd.read_excel(io.BytesIO(contents))
+        else:
+            raise HTTPException(status_code=400, detail="Formato não suportado. Use CSV ou XLSX")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erro ao ler arquivo: {str(e)}")
+    
+    required_columns = ['email', 'full_name']
+    if not all(col in df.columns for col in required_columns):
+        raise HTTPException(status_code=400, detail=f"Arquivo deve conter as colunas: {', '.join(required_columns)}")
+    
+    imported = 0
+    errors = []
+    
+    for _, row in df.iterrows():
+        try:
+            email = str(row['email']).strip()
+            full_name = str(row['full_name']).strip()
+            
+            if not email or email == 'nan' or '@' not in email:
+                errors.append(f"Email inválido: {email}")
+                continue
+            
+            existing = await db.users.find_one({"email": email})
+            if existing:
+                errors.append(f"{email}: já cadastrado")
+                continue
+            
+            # Campos opcionais
+            phone = str(row.get('phone', '')).strip() if pd.notna(row.get('phone')) else None
+            role = str(row.get('role', 'licenciado')).strip().lower() if pd.notna(row.get('role')) else 'licenciado'
+            password = str(row.get('password', '')).strip() if pd.notna(row.get('password')) else None
+            
+            # Validar role
+            if role not in ['licenciado', 'supervisor', 'admin']:
+                role = 'licenciado'
+            
+            user = User(
+                email=email,
+                full_name=full_name,
+                role=role,
+                phone=phone if phone and phone != 'nan' else None
+            )
+            
+            user_dict = user.model_dump()
+            
+            # Usar senha fornecida ou gerar temporária
+            if password and password != 'nan':
+                user_dict["password_hash"] = get_password_hash(password)
+            else:
+                user_dict["password_hash"] = get_password_hash(secrets.token_urlsafe(12))
+            
+            await db.users.insert_one(user_dict)
+            imported += 1
+            
+        except Exception as e:
+            errors.append(f"{row.get('email', 'Unknown')}: {str(e)}")
+    
+    return {
+        "message": f"{imported} usuários importados com sucesso",
+        "imported": imported,
+        "errors": errors
+    }
+
 @router.post("/import-csv")
 async def import_users_csv(file: UploadFile = File(...), current_user: dict = Depends(require_role(["admin"]))):
     if not file.filename.endswith('.csv'):
