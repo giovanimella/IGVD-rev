@@ -16,7 +16,9 @@ import {
   MessageCircle,
   Image,
   Megaphone,
-  Target
+  Target,
+  Heart,
+  BarChart3
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -50,6 +52,7 @@ const Sidebar = () => {
   const supervisorLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/supervisor/licensees', icon: Users, label: 'Licenciados' },
+    { path: '/supervisor/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
     // { path: '/admin/chat', icon: MessageCircle, label: 'Chat Suporte' },
@@ -61,6 +64,7 @@ const Sidebar = () => {
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
     { path: '/certificates', icon: Award, label: 'Certificados' },
     { path: '/rewards', icon: Award, label: 'Recompensas' },
+    { path: '/favorites', icon: Heart, label: 'Favoritos' },
     { path: '/file-repository', icon: FileText, label: 'Arquivos' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
     { path: '/profile', icon: Settings, label: 'Perfil' },
