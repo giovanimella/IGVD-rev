@@ -341,11 +341,11 @@ class TestProfilePicture:
 # ==================== FAVORITES TESTS ====================
 
 class TestFavoritesList:
-    """Test GET /api/favorites"""
+    """Test GET /api/favorites/"""
     
     def test_licensee_can_list_favorites(self, licensee_headers):
         """Licensee should list their favorites"""
-        response = requests.get(f"{BASE_URL}/api/favorites", headers=licensee_headers)
+        response = requests.get(f"{BASE_URL}/api/favorites/", headers=licensee_headers)
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
         data = response.json()
@@ -354,7 +354,7 @@ class TestFavoritesList:
     
     def test_admin_can_list_favorites(self, admin_headers):
         """Admin should also be able to list favorites"""
-        response = requests.get(f"{BASE_URL}/api/favorites", headers=admin_headers)
+        response = requests.get(f"{BASE_URL}/api/favorites/", headers=admin_headers)
         assert response.status_code == 200
 
 
