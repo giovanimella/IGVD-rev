@@ -45,15 +45,19 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
     if existing:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
     
-    temp_password = secrets.token_urlsafe(12)
+    # Usar senha fornecida ou gerar temporária
+    password = user_data.password if user_data.password else secrets.token_urlsafe(12)
+    
     user = User(
         email=user_data.email,
         full_name=user_data.full_name,
-        role=user_data.role
+        role=user_data.role,
+        phone=user_data.phone,
+        supervisor_id=user_data.supervisor_id
     )
     
     user_dict = user.model_dump()
-    user_dict["password_hash"] = get_password_hash(temp_password)
+    user_dict["password_hash"] = get_password_hash(password)
     
     await db.users.insert_one(user_dict)
     
@@ -63,6 +67,13 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
 @router.put("/{user_id}")
 async def update_user(user_id: str, updates: dict, current_user: dict = Depends(require_role(["admin", "supervisor"]))):
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    # Se houver senha, fazer hash
+    if "password" in updates and updates["password"]:
+        updates["password_hash"] = get_password_hash(updates["password"])
+        del updates["password"]
+    elif "password" in updates:
+        del updates["password"]
     
     result = await db.users.update_one(
         {"id": user_id},
