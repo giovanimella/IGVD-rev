@@ -13,7 +13,6 @@ import {
   LogOut,
   Menu,
   X,
-  MessageCircle,
   Image,
   Megaphone,
   Target,
@@ -33,6 +32,23 @@ const Sidebar = () => {
   useEffect(() => {
     fetchLogo();
   }, []);
+
+  // Fechar menu ao mudar de rota
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [location.pathname]);
+
+  // Prevenir scroll do body quando menu mobile está aberto
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileOpen]);
 
   const fetchLogo = async () => {
     try {
@@ -87,9 +103,10 @@ const Sidebar = () => {
 
   const links = user?.role === 'admin' ? adminLinks : user?.role === 'supervisor' ? supervisorLinks : licenseeLinks;
 
-  const NavLinks = () => (
-    <>
-      <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-200">
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Header/Logo */}
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 flex-shrink-0">
         {logoUrl ? (
           <img 
             src={logoUrl} 
@@ -99,7 +116,7 @@ const Sidebar = () => {
           />
         ) : (
           <>
-            <div className="w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center flex-shrink-0">
               <span className="text-white font-outfit font-bold text-xl">U</span>
             </div>
             <div>
@@ -109,39 +126,42 @@ const Sidebar = () => {
         )}
       </div>
 
-      <nav className="flex-1 px-3 py-6 space-y-1">
-        {links.map((link) => {
-          const Icon = link.icon;
-          const isActive = location.pathname === link.path;
-          return (
-            <Link
-              key={link.path}
-              to={link.path}
-              data-testid={`sidebar-link-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-              onClick={() => setIsMobileOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
-                isActive
-                  ? 'bg-cyan-50 text-cyan-600 font-medium'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              <span>{link.label}</span>
-            </Link>
-          );
-        })}
+      {/* Navigation - Scrollable */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <div className="space-y-1">
+          {links.map((link) => {
+            const Icon = link.icon;
+            const isActive = location.pathname === link.path;
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                data-testid={`sidebar-link-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  isActive
+                    ? 'bg-cyan-50 text-cyan-600 font-medium'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="truncate">{link.label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
-      <div className="px-3 py-4 border-t border-slate-200">
+      {/* User Info & Logout - Fixed at bottom */}
+      <div className="px-3 py-4 border-t border-slate-200 flex-shrink-0 bg-white">
         <div className="flex items-center gap-3 px-4 py-3 mb-2">
           {user?.profile_picture ? (
             <img 
               src={`${API_URL}${user.profile_picture}`} 
               alt="" 
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
               <span className="text-white font-medium">{user?.full_name?.charAt(0)}</span>
             </div>
           )}
@@ -155,11 +175,11 @@ const Sidebar = () => {
           data-testid="sidebar-logout-button"
           className="flex items-center gap-3 px-4 py-3 w-full text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-5 h-5 flex-shrink-0" />
           <span>Sair</span>
         </button>
       </div>
-    </>
+    </div>
   );
 
   return (
@@ -169,6 +189,7 @@ const Sidebar = () => {
         onClick={() => setIsMobileOpen(!isMobileOpen)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg border border-slate-200"
         data-testid="mobile-menu-button"
+        aria-label="Menu"
       >
         {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -181,13 +202,19 @@ const Sidebar = () => {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Mobile Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col transform transition-transform duration-300 lg:transform-none ${
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`lg:hidden fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{ maxHeight: '100vh', height: '100%' }}
       >
-        <NavLinks />
+        <SidebarContent />
+      </aside>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 bg-white border-r border-slate-200 h-screen sticky top-0">
+        <SidebarContent />
       </aside>
     </>
   );
