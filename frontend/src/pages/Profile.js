@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import { User, Mail, Phone, Lock, Save } from 'lucide-react';
+import { User, Mail, Phone, Lock, Save, Camera, Trash2, Upload } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 const Profile = () => {
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -33,6 +35,55 @@ const Profile = () => {
       });
     }
   }, [user]);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tamanho (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 2MB');
+      return;
+    }
+
+    // Validar tipo
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+      toast.error('Formato inválido. Use JPG, PNG, GIF ou WebP');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post(`${API_URL}/api/profile/picture`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      updateUser({ profile_picture: response.data.profile_picture });
+      toast.success('Foto atualizada com sucesso!');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao enviar foto');
+    } finally {
+      setUploadingPhoto(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (!window.confirm('Remover sua foto de perfil?')) return;
+
+    try {
+      await axios.delete(`${API_URL}/api/profile/picture`);
+      updateUser({ profile_picture: null });
+      toast.success('Foto removida');
+    } catch (error) {
+      toast.error('Erro ao remover foto');
+    }
+  };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -103,15 +154,80 @@ const Profile = () => {
 
         {/* Profile Info Card */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-200">
-            <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-3xl font-outfit font-bold text-white">
-                {user?.full_name?.charAt(0).toUpperCase()}
-              </span>
+          <div className="flex items-center gap-6 mb-6 pb-6 border-b border-slate-200">
+            {/* Profile Picture */}
+            <div className="relative group">
+              {user?.profile_picture ? (
+                <img
+                  src={`${API_URL}${user.profile_picture}`}
+                  alt="Foto de perfil"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                  data-testid="profile-picture"
+                />
+              ) : (
+                <div className="w-24 h-24 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                  <span className="text-4xl font-outfit font-bold text-white">
+                    {user?.full_name?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              
+              {/* Upload Overlay */}
+              <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  className="p-2 bg-white rounded-full hover:bg-slate-100 transition-colors"
+                  data-testid="upload-photo-button"
+                >
+                  {uploadingPhoto ? (
+                    <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-5 h-5 text-slate-700" />
+                  )}
+                </button>
+              </div>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                data-testid="photo-input"
+              />
             </div>
-            <div>
+
+            <div className="flex-1">
               <h2 className="text-2xl font-outfit font-bold text-slate-900">{user?.full_name}</h2>
               <p className="text-slate-600 capitalize">{user?.role}</p>
+              
+              {/* Photo Actions */}
+              <div className="flex gap-2 mt-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  data-testid="change-photo-btn"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {user?.profile_picture ? 'Alterar Foto' : 'Adicionar Foto'}
+                </Button>
+                
+                {user?.profile_picture && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRemovePhoto}
+                    className="text-red-600 hover:bg-red-50 hover:border-red-200"
+                    data-testid="remove-photo-btn"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Remover
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
