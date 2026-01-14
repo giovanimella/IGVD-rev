@@ -19,6 +19,7 @@ class User(BaseModel):
     role: str
     points: int = 0
     level_title: str = "Iniciante"
+    profile_picture: Optional[str] = None  # URL da foto de perfil
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
     
@@ -42,6 +43,7 @@ class UserResponse(BaseModel):
     role: str
     points: int
     level_title: str
+    profile_picture: Optional[str] = None
     created_at: str
     updated_at: str
     current_stage: Optional[str] = None
