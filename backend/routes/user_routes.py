@@ -237,7 +237,7 @@ async def import_users_csv(file: UploadFile = File(...), current_user: dict = De
             html_content = f"""
             <html>
                 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #06b6d4;">Bem-vindo à Plataforma Ozoxx!</h2>
+                    <h2 style="color: #06b6d4;">Bem-vindo à Plataforma UniOzoxx!</h2>
                     <p>Olá {full_name},</p>
                     <p>Sua conta foi criada com sucesso. Para definir sua senha e acessar a plataforma, clique no link abaixo:</p>
                     <a href="{reset_link}" style="background-color: #06b6d4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; margin: 20px 0;">Definir Senha</a>
@@ -251,7 +251,7 @@ async def import_users_csv(file: UploadFile = File(...), current_user: dict = De
                 params = {
                     "from": SENDER_EMAIL,
                     "to": [email],
-                    "subject": "Bem-vindo à Plataforma Ozoxx",
+                    "subject": "Bem-vindo à Plataforma UniOzoxx",
                     "html": html_content
                 }
                 await asyncio.to_thread(resend.Emails.send, params)

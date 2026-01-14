@@ -84,7 +84,7 @@ async def request_password_reset(request: PasswordResetRequest):
     html_content = f"""
     <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #06b6d4;">Redefinição de Senha - Ozoxx</h2>
+            <h2 style="color: #06b6d4;">Redefinição de Senha - UniOzoxx</h2>
             <p>Olá {user['full_name']},</p>
             <p>Você solicitou a redefinição de senha. Clique no link abaixo para definir uma nova senha:</p>
             <a href="{reset_link}" style="background-color: #06b6d4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; margin: 20px 0;">Redefinir Senha</a>
@@ -98,7 +98,7 @@ async def request_password_reset(request: PasswordResetRequest):
         params = {
             "from": SENDER_EMAIL,
             "to": [request.email],
-            "subject": "Redefinição de Senha - Ozoxx",
+            "subject": "Redefinição de Senha - UniOzoxx",
             "html": html_content
         }
         await asyncio.to_thread(resend.Emails.send, params)

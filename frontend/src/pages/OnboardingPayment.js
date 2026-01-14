@@ -108,7 +108,7 @@ const OnboardingPayment = () => {
               </div>
               
               <h2 className="text-2xl font-outfit font-bold text-slate-900 mb-4">
-                Taxa de Licença Ozoxx
+                Taxa de Licença UniOzoxx
               </h2>
               
               <div className="bg-slate-50 rounded-lg p-6 mb-6">

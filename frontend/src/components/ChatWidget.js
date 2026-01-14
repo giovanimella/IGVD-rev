@@ -104,7 +104,7 @@ const ChatWidget = () => {
                 <MessageCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-outfit font-semibold">Suporte Ozoxx</h3>
+                <h3 className="font-outfit font-semibold">Suporte UniOzoxx</h3>
                 <p className="text-xs text-cyan-100">Sempre prontos para ajudar</p>
               </div>
             </div>

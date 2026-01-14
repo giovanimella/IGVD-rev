@@ -304,7 +304,7 @@ const AdminBanners = () => {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  placeholder="Ex: Novidades da Ozoxx"
+                  placeholder="Ex: Novidades da UniOzoxx"
                 />
               </div>
 

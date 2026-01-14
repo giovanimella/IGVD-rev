@@ -126,8 +126,8 @@ const PublicRegistration = () => {
           <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mb-6">
             <span className="text-4xl font-outfit font-bold">O</span>
           </div>
-          <h1 className="text-5xl font-outfit font-bold mb-4">Ozoxx</h1>
-          <p className="text-xl text-center text-white/90 mb-8">Bem-vindo à Família Ozoxx</p>
+          <h1 className="text-5xl font-outfit font-bold mb-4">UniOzoxx</h1>
+          <p className="text-xl text-center text-white/90 mb-8">Bem-vindo à Família UniOzoxx</p>
           <p className="text-white/80 text-center">Você foi convidado por <strong>{supervisorName}</strong></p>
         </div>
       </div>

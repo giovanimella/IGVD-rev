@@ -153,7 +153,7 @@ const AdminSystem = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-outfit font-bold text-slate-900">Painel Administrativo</h1>
-          <p className="text-slate-600 mt-2">Controle total do sistema Ozoxx LMS</p>
+          <p className="text-slate-600 mt-2">Controle total do sistema UniOzoxx LMS</p>
         </div>
 
         {/* Estatísticas Rápidas */}

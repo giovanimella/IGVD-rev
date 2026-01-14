@@ -17,7 +17,7 @@ from routes import assessment_routes, onboarding_routes, payment_routes, notific
 from routes import banner_routes, post_routes, gamification_routes, system_routes, certificate_routes
 from routes import analytics_routes, profile_routes, favorites_routes
 
-app = FastAPI(title="Ozoxx LMS API")
+app = FastAPI(title="UniOzoxx LMS API")
 
 UPLOAD_DIR = Path("/app/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -58,7 +58,7 @@ app.include_router(favorites_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "service": "Ozoxx LMS API"}
+    return {"status": "healthy", "service": "UniOzoxx LMS API"}
 
 logging.basicConfig(
     level=logging.INFO,
