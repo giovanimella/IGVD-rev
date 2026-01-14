@@ -19,7 +19,8 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 - **Frontend**: React + Tailwind CSS + Shadcn/UI
 - **Backend**: FastAPI + MongoDB (motor driver)
 - **Auth**: JWT tokens
-- **PDF**: pdf2image + Pillow para certificados
+- **PDF**: pdf2image + Pillow + poppler-utils para certificados
+- **Email**: Resend (requer configuração de API key)
 
 ---
 
@@ -48,64 +49,49 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 - Upload de arquivos para pastas específicas
 - Mover arquivos entre pastas
 - Visualização por accordion no licenciado
-- Ícones e cores customizáveis
 
-### Fase 5: Reports & Analytics 🔜 PRÓXIMA
-- Dashboard analítico para supervisores
+### Fase 5: Reports & Analytics ✅ COMPLETA (14/01/2026)
+- Dashboard analítico para supervisores/admin
 - Engajamento por módulo
 - Heatmaps de estudo
-- Exportação de relatórios
+- Progresso detalhado de licenciados
+- Exportação CSV
 
-### Fase 6: Favoritos 📋 BACKLOG
-- Licenciados podem favoritar capítulos
+### Fase 6: Foto de Perfil ✅ COMPLETA (14/01/2026)
+- Upload de foto pelo usuário
+- Redimensionamento automático (200x200)
+- Exibição no header, sidebar e perfil
+- Fallback com iniciais
+
+### Fase 7: Sistema de Favoritos ✅ COMPLETA (14/01/2026)
+- Botão de favoritar nos capítulos
 - Página "Meus Favoritos"
+- Toggle favorito (adiciona/remove)
 
 ---
 
-## Arquitetura
+## Melhorias Implementadas (14/01/2026)
 
-```
-/app/
-├── backend/
-│   ├── routes/
-│   │   ├── auth_routes.py
-│   │   ├── module_routes.py
-│   │   ├── gamification_routes.py
-│   │   ├── assessment_routes.py
-│   │   ├── certificate_routes.py
-│   │   ├── file_routes.py (pastas e arquivos)
-│   │   └── system_routes.py
-│   ├── models.py
-│   └── server.py
-├── frontend/
-│   └── src/
-│       ├── pages/
-│       │   ├── admin/
-│       │   │   ├── AdminBadges.js
-│       │   │   ├── AdminChallenges.js
-│       │   │   ├── AdminAssessment.js
-│       │   │   ├── AdminCertificates.js
-│       │   │   └── AdminFiles.js
-│       │   ├── Dashboard.js
-│       │   ├── ModuleDetail.js
-│       │   ├── ModuleAssessment.js
-│       │   ├── MyCertificates.js
-│       │   └── FileRepository.js
-│       └── App.js
-└── tests/
-    └── test_folder_system.py
-```
+### Admin - Gerenciamento de Usuários
+- Campo de senha ao criar/editar usuário
+- Sistema de importação CSV/XLSX restaurado
+- Modelo de importação para download
 
-## Collections MongoDB
-- users, modules, chapters, progress
-- badges, user_badges, weekly_challenges, user_streaks
-- assessments, assessment_results
-- certificates, system_configs
-- file_folders, file_repository
+### Correções de Bugs
+- URL de uploads corrigida para funcionar com proxy externo
+- Instalado poppler-utils para geração de certificados
+
+---
+
+## Configurações Pendentes
+
+### Email (Resend)
+- Sistema implementado mas precisa de API key real
+- Arquivo: `/app/backend/.env`
+- Variável: `RESEND_API_KEY`
+
+---
 
 ## Credenciais de Teste
 - Admin: `admin@ozoxx.com` / `admin123`
 - Licenciado: `licenciado.teste@ozoxx.com` / `licenciado123`
-
-## Verificações Pendentes
-- Certificados: aguardando confirmação do usuário com template real
