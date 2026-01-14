@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import axios from 'axios';
-import { ArrowLeft, BookOpen, Play, CheckCircle, Clock, Award, ClipboardCheck, Download } from 'lucide-react';
+import { ArrowLeft, BookOpen, Play, CheckCircle, Clock, Award, ClipboardCheck, Download, Heart } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Progress } from '../components/ui/progress';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ const ModuleDetail = () => {
   const [generatingCertificate, setGeneratingCertificate] = useState(false);
   const [module, setModule] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState({});
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -22,7 +23,34 @@ const ModuleDetail = () => {
     fetchModule();
     fetchAssessmentResult();
     fetchCertificateEligibility();
+    fetchFavorites();
   }, [id]);
+
+  const fetchFavorites = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/favorites`);
+      const favMap = {};
+      response.data.forEach(f => {
+        favMap[f.chapter_id] = true;
+      });
+      setFavorites(favMap);
+    } catch (error) {
+      console.error('Erro ao buscar favoritos:', error);
+    }
+  };
+
+  const toggleFavorite = async (chapterId) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/favorites/toggle/${chapterId}`);
+      setFavorites(prev => ({
+        ...prev,
+        [chapterId]: response.data.is_favorite
+      }));
+      toast.success(response.data.message);
+    } catch (error) {
+      toast.error('Erro ao atualizar favorito');
+    }
+  };
 
   const fetchModule = async () => {
     try {
@@ -226,7 +254,19 @@ const ModuleDetail = () => {
                           </div>
                         </div>
                       </div>
-                      <div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleFavorite(chapter.id)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            favorites[chapter.id]
+                              ? 'text-rose-500 bg-rose-50 hover:bg-rose-100'
+                              : 'text-slate-400 hover:text-rose-500 hover:bg-slate-100'
+                          }`}
+                          data-testid={`favorite-chapter-${chapter.id}`}
+                          title={favorites[chapter.id] ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        >
+                          <Heart className={`w-5 h-5 ${favorites[chapter.id] ? 'fill-current' : ''}`} />
+                        </button>
                         {!isCompleted && (
                           <Button
                             onClick={() => handleMarkComplete(chapter.id)}
