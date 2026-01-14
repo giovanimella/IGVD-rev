@@ -126,7 +126,7 @@ async def upload_document(
     with file_path.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    document_url = f"/uploads/documents/{unique_filename}"
+    document_url = f"/api/uploads/documents/{unique_filename}"
     
     documents_uploaded = user.get("documents_uploaded", [])
     

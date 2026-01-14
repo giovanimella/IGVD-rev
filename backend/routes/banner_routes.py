@@ -64,7 +64,7 @@ async def upload_banner_image(
     
     return {
         "filename": unique_filename,
-        "url": f"/uploads/banners/{unique_filename}"
+        "url": f"/api/uploads/banners/{unique_filename}"
     }
 
 @router.put("/{banner_id}")

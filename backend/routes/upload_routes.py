@@ -49,7 +49,7 @@ async def upload_video(file: UploadFile = File(...), current_user: dict = Depend
     
     return {
         "filename": unique_filename,
-        "url": f"/uploads/videos/{unique_filename}",
+        "url": f"/api/uploads/videos/{unique_filename}",
         "size": total_size
     }
 
@@ -72,7 +72,7 @@ async def upload_document(file: UploadFile = File(...), current_user: dict = Dep
     
     return {
         "filename": unique_filename,
-        "url": f"/uploads/documents/{unique_filename}",
+        "url": f"/api/uploads/documents/{unique_filename}",
         "size": file_size
     }
 
@@ -92,5 +92,5 @@ async def upload_certificate_template(file: UploadFile = File(...), current_user
     
     return {
         "filename": unique_filename,
-        "url": f"/uploads/certificates/{unique_filename}"
+        "url": f"/api/uploads/certificates/{unique_filename}"
     }

@@ -141,7 +141,7 @@ async def upload_file(
         file_type=file_type,
         category=category,
         folder_id=folder_id if folder_id and folder_id != "null" else None,
-        file_url=f"/uploads/repository/{unique_filename}",
+        file_url=f"/api/uploads/repository/{unique_filename}",
         file_size=file_size,
         uploaded_by=current_user["sub"]
     )
