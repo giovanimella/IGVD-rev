@@ -481,7 +481,7 @@ class TestFavoritesIntegration:
         assert toggle_response.status_code == 200
         
         # 4. Verify in list
-        list_response = requests.get(f"{BASE_URL}/api/favorites", headers=licensee_headers)
+        list_response = requests.get(f"{BASE_URL}/api/favorites/", headers=licensee_headers)
         assert list_response.status_code == 200
         favorites = list_response.json()
         
