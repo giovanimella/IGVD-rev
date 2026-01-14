@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Users, Plus, Edit, Trash2, X, Mail, User, Shield } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, X, Mail, User, Shield, Upload, Download, Lock, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminUsers = () => {
@@ -9,13 +9,17 @@ const AdminUsers = () => {
   const [supervisors, setSupervisors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importing, setImporting] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
     email: '',
     full_name: '',
     role: 'licenciado',
     phone: '',
-    supervisor_id: ''
+    supervisor_id: '',
+    password: ''
   });
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -40,7 +44,7 @@ const AdminUsers = () => {
 
   const openCreateModal = () => {
     setEditingUser(null);
-    setFormData({ email: '', full_name: '', role: 'licenciado', phone: '', supervisor_id: '' });
+    setFormData({ email: '', full_name: '', role: 'licenciado', phone: '', supervisor_id: '', password: '' });
     setShowModal(true);
   };
 
@@ -51,9 +55,51 @@ const AdminUsers = () => {
       full_name: user.full_name,
       role: user.role,
       phone: user.phone || '',
-      supervisor_id: user.supervisor_id || ''
+      supervisor_id: user.supervisor_id || '',
+      password: ''
     });
     setShowModal(true);
+  };
+
+  const downloadTemplate = () => {
+    const template = 'email,full_name,phone,role,password\nexemplo@email.com,Nome Completo,11999999999,licenciado,senha123';
+    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'modelo_importacao_usuarios.csv';
+    link.click();
+  };
+
+  const handleImport = async () => {
+    if (!importFile) {
+      toast.error('Selecione um arquivo');
+      return;
+    }
+
+    setImporting(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', importFile);
+
+    try {
+      const response = await axios.post(`${API_URL}/api/users/import`, formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast.success(`${response.data.imported} usuários importados!`);
+      
+      if (response.data.errors && response.data.errors.length > 0) {
+        toast.error(`${response.data.errors.length} erro(s) na importação`);
+        console.log('Erros:', response.data.errors);
+      }
+      
+      setShowImportModal(false);
+      setImportFile(null);
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao importar usuários');
+    } finally {
+      setImporting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
