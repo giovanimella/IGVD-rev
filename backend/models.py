@@ -7,6 +7,9 @@ class UserCreate(BaseModel):
     email: EmailStr
     full_name: str
     role: str = "licenciado"
+    phone: Optional[str] = None
+    supervisor_id: Optional[str] = None
+    password: Optional[str] = None  # Senha opcional - se não fornecida, gera temporária
 
 class UserLogin(BaseModel):
     email: EmailStr
