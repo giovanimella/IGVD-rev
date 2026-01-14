@@ -28,7 +28,7 @@ const ModuleDetail = () => {
 
   const fetchFavorites = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/favorites`);
+      const response = await axios.get(`${API_URL}/api/favorites/`);
       const favMap = {};
       response.data.forEach(f => {
         favMap[f.chapter_id] = true;
