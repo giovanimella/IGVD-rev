@@ -499,12 +499,12 @@ const AdminFiles = () => {
               )}
               <div>
                 <Label>Mover para</Label>
-                <Select value={targetFolderId} onValueChange={setTargetFolderId}>
+                <Select value={targetFolderId || "none"} onValueChange={(val) => setTargetFolderId(val === "none" ? "" : val)}>
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Selecione a pasta de destino" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sem pasta</SelectItem>
+                    <SelectItem value="none">Sem pasta</SelectItem>
                     {data.folders.map((folder) => (
                       <SelectItem key={folder.id} value={folder.id}>
                         {folder.icon} {folder.name}
