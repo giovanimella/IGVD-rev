@@ -185,6 +185,14 @@ const AdminUsers = () => {
             <Plus className="w-5 h-5" />
             <span>Novo Usuário</span>
           </button>
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-colors"
+            data-testid="import-users-btn"
+          >
+            <Upload className="w-5 h-5" />
+            <span>Importar</span>
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -355,6 +363,29 @@ const AdminUsers = () => {
                   </select>
                 </div>
               )}
+
+              {/* Campo Senha */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    {editingUser ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}
+                  </div>
+                </label>
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  placeholder={editingUser ? '••••••••' : 'Digite a senha'}
+                  required={!editingUser}
+                  minLength={6}
+                  data-testid="user-password-input"
+                />
+                {!editingUser && (
+                  <p className="text-xs text-slate-500 mt-1">Mínimo 6 caracteres</p>
+                )}
+              </div>
 
               <div className="flex space-x-3 pt-4">
                 <button
