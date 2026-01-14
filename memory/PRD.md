@@ -1,11 +1,11 @@
-# PRD - Plataforma EAD Ozoxx
+# PRD - Plataforma UniOzoxx
 
 ## Problema Original
 Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos, capítulos, gamificação, avaliações, certificados e repositório de arquivos digitais.
 
 ## Personas
 - **Admin**: Gerencia módulos, usuários, badges, desafios, avaliações e certificados
-- **Supervisor**: Supervisiona licenciados (futuro: dashboard analytics)
+- **Supervisor**: Supervisiona licenciados (dashboard analytics)
 - **Licenciado**: Consome conteúdo, realiza avaliações, ganha badges e certificados
 
 ## Requisitos Core
@@ -14,81 +14,85 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 3. Avaliações ao final dos módulos
 4. Certificados automáticos ao concluir módulo + avaliação
 5. Repositório de arquivos digitais com sistema de pastas
+6. Logo customizável da plataforma
 
 ## Stack Técnica
 - **Frontend**: React + Tailwind CSS + Shadcn/UI
 - **Backend**: FastAPI + MongoDB (motor driver)
 - **Auth**: JWT tokens
 - **PDF**: pdf2image + Pillow + poppler-utils para certificados
-- **Email**: Resend (requer configuração de API key)
+- **Email**: Resend (configurado com domínio email.ozoxx.com.br)
 
 ---
 
-## Fases de Desenvolvimento
+## Fases de Desenvolvimento - TODAS COMPLETAS ✅
 
-### Fase 1: Gamificação ✅ COMPLETA
+### Fase 1: Gamificação ✅
 - Badges e conquistas
 - Sistema de pontos
 - Streaks de acesso diário
 - Desafios semanais
 
-### Fase 2: Avaliações ✅ COMPLETA
+### Fase 2: Avaliações ✅
 - Quiz ao final de cada módulo
 - Perguntas de múltipla escolha
 - Score mínimo global configurável
 - Resultados salvos
 
-### Fase 3: Certificados ✅ COMPLETA
+### Fase 3: Certificados ✅
 - Template PDF configurável pelo admin
 - Geração automática com nome, data e módulo
 - Posição Y configurável para cada campo
-- Método robusto: PDF → Imagem → Overlay → PDF
 
-### Fase 4: Sistema de Pastas ✅ COMPLETA (14/01/2026)
+### Fase 4: Sistema de Pastas ✅
 - CRUD de pastas (admin only)
 - Upload de arquivos para pastas específicas
 - Mover arquivos entre pastas
 - Visualização por accordion no licenciado
 
-### Fase 5: Reports & Analytics ✅ COMPLETA (14/01/2026)
+### Fase 5: Reports & Analytics ✅
 - Dashboard analítico para supervisores/admin
 - Engajamento por módulo
 - Heatmaps de estudo
 - Progresso detalhado de licenciados
 - Exportação CSV
 
-### Fase 6: Foto de Perfil ✅ COMPLETA (14/01/2026)
+### Fase 6: Foto de Perfil ✅
 - Upload de foto pelo usuário
 - Redimensionamento automático (200x200)
 - Exibição no header, sidebar e perfil
-- Fallback com iniciais
 
-### Fase 7: Sistema de Favoritos ✅ COMPLETA (14/01/2026)
+### Fase 7: Sistema de Favoritos ✅
 - Botão de favoritar nos capítulos
 - Página "Meus Favoritos"
 - Toggle favorito (adiciona/remove)
 
+### Fase 8: Branding UniOzoxx ✅ (14/01/2026)
+- Renomeado para UniOzoxx em toda plataforma
+- Sistema de upload de logo (PNG, max 10MB)
+- Logo exibida em: Login, Sidebar, onde conveniente
+- Removido texto "Plataforma de Treinamento para Franquias"
+
 ---
 
-## Melhorias Implementadas (14/01/2026)
+## Melhorias Admin (14/01/2026)
 
-### Admin - Gerenciamento de Usuários
 - Campo de senha ao criar/editar usuário
-- Sistema de importação CSV/XLSX restaurado
-- Modelo de importação para download
-
-### Correções de Bugs
-- URL de uploads corrigida para funcionar com proxy externo
-- Instalado poppler-utils para geração de certificados
+- Sistema de importação CSV/XLSX com modelo
+- Upload de logo da plataforma no Painel Sistema
 
 ---
 
-## Configurações Pendentes
+## Configurações Atuais
 
-### Email (Resend)
-- Sistema implementado mas precisa de API key real
-- Arquivo: `/app/backend/.env`
-- Variável: `RESEND_API_KEY`
+### Email (Resend) ✅ CONFIGURADO
+- Chave API: Configurada
+- Domínio: email.ozoxx.com.br
+- Remetente: noreply@email.ozoxx.com.br
+
+### Certificados ✅ FUNCIONANDO
+- poppler-utils instalado
+- Geração de PDF funcionando
 
 ---
 
