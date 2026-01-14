@@ -142,7 +142,7 @@ async def upload_profile_picture(
                 old_path.unlink()
         
         # Atualizar no banco
-        profile_picture_url = f"/uploads/avatars/{unique_filename}"
+        profile_picture_url = f"/api/uploads/avatars/{unique_filename}"
         await db.users.update_one(
             {"id": current_user["sub"]},
             {"$set": {"profile_picture": profile_picture_url}}
