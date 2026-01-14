@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Settings, Users, BookOpen, Award, FileText, TrendingUp, DollarSign, Calendar, Save, ClipboardCheck } from 'lucide-react';
+import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '../../components/ui/button';
 
 const AdminSystem = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [systemConfig, setSystemConfig] = useState({ minimum_passing_score: 70 });
   const [savingConfig, setSavingConfig] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef(null);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -44,6 +48,9 @@ const AdminSystem = () => {
     try {
       const response = await axios.get(`${API_URL}/api/system/config`);
       setSystemConfig(response.data);
+      if (response.data.platform_logo) {
+        setLogoUrl(`${API_URL}${response.data.platform_logo}`);
+      }
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
     }
@@ -61,6 +68,55 @@ const AdminSystem = () => {
       toast.error('Erro ao salvar configurações');
     } finally {
       setSavingConfig(false);
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar extensão
+    if (!file.name.toLowerCase().endsWith('.png')) {
+      toast.error('Apenas arquivos PNG são aceitos');
+      return;
+    }
+
+    // Validar tamanho (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 10MB');
+      return;
+    }
+
+    setUploadingLogo(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post(`${API_URL}/api/system/logo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setLogoUrl(`${API_URL}${response.data.logo_url}`);
+      toast.success('Logo enviada com sucesso!');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao enviar logo');
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) {
+        logoInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!window.confirm('Remover a logo da plataforma?')) return;
+
+    try {
+      await axios.delete(`${API_URL}/api/system/logo`);
+      setLogoUrl(null);
+      toast.success('Logo removida');
+    } catch (error) {
+      toast.error('Erro ao remover logo');
     }
   };
 
@@ -156,6 +212,72 @@ const AdminSystem = () => {
           <p className="text-slate-600 mt-2">Controle total do sistema UniOzoxx LMS</p>
         </div>
 
+        {/* Logo da Plataforma */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
+              <Image className="w-5 h-5 text-cyan-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-outfit font-semibold text-slate-900">Logo da Plataforma</h3>
+              <p className="text-sm text-slate-500">Faça upload da logo UniOzoxx (PNG, máximo 10MB)</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            {/* Preview da Logo */}
+            <div className="w-48 h-24 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center bg-slate-50 overflow-hidden">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt="Logo UniOzoxx" 
+                  className="max-w-full max-h-full object-contain p-2"
+                  data-testid="current-logo-preview"
+                />
+              ) : (
+                <span className="text-slate-400 text-sm">Nenhuma logo</span>
+              )}
+            </div>
+
+            {/* Ações */}
+            <div className="flex flex-col gap-2">
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept=".png"
+                onChange={handleLogoUpload}
+                className="hidden"
+                data-testid="logo-file-input"
+              />
+              <Button
+                onClick={() => logoInputRef.current?.click()}
+                disabled={uploadingLogo}
+                variant="outline"
+                data-testid="upload-logo-btn"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {uploadingLogo ? 'Enviando...' : logoUrl ? 'Alterar Logo' : 'Enviar Logo'}
+              </Button>
+              
+              {logoUrl && (
+                <Button
+                  onClick={handleRemoveLogo}
+                  variant="outline"
+                  className="text-red-600 hover:bg-red-50 hover:border-red-200"
+                  data-testid="remove-logo-btn"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Remover
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-500 mt-4">
+            A logo será exibida na tela de login, no menu lateral e em outros lugares da plataforma.
+          </p>
+        </div>
+
         {/* Estatísticas Rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {quickStats.map((stat, index) => {
@@ -230,6 +352,7 @@ const AdminSystem = () => {
                 value={systemConfig.minimum_passing_score}
                 onChange={(e) => setSystemConfig({ ...systemConfig, minimum_passing_score: parseInt(e.target.value) || 0 })}
                 className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                data-testid="passing-score-input"
               />
               <p className="text-xs text-slate-500 mt-1">
                 Esta nota será aplicada a todas as avaliações de módulos
@@ -239,6 +362,7 @@ const AdminSystem = () => {
               onClick={saveSystemConfig}
               disabled={savingConfig}
               className="flex items-center gap-2 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors disabled:opacity-50"
+              data-testid="save-config-btn"
             >
               <Save className="w-4 h-4" />
               {savingConfig ? 'Salvando...' : 'Salvar'}
@@ -246,7 +370,7 @@ const AdminSystem = () => {
           </div>
         </div>
 
-        {/* Ações Rápidas do Sistema */}
+        {/* Resumo do Sistema */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4">Resumo do Sistema</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
