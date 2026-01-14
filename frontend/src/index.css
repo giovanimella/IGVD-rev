@@ -74,6 +74,19 @@ code {
     h1, h2, h3, h4, h5, h6 {
         @apply font-outfit;
     }
+    
+    /* Mobile fixes */
+    html, body {
+        min-height: 100%;
+        min-height: -webkit-fill-available;
+    }
+    
+    /* Prevent content from being hidden behind mobile browser UI */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+        body {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    }
 }
 
 @layer base {
