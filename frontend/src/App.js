@@ -31,11 +31,13 @@ import AdminChallenges from './pages/admin/AdminChallenges';
 import AdminAssessment from './pages/admin/AdminAssessment';
 import AdminCertificates from './pages/admin/AdminCertificates';
 import SupervisorLicensees from './pages/supervisor/SupervisorLicensees';
+import SupervisorAnalytics from './pages/supervisor/SupervisorAnalytics';
 import LicenseeDetail from './pages/supervisor/LicenseeDetail';
 import PublicRegistration from './pages/PublicRegistration';
 import OnboardingDocuments from './pages/OnboardingDocuments';
 import OnboardingPayment from './pages/OnboardingPayment';
 import Profile from './pages/Profile';
+import Favorites from './pages/Favorites';
 
 function App() {
   return (
@@ -244,10 +246,26 @@ function App() {
             }
           />
           <Route
+            path="/favorites"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <Favorites />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/supervisor/licensees"
             element={
               <PrivateRoute roles={['supervisor']}>
                 <SupervisorLicensees />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/supervisor/analytics"
+            element={
+              <PrivateRoute roles={['supervisor', 'admin']}>
+                <SupervisorAnalytics />
               </PrivateRoute>
             }
           />
