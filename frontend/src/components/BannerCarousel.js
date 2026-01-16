@@ -47,7 +47,7 @@ const BannerCarousel = () => {
   }
 
   return (
-    <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-lg mb-6">
+    <div className="relative w-full h-40 sm:h-48 md:h-64 rounded-xl overflow-hidden shadow-lg mb-4 lg:mb-6">
       {/* Imagem do Banner */}
       <img
         src={`${API_URL}${banners[currentIndex].image_url}`}
@@ -57,8 +57,8 @@ const BannerCarousel = () => {
 
       {/* Overlay com título se existir */}
       {banners[currentIndex].title && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-          <h3 className="text-white text-2xl font-outfit font-bold">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 lg:p-6">
+          <h3 className="text-white text-lg lg:text-2xl font-outfit font-bold">
             {banners[currentIndex].title}
           </h3>
         </div>
@@ -69,15 +69,15 @@ const BannerCarousel = () => {
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all"
+            className="absolute left-2 lg:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 lg:p-2 shadow-lg transition-all"
           >
-            <ChevronLeft className="w-6 h-6 text-slate-900" />
+            <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6 text-slate-900" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all"
+            className="absolute right-2 lg:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 lg:p-2 shadow-lg transition-all"
           >
-            <ChevronRight className="w-6 h-6 text-slate-900" />
+            <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 text-slate-900" />
           </button>
 
           {/* Indicadores */}
