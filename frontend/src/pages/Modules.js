@@ -38,22 +38,22 @@ const Modules = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 lg:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Módulos de Treinamento</h1>
-            <p className="text-slate-600 mt-2">Aprenda e evolua com nossos conteúdos</p>
+            <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900">Módulos de Treinamento</h1>
+            <p className="text-slate-600 mt-1 text-sm lg:text-base">Aprenda e evolua com nossos conteúdos</p>
           </div>
         </div>
 
         {modules.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2">Nenhum módulo disponível</h3>
-            <p className="text-slate-600">Os módulos estarão disponíveis em breve.</p>
+          <div className="bg-white rounded-xl border border-slate-200 p-8 lg:p-12 text-center">
+            <BookOpen className="w-12 lg:w-16 h-12 lg:h-16 text-slate-300 mx-auto mb-4" />
+            <h3 className="text-lg lg:text-xl font-outfit font-semibold text-slate-900 mb-2">Nenhum módulo disponível</h3>
+            <p className="text-slate-600 text-sm lg:text-base">Os módulos estarão disponíveis em breve.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {modules.map((module) => (
               <Link
                 key={module.id}
@@ -61,7 +61,7 @@ const Modules = () => {
                 data-testid={`module-card-${module.id}`}
                 className="group bg-white rounded-xl overflow-hidden border border-slate-100 hover:shadow-lg transition-all duration-300"
               >
-                <div className="h-48 bg-gradient-to-br from-cyan-500 to-blue-600 relative overflow-hidden">
+                <div className="h-36 lg:h-48 bg-gradient-to-br from-cyan-500 to-blue-600 relative overflow-hidden">
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center gap-2 text-white/90 text-sm mb-2">
@@ -71,8 +71,8 @@ const Modules = () => {
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2 group-hover:text-cyan-600 transition-colors">
+                <div className="p-4 lg:p-6">
+                  <h3 className="text-lg lg:text-xl font-outfit font-semibold text-slate-900 mb-2 group-hover:text-cyan-600 transition-colors">
                     {module.title}
                   </h3>
                   <p className="text-slate-600 text-sm mb-4 line-clamp-2">{module.description}</p>
