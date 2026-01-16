@@ -125,8 +125,8 @@ const Dashboard = () => {
             <p className="text-slate-600 mt-2">Visão geral da plataforma</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl border border-slate-100 p-6 hover:border-cyan-100 transition-colors" data-testid="stat-card-users">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            <div className="bg-white rounded-xl border border-slate-100 p-4 lg:p-6 hover:border-cyan-100 transition-colors" data-testid="stat-card-users">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
                   <Users className="w-6 h-6 text-cyan-600" />
@@ -359,8 +359,8 @@ const Dashboard = () => {
           )}
 
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Meu Dashboard</h1>
-            <p className="text-slate-600 mt-2">Acompanhe seu progresso e conquistas</p>
+            <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900">Meu Dashboard</h1>
+            <p className="text-slate-600 mt-1 lg:mt-2 text-sm lg:text-base">Acompanhe seu progresso e conquistas</p>
           </div>
 
           {/* Banner Rotativo */}
@@ -369,8 +369,8 @@ const Dashboard = () => {
           {/* Novidades e Comunicados */}
           <PostsList />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 p-4 lg:p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center">
                   <Award className="w-6 h-6 text-white" />
@@ -422,7 +422,7 @@ const Dashboard = () => {
           </div>
 
           {/* Seção de Gamificação */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {/* Streak */}
             <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl border border-orange-200 p-6">
               <div className="flex items-center gap-3 mb-4">
