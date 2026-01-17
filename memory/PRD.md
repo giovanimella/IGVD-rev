@@ -159,3 +159,20 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 
 ### Supervisor/Admin
 - `GET /api/onboarding/supervisor/licensee/{user_id}/documents` - Visualiza documentos de um licenciado
+
+---
+
+## APIs de Agenda
+
+### Licenciado
+- `POST /api/appointments/` - Criar compromisso
+- `GET /api/appointments/` - Listar todos os compromissos
+- `GET /api/appointments/upcoming` - Compromissos de hoje + 3 dias
+- `GET /api/appointments/month/{year}/{month}` - Compromissos do mês
+- `GET /api/appointments/{id}` - Detalhes de um compromisso
+- `PUT /api/appointments/{id}` - Atualizar compromisso
+- `DELETE /api/appointments/{id}` - Excluir compromisso
+
+### Supervisor/Admin
+- `GET /api/appointments/supervisor/licensee/{user_id}` - Todos compromissos do licenciado
+- `GET /api/appointments/supervisor/licensee/{user_id}/month/{year}/{month}` - Compromissos do mês
