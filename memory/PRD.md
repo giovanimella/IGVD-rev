@@ -90,6 +90,16 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 - Aba "Documentos" na página de detalhes do licenciado (supervisor/admin)
 - Visualização de documentos PF e PJ pelo supervisor/admin
 
+### Fase 11: Sistema de Agenda ✅ (17/01/2026)
+- Página de agenda com calendário mensal interativo
+- CRUD completo de compromissos
+- Categorias: Visita a Cliente, Reunião, Treinamento, Lembrete, Outro
+- Campos: Título, Data, Hora, Categoria, Duração (livre), Observações
+- Widget no Dashboard mostrando compromissos de hoje e próximos 3 dias
+- Supervisor/Admin pode visualizar agenda do licenciado (aba "Agenda")
+- Navegação por mês no calendário
+- Indicadores visuais de compromissos nos dias do calendário
+
 ---
 
 ## Fluxo de Onboarding Atual (9 Etapas)
