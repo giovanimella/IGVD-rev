@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 class OzoxxAPITester:
-    def __init__(self, base_url="https://learnhub-784.preview.emergentagent.com"):
+    def __init__(self, base_url="https://doc-upload-flow.preview.emergentagent.com"):
         self.base_url = base_url
         self.admin_token = None
         self.franqueado_token = None
