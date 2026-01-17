@@ -50,6 +50,12 @@ const LicenseeDetail = () => {
     fetchLicenseeDetails();
   }, [id]);
 
+  useEffect(() => {
+    if (activeTab === 'agenda') {
+      fetchAppointments();
+    }
+  }, [activeTab, currentMonth]);
+
   const fetchLicenseeDetails = async () => {
     try {
       const [userRes, modulesRes, redemptionsRes, docsRes] = await Promise.all([
