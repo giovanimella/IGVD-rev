@@ -145,12 +145,24 @@ const ChapterView = () => {
         chapter_id: chapterId,
         module_id: moduleId,
         completed: true,
-        watched_percentage: Math.max(watchedPercentage, MIN_PERCENTAGE)
+        watched_percentage: Math.round(Math.max(watchedPercentage, MIN_PERCENTAGE))
       });
       setIsCompleted(true);
       toast.success('Capítulo marcado como completo!');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erro ao marcar como completo');
+      console.error('Erro ao marcar como completo:', error.response?.data);
+      const errorData = error.response?.data;
+      let errorMessage = 'Erro ao marcar como completo';
+      
+      if (typeof errorData?.detail === 'string') {
+        errorMessage = errorData.detail;
+      } else if (Array.isArray(errorData?.detail)) {
+        errorMessage = errorData.detail.map(e => e.msg || e.message || String(e)).join(', ');
+      } else if (errorData?.message) {
+        errorMessage = errorData.message;
+      }
+      
+      toast.error(errorMessage);
     }
   };
 
