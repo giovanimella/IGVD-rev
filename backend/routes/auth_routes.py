@@ -152,12 +152,14 @@ async def set_initial_password(request: PasswordResetConfirm):
     
     new_password_hash = get_password_hash(request.new_password)
     
+    # Atualizar senha e avançar para próxima etapa (documentos_pf)
     await db.users.update_one(
         {"id": user["id"]},
         {"$set": {
             "password_hash": new_password_hash,
             "password_token": None,
             "password_token_expires": None,
+            "current_stage": "documentos_pf",
             "updated_at": datetime.now(timezone.utc).isoformat()
         }}
     )
