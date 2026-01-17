@@ -133,3 +133,33 @@ async def reset_password(request: PasswordResetConfirm):
     )
     
     return {"message": "Senha redefinida com sucesso"}
+
+
+@router.post("/set-password")
+async def set_initial_password(request: PasswordResetConfirm):
+    """Define a senha inicial para usuários cadastrados via webhook"""
+    user = await db.users.find_one({
+        "password_token": request.token
+    }, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=400, detail="Token inválido ou expirado")
+    
+    # Verificar expiração
+    expires = user.get("password_token_expires", 0)
+    if datetime.now().timestamp() > expires:
+        raise HTTPException(status_code=400, detail="Token expirado. Solicite um novo cadastro.")
+    
+    new_password_hash = get_password_hash(request.new_password)
+    
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {
+            "password_hash": new_password_hash,
+            "password_token": None,
+            "password_token_expires": None,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Senha definida com sucesso! Você já pode fazer login."}
