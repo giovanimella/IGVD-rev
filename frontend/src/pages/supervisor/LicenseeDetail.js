@@ -491,6 +491,94 @@ const LicenseeDetail = () => {
           </div>
         )}
 
+        {/* Tab Content: Agenda */}
+        {activeTab === 'agenda' && (
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-cyan-600" />
+                Agenda do Licenciado
+              </h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5 text-slate-600" />
+                </button>
+                <span className="text-sm font-medium text-slate-700 min-w-[140px] text-center">
+                  {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                </span>
+                <button
+                  onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+            </div>
+
+            {appointments.length > 0 ? (
+              <div className="space-y-3">
+                {appointments.map((apt) => {
+                  const catInfo = getCategoryInfo(apt.category);
+                  const Icon = catInfo.icon;
+                  const aptDate = new Date(apt.date + 'T00:00:00');
+                  return (
+                    <div
+                      key={apt.id}
+                      className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+                    >
+                      <div className={`w-12 h-12 rounded-lg ${catInfo.color} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-medium text-slate-900">{apt.title}</p>
+                            <p className="text-sm text-slate-500">{catInfo.label}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-slate-900">
+                              {aptDate.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
+                            </p>
+                            <p className="text-sm text-slate-500 flex items-center justify-end">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {apt.time}
+                              {apt.duration && <span className="ml-2 text-slate-400">• {apt.duration}</span>}
+                            </p>
+                          </div>
+                        </div>
+                        {apt.description && (
+                          <p className="text-sm text-slate-600 mt-2 bg-slate-50 rounded p-2">{apt.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-500">Nenhum compromisso neste mês</p>
+              </div>
+            )}
+
+            {/* Legenda de categorias */}
+            <div className="mt-6 pt-4 border-t border-slate-200">
+              <p className="text-xs font-medium text-slate-500 mb-3">Categorias</p>
+              <div className="flex flex-wrap gap-4">
+                {Object.entries(categories).map(([key, cat]) => (
+                  <div key={key} className="flex items-center gap-2 text-xs">
+                    <div className={`w-3 h-3 rounded ${cat.color}`} />
+                    <span className="text-slate-600">{cat.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tab Content: Progresso */}
         {activeTab === 'progress' && (
           <div className="bg-white rounded-xl border border-slate-200 p-6">
