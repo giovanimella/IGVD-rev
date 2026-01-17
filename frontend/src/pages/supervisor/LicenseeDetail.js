@@ -20,7 +20,14 @@ import {
   Eye,
   ExternalLink,
   Users,
-  Hash
+  Hash,
+  Calendar,
+  Briefcase,
+  GraduationCap,
+  Bell,
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
@@ -32,6 +39,8 @@ const LicenseeDetail = () => {
   const [modules, setModules] = useState([]);
   const [redemptions, setRedemptions] = useState([]);
   const [documents, setDocuments] = useState({ documents_pf: {}, documents_pj: {} });
+  const [appointments, setAppointments] = useState([]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('info');
 
