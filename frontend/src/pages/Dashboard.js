@@ -90,6 +90,42 @@ const Dashboard = () => {
     }
   };
 
+  const fetchUpcomingAppointments = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/appointments/upcoming`);
+      setUpcomingAppointments(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar compromissos:', error);
+    }
+  };
+
+  const getCategoryInfo = (categoryKey) => {
+    const categories = {
+      visita_cliente: { label: 'Visita a Cliente', icon: Users, color: 'bg-blue-500' },
+      reuniao: { label: 'Reunião', icon: Briefcase, color: 'bg-purple-500' },
+      treinamento: { label: 'Treinamento', icon: GraduationCap, color: 'bg-green-500' },
+      lembrete: { label: 'Lembrete', icon: Bell, color: 'bg-amber-500' },
+      outro: { label: 'Outro', icon: MoreHorizontal, color: 'bg-slate-500' }
+    };
+    return categories[categoryKey] || categories.outro;
+  };
+
+  const formatAppointmentDate = (dateStr) => {
+    const date = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    if (date.getTime() === today.getTime()) {
+      return 'Hoje';
+    } else if (date.getTime() === tomorrow.getTime()) {
+      return 'Amanhã';
+    } else {
+      return date.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
