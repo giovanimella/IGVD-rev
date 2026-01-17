@@ -220,6 +220,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/levels"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminLevels />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/admin/files"
             element={
               <PrivateRoute roles={['admin']}>
