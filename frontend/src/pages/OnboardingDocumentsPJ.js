@@ -235,25 +235,27 @@ const OnboardingDocumentsPJ = () => {
                       </div>
                     </div>
 
-                    <label className="block">
+                    <div>
                       <input
                         type="file"
+                        id={`file-upload-pj-${doc.key}`}
                         accept=".jpg,.jpeg,.png,.pdf"
                         onChange={(e) => handleFileUpload(doc.key, e.target.files[0])}
                         className="hidden"
                         data-testid={`upload-${doc.key}`}
                       />
                       <Button
-                        as="span"
+                        type="button"
                         size="sm"
                         disabled={isUploading}
                         variant={uploaded ? "outline" : "default"}
                         className={`cursor-pointer ${uploaded ? 'border-green-300 text-green-700 hover:bg-green-50' : 'bg-purple-600 hover:bg-purple-700'}`}
+                        onClick={() => document.getElementById(`file-upload-pj-${doc.key}`).click()}
                       >
                         <Upload className="w-4 h-4 mr-1" />
                         {isUploading ? 'Enviando...' : uploaded ? 'Alterar' : 'Enviar'}
                       </Button>
-                    </label>
+                    </div>
                   </div>
                 </div>
               );
