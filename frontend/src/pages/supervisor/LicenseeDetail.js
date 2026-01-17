@@ -296,6 +296,40 @@ const LicenseeDetail = () => {
               </div>
             )}
 
+            {/* Informações do Líder */}
+            {(licensee.leader_id || licensee.leader_name) && (
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 p-6">
+                <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-indigo-600" />
+                  Líder Responsável
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {licensee.leader_name && (
+                    <div className="flex items-center gap-3 bg-white rounded-lg p-4 border border-indigo-100">
+                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <User className="w-5 h-5 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Nome do Líder</p>
+                        <p className="font-semibold text-slate-900">{licensee.leader_name}</p>
+                      </div>
+                    </div>
+                  )}
+                  {licensee.leader_id && (
+                    <div className="flex items-center gap-3 bg-white rounded-lg p-4 border border-indigo-100">
+                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <Hash className="w-5 h-5 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">ID do Líder</p>
+                        <p className="font-semibold text-slate-900 font-mono text-sm">{licensee.leader_id}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Informações Adicionais */}
             <div className="bg-white rounded-xl border border-slate-200 p-6">
               <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4 flex items-center">
