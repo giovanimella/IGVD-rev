@@ -2,9 +2,14 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timezone, timedelta
-from database import db
+from motor.motor_asyncio import AsyncIOMotorClient
 from auth import get_current_user, require_role
 import uuid
+import os
+
+mongo_url = os.environ['MONGO_URL']
+client = AsyncIOMotorClient(mongo_url)
+db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
 
