@@ -223,7 +223,7 @@ async def webhook_create_licensee(
         "points": 0,
         "level_title": "Iniciante",
         "leader_id": data.leader_id,
-        "leader_name": data.leader_name,
+        "leader_name": leader_name_to_save,
         "password_hash": None,  # Sem senha até o usuário definir
         "password_token": password_token,
         "password_token_expires": token_expires,
