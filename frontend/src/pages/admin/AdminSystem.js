@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff } from 'lucide-react';
+import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
 
@@ -224,6 +224,14 @@ const AdminSystem = () => {
       icon: Settings,
       link: '/admin/chat',
       color: 'bg-cyan-500',
+      count: '-'
+    },
+    {
+      title: 'Níveis da Plataforma',
+      description: 'Configurar níveis e progressão dos licenciados',
+      icon: Trophy,
+      link: '/admin/levels',
+      color: 'bg-yellow-500',
       count: '-'
     }
   ];
