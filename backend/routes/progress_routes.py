@@ -67,6 +67,41 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
                     "admin_notification",
                     module["id"]
                 )
+                
+                # Verificar se precisa avançar o estágio do onboarding
+                if user.get("current_stage") == "acolhimento" and module.get("is_acolhimento"):
+                    # Verificar se todos os módulos de acolhimento foram concluídos
+                    acolhimento_modules = await db.modules.find({"is_acolhimento": True}, {"_id": 0, "id": 1}).to_list(100)
+                    all_acolhimento_completed = True
+                    
+                    for acolh_module in acolhimento_modules:
+                        module_chapters = await db.chapters.find({"module_id": acolh_module["id"]}, {"_id": 0, "id": 1}).to_list(100)
+                        for chapter in module_chapters:
+                            chapter_progress = await db.user_progress.find_one({
+                                "user_id": current_user["sub"],
+                                "chapter_id": chapter["id"],
+                                "completed": True
+                            })
+                            if not chapter_progress:
+                                all_acolhimento_completed = False
+                                break
+                        if not all_acolhimento_completed:
+                            break
+                    
+                    if all_acolhimento_completed:
+                        # Avançar para próxima etapa do onboarding
+                        await db.users.update_one(
+                            {"id": current_user["sub"]},
+                            {"$set": {"current_stage": "agendamento"}}
+                        )
+                        
+                        await create_notification(
+                            current_user["sub"],
+                            "Acolhimento Concluído! 🎓",
+                            "Parabéns! Você concluiu todos os módulos de acolhimento. Agora você pode agendar seu treinamento presencial.",
+                            "onboarding_stage",
+                            "agendamento"
+                        )
         
         await db.user_progress.update_one(
             {"id": existing["id"]},
