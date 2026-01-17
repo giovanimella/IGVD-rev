@@ -198,7 +198,7 @@ const ChapterView = () => {
       <Layout>
         <div className="text-center py-12">
           <h2 className="text-2xl font-outfit font-bold text-slate-900">Capítulo não encontrado</h2>
-          <Button onClick={() => navigate(`/modules/${moduleId}`)} className="mt-4">
+          <Button onClick={() => navigate(`/module/${moduleId}`)} className="mt-4">
             Voltar para o Módulo
           </Button>
         </div>
@@ -379,7 +379,7 @@ const ChapterView = () => {
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              onClick={() => navigate(`/modules/${moduleId}`)}
+              onClick={() => navigate(`/module/${moduleId}`)}
             >
               Voltar ao Módulo
             </Button>
