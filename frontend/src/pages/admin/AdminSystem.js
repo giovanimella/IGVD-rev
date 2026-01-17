@@ -484,6 +484,180 @@ const AdminSystem = () => {
             </div>
           </div>
         </div>
+
+        {/* Configurações de Webhook */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Webhook className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-outfit font-semibold text-slate-900">Webhooks</h3>
+              <p className="text-sm text-slate-500">Configure integrações com sistemas externos</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Webhook de Entrada - API Key */}
+            <div className="bg-slate-50 rounded-lg p-4">
+              <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+                <Key className="w-4 h-4" />
+                Webhook de Entrada (Receber Licenciados)
+              </h4>
+              <p className="text-sm text-slate-600 mb-4">
+                Endpoint: <code className="bg-slate-200 px-2 py-1 rounded text-xs">{API_URL}/api/webhook/licensee</code>
+                <button 
+                  onClick={() => copyToClipboard(`${API_URL}/api/webhook/licensee`)}
+                  className="ml-2 text-cyan-600 hover:text-cyan-700"
+                >
+                  <Copy className="w-4 h-4 inline" />
+                </button>
+              </p>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">API Key (Header: X-API-Key)</label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type={showApiKey ? 'text' : 'password'}
+                        value={systemConfig.webhook_api_key || ''}
+                        onChange={(e) => setSystemConfig({ ...systemConfig, webhook_api_key: e.target.value })}
+                        className="w-full px-4 py-2 pr-20 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                        placeholder="Clique em Gerar para criar uma chave"
+                        data-testid="webhook-api-key-input"
+                      />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                        <button 
+                          onClick={() => setShowApiKey(!showApiKey)}
+                          className="p-1 text-slate-400 hover:text-slate-600"
+                        >
+                          {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                        {systemConfig.webhook_api_key && (
+                          <button 
+                            onClick={() => copyToClipboard(systemConfig.webhook_api_key)}
+                            className="p-1 text-slate-400 hover:text-slate-600"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <Button onClick={generateApiKey} variant="outline" size="sm">
+                      <RefreshCw className="w-4 h-4 mr-1" />
+                      Gerar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Webhook de Saída - URL */}
+            <div className="bg-slate-50 rounded-lg p-4">
+              <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+                <Webhook className="w-4 h-4" />
+                Webhook de Saída (Onboarding Completo)
+              </h4>
+              <p className="text-sm text-slate-600 mb-4">
+                Envia notificação quando um licenciado atinge "Completo - Acesso Total"
+              </p>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">URL de Destino</label>
+                  <input
+                    type="url"
+                    value={systemConfig.webhook_url || ''}
+                    onChange={(e) => setSystemConfig({ ...systemConfig, webhook_url: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="https://seu-sistema.com/webhook/onboarding"
+                    data-testid="webhook-url-input"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={systemConfig.webhook_enabled || false}
+                      onChange={(e) => setSystemConfig({ ...systemConfig, webhook_enabled: e.target.checked })}
+                      className="sr-only peer"
+                      data-testid="webhook-enabled-toggle"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  </label>
+                  <span className="text-sm text-slate-700">
+                    {systemConfig.webhook_enabled ? 'Webhook habilitado' : 'Webhook desabilitado'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Payload de exemplo */}
+            <div className="bg-slate-800 rounded-lg p-4 text-white">
+              <h4 className="font-medium mb-2 text-slate-200">Payload de Exemplo (Saída)</h4>
+              <pre className="text-xs text-slate-300 overflow-x-auto">
+{`{
+  "event": "onboarding_completed",
+  "timestamp": "2026-01-16T12:00:00.000Z",
+  "data": {
+    "id": "123-abc-456",
+    "full_name": "Nome do Licenciado"
+  }
+}`}
+              </pre>
+            </div>
+
+            <div className="flex justify-end">
+              <Button
+                onClick={saveWebhookConfig}
+                disabled={savingWebhook}
+                className="bg-purple-600 hover:bg-purple-700"
+                data-testid="save-webhook-btn"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {savingWebhook ? 'Salvando...' : 'Salvar Webhooks'}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Logs de Webhook */}
+        {webhookLogs.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-outfit font-semibold text-slate-900">Últimos Webhooks</h3>
+              <Button variant="outline" size="sm" onClick={fetchWebhookLogs}>
+                <RefreshCw className="w-4 h-4 mr-1" />
+                Atualizar
+              </Button>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {webhookLogs.map((log, idx) => (
+                <div 
+                  key={idx} 
+                  className={`flex items-center justify-between p-3 rounded-lg text-sm ${
+                    log.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      log.type === 'incoming' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                    }`}>
+                      {log.type === 'incoming' ? 'Entrada' : 'Saída'}
+                    </span>
+                    <span className="text-slate-600">{log.event}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-slate-500">
+                    <span>{new Date(log.created_at).toLocaleString('pt-BR')}</span>
+                    <span className={`w-2 h-2 rounded-full ${log.success ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
