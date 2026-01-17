@@ -1,17 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image } from 'lucide-react';
+import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
 
 const AdminSystem = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [systemConfig, setSystemConfig] = useState({ minimum_passing_score: 70 });
+  const [systemConfig, setSystemConfig] = useState({ 
+    minimum_passing_score: 70,
+    webhook_url: '',
+    webhook_enabled: false,
+    webhook_api_key: ''
+  });
   const [savingConfig, setSavingConfig] = useState(false);
+  const [savingWebhook, setSavingWebhook] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [webhookLogs, setWebhookLogs] = useState([]);
   const logoInputRef = useRef(null);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -19,6 +27,7 @@ const AdminSystem = () => {
   useEffect(() => {
     fetchSystemStats();
     fetchSystemConfig();
+    fetchWebhookLogs();
   }, []);
 
   const fetchSystemStats = async () => {
@@ -47,12 +56,26 @@ const AdminSystem = () => {
   const fetchSystemConfig = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/system/config`);
-      setSystemConfig(response.data);
+      setSystemConfig({
+        minimum_passing_score: response.data.minimum_passing_score || 70,
+        webhook_url: response.data.webhook_url || '',
+        webhook_enabled: response.data.webhook_enabled || false,
+        webhook_api_key: response.data.webhook_api_key || ''
+      });
       if (response.data.platform_logo) {
         setLogoUrl(`${API_URL}${response.data.platform_logo}`);
       }
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
+    }
+  };
+
+  const fetchWebhookLogs = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/webhook/logs?limit=10`);
+      setWebhookLogs(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar logs de webhook:', error);
     }
   };
 
@@ -69,6 +92,38 @@ const AdminSystem = () => {
     } finally {
       setSavingConfig(false);
     }
+  };
+
+  const saveWebhookConfig = async () => {
+    setSavingWebhook(true);
+    try {
+      await axios.put(`${API_URL}/api/system/config`, {
+        webhook_url: systemConfig.webhook_url,
+        webhook_enabled: systemConfig.webhook_enabled,
+        webhook_api_key: systemConfig.webhook_api_key
+      });
+      toast.success('Configurações de webhook salvas!');
+    } catch (error) {
+      console.error('Erro ao salvar webhook:', error);
+      toast.error('Erro ao salvar configurações');
+    } finally {
+      setSavingWebhook(false);
+    }
+  };
+
+  const generateApiKey = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let key = 'uniozoxx_';
+    for (let i = 0; i < 32; i++) {
+      key += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setSystemConfig({ ...systemConfig, webhook_api_key: key });
+    toast.success('Nova API Key gerada! Clique em Salvar para confirmar.');
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copiado para a área de transferência!');
   };
 
   const handleLogoUpload = async (e) => {
