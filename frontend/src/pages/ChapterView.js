@@ -321,7 +321,38 @@ const ChapterView = () => {
             </div>
           )}
 
-          {chapter.description && (
+          {/* Conteúdo genérico quando não há tipo definido */}
+          {!chapter.content_type && !chapter.video_url && (
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4 p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+                <FileText className="w-6 h-6 text-cyan-600" />
+                <div className="flex-1">
+                  <p className="font-medium text-cyan-800">Conteúdo do Capítulo</p>
+                  <p className="text-sm text-cyan-600">
+                    Permaneça nesta página para registrar seu progresso
+                  </p>
+                </div>
+              </div>
+              
+              {chapter.description && (
+                <div className="prose max-w-none mb-4">
+                  <p className="text-slate-700">{chapter.description}</p>
+                </div>
+              )}
+              
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-700">
+                  <Clock className="w-4 h-4 inline mr-1" />
+                  Tempo na página: {Math.floor(readTime / 60)}:{String(readTime % 60).padStart(2, '0')} / {chapter.duration_minutes || 1}:00 min
+                </p>
+                <p className="text-xs text-blue-500 mt-1">
+                  Aguarde atingir 90% para marcar como completo
+                </p>
+              </div>
+            </div>
+          )}
+
+          {chapter.description && chapter.content_type && (
             <div className="p-6 border-t border-slate-200">
               <h3 className="font-semibold text-slate-900 mb-2">Sobre este capítulo</h3>
               <p className="text-slate-600">{chapter.description}</p>
