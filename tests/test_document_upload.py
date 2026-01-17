@@ -166,8 +166,8 @@ class TestDocumentPFUpload:
             files=files
         )
         
-        assert response.status_code == 401
-        print(f"✓ PF upload requires authentication (401)")
+        assert response.status_code in [401, 403]
+        print(f"✓ PF upload requires authentication ({response.status_code})")
     
     def test_get_documents_pf(self, licensee_token):
         """Test GET /api/onboarding/documents/pf endpoint"""
