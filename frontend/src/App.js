@@ -82,6 +82,14 @@ function App() {
             }
           />
           <Route
+            path="/module/:moduleId/chapter/:chapterId"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <ChapterView />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/module/:moduleId/assessment"
             element={
               <PrivateRoute roles={['licenciado']}>
