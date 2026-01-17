@@ -31,10 +31,10 @@ const ChapterView = () => {
     fetchFavoriteStatus();
   }, [moduleId, chapterId]);
 
-  // Para documentos/texto: rastrear tempo de leitura
+  // Para documentos/texto ou quando não há tipo definido: rastrear tempo de leitura
   useEffect(() => {
-    if (chapter?.content_type === 'document' || chapter?.content_type === 'text') {
-      const minReadTime = (chapter.duration_minutes || 2) * 60; // segundos
+    if (chapter && (chapter?.content_type === 'document' || chapter?.content_type === 'text' || !chapter?.content_type)) {
+      const minReadTime = (chapter.duration_minutes || 1) * 60; // segundos (mínimo 1 minuto)
       const interval = setInterval(() => {
         setReadTime(prev => {
           const newTime = prev + 1;
@@ -43,6 +43,7 @@ const ChapterView = () => {
           
           if (percentage >= MIN_PERCENTAGE && !canComplete) {
             setCanComplete(true);
+            toast.success('Você pode marcar este capítulo como completo!');
           }
           
           // Salvar progresso a cada 10 segundos
@@ -56,7 +57,7 @@ const ChapterView = () => {
       
       return () => clearInterval(interval);
     }
-  }, [chapter]);
+  }, [chapter, canComplete]);
 
   const fetchChapter = async () => {
     try {
