@@ -116,9 +116,38 @@ const LicenseeDetail = () => {
     window.open(`${API_URL}${docUrl}`, '_blank');
   };
 
+  const fetchAppointments = async () => {
+    try {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth() + 1;
+      const response = await axios.get(`${API_URL}/api/appointments/supervisor/licensee/${id}/month/${year}/${month}`);
+      setAppointments(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar agenda:', error);
+    }
+  };
+
+  const categories = {
+    visita_cliente: { label: 'Visita a Cliente', icon: Users, color: 'bg-blue-500' },
+    reuniao: { label: 'Reunião', icon: Briefcase, color: 'bg-purple-500' },
+    treinamento: { label: 'Treinamento', icon: GraduationCap, color: 'bg-green-500' },
+    lembrete: { label: 'Lembrete', icon: Bell, color: 'bg-amber-500' },
+    outro: { label: 'Outro', icon: MoreHorizontal, color: 'bg-slate-500' }
+  };
+
+  const getCategoryInfo = (categoryKey) => {
+    return categories[categoryKey] || categories.outro;
+  };
+
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
   const tabs = [
     { key: 'info', label: 'Informações', icon: User },
     { key: 'documents', label: 'Documentos', icon: FolderOpen },
+    { key: 'agenda', label: 'Agenda', icon: Calendar },
     { key: 'progress', label: 'Progresso', icon: BookOpen }
   ];
 
