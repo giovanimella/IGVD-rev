@@ -17,7 +17,8 @@ import {
   Megaphone,
   Target,
   Heart,
-  BarChart3
+  BarChart3,
+  Calendar
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -93,6 +94,7 @@ const Sidebar = () => {
   const licenseeLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
+    { path: '/agenda', icon: Calendar, label: 'Agenda' },
     { path: '/certificates', icon: Award, label: 'Certificados' },
     { path: '/rewards', icon: Award, label: 'Recompensas' },
     { path: '/favorites', icon: Heart, label: 'Favoritos' },
