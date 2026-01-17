@@ -444,6 +444,11 @@ class SystemConfig(BaseModel):
     certificate_name_y_position: int = 400  # Posição Y do nome no certificado (de baixo para cima)
     certificate_module_y_position: int = 360  # Posição Y do nome do módulo no certificado
     certificate_date_y_position: int = 320  # Posição Y da data no certificado
+    platform_logo: Optional[str] = None  # URL da logo da plataforma
+    # Configurações de Webhook
+    webhook_url: Optional[str] = None  # URL de destino para webhook de saída
+    webhook_enabled: bool = False  # Habilitar envio de webhooks
+    webhook_api_key: Optional[str] = None  # API Key para autenticar webhooks de entrada
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 # ==================== CERTIFICADOS ====================
