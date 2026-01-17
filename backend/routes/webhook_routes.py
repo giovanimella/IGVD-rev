@@ -201,13 +201,13 @@ async def webhook_create_licensee(
     if existing_id:
         raise HTTPException(status_code=400, detail="ID já existe no sistema")
     
-    # Verificar se líder existe (se informado)
-    leader_info = None
-    if data.leader_id:
-        leader = await db.users.find_one({"id": data.leader_id}, {"_id": 0, "id": 1, "full_name": 1})
-        if not leader:
-            raise HTTPException(status_code=400, detail="Líder não encontrado")
-        leader_info = leader
+    # Processar informações do líder
+    leader_name_to_save = data.leader_name
+    if data.leader_id and not leader_name_to_save:
+        # Se não foi fornecido leader_name, tenta buscar do banco
+        leader = await db.users.find_one({"id": data.leader_id}, {"_id": 0, "full_name": 1})
+        if leader:
+            leader_name_to_save = leader.get("full_name")
     
     # Gerar token para definir senha (válido por 48h)
     password_token = secrets.token_urlsafe(32)
