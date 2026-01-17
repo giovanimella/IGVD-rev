@@ -267,17 +267,21 @@ const ModuleDetail = () => {
                         >
                           <Heart className={`w-5 h-5 ${favorites[chapter.id] ? 'fill-current' : ''}`} />
                         </button>
-                        {!isCompleted && (
+                        {!isCompleted ? (
                           <Button
-                            onClick={() => handleMarkComplete(chapter.id)}
+                            onClick={() => navigate(`/module/${id}/chapter/${chapter.id}`)}
                             size="sm"
-                            data-testid={`complete-chapter-${chapter.id}`}
+                            data-testid={`view-chapter-${chapter.id}`}
                           >
-                            Marcar como Completo
+                            <Play className="w-4 h-4 mr-1" />
+                            {chapter.content_type === 'video' ? 'Assistir' : 'Ver Conteúdo'}
                           </Button>
-                        )}
-                        {isCompleted && (
+                        ) : (
                           <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                            <CheckCircle className="w-4 h-4" />
+                            Concluído
+                          </span>
+                        )}
                             <CheckCircle className="w-4 h-4" />
                             Completo
                           </span>
