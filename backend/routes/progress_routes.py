@@ -225,16 +225,28 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
             {"$set": update_data}
         )
     else:
+        # Validação para novo progresso
+        can_complete = progress_data.watched_percentage >= MIN_WATCH_PERCENTAGE
+        should_complete = progress_data.completed and can_complete
+        
+        if progress_data.completed and not can_complete:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Você precisa assistir pelo menos {MIN_WATCH_PERCENTAGE}% do conteúdo para marcar como completo. Progresso atual: {progress_data.watched_percentage}%"
+            )
+        
         progress = UserProgress(
             user_id=current_user["sub"],
             module_id=progress_data.module_id,
             chapter_id=progress_data.chapter_id,
-            completed=progress_data.completed,
+            completed=should_complete,
             watched_percentage=progress_data.watched_percentage
         )
         
-        if progress_data.completed:
+        if should_complete:
             progress.completed_at = datetime.now(timezone.utc).isoformat()
+            # Atualizar progresso dos desafios semanais
+            await update_challenge_progress(current_user["sub"])
         
         await db.user_progress.insert_one(progress.model_dump())
     
