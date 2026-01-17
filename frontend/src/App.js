@@ -41,6 +41,7 @@ import OnboardingPayment from './pages/OnboardingPayment';
 import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
 import Agenda from './pages/Agenda';
+import ChapterView from './pages/ChapterView';
 
 function App() {
   return (
