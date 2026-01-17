@@ -51,9 +51,10 @@ async def create_appointment(
     current_user: dict = Depends(get_current_user)
 ):
     """Criar um novo compromisso"""
+    user_id = current_user.get("sub")
     appointment = {
         "id": str(uuid.uuid4()),
-        "user_id": current_user["id"],
+        "user_id": user_id,
         "title": data.title,
         "date": data.date,
         "time": data.time,
@@ -73,8 +74,9 @@ async def get_my_appointments(
     current_user: dict = Depends(get_current_user)
 ):
     """Listar todos os compromissos do usuário logado"""
+    user_id = current_user.get("sub")
     appointments = await db.appointments.find(
-        {"user_id": current_user["id"]},
+        {"user_id": user_id},
         {"_id": 0}
     ).sort("date", 1).to_list(1000)
     return appointments
@@ -84,12 +86,13 @@ async def get_upcoming_appointments(
     current_user: dict = Depends(get_current_user)
 ):
     """Listar compromissos de hoje e dos próximos 3 dias"""
+    user_id = current_user.get("sub")
     today = datetime.now(timezone.utc).date()
     end_date = today + timedelta(days=3)
     
     appointments = await db.appointments.find(
         {
-            "user_id": current_user["id"],
+            "user_id": user_id,
             "date": {
                 "$gte": today.isoformat(),
                 "$lte": end_date.isoformat()
@@ -107,6 +110,7 @@ async def get_appointments_by_month(
     current_user: dict = Depends(get_current_user)
 ):
     """Listar compromissos de um mês específico"""
+    user_id = current_user.get("sub")
     start_date = f"{year}-{month:02d}-01"
     
     # Calcular último dia do mês
@@ -117,7 +121,7 @@ async def get_appointments_by_month(
     
     appointments = await db.appointments.find(
         {
-            "user_id": current_user["id"],
+            "user_id": user_id,
             "date": {
                 "$gte": start_date,
                 "$lt": end_date
@@ -134,8 +138,9 @@ async def get_appointment(
     current_user: dict = Depends(get_current_user)
 ):
     """Obter detalhes de um compromisso"""
+    user_id = current_user.get("sub")
     appointment = await db.appointments.find_one(
-        {"id": appointment_id, "user_id": current_user["id"]},
+        {"id": appointment_id, "user_id": user_id},
         {"_id": 0}
     )
     
@@ -151,8 +156,9 @@ async def update_appointment(
     current_user: dict = Depends(get_current_user)
 ):
     """Atualizar um compromisso"""
+    user_id = current_user.get("sub")
     appointment = await db.appointments.find_one(
-        {"id": appointment_id, "user_id": current_user["id"]}
+        {"id": appointment_id, "user_id": user_id}
     )
     
     if not appointment:
@@ -175,8 +181,9 @@ async def delete_appointment(
     current_user: dict = Depends(get_current_user)
 ):
     """Excluir um compromisso"""
+    user_id = current_user.get("sub")
     result = await db.appointments.delete_one(
-        {"id": appointment_id, "user_id": current_user["id"]}
+        {"id": appointment_id, "user_id": user_id}
     )
     
     if result.deleted_count == 0:
