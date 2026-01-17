@@ -109,7 +109,7 @@ const ChapterView = () => {
         watched_percentage: Math.round(percentage)
       });
     } catch (error) {
-      console.error('Erro ao salvar progresso:', error);
+      console.error('Erro ao salvar progresso:', error.response?.data);
     }
   };
 
