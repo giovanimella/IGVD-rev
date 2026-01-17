@@ -5,8 +5,8 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 
 ## Personas
 - **Admin**: Gerencia módulos, usuários, badges, desafios, avaliações e certificados
-- **Supervisor**: Supervisiona licenciados (dashboard analytics), visualiza documentos dos licenciados
-- **Licenciado**: Consome conteúdo, realiza avaliações, ganha badges e certificados
+- **Supervisor**: Supervisiona licenciados (dashboard analytics), visualiza documentos e agenda dos licenciados
+- **Licenciado**: Consome conteúdo, realiza avaliações, ganha badges e certificados, gerencia agenda
 
 ## Requisitos Core
 1. Sistema de módulos e capítulos com progresso
@@ -17,6 +17,7 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 6. Logo customizável da plataforma
 7. Sistema de webhooks para integração externa
 8. Onboarding com documentos PF e PJ separados
+9. Sistema de Agenda para licenciados
 
 ## Stack Técnica
 - **Frontend**: React + Tailwind CSS + Shadcn/UI
