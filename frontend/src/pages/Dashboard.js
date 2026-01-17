@@ -5,7 +5,7 @@ import StageProgressBar from '../components/StageProgressBar';
 import BannerCarousel from '../components/BannerCarousel';
 import PostsList from '../components/PostsList';
 import axios from 'axios';
-import { BookOpen, Users, Award, Clock, TrendingUp, Trophy, CheckCircle, Activity, Flame, Target } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, TrendingUp, Trophy, CheckCircle, Activity, Flame, Target, Calendar, Briefcase, GraduationCap, Bell, MoreHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -20,6 +20,7 @@ const Dashboard = () => {
   const [myBadges, setMyBadges] = useState([]);
   const [streak, setStreak] = useState(null);
   const [activeChallenges, setActiveChallenges] = useState([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -30,6 +31,7 @@ const Dashboard = () => {
       fetchRecentActivity();
       fetchAccessHistory();
       fetchGamificationData();
+      fetchUpcomingAppointments();
     }
   }, []);
 
