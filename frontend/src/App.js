@@ -121,6 +121,14 @@ function App() {
             }
           />
           <Route
+            path="/agenda"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <Agenda />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <PrivateRoute>
