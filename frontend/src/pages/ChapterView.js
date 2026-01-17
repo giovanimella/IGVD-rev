@@ -214,7 +214,7 @@ const ChapterView = () => {
         {/* Header */}
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate(`/modules/${moduleId}`)}
+            onClick={() => navigate(`/module/${moduleId}`)}
             className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-6 h-6 text-slate-600" />
