@@ -404,6 +404,66 @@ const Dashboard = () => {
           {/* Banner Rotativo */}
           <BannerCarousel />
 
+          {/* Compromissos Próximos */}
+          {upcomingAppointments.length > 0 && (
+            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200 p-6" data-testid="upcoming-appointments-widget">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-outfit font-semibold text-slate-900">Próximos Compromissos</h3>
+                    <p className="text-sm text-slate-600">Hoje e nos próximos 3 dias</p>
+                  </div>
+                </div>
+                <Link 
+                  to="/agenda" 
+                  className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+                >
+                  Ver Agenda →
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {upcomingAppointments.slice(0, 6).map((apt) => {
+                  const catInfo = getCategoryInfo(apt.category);
+                  const Icon = catInfo.icon;
+                  return (
+                    <div 
+                      key={apt.id} 
+                      className="bg-white rounded-lg p-4 border border-slate-200 hover:border-cyan-300 transition-colors"
+                      data-testid={`upcoming-apt-${apt.id}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-lg ${catInfo.color} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-slate-900 truncate">{apt.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              formatAppointmentDate(apt.date) === 'Hoje' 
+                                ? 'bg-red-100 text-red-700' 
+                                : formatAppointmentDate(apt.date) === 'Amanhã'
+                                ? 'bg-amber-100 text-amber-700'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {formatAppointmentDate(apt.date)}
+                            </span>
+                            <span className="text-sm text-slate-500 flex items-center">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {apt.time}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Novidades e Comunicados */}
           <PostsList />
 
