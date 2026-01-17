@@ -29,6 +29,7 @@ class WebhookLicenseeCreate(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     leader_id: Optional[str] = None  # ID do líder que indicou
+    leader_name: Optional[str] = None  # Nome do líder que indicou
 
 
 class WebhookConfigUpdate(BaseModel):
@@ -222,6 +223,7 @@ async def webhook_create_licensee(
         "points": 0,
         "level_title": "Iniciante",
         "leader_id": data.leader_id,
+        "leader_name": data.leader_name,
         "password_hash": None,  # Sem senha até o usuário definir
         "password_token": password_token,
         "password_token_expires": token_expires,
