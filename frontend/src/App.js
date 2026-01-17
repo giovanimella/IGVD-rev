@@ -283,7 +283,7 @@ function App() {
           <Route
             path="/supervisor/licensee/:id"
             element={
-              <PrivateRoute roles={['supervisor']}>
+              <PrivateRoute roles={['supervisor', 'admin']}>
                 <LicenseeDetail />
               </PrivateRoute>
             }
