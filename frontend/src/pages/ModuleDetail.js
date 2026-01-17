@@ -113,21 +113,6 @@ const ModuleDetail = () => {
     }
   };
 
-  const handleMarkComplete = async (chapterId) => {
-    try {
-      await axios.post(`${API_URL}/api/progress/update`, {
-        chapter_id: chapterId,
-        module_id: id,
-        completed: true,
-        watched_percentage: 100
-      });
-      toast.success('Capítulo marcado como completo!');
-      fetchModule();
-    } catch (error) {
-      toast.error('Erro ao atualizar progresso');
-    }
-  };
-
   if (loading) {
     return (
       <Layout>
