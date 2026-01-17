@@ -5,7 +5,7 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 
 ## Personas
 - **Admin**: Gerencia módulos, usuários, badges, desafios, avaliações e certificados
-- **Supervisor**: Supervisiona licenciados (dashboard analytics)
+- **Supervisor**: Supervisiona licenciados (dashboard analytics), visualiza documentos dos licenciados
 - **Licenciado**: Consome conteúdo, realiza avaliações, ganha badges e certificados
 
 ## Requisitos Core
@@ -15,6 +15,8 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 4. Certificados automáticos ao concluir módulo + avaliação
 5. Repositório de arquivos digitais com sistema de pastas
 6. Logo customizável da plataforma
+7. Sistema de webhooks para integração externa
+8. Onboarding com documentos PF e PJ separados
 
 ## Stack Técnica
 - **Frontend**: React + Tailwind CSS + Shadcn/UI
@@ -22,6 +24,7 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 - **Auth**: JWT tokens
 - **PDF**: pdf2image + Pillow + poppler-utils para certificados
 - **Email**: Resend (configurado com domínio email.ozoxx.com.br)
+- **Webhooks**: httpx para requisições assíncronas
 
 ---
 
@@ -73,6 +76,33 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 - Logo exibida em: Login, Sidebar, onde conveniente
 - Removido texto "Plataforma de Treinamento para Franquias"
 
+### Fase 9: Sistema de Webhooks ✅ (16/01/2026)
+- Webhook inbound para criação de usuários via API externa
+- Webhook outbound para notificar conclusão de onboarding
+- Configuração via Painel Sistema (URL, API Key)
+
+### Fase 10: Reestruturação do Onboarding ✅ (17/01/2026)
+- Separação de documentos em duas etapas: PF (Pessoa Física) e PJ (Pessoa Jurídica)
+- Documentos PF: RG, CPF, Comprovante de Residência
+- Documentos PJ: Cartão CNPJ, Contrato Social
+- Barra de progresso com 9 etapas
+- Aba "Documentos" na página de detalhes do licenciado (supervisor/admin)
+- Visualização de documentos PF e PJ pelo supervisor/admin
+
+---
+
+## Fluxo de Onboarding Atual (9 Etapas)
+
+1. **Registro** - Cadastro inicial via link do supervisor
+2. **Docs PF** - Envio de RG, CPF, Comprovante de Residência
+3. **Pagamento** - Taxa de licença
+4. **Acolhimento** - Primeiros treinamentos
+5. **Agendamento** - Agendar treinamento presencial
+6. **Treinamento** - Treinamento presencial na fábrica
+7. **Vendas** - 10 vendas em campo
+8. **Docs PJ** - Envio de Cartão CNPJ, Contrato Social
+9. **Completo** - Acesso total à plataforma
+
 ---
 
 ## Melhorias Admin (14/01/2026)
@@ -94,8 +124,27 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 - poppler-utils instalado
 - Geração de PDF funcionando
 
+### Webhooks ✅ CONFIGURADO
+- Inbound: POST /api/webhooks/users/create (requer X-API-Key)
+- Outbound: Notifica URL configurada quando onboarding é concluído
+
 ---
 
 ## Credenciais de Teste
 - Admin: `admin@ozoxx.com` / `admin123`
 - Licenciado: `licenciado.teste@ozoxx.com` / `licenciado123`
+
+---
+
+## APIs de Documentos
+
+### Documentos PF
+- `POST /api/onboarding/documents/pf/{document_type}` - Upload (rg, cpf, comprovante_residencia)
+- `GET /api/onboarding/documents/pf` - Lista documentos PF do usuário
+
+### Documentos PJ
+- `POST /api/onboarding/documents/pj/{document_type}` - Upload (cartao_cnpj, contrato_social)
+- `GET /api/onboarding/documents/pj` - Lista documentos PJ do usuário
+
+### Supervisor/Admin
+- `GET /api/onboarding/supervisor/licensee/{user_id}/documents` - Visualiza documentos de um licenciado
