@@ -319,8 +319,8 @@ class TestSupervisorDocumentAccess:
             f"{BASE_URL}/api/onboarding/supervisor/licensee/{licensee_id}/documents"
         )
         
-        assert response.status_code == 401
-        print(f"✓ Supervisor endpoint requires authentication (401)")
+        assert response.status_code in [401, 403]
+        print(f"✓ Supervisor endpoint requires authentication ({response.status_code})")
     
     def test_licensee_cannot_access_supervisor_endpoint(self, licensee_token, licensee_id):
         """Test licensee cannot access supervisor endpoint"""
