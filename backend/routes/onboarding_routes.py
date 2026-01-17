@@ -289,6 +289,9 @@ async def mark_training_attendance(user_id: str, attended: bool, current_user: d
 
 @router.put("/approve-field-sales/{user_id}")
 async def approve_field_sales(user_id: str, current_user: dict = Depends(require_role(["admin"]))):
+    # Buscar usuário antes de atualizar
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "full_name": 1, "current_stage": 1})
+    
     await db.users.update_one(
         {"id": user_id},
         {"$set": {
@@ -296,5 +299,10 @@ async def approve_field_sales(user_id: str, current_user: dict = Depends(require
             "current_stage": "completo"
         }}
     )
+    
+    # Disparar webhook de conclusão
+    if user and user.get("current_stage") != "completo":
+        from routes.webhook_routes import send_webhook_notification
+        await send_webhook_notification(user_id, user.get("full_name", ""))
     
     return {"message": "Vendas aprovadas. Licenciado agora tem acesso completo"}
