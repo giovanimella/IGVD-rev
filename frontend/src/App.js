@@ -40,6 +40,7 @@ import OnboardingDocumentsPJ from './pages/OnboardingDocumentsPJ';
 import OnboardingPayment from './pages/OnboardingPayment';
 import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
+import Agenda from './pages/Agenda';
 
 function App() {
   return (
