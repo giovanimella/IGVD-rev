@@ -36,6 +36,7 @@ import SupervisorAnalytics from './pages/supervisor/SupervisorAnalytics';
 import LicenseeDetail from './pages/supervisor/LicenseeDetail';
 import PublicRegistration from './pages/PublicRegistration';
 import OnboardingDocuments from './pages/OnboardingDocuments';
+import OnboardingDocumentsPJ from './pages/OnboardingDocumentsPJ';
 import OnboardingPayment from './pages/OnboardingPayment';
 import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
@@ -131,6 +132,14 @@ function App() {
             element={
               <PrivateRoute roles={['licenciado']}>
                 <OnboardingDocuments />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/onboarding/documents-pj"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <OnboardingDocumentsPJ />
               </PrivateRoute>
             }
           />

@@ -7,12 +7,13 @@ const StageProgressBar = ({ currentStage }) => {
   
   const stages = [
     { key: 'registro', label: 'Registro', description: 'Cadastro inicial', link: '/profile' },
-    { key: 'documentos', label: 'Documentos', description: 'Envio de documentos', link: '/onboarding/documents' },
+    { key: 'documentos_pf', label: 'Docs PF', description: 'Pessoa Física', link: '/onboarding/documents' },
     { key: 'pagamento', label: 'Pagamento', description: 'Taxa de licença', link: '/onboarding/payment' },
     { key: 'acolhimento', label: 'Acolhimento', description: 'Primeiros treinamentos', link: '/modules' },
     { key: 'agendamento', label: 'Agendamento', description: 'Agendar treinamento', link: '/profile' },
     { key: 'treinamento_presencial', label: 'Treinamento', description: 'Presencial na fábrica', link: '/profile' },
     { key: 'vendas_campo', label: 'Vendas', description: '10 vendas em campo', link: '/profile' },
+    { key: 'documentos_pj', label: 'Docs PJ', description: 'Pessoa Jurídica', link: '/onboarding/documents-pj' },
     { key: 'completo', label: 'Completo', description: 'Acesso total', link: '/modules' }
   ];
 
