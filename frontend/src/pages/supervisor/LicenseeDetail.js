@@ -18,7 +18,9 @@ import {
   FolderOpen,
   Building2,
   Eye,
-  ExternalLink
+  ExternalLink,
+  Users,
+  Hash
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
