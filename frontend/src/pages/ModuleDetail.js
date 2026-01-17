@@ -267,10 +267,6 @@ const ModuleDetail = () => {
                             Concluído
                           </span>
                         )}
-                            <CheckCircle className="w-4 h-4" />
-                            Completo
-                          </span>
-                        )}
                       </div>
                     </div>
                   </div>
