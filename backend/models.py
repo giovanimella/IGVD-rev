@@ -176,7 +176,7 @@ class ProgressUpdate(BaseModel):
     chapter_id: str
     module_id: str
     completed: bool = False
-    watched_percentage: int = 0
+    watched_percentage: float = 0
 
 class Reward(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
