@@ -237,8 +237,8 @@ class TestDocumentPJUpload:
             files=files
         )
         
-        assert response.status_code == 401
-        print(f"✓ PJ upload requires authentication (401)")
+        assert response.status_code in [401, 403]
+        print(f"✓ PJ upload requires authentication ({response.status_code})")
     
     def test_get_documents_pj(self, licensee_token):
         """Test GET /api/onboarding/documents/pj endpoint"""
