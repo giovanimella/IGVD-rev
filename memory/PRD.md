@@ -102,17 +102,17 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 
 ---
 
-## Fluxo de Onboarding Atual (9 Etapas)
+## Fluxo de Onboarding Atual (7 Etapas) - ATUALIZADO 18/01/2026
 
 1. **Registro** - Cadastro inicial via link do supervisor
 2. **Docs PF** - Envio de RG, CPF, Comprovante de Residência
-3. **Pagamento** - Taxa de licença
-4. **Acolhimento** - Primeiros treinamentos
-5. **Agendamento** - Agendar treinamento presencial
-6. **Treinamento** - Treinamento presencial na fábrica
-7. **Vendas** - 10 vendas em campo
-8. **Docs PJ** - Envio de Cartão CNPJ, Contrato Social
-9. **Completo** - Acesso total à plataforma
+3. **Acolhimento** - Primeiros treinamentos (módulos de acolhimento)
+4. **Treinamento Presencial** - Inscrição, pagamento e participação no treinamento presencial
+5. **Vendas** - 10 vendas em campo
+6. **Docs PJ** - Envio de Cartão CNPJ, Contrato Social
+7. **Completo** - Acesso total à plataforma
+
+**Nota**: Etapa de "Pagamento de Taxa de Licença" e "Agendamento" foram removidas/incorporadas.
 
 ---
 
