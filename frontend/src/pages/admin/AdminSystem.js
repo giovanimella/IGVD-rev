@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff, Trophy } from 'lucide-react';
+import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff, Trophy, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
 
@@ -232,6 +232,14 @@ const AdminSystem = () => {
       icon: Trophy,
       link: '/admin/levels',
       color: 'bg-yellow-500',
+      count: '-'
+    },
+    {
+      title: 'Treinamentos Presenciais',
+      description: 'Gerenciar turmas e inscrições',
+      icon: GraduationCap,
+      link: '/admin/training',
+      color: 'bg-indigo-500',
       count: '-'
     }
   ];
