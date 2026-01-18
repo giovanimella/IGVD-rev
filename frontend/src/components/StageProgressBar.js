@@ -9,10 +9,8 @@ const StageProgressBar = ({ currentStage }) => {
   const stages = [
     { key: 'registro', label: 'Registro', description: 'Definir senha', link: null },
     { key: 'documentos_pf', label: 'Docs PF', description: 'Pessoa Física', link: '/onboarding/documents' },
-    { key: 'pagamento', label: 'Pagamento', description: 'Taxa de licença', link: '/onboarding/payment' },
     { key: 'acolhimento', label: 'Acolhimento', description: 'Primeiros treinamentos', link: '/modules' },
-    { key: 'agendamento', label: 'Agendamento', description: 'Agendar treinamento', link: '/profile' },
-    { key: 'treinamento_presencial', label: 'Treinamento', description: 'Presencial na fábrica', link: '/profile' },
+    { key: 'treinamento_presencial', label: 'Treinamento', description: 'Presencial na empresa', link: '/training' },
     { key: 'vendas_campo', label: 'Vendas', description: '10 vendas em campo', link: '/profile' },
     { key: 'documentos_pj', label: 'Docs PJ', description: 'Pessoa Jurídica', link: '/onboarding/documents-pj' },
     { key: 'completo', label: 'Completo', description: 'Acesso total', link: '/modules' }
@@ -58,7 +56,7 @@ const StageProgressBar = ({ currentStage }) => {
         </div>
 
         {/* Stages */}
-        <div className="relative grid grid-cols-4 md:grid-cols-9 gap-4">
+        <div className="relative grid grid-cols-4 md:grid-cols-7 gap-4">
           {stages.map((stage, index) => {
             const status = getStageStatus(index);
             return (
