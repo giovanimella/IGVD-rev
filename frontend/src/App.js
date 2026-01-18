@@ -32,6 +32,7 @@ import AdminChallenges from './pages/admin/AdminChallenges';
 import AdminAssessment from './pages/admin/AdminAssessment';
 import AdminCertificates from './pages/admin/AdminCertificates';
 import AdminLevels from './pages/admin/AdminLevels';
+import AdminTraining from './pages/admin/AdminTraining';
 import SupervisorLicensees from './pages/supervisor/SupervisorLicensees';
 import SupervisorAnalytics from './pages/supervisor/SupervisorAnalytics';
 import LicenseeDetail from './pages/supervisor/LicenseeDetail';
@@ -43,6 +44,7 @@ import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
 import Agenda from './pages/Agenda';
 import ChapterView from './pages/ChapterView';
+import Training from './pages/Training';
 
 function App() {
   return (
@@ -224,6 +226,14 @@ function App() {
             element={
               <PrivateRoute roles={['admin']}>
                 <AdminLevels />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/training"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminTraining />
               </PrivateRoute>
             }
           />
