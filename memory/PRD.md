@@ -176,3 +176,106 @@ Desenvolver uma plataforma EAD completa para franquias, com sistema de módulos,
 ### Supervisor/Admin
 - `GET /api/appointments/supervisor/licensee/{user_id}` - Todos compromissos do licenciado
 - `GET /api/appointments/supervisor/licensee/{user_id}/month/{year}/{month}` - Compromissos do mês
+
+
+---
+
+## Sistema de Treinamentos Presenciais ✅ NOVO (18/01/2026)
+
+### Visão Geral
+Sistema completo para gerenciamento de turmas de treinamento presencial com duração de 3 dias. Inclui inscrição de licenciados, pagamento (**MOCKADO**), controle de presença e geração de PDF.
+
+### Funcionalidades Admin
+
+#### Painel de Turmas (`/admin/training`)
+- CRUD de turmas (criar, editar, excluir)
+- Campos: Data, Horário, Capacidade, Local, Informações do Hotel
+- Data de fechamento calculada automaticamente (X dias antes)
+- Visualização de inscritos por turma
+- Download de PDF da lista de presença (3 páginas - Dia 01, 02, 03)
+- Marcação de presença/ausência
+- Realocação de ausentes para próxima turma
+
+#### Configurações Globais
+- **Dias para Fechamento**: Quantos dias antes do treinamento as inscrições fecham
+- **Valor Individual**: R$ 3.500,00 (default)
+- **Valor com Cônjuge**: R$ 6.000,00 (default)
+- **Termos e Condições**: Texto configurável
+- **Instruções do Treinamento**: Texto configurável
+
+### Fluxo do Licenciado (`/training`)
+
+1. **Aceitar Termos**: Lê e aceita os termos e condições
+2. **Preencher Dados**: Formulário completo para reserva de hospedagem
+   - Nome Completo, CPF, RG, Data de Nascimento
+   - Telefone, E-mail
+   - Endereço Completo, Cidade, Estado, CEP
+3. **Cônjuge (opcional)**: Se marcado, abre formulário idêntico para cônjuge
+4. **Pagamento**: **MOCKADO** - Botão "Simular Pagamento" (gateway a definir)
+5. **Confirmação**: Exibe informações do treinamento (data, hora, local, hotel, instruções)
+
+### Lógica de Alocação
+- Sistema aloca automaticamente na primeira turma disponível
+- Turma disponível = status "open" + data de fechamento >= hoje + vagas disponíveis
+- Se nenhuma turma disponível, retorna erro
+
+### Controle de Presença (Pós-Treinamento)
+- Admin marca **Presente**: Licenciado avança para "vendas_campo"
+- Admin marca **Ausente**: Licenciado precisa ser realocado (sem novo pagamento)
+
+### APIs de Treinamento
+
+#### Configuração
+- `GET /api/training/config` - Obter configurações
+- `PUT /api/training/config` - Atualizar configurações (admin only)
+
+#### Turmas (Admin)
+- `POST /api/training/classes` - Criar turma
+- `GET /api/training/classes` - Listar todas turmas
+- `GET /api/training/classes/available` - Turmas disponíveis para inscrição
+- `GET /api/training/classes/{id}` - Detalhes com inscritos
+- `PUT /api/training/classes/{id}` - Atualizar turma
+- `DELETE /api/training/classes/{id}` - Excluir turma (sem inscritos pagos)
+- `GET /api/training/classes/{id}/attendance-pdf` - Gerar PDF lista de presença
+
+#### Licenciado
+- `GET /api/training/my-registration` - Minha inscrição + config
+- `POST /api/training/register` - Inscrever-se
+- `POST /api/training/simulate-payment` - **MOCK** Simular pagamento
+
+#### Presença (Admin)
+- `PUT /api/training/registrations/{id}/attendance?present=true/false` - Marcar presença
+- `POST /api/training/registrations/{id}/reallocate` - Realocar ausente
+
+#### Supervisor
+- `GET /api/training/supervisor/licensees` - Status de treinamento dos licenciados
+
+### ⚠️ IMPORTANTE: Pagamento MOCKADO
+O pagamento está **simulado** via endpoint `POST /api/training/simulate-payment`. 
+A integração real com **MercadoPago ou PagSeguro** será implementada posteriormente.
+
+---
+
+## Níveis de Gamificação ✅ (17/01/2026)
+
+### Painel Admin (`/admin/levels`)
+- CRUD completo de níveis
+- Campos: Título, Pontos Mínimos, Ícone (emoji), Cor, Descrição
+- Preview em tempo real
+- Botão para criar níveis padrão
+
+### Níveis Padrão
+1. 🌱 Iniciante - 0 pts
+2. 📚 Aprendiz - 100 pts
+3. ⭐ Intermediário - 300 pts
+4. 🚀 Avançado - 600 pts
+5. 🏆 Expert - 1.000 pts
+6. 👑 Mestre - 2.000 pts
+
+### APIs
+- `GET /api/levels/` - Listar níveis
+- `POST /api/levels/` - Criar nível
+- `PUT /api/levels/{id}` - Atualizar nível
+- `DELETE /api/levels/{id}` - Excluir nível
+- `POST /api/levels/seed` - Criar níveis padrão
+
