@@ -20,13 +20,13 @@ DOCUMENTS_DIR = Path("/app/uploads/documents")
 DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ==================== ESTÁGIOS DO ONBOARDING ====================
-# registro -> documentos_pf -> pagamento -> agendamento -> treinamento_presencial -> vendas_campo -> documentos_pj -> completo
+# registro -> documentos_pf -> acolhimento -> treinamento_presencial -> vendas_campo -> documentos_pj -> completo
+# Nota: "pagamento" foi removido; "agendamento" foi incorporado ao "treinamento_presencial"
 
 STAGES_ORDER = [
     "registro",
     "documentos_pf",
-    "pagamento",
-    "agendamento",
+    "acolhimento",
     "treinamento_presencial",
     "vendas_campo",
     "documentos_pj",
@@ -182,13 +182,14 @@ async def upload_document_pf(
     all_uploaded = all(doc in documents_pf for doc in required_docs)
     
     if all_uploaded:
+        # Pagamento removido - vai direto para acolhimento
         await db.users.update_one(
             {"id": current_user["sub"]},
-            {"$set": {"current_stage": "pagamento"}}
+            {"$set": {"current_stage": "acolhimento"}}
         )
         return {
             "message": "Documento enviado com sucesso",
-            "next_stage": "pagamento",
+            "next_stage": "acolhimento",
             "all_documents_uploaded": True
         }
     
