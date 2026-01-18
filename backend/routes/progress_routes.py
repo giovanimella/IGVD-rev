@@ -206,18 +206,18 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
                             break
                     
                     if all_acolhimento_completed:
-                        # Avançar para próxima etapa do onboarding
+                        # Avançar para próxima etapa do onboarding (treinamento presencial)
                         await db.users.update_one(
                             {"id": current_user["sub"]},
-                            {"$set": {"current_stage": "agendamento"}}
+                            {"$set": {"current_stage": "treinamento_presencial"}}
                         )
                         
                         await create_notification(
                             current_user["sub"],
                             "Acolhimento Concluído! 🎓",
-                            "Parabéns! Você concluiu todos os módulos de acolhimento. Agora você pode agendar seu treinamento presencial.",
+                            "Parabéns! Você concluiu todos os módulos de acolhimento. Agora você pode se inscrever no treinamento presencial.",
                             "onboarding_stage",
-                            "agendamento"
+                            "treinamento_presencial"
                         )
         
         await db.user_progress.update_one(
