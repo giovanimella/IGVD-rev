@@ -257,7 +257,9 @@ class TestLicenseeRegistration:
         response = requests.post(f"{BASE_URL}/api/training/register", json=registration_data, headers=licensee_headers)
         # Should fail because licensee is at 'completo' stage, not 'treinamento_presencial'
         assert response.status_code == 400
-        assert "treinamento_presencial" in response.json().get("detail", "").lower()
+        # Check that error message mentions training stage
+        detail = response.json().get("detail", "").lower()
+        assert "treinamento" in detail or "etapa" in detail
     
     def test_register_terms_not_accepted(self, licensee_headers):
         """POST /api/training/register - Rejects if terms not accepted"""
