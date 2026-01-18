@@ -141,6 +141,14 @@ function App() {
             }
           />
           <Route
+            path="/training"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <Training />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <PrivateRoute>
