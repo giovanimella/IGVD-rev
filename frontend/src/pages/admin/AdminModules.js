@@ -216,6 +216,23 @@ const AdminModules = () => {
                     onCheckedChange={(checked) => setFormData({...formData, has_assessment: checked})}
                   />
                 </div>
+                <div className="space-y-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-purple-600" />
+                    <Label htmlFor="delay">Delay de Visibilidade (meses)</Label>
+                  </div>
+                  <p className="text-sm text-purple-600 mb-2">
+                    0 = aparece imediatamente. Ex: 3 = aparece após 3 meses de cadastro
+                  </p>
+                  <Input
+                    id="delay"
+                    type="number"
+                    min="0"
+                    value={formData.visibility_delay_months}
+                    onChange={(e) => setFormData({...formData, visibility_delay_months: parseInt(e.target.value) || 0})}
+                    placeholder="0"
+                  />
+                </div>
                 <Button onClick={handleCreateModule} className="w-full" data-testid="submit-module-button">
                   Criar Módulo
                 </Button>
