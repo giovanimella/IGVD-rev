@@ -161,62 +161,62 @@ const Dashboard = () => {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Dashboard Administrativo</h1>
-            <p className="text-slate-600 mt-2">Visão geral da plataforma</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Dashboard Administrativo</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Visão geral da plataforma</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            <div className="bg-white rounded-xl border border-slate-100 p-4 lg:p-6 hover:border-cyan-100 transition-colors" data-testid="stat-card-users">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-4 lg:p-6 hover:border-cyan-100 dark:hover:border-cyan-500/30 transition-all" data-testid="stat-card-users">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-cyan-600" />
+                <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">Total de Licenciados</p>
-              <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_users || 0}</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total de Licenciados</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_users || 0}</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-100 p-6 hover:border-cyan-100 transition-colors" data-testid="stat-card-modules">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-blue-500/30 transition-all" data-testid="stat-card-modules">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">Total de Módulos</p>
-              <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_modules || 0}</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total de Módulos</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_modules || 0}</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-100 p-6 hover:border-cyan-100 transition-colors" data-testid="stat-card-rewards">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-amber-500/30 transition-all" data-testid="stat-card-rewards">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <Award className="w-6 h-6 text-amber-600" />
+                <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
+                  <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">Recompensas Ativas</p>
-              <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_rewards || 0}</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Recompensas Ativas</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_rewards || 0}</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-100 p-6 hover:border-cyan-100 transition-colors" data-testid="stat-card-pending">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-orange-500/30 transition-all" data-testid="stat-card-pending">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-orange-600" />
+                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-500/20 rounded-lg flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">Resgates Pendentes</p>
-              <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.pending_redemptions || 0}</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Resgates Pendentes</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.pending_redemptions || 0}</p>
             </div>
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-6">Crescimento ao Longo do Tempo</h3>
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Crescimento ao Longo do Tempo</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={progressData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="month" stroke="#64748b" />
-                  <YAxis stroke="#64748b" />
-                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                  <XAxis dataKey="month" stroke="#94a3b8" />
+                  <YAxis stroke="#94a3b8" />
+                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
                   <Legend />
                   <Line type="monotone" dataKey="licenciados" stroke="#06b6d4" strokeWidth={2} name="Licenciados" />
                   <Line type="monotone" dataKey="modulos" stroke="#8b5cf6" strokeWidth={2} name="Módulos Concluídos" />
