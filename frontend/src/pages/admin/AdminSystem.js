@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff, Trophy, GraduationCap } from 'lucide-react';
+import { Settings, Users, BookOpen, Award, FileText, TrendingUp, Save, ClipboardCheck, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff, Trophy, GraduationCap, ShoppingCart, Radio, DollarSign, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const AdminSystem = () => {
   const [stats, setStats] = useState(null);
