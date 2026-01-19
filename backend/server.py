@@ -60,6 +60,8 @@ app.include_router(webhook_routes.router, prefix="/api")
 app.include_router(appointment_routes.router, prefix="/api")
 app.include_router(level_routes.router, prefix="/api")
 app.include_router(training_routes.router, prefix="/api")
+app.include_router(sales_routes.router, prefix="/api")
+app.include_router(ozoxx_cast_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
