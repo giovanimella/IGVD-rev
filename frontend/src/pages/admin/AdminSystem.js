@@ -239,9 +239,25 @@ const AdminSystem = () => {
     {
       title: 'Treinamentos Presenciais',
       description: 'Gerenciar turmas e inscrições',
-      icon: GraduationCap,
+      icon: UserCheck,
       link: '/admin/training',
       color: 'bg-indigo-500',
+      count: '-'
+    },
+    {
+      title: 'Relatório de Vendas',
+      description: 'Acompanhar vendas e comissões',
+      icon: DollarSign,
+      link: '/admin/sales',
+      color: 'bg-emerald-500',
+      count: '-'
+    },
+    {
+      title: 'Ozoxx Cast',
+      description: 'Gerenciar vídeos de lives',
+      icon: Radio,
+      link: '/admin/ozoxx-cast',
+      color: 'bg-pink-500',
       count: '-'
     }
   ];
