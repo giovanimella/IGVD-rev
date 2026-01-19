@@ -33,6 +33,17 @@ const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
 
+  const fetchLogo = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/system/logo`);
+      if (response.data.logo_url) {
+        setLogoUrl(`${API_URL}${response.data.logo_url}`);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar logo:', error);
+    }
+  };
+
   useEffect(() => {
     fetchLogo();
   }, []);
@@ -53,17 +64,6 @@ const Sidebar = () => {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileOpen]);
-
-  const fetchLogo = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/api/system/logo`);
-      if (response.data.logo_url) {
-        setLogoUrl(`${API_URL}${response.data.logo_url}`);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar logo:', error);
-    }
-  };
 
   const handleLogout = () => {
     logout();
