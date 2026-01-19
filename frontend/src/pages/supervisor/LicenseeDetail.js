@@ -219,14 +219,14 @@ const LicenseeDetail = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/supervisor/licensees')}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
               data-testid="back-button"
             >
-              <ArrowLeft className="w-6 h-6 text-slate-600" />
+              <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
             </button>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900">{licensee.full_name}</h1>
-              <p className="text-slate-600 mt-1 text-sm lg:text-base">Detalhes do Licenciado</p>
+              <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">{licensee.full_name}</h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm lg:text-base">Detalhes do Licenciado</p>
             </div>
           </div>
           <span
@@ -239,7 +239,7 @@ const LicenseeDetail = () => {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-slate-200">
+        <div className="border-b border-slate-200 dark:border-white/10">
           <div className="flex space-x-1 overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -250,8 +250,8 @@ const LicenseeDetail = () => {
                   data-testid={`tab-${tab.key}`}
                   className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === tab.key
-                      ? 'border-cyan-500 text-cyan-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                      ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                      : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-white/20'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -267,53 +267,53 @@ const LicenseeDetail = () => {
           <div className="space-y-6">
             {/* Informações Básicas */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <User className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
-                <p className="text-slate-600 text-sm mb-1">Informações de Contato</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Informações de Contato</p>
                 <div className="space-y-2 mt-3">
-                  <div className="flex items-center text-sm text-slate-700">
-                    <Mail className="w-4 h-4 mr-2 text-slate-400" />
+                  <div className="flex items-center text-sm text-slate-700 dark:text-slate-300">
+                    <Mail className="w-4 h-4 mr-2 text-slate-400 dark:text-slate-500" />
                     {licensee.email}
                   </div>
                   {licensee.phone && (
-                    <div className="flex items-center text-sm text-slate-700">
-                      <Phone className="w-4 h-4 mr-2 text-slate-400" />
+                    <div className="flex items-center text-sm text-slate-700 dark:text-slate-300">
+                      <Phone className="w-4 h-4 mr-2 text-slate-400 dark:text-slate-500" />
                       {licensee.phone}
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 p-6">
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 rounded-xl border border-amber-200 dark:border-amber-700/50 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center">
                     <Award className="w-6 h-6 text-white" />
                   </div>
                 </div>
-                <p className="text-amber-700 text-sm mb-1">Pontos e Nível</p>
-                <p className="text-3xl font-outfit font-bold text-amber-900">{licensee.points || 0}</p>
-                <p className="text-amber-700 text-sm mt-1">{licensee.level_title || 'Iniciante'}</p>
+                <p className="text-amber-700 dark:text-amber-400 text-sm mb-1">Pontos e Nível</p>
+                <p className="text-3xl font-outfit font-bold text-amber-900 dark:text-amber-300">{licensee.points || 0}</p>
+                <p className="text-amber-700 dark:text-amber-400 text-sm mt-1">{licensee.level_title || 'Iniciante'}</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-green-600" />
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
-                <p className="text-slate-600 text-sm mb-1">Vendas em Campo</p>
-                <p className="text-3xl font-outfit font-bold text-slate-900">{licensee.field_sales_count || 0}/10</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Vendas em Campo</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{licensee.field_sales_count || 0}/10</p>
               </div>
             </div>
 
             {/* Recompensas Pendentes */}
             {redemptions.filter(r => r.status === 'pending').length > 0 && (
-              <div className="bg-white rounded-xl border border-slate-200 p-6">
-                <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4 flex items-center">
+              <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+                <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
                   <Gift className="w-5 h-5 mr-2 text-amber-600" />
                   Recompensas Pendentes
                 </h3>
@@ -323,15 +323,15 @@ const LicenseeDetail = () => {
                     .map((redemption) => (
                       <div
                         key={redemption.id}
-                        className="flex items-center justify-between p-4 border border-amber-200 bg-amber-50 rounded-lg"
+                        className="flex items-center justify-between p-4 border border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/20 rounded-lg"
                       >
                         <div>
-                          <p className="font-medium text-slate-900">Recompensa Solicitada</p>
-                          <p className="text-sm text-slate-600">
+                          <p className="font-medium text-slate-900 dark:text-white">Recompensa Solicitada</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
                             {new Date(redemption.requested_at).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                        <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full text-xs font-medium">
                           Pendente
                         </span>
                       </div>
@@ -342,31 +342,31 @@ const LicenseeDetail = () => {
 
             {/* Informações do Líder */}
             {(licensee.leader_id || licensee.leader_name) && (
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 p-6">
-                <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4 flex items-center">
-                  <Users className="w-5 h-5 mr-2 text-indigo-600" />
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-200 dark:border-indigo-700/50 p-6">
+                <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
                   Líder Responsável
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {licensee.leader_name && (
-                    <div className="flex items-center gap-3 bg-white rounded-lg p-4 border border-indigo-100">
-                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                        <User className="w-5 h-5 text-indigo-600" />
+                    <div className="flex items-center gap-3 bg-white dark:bg-[#151B28] rounded-lg p-4 border border-indigo-100 dark:border-indigo-800/50">
+                      <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                        <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500">Nome do Líder</p>
-                        <p className="font-semibold text-slate-900">{licensee.leader_name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Nome do Líder</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">{licensee.leader_name}</p>
                       </div>
                     </div>
                   )}
                   {licensee.leader_id && (
-                    <div className="flex items-center gap-3 bg-white rounded-lg p-4 border border-indigo-100">
-                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                        <Hash className="w-5 h-5 text-indigo-600" />
+                    <div className="flex items-center gap-3 bg-white dark:bg-[#151B28] rounded-lg p-4 border border-indigo-100 dark:border-indigo-800/50">
+                      <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                        <Hash className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500">ID do Líder</p>
-                        <p className="font-semibold text-slate-900 font-mono text-sm">{licensee.leader_id}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">ID do Líder</p>
+                        <p className="font-semibold text-slate-900 dark:text-white font-mono text-sm">{licensee.leader_id}</p>
                       </div>
                     </div>
                   )}
@@ -375,49 +375,49 @@ const LicenseeDetail = () => {
             )}
 
             {/* Informações Adicionais */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4 flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-slate-600" />
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
+                <Clock className="w-5 h-5 mr-2 text-slate-600 dark:text-slate-400" />
                 Informações Adicionais
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border-l-4 border-blue-500 pl-4">
-                  <p className="text-sm text-slate-600 mb-1">Status de Pagamento</p>
-                  <p className="font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Status de Pagamento</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">
                     {licensee.payment_status === 'paid' ? (
-                      <span className="text-green-600 flex items-center">
+                      <span className="text-green-600 dark:text-green-400 flex items-center">
                         <CheckCircle className="w-4 h-4 mr-1" /> Pago
                       </span>
                     ) : (
-                      <span className="text-yellow-600 flex items-center">
+                      <span className="text-yellow-600 dark:text-yellow-400 flex items-center">
                         <Clock className="w-4 h-4 mr-1" /> Pendente
                       </span>
                     )}
                   </p>
                 </div>
                 <div className="border-l-4 border-purple-500 pl-4">
-                  <p className="text-sm text-slate-600 mb-1">Treinamento Presencial</p>
-                  <p className="font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Treinamento Presencial</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">
                     {licensee.training_attended ? (
-                      <span className="text-green-600 flex items-center">
+                      <span className="text-green-600 dark:text-green-400 flex items-center">
                         <CheckCircle className="w-4 h-4 mr-1" /> Concluído
                       </span>
                     ) : (
-                      <span className="text-gray-600 flex items-center">
+                      <span className="text-gray-600 dark:text-gray-400 flex items-center">
                         <XCircle className="w-4 h-4 mr-1" /> Não realizado
                       </span>
                     )}
                   </p>
                 </div>
                 <div className="border-l-4 border-amber-500 pl-4">
-                  <p className="text-sm text-slate-600 mb-1">Data de Cadastro</p>
-                  <p className="font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Data de Cadastro</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">
                     {new Date(licensee.created_at).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
                 <div className="border-l-4 border-green-500 pl-4">
-                  <p className="text-sm text-slate-600 mb-1">Última Atualização</p>
-                  <p className="font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Última Atualização</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">
                     {new Date(licensee.updated_at).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
@@ -430,16 +430,16 @@ const LicenseeDetail = () => {
         {activeTab === 'documents' && (
           <div className="space-y-6">
             {/* Documentos Pessoa Física */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-cyan-200 p-6">
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-cyan-200 dark:border-cyan-700/50 p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-cyan-500 rounded-xl flex items-center justify-center">
                   <User className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-outfit font-semibold text-slate-900">
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">
                     Documentos Pessoa Física
                   </h3>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     RG, CPF e Comprovante de Residência
                   </p>
                 </div>
@@ -451,25 +451,25 @@ const LicenseeDetail = () => {
                     renderDocumentCard(key, value, 'pf')
                   )
                 ) : (
-                  <div className="text-center py-8 bg-white rounded-lg border border-slate-200">
-                    <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500">Nenhum documento PF enviado ainda</p>
+                  <div className="text-center py-8 bg-white dark:bg-[#151B28] rounded-lg border border-slate-200 dark:border-white/10">
+                    <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-500 dark:text-slate-400">Nenhum documento PF enviado ainda</p>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Documentos Pessoa Jurídica */}
-            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border border-purple-200 p-6">
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-700/50 p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
                   <Building2 className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-outfit font-semibold text-slate-900">
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">
                     Documentos Pessoa Jurídica
                   </h3>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     Cartão CNPJ e Contrato Social
                   </p>
                 </div>
@@ -481,9 +481,9 @@ const LicenseeDetail = () => {
                     renderDocumentCard(key, value, 'pj')
                   )
                 ) : (
-                  <div className="text-center py-8 bg-white rounded-lg border border-slate-200">
-                    <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500">Nenhum documento PJ enviado ainda</p>
+                  <div className="text-center py-8 bg-white dark:bg-[#151B28] rounded-lg border border-slate-200 dark:border-white/10">
+                    <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-500 dark:text-slate-400">Nenhum documento PJ enviado ainda</p>
                   </div>
                 )}
               </div>
@@ -493,27 +493,27 @@ const LicenseeDetail = () => {
 
         {/* Tab Content: Agenda */}
         {activeTab === 'agenda' && (
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-outfit font-semibold text-slate-900 flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-cyan-600" />
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-cyan-600 dark:text-cyan-400" />
                 Agenda do Licenciado
               </h3>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                 >
-                  <ChevronLeft className="w-5 h-5 text-slate-600" />
+                  <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                 </button>
-                <span className="text-sm font-medium text-slate-700 min-w-[140px] text-center">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 min-w-[140px] text-center">
                   {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                 </span>
                 <button
                   onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                 >
-                  <ChevronRight className="w-5 h-5 text-slate-600" />
+                  <ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                 </button>
               </div>
             </div>
@@ -527,7 +527,7 @@ const LicenseeDetail = () => {
                   return (
                     <div
                       key={apt.id}
-                      className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+                      className="flex items-start gap-4 p-4 rounded-lg border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                     >
                       <div className={`w-12 h-12 rounded-lg ${catInfo.color} flex items-center justify-center flex-shrink-0`}>
                         <Icon className="w-6 h-6 text-white" />
@@ -535,22 +535,22 @@ const LicenseeDetail = () => {
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
-                            <p className="font-medium text-slate-900">{apt.title}</p>
-                            <p className="text-sm text-slate-500">{catInfo.label}</p>
+                            <p className="font-medium text-slate-900 dark:text-white">{apt.title}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{catInfo.label}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium text-slate-900">
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">
                               {aptDate.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
                             </p>
-                            <p className="text-sm text-slate-500 flex items-center justify-end">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center justify-end">
                               <Clock className="w-3 h-3 mr-1" />
                               {apt.time}
-                              {apt.duration && <span className="ml-2 text-slate-400">• {apt.duration}</span>}
+                              {apt.duration && <span className="ml-2 text-slate-400 dark:text-slate-500">• {apt.duration}</span>}
                             </p>
                           </div>
                         </div>
                         {apt.description && (
-                          <p className="text-sm text-slate-600 mt-2 bg-slate-50 rounded p-2">{apt.description}</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 bg-slate-50 dark:bg-white/5 rounded p-2">{apt.description}</p>
                         )}
                       </div>
                     </div>
@@ -559,19 +559,19 @@ const LicenseeDetail = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-500">Nenhum compromisso neste mês</p>
+                <Calendar className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <p className="text-slate-500 dark:text-slate-400">Nenhum compromisso neste mês</p>
               </div>
             )}
 
             {/* Legenda de categorias */}
-            <div className="mt-6 pt-4 border-t border-slate-200">
-              <p className="text-xs font-medium text-slate-500 mb-3">Categorias</p>
+            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/10">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Categorias</p>
               <div className="flex flex-wrap gap-4">
                 {Object.entries(categories).map(([key, cat]) => (
                   <div key={key} className="flex items-center gap-2 text-xs">
                     <div className={`w-3 h-3 rounded ${cat.color}`} />
-                    <span className="text-slate-600">{cat.label}</span>
+                    <span className="text-slate-600 dark:text-slate-400">{cat.label}</span>
                   </div>
                 ))}
               </div>
@@ -581,32 +581,32 @@ const LicenseeDetail = () => {
 
         {/* Tab Content: Progresso */}
         {activeTab === 'progress' && (
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4 flex items-center">
-              <BookOpen className="w-5 h-5 mr-2 text-purple-600" />
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+            <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
+              <BookOpen className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
               Progresso nos Módulos
             </h3>
             <div className="space-y-3">
               {modules.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">Nenhum módulo disponível</p>
+                <p className="text-slate-500 dark:text-slate-400 text-center py-8">Nenhum módulo disponível</p>
               ) : (
                 modules.map((module) => (
-                  <div key={module.id} className="border border-slate-200 rounded-lg p-4">
+                  <div key={module.id} className="border border-slate-200 dark:border-white/10 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-slate-900">{module.title}</h4>
+                      <h4 className="font-medium text-slate-900 dark:text-white">{module.title}</h4>
                       {module.is_acolhimento && (
-                        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                        <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-xs font-medium">
                           Acolhimento
                         </span>
                       )}
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2">
+                    <div className="w-full bg-slate-200 dark:bg-white/10 rounded-full h-2">
                       <div
                         className="bg-cyan-500 h-2 rounded-full transition-all"
                         style={{ width: `${module.progress || 0}%` }}
                       />
                     </div>
-                    <p className="text-xs text-slate-600 mt-1">{module.progress || 0}% concluído</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{module.progress || 0}% concluído</p>
                   </div>
                 ))
               )}
