@@ -4,6 +4,7 @@ from models import Module, ModuleCreate
 from auth import get_current_user, require_role
 import os
 from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -24,6 +25,32 @@ async def get_all_modules(current_user: dict = Depends(get_current_user)):
             return []
     
     modules = await db.modules.find(query, {"_id": 0}).sort("order", 1).to_list(1000)
+    
+    # Filtrar módulos baseado no delay de visibilidade (para licenciados)
+    if current_user.get("role") == "licenciado" and user:
+        user_created_at = user.get("created_at", datetime.now(timezone.utc).isoformat())
+        try:
+            user_registration_date = datetime.fromisoformat(user_created_at.replace('Z', '+00:00'))
+        except:
+            user_registration_date = datetime.now(timezone.utc)
+        
+        now = datetime.now(timezone.utc)
+        months_since_registration = (now.year - user_registration_date.year) * 12 + (now.month - user_registration_date.month)
+        
+        filtered_modules = []
+        for module in modules:
+            delay_months = module.get("visibility_delay_months", 0)
+            if delay_months <= months_since_registration:
+                filtered_modules.append(module)
+            else:
+                # Calcular quando o módulo ficará disponível
+                available_date = user_registration_date + relativedelta(months=delay_months)
+                module["locked"] = True
+                module["available_at"] = available_date.isoformat()
+                module["months_until_available"] = delay_months - months_since_registration
+                filtered_modules.append(module)
+        
+        modules = filtered_modules
     
     for module in modules:
         chapters_count = await db.chapters.count_documents({"module_id": module["id"]})
