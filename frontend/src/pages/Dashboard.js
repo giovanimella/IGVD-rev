@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import Layout from '../components/Layout';
 import StageProgressBar from '../components/StageProgressBar';
 import BannerCarousel from '../components/BannerCarousel';
@@ -11,6 +12,7 @@ import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Cart
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [stats, setStats] = useState(null);
   const [stageInfo, setStageInfo] = useState(null);
   const [loading, setLoading] = useState(true);
