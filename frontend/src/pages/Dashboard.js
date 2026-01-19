@@ -293,51 +293,51 @@ const Dashboard = () => {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Dashboard do Supervisor</h1>
-            <p className="text-slate-600 mt-2">Visão geral dos seus licenciados</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Dashboard do Supervisor</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Visão geral dos seus licenciados</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-cyan-600" />
+                <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                  <Users className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">Total de Licenciados</p>
-              <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_licensees || 0}</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total de Licenciados</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_licensees || 0}</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">Módulos Disponíveis</p>
-              <p className="text-3xl font-outfit font-bold text-slate-900">{stats?.total_modules || 0}</p>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Módulos Disponíveis</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_modules || 0}</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Award className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+                  <Award className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
-              <p className="text-slate-600 text-sm mb-1">Licenciados Completos</p>
-              <p className="text-3xl font-outfit font-bold text-slate-900">
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Licenciados Completos</p>
+              <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">
                 {stats?.licensees?.filter(l => l.current_stage === 'completo').length || 0}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Ações Rápidas</h3>
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Ações Rápidas</h3>
               <div className="space-y-3">
-                <Link to="/supervisor/licensees" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                <Link to="/supervisor/licensees" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Users className="w-5 h-5 text-cyan-600" />
+                    <Users className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                     <span className="font-medium text-slate-900">Gerenciar Licenciados</span>
                   </div>
                   <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
