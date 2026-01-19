@@ -42,24 +42,40 @@ code {
     }
 
     .dark {
-        --background: 222 47% 11%;
-        --foreground: 0 0% 98%;
-        --card: 222 47% 11%;
-        --card-foreground: 0 0% 98%;
-        --popover: 222 47% 11%;
-        --popover-foreground: 0 0% 98%;
+        /* Deep dark blue-grey background like Dashdark X */
+        --background: 222 58% 7%;
+        --foreground: 210 20% 98%;
+        
+        /* Cards with slightly lighter shade */
+        --card: 220 40% 13%;
+        --card-foreground: 210 20% 98%;
+        
+        /* Popover same as card */
+        --popover: 220 40% 13%;
+        --popover-foreground: 210 20% 98%;
+        
+        /* Primary cyan accent */
         --primary: 187 100% 42%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 217 33% 17%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 217 33% 17%;
+        
+        /* Secondary for muted elements */
+        --secondary: 220 30% 20%;
+        --secondary-foreground: 210 20% 90%;
+        
+        /* Muted backgrounds */
+        --muted: 220 30% 18%;
         --muted-foreground: 215 20% 65%;
-        --accent: 38 92% 50%;
+        
+        /* Accent purple/violet */
+        --accent: 259 70% 60%;
         --accent-foreground: 0 0% 100%;
-        --destructive: 0 62% 30%;
+        
+        --destructive: 0 62% 50%;
         --destructive-foreground: 0 0% 98%;
-        --border: 217 33% 17%;
-        --input: 217 33% 17%;
+        
+        /* Subtle borders */
+        --border: 220 30% 22%;
+        --input: 220 30% 18%;
         --ring: 187 100% 42%;
     }
 }
@@ -87,6 +103,53 @@ code {
             padding-bottom: env(safe-area-inset-bottom);
         }
     }
+}
+
+/* Dark mode global styles */
+.dark {
+    color-scheme: dark;
+}
+
+.dark body {
+    background: linear-gradient(135deg, #0B0F18 0%, #151B28 100%);
+}
+
+/* Dark mode cards with subtle gradient and glow */
+.dark .dark-card {
+    background: linear-gradient(145deg, #191E2A 0%, #1A2234 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode input fields */
+.dark input,
+.dark textarea,
+.dark select {
+    background-color: #191E2A !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #E0E0E0 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: #6B7280 !important;
+}
+
+/* Dark mode tables */
+.dark table {
+    background-color: transparent;
+}
+
+.dark thead {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.dark tbody tr {
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
 }
 
 @layer base {
