@@ -97,6 +97,7 @@ const Sidebar = () => {
   const licenseeLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
+    { path: '/ozoxx-cast', icon: Radio, label: 'Ozoxx Cast' },
     { path: '/agenda', icon: Calendar, label: 'Agenda' },
     { path: '/certificates', icon: Award, label: 'Certificados' },
     { path: '/rewards', icon: Award, label: 'Recompensas' },
