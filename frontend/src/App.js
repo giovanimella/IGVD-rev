@@ -266,6 +266,22 @@ function App() {
             }
           />
           <Route
+            path="/admin/sales"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminSales />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/ozoxx-cast"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminOzoxxCast />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/admin/files"
             element={
               <PrivateRoute roles={['admin']}>
