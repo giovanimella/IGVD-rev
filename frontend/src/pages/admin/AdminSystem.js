@@ -313,18 +313,48 @@ const AdminSystem = () => {
               <Image className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
             </div>
             <div>
-              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Logo da Plataforma</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Faça upload da logo UniOzoxx (PNG, máximo 10MB)</p>
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Identidade da Plataforma</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Configure o nome e logo da plataforma</p>
             </div>
           </div>
 
+          {/* Nome da Plataforma */}
+          <div className="mb-6 p-4 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Nome da Plataforma
+            </label>
+            <div className="flex items-center gap-4">
+              <input
+                type="text"
+                value={systemConfig.platform_name}
+                onChange={(e) => setSystemConfig({ ...systemConfig, platform_name: e.target.value })}
+                className="flex-1 px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                placeholder="Ex: UniOzoxx"
+                data-testid="platform-name-input"
+              />
+              <Button
+                onClick={saveSystemConfig}
+                disabled={savingConfig}
+                className="bg-cyan-500 hover:bg-cyan-600"
+                data-testid="save-platform-name-btn"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {savingConfig ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              Este nome aparecerá na tela de login, emails, título das páginas e em toda a plataforma.
+            </p>
+          </div>
+
+          {/* Logo */}
           <div className="flex items-center gap-6">
             {/* Preview da Logo */}
             <div className="w-48 h-24 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-lg flex items-center justify-center bg-slate-50 dark:bg-white/5 overflow-hidden">
               {logoUrl ? (
                 <img 
                   src={logoUrl} 
-                  alt="Logo UniOzoxx" 
+                  alt={systemConfig.platform_name}
                   className="max-w-full max-h-full object-contain p-2"
                   data-testid="current-logo-preview"
                 />
@@ -368,7 +398,7 @@ const AdminSystem = () => {
           </div>
 
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
-            A logo será exibida na tela de login, no menu lateral e em outros lugares da plataforma.
+            A logo será exibida na tela de login e no menu lateral (PNG, máximo 10MB).
           </p>
         </div>
 
