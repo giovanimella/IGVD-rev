@@ -26,6 +26,11 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+async def get_platform_name():
+    """Busca o nome da plataforma das configurações do sistema"""
+    config = await db.system_config.find_one({"id": "system_config"})
+    return config.get("platform_name", "UniOzoxx") if config else "UniOzoxx"
+
 @router.post("/login")
 async def login(credentials: UserLogin):
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
