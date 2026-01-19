@@ -18,7 +18,7 @@ router = APIRouter(prefix="/webhook", tags=["webhook"])
 # Configuração do Resend
 resend.api_key = os.environ.get('RESEND_API_KEY')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@email.ozoxx.com.br')
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://ozoxx-training.preview.emergentagent.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://trainozoxx.preview.emergentagent.com')
 
 
 # ==================== MODELOS ====================
