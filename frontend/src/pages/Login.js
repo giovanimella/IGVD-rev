@@ -16,21 +16,28 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
+  const [platformName, setPlatformName] = useState('UniOzoxx');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchLogo();
+    fetchSystemConfig();
   }, []);
 
-  const fetchLogo = async () => {
+  const fetchSystemConfig = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/system/logo`);
-      if (response.data.logo_url) {
-        setLogoUrl(`${API_URL}${response.data.logo_url}`);
+      const [logoRes, configRes] = await Promise.all([
+        axios.get(`${API_URL}/api/system/logo`),
+        axios.get(`${API_URL}/api/system/config`)
+      ]);
+      if (logoRes.data.logo_url) {
+        setLogoUrl(`${API_URL}${logoRes.data.logo_url}`);
+      }
+      if (configRes.data.platform_name) {
+        setPlatformName(configRes.data.platform_name);
       }
     } catch (error) {
-      console.error('Erro ao buscar logo:', error);
+      console.error('Erro ao buscar configurações:', error);
     }
   };
 
@@ -50,106 +57,85 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-cyan-500 to-blue-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative z-10 flex flex-col justify-center items-center text-white px-12">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B0F18] p-4">
+      <div className="w-full max-w-md">
+        {/* Logo centralizada */}
+        <div className="flex flex-col items-center mb-8">
           {logoUrl ? (
             <img 
               src={logoUrl} 
-              alt="UniOzoxx" 
-              className="max-w-xs max-h-32 object-contain mb-8"
+              alt={platformName}
+              className="max-w-[200px] max-h-24 object-contain mb-4"
               data-testid="login-logo"
             />
           ) : (
-            <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mb-6">
-              <span className="text-4xl font-outfit font-bold">U</span>
+            <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <span className="text-4xl font-outfit font-bold text-white">{platformName.charAt(0)}</span>
             </div>
           )}
-          <h1 className="text-5xl font-outfit font-bold mb-4">UniOzoxx</h1>
-          <div className="mt-8 space-y-4 text-center">
-            <p className="text-white/80">Aprenda, Cresça e Conquiste Recompensas</p>
-          </div>
+          <h1 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white">{platformName}</h1>
         </div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl"></div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-            {/* Logo no mobile */}
-            <div className="lg:hidden flex justify-center mb-6">
-              {logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt="UniOzoxx" 
-                  className="max-w-[200px] max-h-20 object-contain"
-                />
-              ) : (
-                <h1 className="text-2xl font-outfit font-bold text-cyan-600">UniOzoxx</h1>
-              )}
-            </div>
-            
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-outfit font-bold text-slate-900 mb-2">Bem-vindo de volta</h2>
-              <p className="text-slate-600">Entre com suas credenciais para continuar</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6" data-testid="login-form">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  data-testid="login-email-input"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-12"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    data-testid="login-password-input"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="h-12 pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end">
-                <Link to="/request-reset" className="text-sm text-cyan-600 hover:text-cyan-700 font-medium">
-                  Esqueceu a senha?
-                </Link>
-              </div>
-
-              <Button
-                type="submit"
-                data-testid="login-submit-button"
-                disabled={loading}
-                className="w-full h-12 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-lg transition-all shadow-sm hover:shadow-md active:scale-95"
-              >
-                {loading ? 'Entrando...' : 'Entrar'}
-              </Button>
-            </form>
+        {/* Card de Login */}
+        <div className="bg-white dark:bg-[#151B28] rounded-2xl shadow-lg border border-slate-200 dark:border-white/10 p-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white mb-2">Bem-vindo de volta</h2>
+            <p className="text-slate-600 dark:text-slate-400">Entre com suas credenciais para continuar</p>
           </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6" data-testid="login-form">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="dark:text-slate-300">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                data-testid="login-email-input"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-12 dark:bg-[#0B0F18] dark:border-white/10 dark:text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="dark:text-slate-300">Senha</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  data-testid="login-password-input"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="h-12 pr-10 dark:bg-[#0B0F18] dark:border-white/10 dark:text-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end">
+              <Link to="/request-reset" className="text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium">
+                Esqueceu a senha?
+              </Link>
+            </div>
+
+            <Button
+              type="submit"
+              data-testid="login-submit-button"
+              disabled={loading}
+              className="w-full h-12 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-lg transition-all shadow-sm hover:shadow-md active:scale-95"
+            >
+              {loading ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </form>
         </div>
       </div>
     </div>
