@@ -87,9 +87,12 @@ const AdminSystem = () => {
     setSavingConfig(true);
     try {
       await axios.put(`${API_URL}/api/system/config`, {
+        platform_name: systemConfig.platform_name,
         minimum_passing_score: systemConfig.minimum_passing_score
       });
       toast.success('Configurações salvas com sucesso!');
+      // Recarregar para atualizar o nome em todo o app
+      window.location.reload();
     } catch (error) {
       console.error('Erro ao salvar configurações:', error);
       toast.error('Erro ao salvar configurações');
