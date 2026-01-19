@@ -85,25 +85,29 @@ async def request_password_reset(request: PasswordResetRequest):
         }}
     )
     
+    # Buscar nome da plataforma
+    platform_name = await get_platform_name()
+    
     reset_link = f"{FRONTEND_URL}/reset-password/{reset_token}"
     html_content = f"""
     <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #06b6d4;">Redefinição de Senha - UniOzoxx</h2>
+            <h2 style="color: #06b6d4;">Redefinição de Senha - {platform_name}</h2>
             <p>Olá {user['full_name']},</p>
             <p>Você solicitou a redefinição de senha. Clique no link abaixo para definir uma nova senha:</p>
             <a href="{reset_link}" style="background-color: #06b6d4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; margin: 20px 0;">Redefinir Senha</a>
             <p>Este link expira em 1 hora.</p>
             <p>Se você não solicitou esta redefinição, ignore este email.</p>
+            <p style="color: #888; font-size: 12px; margin-top: 30px;">© {platform_name} - Plataforma de Treinamento</p>
         </body>
     </html>
     """
     
     try:
         params = {
-            "from": SENDER_EMAIL,
+            "from": f"{platform_name} <{SENDER_EMAIL}>",
             "to": [request.email],
-            "subject": "Redefinição de Senha - UniOzoxx",
+            "subject": f"Redefinição de Senha - {platform_name}",
             "html": html_content
         }
         await asyncio.to_thread(resend.Emails.send, params)
