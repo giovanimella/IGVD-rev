@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { useLanguage } from '../../contexts/LanguageContext';
 import {
   ShoppingCart,
   DollarSign,
@@ -48,7 +47,6 @@ import {
 
 const AdminSales = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
   const [sales, setSales] = useState([]);
