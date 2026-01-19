@@ -18,7 +18,10 @@ import {
   Target,
   Heart,
   BarChart3,
-  Calendar
+  Calendar,
+  Radio,
+  ShoppingCart,
+  DollarSign
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
