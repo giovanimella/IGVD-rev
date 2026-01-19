@@ -529,6 +529,69 @@ async def reallocate_registration(
     
     return {"message": "Licenciado realocado com sucesso"}
 
+@router.put("/classes/{class_id}/open-attendance")
+async def open_attendance(
+    class_id: str,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Marcar que o treinamento ocorreu e abrir página de presença"""
+    cls = await db.training_classes_v2.find_one({"id": class_id})
+    if not cls:
+        raise HTTPException(status_code=404, detail="Turma não encontrada")
+    
+    # Atualizar status da turma para attendance_open (presença aberta)
+    await db.training_classes_v2.update_one(
+        {"id": class_id},
+        {"$set": {
+            "status": "attendance_open",
+            "training_occurred": True,
+            "training_occurred_at": datetime.now(timezone.utc).isoformat(),
+            "training_occurred_by": current_user["sub"]
+        }}
+    )
+    
+    return {
+        "message": "Treinamento marcado como realizado. Página de presença aberta.",
+        "status": "attendance_open"
+    }
+
+@router.put("/classes/{class_id}/close-attendance")
+async def close_attendance(
+    class_id: str,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Finalizar marcação de presença e concluir turma"""
+    cls = await db.training_classes_v2.find_one({"id": class_id})
+    if not cls:
+        raise HTTPException(status_code=404, detail="Turma não encontrada")
+    
+    # Verificar quantos não tiveram presença marcada
+    not_marked = await db.training_registrations.count_documents({
+        "class_id": class_id,
+        "payment_status": "paid",
+        "attendance_status": None
+    })
+    
+    if not_marked > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Ainda há {not_marked} participante(s) sem presença marcada"
+        )
+    
+    # Atualizar status da turma para completed
+    await db.training_classes_v2.update_one(
+        {"id": class_id},
+        {"$set": {
+            "status": "completed",
+            "completed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "message": "Marcação de presença finalizada. Turma concluída.",
+        "status": "completed"
+    }
+
 # ==================== GERAÇÃO DE PDF - LISTA DE PRESENÇA ====================
 
 @router.get("/classes/{class_id}/attendance-pdf")
