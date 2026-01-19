@@ -609,6 +609,9 @@ async def generate_sales_report_pdf(
     # Calcular totais
     total_value = sum(s.get("sale_value", 0) for s in sales)
     
+    # Buscar nome da plataforma
+    platform_name = await get_platform_name()
+    
     # Buscar tipos de comissão ativos
     commission_types = await db.commission_types.find({"active": True}, {"_id": 0}).to_list(100)
     
@@ -638,7 +641,7 @@ async def generate_sales_report_pdf(
     
     # Título
     month_name = get_month_name(month)
-    elements.append(Paragraph(f"Relatório de Vendas e Comissões", title_style))
+    elements.append(Paragraph(f"Relatório de Vendas e Comissões - {platform_name}", title_style))
     elements.append(Paragraph(f"{month_name} de {year}", subtitle_style))
     elements.append(Spacer(1, 0.5*cm))
     
