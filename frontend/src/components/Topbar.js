@@ -32,17 +32,18 @@ const Topbar = () => {
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4">
+          <ThemeToggle />
           <LanguageSelector />
           <NotificationBell />
           
           {user?.role === 'licenciado' && (
             <>
               {/* Pontos - Compacto em mobile */}
-              <div className="flex items-center gap-2 bg-amber-50 px-2 lg:px-4 py-1.5 lg:py-2 rounded-lg border border-amber-200">
-                <Award className="w-4 h-4 lg:w-5 lg:h-5 text-amber-600" />
+              <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/30 px-2 lg:px-4 py-1.5 lg:py-2 rounded-lg border border-amber-200 dark:border-amber-700">
+                <Award className="w-4 h-4 lg:w-5 lg:h-5 text-amber-600 dark:text-amber-400" />
                 <div>
-                  <p className="text-[10px] lg:text-xs text-amber-600 font-medium hidden lg:block">Pontos</p>
-                  <p className="text-sm lg:text-lg font-outfit font-bold text-amber-700" data-testid="user-points">
+                  <p className="text-[10px] lg:text-xs text-amber-600 dark:text-amber-400 font-medium hidden lg:block">Pontos</p>
+                  <p className="text-sm lg:text-lg font-outfit font-bold text-amber-700 dark:text-amber-300" data-testid="user-points">
                     {user?.points || 0}
                   </p>
                 </div>
