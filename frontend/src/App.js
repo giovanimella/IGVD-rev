@@ -45,6 +45,10 @@ import Favorites from './pages/Favorites';
 import Agenda from './pages/Agenda';
 import ChapterView from './pages/ChapterView';
 import Training from './pages/Training';
+import Sales from './pages/Sales';
+import OzoxxCast from './pages/OzoxxCast';
+import AdminOzoxxCast from './pages/admin/AdminOzoxxCast';
+import AdminSales from './pages/admin/AdminSales';
 
 function App() {
   return (
