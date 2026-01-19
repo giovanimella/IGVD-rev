@@ -218,8 +218,8 @@ const Agenda = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900">Minha Agenda</h1>
-            <p className="text-slate-600 mt-1">Gerencie seus compromissos e atividades</p>
+            <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">Minha Agenda</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-1">Gerencie seus compromissos e atividades</p>
           </div>
           <Button
             onClick={() => openNewAppointmentModal()}
@@ -233,32 +233,32 @@ const Agenda = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendário */}
-          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6">
+          <div className="lg:col-span-2 bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
             {/* Navegação do mês */}
             <div className="flex items-center justify-between mb-6">
               <button
                 onClick={handlePrevMonth}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                 data-testid="prev-month-btn"
               >
-                <ChevronLeft className="w-5 h-5 text-slate-600" />
+                <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </button>
-              <h2 className="text-xl font-outfit font-semibold text-slate-900">
+              <h2 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h2>
               <button
                 onClick={handleNextMonth}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                 data-testid="next-month-btn"
               >
-                <ChevronRight className="w-5 h-5 text-slate-600" />
+                <ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </button>
             </div>
 
             {/* Dias da semana */}
             <div className="grid grid-cols-7 mb-2">
               {weekDays.map(day => (
-                <div key={day} className="text-center text-sm font-medium text-slate-500 py-2">
+                <div key={day} className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 py-2">
                   {day}
                 </div>
               ))}
@@ -276,15 +276,15 @@ const Agenda = () => {
                     onClick={() => handleDateClick(dayInfo)}
                     className={`
                       min-h-[80px] p-2 rounded-lg cursor-pointer transition-all border
-                      ${dayInfo.isCurrentMonth ? 'bg-white' : 'bg-slate-50'}
-                      ${isSelected ? 'border-cyan-500 ring-2 ring-cyan-200' : 'border-transparent hover:border-slate-200'}
-                      ${isToday(dayInfo.date) ? 'bg-cyan-50' : ''}
+                      ${dayInfo.isCurrentMonth ? 'bg-white dark:bg-[#151B28]' : 'bg-slate-50 dark:bg-white/5'}
+                      ${isSelected ? 'border-cyan-500 ring-2 ring-cyan-200 dark:ring-cyan-500/30' : 'border-transparent hover:border-slate-200 dark:hover:border-white/20'}
+                      ${isToday(dayInfo.date) ? 'bg-cyan-50 dark:bg-cyan-900/30' : ''}
                     `}
                     data-testid={`calendar-day-${dayInfo.day}`}
                   >
                     <span className={`
                       text-sm font-medium
-                      ${dayInfo.isCurrentMonth ? 'text-slate-900' : 'text-slate-400'}
+                      ${dayInfo.isCurrentMonth ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}
                       ${isToday(dayInfo.date) ? 'bg-cyan-500 text-white w-7 h-7 rounded-full flex items-center justify-center' : ''}
                     `}>
                       {dayInfo.day}
@@ -304,7 +304,7 @@ const Agenda = () => {
                         );
                       })}
                       {dayAppointments.length > 2 && (
-                        <div className="text-xs text-slate-500 text-center">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
                           +{dayAppointments.length - 2}
                         </div>
                       )}
@@ -316,9 +316,9 @@ const Agenda = () => {
           </div>
 
           {/* Lista de compromissos do dia */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-outfit font-semibold text-slate-900">
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">
                 {selectedDate ? (
                   <>
                     {selectedDate.getDate()} de {monthNames[selectedDate.getMonth()]}
@@ -348,7 +348,7 @@ const Agenda = () => {
                     return (
                       <div
                         key={apt.id}
-                        className="p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+                        className="p-4 rounded-lg border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                         data-testid={`appointment-${apt.id}`}
                       >
                         <div className="flex items-start justify-between">
@@ -357,30 +357,30 @@ const Agenda = () => {
                               <Icon className="w-5 h-5 text-white" />
                             </div>
                             <div>
-                              <p className="font-medium text-slate-900">{apt.title}</p>
-                              <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
+                              <p className="font-medium text-slate-900 dark:text-white">{apt.title}</p>
+                              <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mt-1">
                                 <Clock className="w-4 h-4" />
                                 <span>{apt.time}</span>
                                 {apt.duration && (
-                                  <span className="text-slate-400">• {apt.duration}</span>
+                                  <span className="text-slate-400 dark:text-slate-500">• {apt.duration}</span>
                                 )}
                               </div>
                               {apt.description && (
-                                <p className="text-sm text-slate-600 mt-2">{apt.description}</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{apt.description}</p>
                               )}
                             </div>
                           </div>
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openEditAppointmentModal(apt)}
-                              className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
+                              className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                               data-testid={`edit-${apt.id}`}
                             >
-                              <Edit className="w-4 h-4 text-slate-500" />
+                              <Edit className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             </button>
                             <button
                               onClick={() => handleDelete(apt.id)}
-                              className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                              className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                               data-testid={`delete-${apt.id}`}
                             >
                               <Trash2 className="w-4 h-4 text-red-500" />
@@ -393,8 +393,8 @@ const Agenda = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <CalendarIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-500">Nenhum compromisso neste dia</p>
+                  <CalendarIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-500 dark:text-slate-400">Nenhum compromisso neste dia</p>
                   <Button
                     size="sm"
                     variant="outline"
@@ -408,19 +408,19 @@ const Agenda = () => {
               )
             ) : (
               <div className="text-center py-8">
-                <CalendarIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500">Clique em um dia para ver os compromissos</p>
+                <CalendarIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                <p className="text-slate-500 dark:text-slate-400">Clique em um dia para ver os compromissos</p>
               </div>
             )}
 
             {/* Legenda de categorias */}
-            <div className="mt-6 pt-4 border-t border-slate-200">
-              <p className="text-xs font-medium text-slate-500 mb-3">Categorias</p>
+            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/10">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Categorias</p>
               <div className="grid grid-cols-2 gap-2">
                 {categories.map(cat => (
                   <div key={cat.key} className="flex items-center gap-2 text-xs">
                     <div className={`w-3 h-3 rounded ${cat.color}`} />
-                    <span className="text-slate-600">{cat.label}</span>
+                    <span className="text-slate-600 dark:text-slate-400">{cat.label}</span>
                   </div>
                 ))}
               </div>
@@ -440,14 +440,14 @@ const Agenda = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Título *
               </label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
                 placeholder="Ex: Reunião com cliente"
                 required
                 data-testid="appointment-title-input"
@@ -456,27 +456,27 @@ const Agenda = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Data *
                 </label>
                 <input
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
                   required
                   data-testid="appointment-date-input"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Horário *
                 </label>
                 <input
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
                   required
                   data-testid="appointment-time-input"
                 />
@@ -485,13 +485,13 @@ const Agenda = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Categoria
                 </label>
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
                   data-testid="appointment-category-select"
                 >
                   {categories.map(cat => (
@@ -500,14 +500,14 @@ const Agenda = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Duração
                 </label>
                 <input
                   type="text"
                   value={formData.duration}
                   onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
                   placeholder="Ex: 1 hora"
                   data-testid="appointment-duration-input"
                 />
@@ -515,13 +515,13 @@ const Agenda = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Observações
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
                 rows={3}
                 placeholder="Detalhes do compromisso..."
                 data-testid="appointment-description-input"
