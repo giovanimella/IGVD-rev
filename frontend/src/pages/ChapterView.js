@@ -215,21 +215,21 @@ const ChapterView = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(`/module/${moduleId}`)}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-6 h-6 text-slate-600" />
+            <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
           </button>
           <div className="flex-1">
-            <p className="text-sm text-cyan-600 font-medium">{module?.title}</p>
-            <h1 className="text-2xl font-outfit font-bold text-slate-900">{chapter.title}</h1>
+            <p className="text-sm text-cyan-600 dark:text-cyan-400 font-medium">{module?.title}</p>
+            <h1 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white">{chapter.title}</h1>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleFavorite}
               className={`p-2 rounded-lg transition-colors ${
                 isFavorite
-                  ? 'text-rose-500 bg-rose-50 hover:bg-rose-100'
-                  : 'text-slate-400 hover:text-rose-500 hover:bg-slate-100'
+                  ? 'text-rose-500 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50'
+                  : 'text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-white/10'
               }`}
             >
               <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
@@ -238,26 +238,26 @@ const ChapterView = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-slate-700">Progresso do Capítulo</span>
-            <span className={`text-sm font-medium ${watchedPercentage >= MIN_PERCENTAGE ? 'text-green-600' : 'text-slate-500'}`}>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Progresso do Capítulo</span>
+            <span className={`text-sm font-medium ${watchedPercentage >= MIN_PERCENTAGE ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
               {Math.round(watchedPercentage)}%
             </span>
           </div>
           <Progress 
             value={watchedPercentage} 
-            className={`h-3 ${watchedPercentage >= MIN_PERCENTAGE ? 'bg-green-100' : ''}`}
+            className={`h-3 ${watchedPercentage >= MIN_PERCENTAGE ? 'bg-green-100 dark:bg-green-900/30' : ''}`}
           />
           {!isCompleted && watchedPercentage < MIN_PERCENTAGE && (
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
               Assista pelo menos {MIN_PERCENTAGE}% do conteúdo para marcar como completo
             </p>
           )}
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden" ref={contentRef}>
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden" ref={contentRef}>
           {chapter.content_type === 'video' && embedUrl && (
             <div className="aspect-video bg-black">
               <iframe
@@ -285,11 +285,11 @@ const ChapterView = () => {
 
           {chapter.content_type === 'document' && (
             <div className="p-6">
-              <div className="flex items-center gap-3 mb-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                <FileText className="w-6 h-6 text-amber-600" />
+              <div className="flex items-center gap-3 mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700/50">
+                <FileText className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 <div className="flex-1">
-                  <p className="font-medium text-amber-800">Documento para Leitura</p>
-                  <p className="text-sm text-amber-600">
+                  <p className="font-medium text-amber-800 dark:text-amber-300">Documento para Leitura</p>
+                  <p className="text-sm text-amber-600 dark:text-amber-400">
                     Tempo estimado: {chapter.duration_minutes || 5} minutos
                   </p>
                 </div>
@@ -307,13 +307,13 @@ const ChapterView = () => {
               </div>
               
               {chapter.content && (
-                <div className="prose max-w-none">
+                <div className="prose dark:prose-invert max-w-none">
                   <div dangerouslySetInnerHTML={{ __html: chapter.content }} />
                 </div>
               )}
               
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm text-blue-700">
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
                   <Clock className="w-4 h-4 inline mr-1" />
                   Tempo de leitura: {Math.floor(readTime / 60)}:{String(readTime % 60).padStart(2, '0')} / {chapter.duration_minutes || 2}:00
                 </p>
@@ -324,28 +324,28 @@ const ChapterView = () => {
           {/* Conteúdo genérico quando não há tipo definido */}
           {!chapter.content_type && !chapter.video_url && (
             <div className="p-6">
-              <div className="flex items-center gap-3 mb-4 p-4 bg-cyan-50 rounded-lg border border-cyan-200">
-                <FileText className="w-6 h-6 text-cyan-600" />
+              <div className="flex items-center gap-3 mb-4 p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-700/50">
+                <FileText className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                 <div className="flex-1">
-                  <p className="font-medium text-cyan-800">Conteúdo do Capítulo</p>
-                  <p className="text-sm text-cyan-600">
+                  <p className="font-medium text-cyan-800 dark:text-cyan-300">Conteúdo do Capítulo</p>
+                  <p className="text-sm text-cyan-600 dark:text-cyan-400">
                     Permaneça nesta página para registrar seu progresso
                   </p>
                 </div>
               </div>
               
               {chapter.description && (
-                <div className="prose max-w-none mb-4">
-                  <p className="text-slate-700">{chapter.description}</p>
+                <div className="prose dark:prose-invert max-w-none mb-4">
+                  <p className="text-slate-700 dark:text-slate-300">{chapter.description}</p>
                 </div>
               )}
               
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm text-blue-700">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
                   <Clock className="w-4 h-4 inline mr-1" />
                   Tempo na página: {Math.floor(readTime / 60)}:{String(readTime % 60).padStart(2, '0')} / {chapter.duration_minutes || 1}:00 min
                 </p>
-                <p className="text-xs text-blue-500 mt-1">
+                <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">
                   Aguarde atingir 90% para marcar como completo
                 </p>
               </div>
@@ -353,23 +353,23 @@ const ChapterView = () => {
           )}
 
           {chapter.description && chapter.content_type && (
-            <div className="p-6 border-t border-slate-200">
-              <h3 className="font-semibold text-slate-900 mb-2">Sobre este capítulo</h3>
-              <p className="text-slate-600">{chapter.description}</p>
+            <div className="p-6 border-t border-slate-200 dark:border-white/10">
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Sobre este capítulo</h3>
+              <p className="text-slate-600 dark:text-slate-400">{chapter.description}</p>
             </div>
           )}
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200 p-4">
+        <div className="flex items-center justify-between bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-4">
           <div className="flex items-center gap-3">
             {isCompleted ? (
-              <div className="flex items-center gap-2 text-green-600">
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                 <CheckCircle className="w-6 h-6" />
                 <span className="font-medium">Capítulo Concluído!</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-slate-500">
+              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                 <Clock className="w-5 h-5" />
                 <span>{chapter.duration_minutes || 5} minutos</span>
               </div>
@@ -406,8 +406,8 @@ const ChapterView = () => {
 
         {/* Note about YouTube */}
         {chapter.content_type === 'video' && embedUrl && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <p className="text-sm text-amber-800">
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-lg p-4">
+            <p className="text-sm text-amber-800 dark:text-amber-300">
               <strong>Nota:</strong> Para vídeos do YouTube, assista o conteúdo completamente e depois clique em "Marcar como Completo" 
               quando estiver satisfeito com seu aprendizado. O sistema confia em sua honestidade.
             </p>
