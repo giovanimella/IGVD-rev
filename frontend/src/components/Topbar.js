@@ -11,22 +11,22 @@ const Topbar = () => {
   const { user } = useAuth();
 
   return (
-    <header className="bg-white border-b border-slate-200 px-4 lg:px-6 py-3 lg:py-4 sticky top-0 z-30">
+    <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 lg:px-6 py-3 lg:py-4 sticky top-0 z-30">
       <div className="flex items-center justify-between">
         {/* Espaço para o botão do menu mobile */}
         <div className="lg:hidden w-12"></div>
         
         {/* Saudação - Escondida em mobile pequeno */}
         <div className="hidden sm:block">
-          <h2 className="text-lg lg:text-2xl font-outfit font-semibold text-slate-900">
+          <h2 className="text-lg lg:text-2xl font-outfit font-semibold text-slate-900 dark:text-white">
             Bem-vindo, {user?.full_name?.split(' ')[0]}
           </h2>
-          <p className="text-xs lg:text-sm text-slate-500 capitalize">{user?.role}</p>
+          <p className="text-xs lg:text-sm text-slate-500 dark:text-slate-400 capitalize">{user?.role}</p>
         </div>
 
         {/* Mobile: Nome curto */}
         <div className="sm:hidden flex-1 text-center">
-          <h2 className="text-base font-outfit font-semibold text-slate-900 truncate px-2">
+          <h2 className="text-base font-outfit font-semibold text-slate-900 dark:text-white truncate px-2">
             Olá, {user?.full_name?.split(' ')[0]}
           </h2>
         </div>
