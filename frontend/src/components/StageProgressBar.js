@@ -43,12 +43,12 @@ const StageProgressBar = ({ currentStage }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6" data-testid="stage-progress-bar">
-      <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-6">Seu Progresso no Onboarding</h3>
+    <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6" data-testid="stage-progress-bar">
+      <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Seu Progresso no Onboarding</h3>
       
       <div className="relative">
         {/* Progress Line */}
-        <div className="absolute top-8 left-0 right-0 h-1 bg-slate-200">
+        <div className="absolute top-8 left-0 right-0 h-1 bg-slate-200 dark:bg-white/10">
           <div 
             className="h-full bg-cyan-500 transition-all duration-500"
             style={{ width: `${(currentIndex / (stages.length - 1)) * 100}%` }}
@@ -64,20 +64,20 @@ const StageProgressBar = ({ currentStage }) => {
                 <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-2 transition-all ${
                   status === 'completed' ? 'bg-green-500 text-white scale-110' :
                   status === 'current' ? 'bg-cyan-500 text-white scale-125 shadow-lg' :
-                  'bg-slate-200 text-slate-400'
+                  'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'
                 }`}>
                   {status === 'completed' && <CheckCircle className="w-8 h-8" />}
                   {status === 'current' && (stage.key === 'registro' ? <Mail className="w-8 h-8" /> : <Circle className="w-8 h-8 animate-pulse" />)}
                   {status === 'locked' && <Lock className="w-6 h-6" />}
                 </div>
                 <p className={`text-xs font-medium text-center ${
-                  status === 'completed' ? 'text-green-600' :
-                  status === 'current' ? 'text-cyan-600' :
-                  'text-slate-400'
+                  status === 'completed' ? 'text-green-600 dark:text-green-400' :
+                  status === 'current' ? 'text-cyan-600 dark:text-cyan-400' :
+                  'text-slate-400 dark:text-slate-500'
                 }`}>
                   {stage.label}
                 </p>
-                <p className="text-xs text-slate-500 text-center mt-1 hidden md:block">
+                <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-1 hidden md:block">
                   {stage.description}
                 </p>
               </div>
@@ -89,7 +89,7 @@ const StageProgressBar = ({ currentStage }) => {
       {/* Current Stage Info */}
       <div 
         onClick={handleStageClick}
-        className="mt-8 bg-cyan-50 rounded-lg p-4 border border-cyan-100 cursor-pointer hover:bg-cyan-100 transition-all duration-200 hover:shadow-md"
+        className="mt-8 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg p-4 border border-cyan-100 dark:border-cyan-700/50 cursor-pointer hover:bg-cyan-100 dark:hover:bg-cyan-900/30 transition-all duration-200 hover:shadow-md"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -99,15 +99,15 @@ const StageProgressBar = ({ currentStage }) => {
             <div>
               {currentStage === 'registro' ? (
                 <>
-                  <p className="text-sm text-cyan-700 font-medium">Verifique seu email</p>
-                  <p className="text-lg font-outfit font-bold text-cyan-900">
+                  <p className="text-sm text-cyan-700 dark:text-cyan-400 font-medium">Verifique seu email</p>
+                  <p className="text-lg font-outfit font-bold text-cyan-900 dark:text-cyan-300">
                     Clique no link enviado para definir sua senha
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-sm text-cyan-700 font-medium">Etapa Atual - Clique para acessar</p>
-                  <p className="text-lg font-outfit font-bold text-cyan-900">
+                  <p className="text-sm text-cyan-700 dark:text-cyan-400 font-medium">Etapa Atual - Clique para acessar</p>
+                  <p className="text-lg font-outfit font-bold text-cyan-900 dark:text-cyan-300">
                     {stages[currentIndex]?.label || 'Completo'}
                   </p>
                 </>
@@ -115,7 +115,7 @@ const StageProgressBar = ({ currentStage }) => {
             </div>
           </div>
           {currentStage !== 'registro' && (
-            <svg className="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           )}
