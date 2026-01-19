@@ -152,14 +152,27 @@ async def set_initial_password(request: PasswordResetConfirm):
     
     new_password_hash = get_password_hash(request.new_password)
     
-    # Atualizar senha e avançar para próxima etapa (documentos_pf)
+    # Determinar próximo estágio baseado no kit_type
+    # Kit Master: mantém em "completo" (já definido no cadastro)
+    # Kit Senior: avança para documentos_pf
+    kit_type = user.get("kit_type", "senior")
+    current_stage = user.get("current_stage", "registro")
+    
+    if kit_type == "master":
+        # Kit Master mantém como completo
+        next_stage = "completo"
+    else:
+        # Kit Senior segue fluxo normal
+        next_stage = "documentos_pf"
+    
+    # Atualizar senha e avançar para próxima etapa
     await db.users.update_one(
         {"id": user["id"]},
         {"$set": {
             "password_hash": new_password_hash,
             "password_token": None,
             "password_token_expires": None,
-            "current_stage": "documentos_pf",
+            "current_stage": next_stage,
             "updated_at": datetime.now(timezone.utc).isoformat()
         }}
     )
