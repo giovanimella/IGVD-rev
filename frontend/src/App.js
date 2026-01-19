@@ -378,6 +378,7 @@ function App() {
       </BrowserRouter>
       {/* </ChatProvider> */}
     </AuthProvider>
+    </LanguageProvider>
   );
 }
 
