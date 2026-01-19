@@ -153,6 +153,22 @@ function App() {
             }
           />
           <Route
+            path="/sales"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <Sales />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/ozoxx-cast"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <OzoxxCast />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <PrivateRoute>
