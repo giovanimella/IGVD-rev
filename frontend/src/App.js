@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 // import { ChatProvider } from './contexts/ChatContext';
 import { PrivateRoute } from './components/PrivateRoute';
 import { Toaster } from './components/ui/sonner';
