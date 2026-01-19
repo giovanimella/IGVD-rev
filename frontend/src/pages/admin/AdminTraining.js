@@ -175,14 +175,17 @@ const AdminTraining = () => {
 
   const handleMarkAttendance = async (registrationId, present) => {
     try {
-      await axios.put(`${API_URL}/api/training/registrations/${registrationId}/attendance?present=${present}`);
-      toast.success(present ? 'Marcado como presente!' : 'Marcado como ausente');
+      await axios.put(`${API_URL}/api/training/classes/${selectedClass.id}/mark-attendance`, {
+        registration_id: registrationId,
+        attendance_status: present ? 'present' : 'absent'
+      });
+      toast.success(present ? 'Marcado como presente! Licenciado avançou para Vendas em Campo.' : 'Marcado como ausente. Será realocado para próxima turma.');
       
       // Atualizar dados
       const response = await axios.get(`${API_URL}/api/training/classes/${selectedClass.id}`);
       setSelectedClass(response.data);
     } catch (error) {
-      toast.error('Erro ao marcar presença');
+      toast.error(error.response?.data?.detail || 'Erro ao marcar presença');
     }
   };
 
