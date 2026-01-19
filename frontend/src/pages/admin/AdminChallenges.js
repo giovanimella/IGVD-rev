@@ -150,8 +150,8 @@ const AdminChallenges = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Desafios Semanais</h1>
-            <p className="text-slate-600 mt-2">Crie missões para engajar os licenciados</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Desafios Semanais</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Crie missões para engajar os licenciados</p>
           </div>
           <button
             onClick={openNewChallengeModal}
@@ -164,78 +164,78 @@ const AdminChallenges = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl border border-slate-100 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-                <Target className="w-6 h-6 text-cyan-600" />
+              <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                <Target className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
               </div>
               <div>
-                <p className="text-slate-600 text-sm">Total de Desafios</p>
-                <p className="text-2xl font-bold text-slate-900">{challenges.length}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Desafios</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{challenges.length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+                <Trophy className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-slate-600 text-sm">Desafios Ativos</p>
-                <p className="text-2xl font-bold text-slate-900">{activeChallenges.length}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Desafios Ativos</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{activeChallenges.length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-amber-600" />
+              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-slate-600 text-sm">Pontos em Recompensas</p>
-                <p className="text-2xl font-bold text-slate-900">{activeChallenges.reduce((acc, c) => acc + c.points_reward, 0)}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Pontos em Recompensas</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{activeChallenges.reduce((acc, c) => acc + c.points_reward, 0)}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Challenges List */}
-        <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead className="bg-slate-50 dark:bg-white/5">
                 <tr>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600">Desafio</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600">Tipo</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600">Meta</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600">Recompensa</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600">Período</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600">Status</th>
-                  <th className="text-right px-6 py-4 text-sm font-medium text-slate-600">Ações</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300">Desafio</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300">Tipo</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300">Meta</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300">Recompensa</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300">Período</th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300">Status</th>
+                  <th className="text-right px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {challenges.map((challenge) => {
                   const status = getChallengeStatus(challenge);
                   return (
-                    <tr key={challenge.id} className="hover:bg-slate-50">
+                    <tr key={challenge.id} className="hover:bg-slate-50 dark:hover:bg-white/5">
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-medium text-slate-900">{challenge.title}</p>
-                          <p className="text-sm text-slate-500 truncate max-w-xs">{challenge.description}</p>
+                          <p className="font-medium text-slate-900 dark:text-white">{challenge.title}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 truncate max-w-xs">{challenge.description}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-sm text-slate-600">{getChallengeTypeLabel(challenge.challenge_type)}</span>
+                        <span className="text-sm text-slate-600 dark:text-slate-400">{getChallengeTypeLabel(challenge.challenge_type)}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-sm font-medium text-slate-900">{challenge.target_value}</span>
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">{challenge.target_value}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-sm font-medium text-amber-600">+{challenge.points_reward} pts</span>
+                        <span className="text-sm font-medium text-amber-600 dark:text-amber-400">+{challenge.points_reward} pts</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-sm text-slate-600">
+                        <span className="text-sm text-slate-600 dark:text-slate-400">
                           {formatDate(challenge.start_date)} - {formatDate(challenge.end_date)}
                         </span>
                       </td>
@@ -248,13 +248,13 @@ const AdminChallenges = () => {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleEdit(challenge)}
-                            className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(challenge.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -269,9 +269,9 @@ const AdminChallenges = () => {
 
           {challenges.length === 0 && (
             <div className="text-center py-12">
-              <Target className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-900 mb-2">Nenhum desafio cadastrado</h3>
-              <p className="text-slate-600 mb-4">Crie desafios semanais para motivar os licenciados!</p>
+              <Target className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Nenhum desafio cadastrado</h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-4">Crie desafios semanais para motivar os licenciados!</p>
               <button
                 onClick={openNewChallengeModal}
                 className="bg-cyan-500 text-white px-4 py-2 rounded-lg hover:bg-cyan-600 transition-colors"

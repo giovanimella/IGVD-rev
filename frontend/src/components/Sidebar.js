@@ -181,7 +181,7 @@ const Sidebar = () => {
         <button
           onClick={handleLogout}
           data-testid="sidebar-logout-button"
-          className="flex items-center gap-3 px-4 py-3 w-full text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+          className="flex items-center gap-3 px-4 py-3 w-full text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
           <span>Sair</span>

@@ -177,8 +177,8 @@ const AdminBadges = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Badges</h1>
-            <p className="text-slate-600 mt-2">Gerencie as conquistas dos licenciados</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Badges</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Gerencie as conquistas dos licenciados</p>
           </div>
           <button
             onClick={openNewBadgeModal}
@@ -191,36 +191,36 @@ const AdminBadges = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl border border-slate-100 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-                <Award className="w-6 h-6 text-cyan-600" />
+              <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                <Award className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
               </div>
               <div>
-                <p className="text-slate-600 text-sm">Total de Badges</p>
-                <p className="text-2xl font-bold text-slate-900">{badges.length}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Badges</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{badges.length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Award className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+                <Award className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-slate-600 text-sm">Badges Ativos</p>
-                <p className="text-2xl font-bold text-slate-900">{badges.filter(b => b.active).length}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Badges Ativos</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{badges.filter(b => b.active).length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-100 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <Gift className="w-6 h-6 text-amber-600" />
+              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
+                <Gift className="w-6 h-6 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-slate-600 text-sm">Total de Pontos em Badges</p>
-                <p className="text-2xl font-bold text-slate-900">{badges.reduce((acc, b) => acc + b.points_reward, 0)}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Pontos em Badges</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{badges.reduce((acc, b) => acc + b.points_reward, 0)}</p>
               </div>
             </div>
           </div>
@@ -231,7 +231,7 @@ const AdminBadges = () => {
           {badges.map((badge) => (
             <div
               key={badge.id}
-              className={`bg-white rounded-xl border ${badge.active ? 'border-slate-100' : 'border-red-200 bg-red-50'} p-6 hover:shadow-lg transition-all`}
+              className={`bg-white dark:bg-[#151B28] rounded-xl border ${badge.active ? 'border-slate-100 dark:border-white/5' : 'border-red-200 dark:border-red-700/30 bg-red-50 dark:bg-red-900/20'} p-6 hover:shadow-lg dark:hover:border-cyan-500/30 transition-all`}
             >
               <div className="flex items-start justify-between mb-4">
                 <div
@@ -246,47 +246,47 @@ const AdminBadges = () => {
                       setSelectedBadge(badge);
                       setShowAwardModal(true);
                     }}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
                     title="Conceder Badge"
                   >
                     <Gift className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleEdit(badge)}
-                    className="p-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                    className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/10 rounded-lg transition-colors"
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDelete(badge.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
               
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">{badge.name}</h3>
-              <p className="text-slate-600 text-sm mb-4">{badge.description}</p>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{badge.name}</h3>
+              <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{badge.description}</p>
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Critério:</span>
-                  <span className="font-medium text-slate-900">{getCriteriaLabel(badge.criteria_type)}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Critério:</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{getCriteriaLabel(badge.criteria_type)}</span>
                 </div>
                 {badge.criteria_value > 0 && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Valor:</span>
-                    <span className="font-medium text-slate-900">{badge.criteria_value}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Valor:</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{badge.criteria_value}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Pontos:</span>
-                  <span className="font-medium text-amber-600">+{badge.points_reward} pts</span>
+                  <span className="text-slate-500 dark:text-slate-400">Pontos:</span>
+                  <span className="font-medium text-amber-600 dark:text-amber-400">+{badge.points_reward} pts</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500">Status:</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  <span className="text-slate-500 dark:text-slate-400">Status:</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge.active ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
                     {badge.active ? 'Ativo' : 'Inativo'}
                   </span>
                 </div>
@@ -296,10 +296,10 @@ const AdminBadges = () => {
         </div>
 
         {badges.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl border border-slate-100">
-            <Award className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">Nenhum badge cadastrado</h3>
-            <p className="text-slate-600 mb-4">Crie badges para motivar seus licenciados!</p>
+          <div className="text-center py-12 bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5">
+            <Award className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Nenhum badge cadastrado</h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">Crie badges para motivar seus licenciados!</p>
             <button
               onClick={openNewBadgeModal}
               className="bg-cyan-500 text-white px-4 py-2 rounded-lg hover:bg-cyan-600 transition-colors"
