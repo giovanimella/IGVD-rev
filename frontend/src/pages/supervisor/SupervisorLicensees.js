@@ -199,60 +199,60 @@ const SupervisorLicensees = () => {
                   {licensees.filter((l) => l.current_stage !== 'completo').length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-orange-600" />
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-500/20 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Lista de Licenciados */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
+              <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
                 <tr>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Licenciado</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Contato</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Etapa</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Pontos</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Nível</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Licenciado</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Contato</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Etapa</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Pontos</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Nível</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                 {filteredLicensees.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center">
-                      <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                      <p className="text-slate-500">
+                      <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                      <p className="text-slate-500 dark:text-slate-400">
                         {searchTerm ? 'Nenhum licenciado encontrado' : 'Nenhum licenciado cadastrado ainda'}
                       </p>
                     </td>
                   </tr>
                 ) : (
                   filteredLicensees.map((licensee) => (
-                    <tr key={licensee.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={licensee.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
                         <div>
                           <button
                             onClick={() => navigate(`/supervisor/licensee/${licensee.id}`)}
-                            className="font-semibold text-cyan-600 hover:text-cyan-700 hover:underline"
+                            className="font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 hover:underline"
                           >
                             {licensee.full_name}
                           </button>
-                          <p className="text-sm text-slate-500">{licensee.email}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">{licensee.email}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col space-y-1">
                           {licensee.email && (
-                            <div className="flex items-center text-sm text-slate-600">
+                            <div className="flex items-center text-sm text-slate-600 dark:text-slate-400">
                               <Mail className="w-4 h-4 mr-2" />
                               {licensee.email}
                             </div>
                           )}
                           {licensee.phone && (
-                            <div className="flex items-center text-sm text-slate-600">
+                            <div className="flex items-center text-sm text-slate-600 dark:text-slate-400">
                               <Phone className="w-4 h-4 mr-2" />
                               {licensee.phone}
                             </div>
@@ -271,11 +271,11 @@ const SupervisorLicensees = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <Award className="w-5 h-5 text-amber-500" />
-                          <span className="font-semibold text-slate-900">{licensee.points || 0}</span>
+                          <span className="font-semibold text-slate-900 dark:text-white">{licensee.points || 0}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-slate-900 font-medium">{licensee.level_title || 'Iniciante'}</span>
+                        <span className="text-slate-900 dark:text-white font-medium">{licensee.level_title || 'Iniciante'}</span>
                       </td>
                     </tr>
                   ))
