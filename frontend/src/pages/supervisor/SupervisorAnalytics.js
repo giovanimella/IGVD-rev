@@ -77,11 +77,11 @@ const SupervisorAnalytics = () => {
   const getHeatmapColor = (count) => {
     const max = getMaxHeatmapValue();
     const intensity = count / max;
-    if (intensity === 0) return 'bg-slate-100';
-    if (intensity < 0.25) return 'bg-cyan-100';
-    if (intensity < 0.5) return 'bg-cyan-300';
-    if (intensity < 0.75) return 'bg-cyan-500';
-    return 'bg-cyan-700';
+    if (intensity === 0) return 'bg-slate-100 dark:bg-slate-700';
+    if (intensity < 0.25) return 'bg-cyan-100 dark:bg-cyan-900/50';
+    if (intensity < 0.5) return 'bg-cyan-300 dark:bg-cyan-700';
+    if (intensity < 0.75) return 'bg-cyan-500 dark:bg-cyan-500';
+    return 'bg-cyan-700 dark:bg-cyan-400';
   };
 
   if (loading) {
