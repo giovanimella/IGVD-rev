@@ -215,6 +215,24 @@ async def simulate_sale_payment(
         }}
     )
     
+    # Criar notificação de venda confirmada para o licenciado
+    notification = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user["sub"],
+        "type": "sale_confirmed",
+        "title": "Venda Confirmada!",
+        "message": f"O pagamento da venda #{sale.get('sale_number')} para {sale.get('customer_name')} foi confirmado no valor de R$ {sale.get('sale_value', 0):.2f}.",
+        "data": {
+            "sale_id": sale_id,
+            "customer_name": sale.get("customer_name"),
+            "sale_value": sale.get("sale_value"),
+            "transaction_id": transaction_id
+        },
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification)
+    
     # Verificar se completou as 10 vendas
     user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
     paid_sales = await db.sales.count_documents({
@@ -231,6 +249,19 @@ async def simulate_sale_payment(
                 "updated_at": datetime.now(timezone.utc).isoformat()
             }}
         )
+        
+        # Notificação de conclusão da etapa
+        completion_notification = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["sub"],
+            "type": "stage_completed",
+            "title": "Etapa Concluída!",
+            "message": "Parabéns! Você completou as 10 vendas em campo e avançou para a etapa de Documentos PJ.",
+            "data": {"stage": "vendas_campo", "next_stage": "documentos_pj"},
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(completion_notification)
         
         return {
             "message": "Parabéns! Você completou as 10 vendas e avançou para a próxima etapa!",
