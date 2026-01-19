@@ -23,12 +23,32 @@ LOGO_DIR.mkdir(parents=True, exist_ok=True)
 MAX_LOGO_SIZE = 10 * 1024 * 1024  # 10MB
 
 @router.get("/config")
-async def get_system_config(current_user: dict = Depends(get_current_user)):
-    """Retorna as configurações do sistema"""
+async def get_system_config():
+    """Retorna as configurações do sistema (público)"""
     config = await db.system_config.find_one({"id": "system_config"}, {"_id": 0})
     
     if not config:
         # Criar configuração padrão se não existir
+        default_config = SystemConfig()
+        await db.system_config.insert_one(default_config.model_dump())
+        config = default_config.model_dump()
+    
+    # Remover campos sensíveis para usuários não autenticados
+    public_config = {
+        "platform_name": config.get("platform_name", "UniOzoxx"),
+        "platform_logo": config.get("platform_logo"),
+        "minimum_passing_score": config.get("minimum_passing_score", 70)
+    }
+    
+    return public_config
+
+
+@router.get("/config/full")
+async def get_full_system_config(current_user: dict = Depends(require_role(["admin"]))):
+    """Retorna todas as configurações do sistema (apenas admin)"""
+    config = await db.system_config.find_one({"id": "system_config"}, {"_id": 0})
+    
+    if not config:
         default_config = SystemConfig()
         await db.system_config.insert_one(default_config.model_dump())
         config = default_config.model_dump()
