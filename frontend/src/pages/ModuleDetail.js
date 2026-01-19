@@ -127,7 +127,7 @@ const ModuleDetail = () => {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-outfit font-bold text-slate-900">Módulo não encontrado</h2>
+          <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white">Módulo não encontrado</h2>
           <Button onClick={() => navigate('/modules')} className="mt-4">
             Voltar para Módulos
           </Button>
@@ -195,7 +195,7 @@ const ModuleDetail = () => {
         </div>
 
         <div>
-          <h2 className="text-2xl font-outfit font-bold text-slate-900 mb-6">Capítulos</h2>
+          <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white mb-6">Capítulos</h2>
           <div className="space-y-4">
             {module.chapters && module.chapters.length > 0 ? (
               module.chapters.map((chapter, index) => {
@@ -204,27 +204,27 @@ const ModuleDetail = () => {
                   <div
                     key={chapter.id}
                     data-testid={`chapter-item-${chapter.id}`}
-                    className={`bg-white rounded-xl border p-6 transition-all ${
-                      isCompleted ? 'border-green-200 bg-green-50/50' : 'border-slate-200 hover:shadow-md'
+                    className={`bg-white dark:bg-[#151B28] rounded-xl border p-6 transition-all ${
+                      isCompleted ? 'border-green-200 dark:border-green-800/50 bg-green-50/50 dark:bg-green-900/10' : 'border-slate-200 dark:border-white/10 hover:shadow-md dark:hover:border-cyan-500/30'
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4 flex-1">
                         <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                          isCompleted ? 'bg-green-500' : 'bg-cyan-100'
+                          isCompleted ? 'bg-green-500' : 'bg-cyan-100 dark:bg-cyan-500/20'
                         }`}>
                           {isCompleted ? (
                             <CheckCircle className="w-6 h-6 text-white" />
                           ) : (
-                            <span className="text-cyan-600 font-semibold text-lg">{index + 1}</span>
+                            <span className="text-cyan-600 dark:text-cyan-400 font-semibold text-lg">{index + 1}</span>
                           )}
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-2">
+                          <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-2">
                             {chapter.title}
                           </h3>
-                          <p className="text-slate-600 text-sm mb-3">{chapter.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-slate-500">
+                          <p className="text-slate-600 dark:text-slate-400 text-sm mb-3">{chapter.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                             <div className="flex items-center gap-1">
                               {chapter.content_type === 'video' && <Play className="w-4 h-4" />}
                               {chapter.content_type === 'document' && <BookOpen className="w-4 h-4" />}
@@ -244,8 +244,8 @@ const ModuleDetail = () => {
                           onClick={() => toggleFavorite(chapter.id)}
                           className={`p-2 rounded-lg transition-colors ${
                             favorites[chapter.id]
-                              ? 'text-rose-500 bg-rose-50 hover:bg-rose-100'
-                              : 'text-slate-400 hover:text-rose-500 hover:bg-slate-100'
+                              ? 'text-rose-500 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50'
+                              : 'text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-white/10'
                           }`}
                           data-testid={`favorite-chapter-${chapter.id}`}
                           title={favorites[chapter.id] ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
@@ -262,7 +262,7 @@ const ModuleDetail = () => {
                             {chapter.content_type === 'video' ? 'Assistir' : 'Ver Conteúdo'}
                           </Button>
                         ) : (
-                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">
                             <CheckCircle className="w-4 h-4" />
                             Concluído
                           </span>
@@ -273,10 +273,10 @@ const ModuleDetail = () => {
                 );
               })
             ) : (
-              <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-                <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2">Nenhum capítulo disponível</h3>
-                <p className="text-slate-600">Os capítulos estarão disponíveis em breve.</p>
+              <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+                <BookOpen className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">Nenhum capítulo disponível</h3>
+                <p className="text-slate-600 dark:text-slate-400">Os capítulos estarão disponíveis em breve.</p>
               </div>
             )}
           </div>
@@ -286,10 +286,10 @@ const ModuleDetail = () => {
         {module.has_assessment && (
           <div className={`rounded-xl border p-6 ${
             assessmentResult?.passed 
-              ? 'bg-green-50 border-green-200' 
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/50' 
               : progress === 100 
-                ? 'bg-amber-50 border-amber-200' 
-                : 'bg-slate-50 border-slate-200'
+                ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/50' 
+                : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'
           }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -298,15 +298,15 @@ const ModuleDetail = () => {
                     ? 'bg-green-500' 
                     : progress === 100 
                       ? 'bg-amber-500' 
-                      : 'bg-slate-300'
+                      : 'bg-slate-300 dark:bg-slate-600'
                 }`}>
                   <ClipboardCheck className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-outfit font-semibold text-slate-900">
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">
                     {assessmentResult?.passed ? 'Avaliação Concluída!' : 'Avaliação do Módulo'}
                   </h3>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {assessmentResult?.passed 
                       ? `Aprovado em ${new Date(assessmentResult.completed_at).toLocaleDateString('pt-BR')}`
                       : progress === 100 
@@ -332,10 +332,10 @@ const ModuleDetail = () => {
         {module.has_certificate && (
           <div className={`rounded-xl border p-6 ${
             certificateEligibility?.certificate_id 
-              ? 'bg-amber-50 border-amber-200' 
+              ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/50' 
               : certificateEligibility?.eligible 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-slate-50 border-slate-200'
+                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/50' 
+                : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10'
           }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -344,17 +344,17 @@ const ModuleDetail = () => {
                     ? 'bg-amber-500' 
                     : certificateEligibility?.eligible 
                       ? 'bg-green-500' 
-                      : 'bg-slate-300'
+                      : 'bg-slate-300 dark:bg-slate-600'
                 }`}>
                   <Award className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-outfit font-semibold text-slate-900">
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">
                     {certificateEligibility?.certificate_id 
                       ? 'Certificado Disponível!' 
                       : 'Certificado do Módulo'}
                   </h3>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {certificateEligibility?.certificate_id 
                       ? 'Você já gerou seu certificado. Acesse na página de Certificados.'
                       : certificateEligibility?.eligible 
