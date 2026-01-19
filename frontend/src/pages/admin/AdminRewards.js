@@ -113,11 +113,11 @@ const AdminRewards = () => {
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900 flex items-center gap-3">
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white flex items-center gap-3">
               <Award className="w-8 h-8 text-amber-500" />
               Gerenciar Recompensas
             </h1>
-            <p className="text-slate-600 mt-2">Configure as recompensas e aprove resgates</p>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Configure as recompensas e aprove resgates</p>
           </div>
 
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -177,27 +177,27 @@ const AdminRewards = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Recompensas Cadastradas</h2>
+          <h2 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Recompensas Cadastradas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rewards.map((reward) => (
-              <div key={reward.id} className="bg-white rounded-xl border border-slate-100 p-6" data-testid={`reward-item-${reward.id}`}>
+              <div key={reward.id} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6" data-testid={`reward-item-${reward.id}`}>
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                    <Award className="w-6 h-6 text-amber-600" />
+                  <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
+                    <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                   </div>
                   <button
                     onClick={() => handleDeleteReward(reward.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-                <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-2">{reward.title}</h3>
-                <p className="text-slate-600 text-sm mb-4">{reward.description}</p>
+                <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-2">{reward.title}</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{reward.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600">Pontos: <strong>{reward.required_points}</strong></span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Pontos: <strong className="text-slate-900 dark:text-white">{reward.required_points}</strong></span>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    reward.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                    reward.active ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
                   }`}>
                     {reward.active ? 'Ativa' : 'Inativa'}
                   </span>
