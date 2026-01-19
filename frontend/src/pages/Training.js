@@ -188,13 +188,13 @@ const Training = () => {
       <Layout>
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="text-center">
-            <div className="w-20 h-20 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <GraduationCap className="w-10 h-10 text-cyan-600" />
+            <div className="w-20 h-20 bg-cyan-100 dark:bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <GraduationCap className="w-10 h-10 text-cyan-600 dark:text-cyan-400" />
             </div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">
               Treinamento Presencial
             </h1>
-            <p className="text-slate-600 mt-2">
+            <p className="text-slate-600 dark:text-slate-400 mt-2">
               Parabéns por completar o treinamento de acolhimento! Agora é hora de se preparar para o treinamento presencial.
             </p>
           </div>
