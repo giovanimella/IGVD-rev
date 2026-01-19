@@ -125,17 +125,17 @@ const Sidebar = () => {
         {logoUrl ? (
           <img 
             src={logoUrl} 
-            alt="UniOzoxx" 
+            alt={platformName}
             className="max-h-10 max-w-[140px] object-contain"
             data-testid="sidebar-logo"
           />
         ) : (
           <>
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-outfit font-bold text-xl">U</span>
+              <span className="text-white font-outfit font-bold text-xl">{platformName.charAt(0)}</span>
             </div>
             <div>
-              <h1 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">UniOzoxx</h1>
+              <h1 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">{platformName}</h1>
             </div>
           </>
         )}
