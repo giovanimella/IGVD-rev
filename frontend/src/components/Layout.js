@@ -4,7 +4,7 @@ import Topbar from './Topbar';
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
         <Topbar />
