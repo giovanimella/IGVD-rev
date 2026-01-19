@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 const AdminSystem = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [systemConfig, setSystemConfig] = useState({ 
