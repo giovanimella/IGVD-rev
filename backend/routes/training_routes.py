@@ -37,7 +37,7 @@ class TrainingClassUpdate(BaseModel):
     capacity: Optional[int] = None
     location: Optional[str] = None
     hotel_info: Optional[str] = None
-    status: Optional[str] = None  # open, closed, completed
+    status: Optional[str] = None  # open, closed, completed, attendance_open
 
 class TrainingConfigUpdate(BaseModel):
     days_before_closing: Optional[int] = None  # Dias antes do treinamento para fechar inscrições
