@@ -444,3 +444,279 @@ async def get_licensee_sales(
         "pending_sales": len(sales) - len(paid_sales),
         "total_value": round(total_value, 2)
     }
+
+@router.get("/report/by-month")
+async def get_sales_by_month(
+    year: int = None,
+    month: int = None,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Obter relatório de vendas e comissões por mês"""
+    from calendar import monthrange
+    
+    # Se não especificado, usar mês atual
+    now = datetime.now(timezone.utc)
+    year = year or now.year
+    month = month or now.month
+    
+    # Datas de início e fim do mês
+    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
+    _, last_day = monthrange(year, month)
+    end_date = datetime(year, month, last_day, 23, 59, 59, tzinfo=timezone.utc)
+    
+    # Buscar vendas do período
+    query = {
+        "payment_status": "paid",
+        "paid_at": {
+            "$gte": start_date.isoformat(),
+            "$lte": end_date.isoformat()
+        }
+    }
+    
+    sales = await db.sales.find(query, {"_id": 0}).sort("paid_at", 1).to_list(1000)
+    
+    # Calcular totais
+    total_value = sum(s.get("sale_value", 0) for s in sales)
+    
+    # Buscar tipos de comissão ativos
+    commission_types = await db.commission_types.find({"active": True}, {"_id": 0}).to_list(100)
+    
+    # Calcular comissões
+    commissions = []
+    for ct in commission_types:
+        commission_value = total_value * (ct["percentage"] / 100)
+        commissions.append({
+            "id": ct["id"],
+            "description": ct["description"],
+            "percentage": ct["percentage"],
+            "calculated_value": round(commission_value, 2)
+        })
+    
+    # Agrupar por origem do aparelho
+    by_source = {}
+    for sale in sales:
+        source = sale.get("device_source", "unknown")
+        if source not in by_source:
+            by_source[source] = {"count": 0, "value": 0}
+        by_source[source]["count"] += 1
+        by_source[source]["value"] += sale.get("sale_value", 0)
+    
+    # Meses disponíveis para filtro
+    pipeline_months = [
+        {"$match": {"payment_status": "paid", "paid_at": {"$ne": None}}},
+        {"$group": {
+            "_id": {"$substr": ["$paid_at", 0, 7]},
+            "count": {"$sum": 1}
+        }},
+        {"$sort": {"_id": -1}}
+    ]
+    available_months = await db.sales.aggregate(pipeline_months).to_list(24)
+    
+    return {
+        "year": year,
+        "month": month,
+        "month_name": get_month_name(month),
+        "total_sales": len(sales),
+        "total_value": round(total_value, 2),
+        "commissions": commissions,
+        "by_device_source": by_source,
+        "sales": sales,
+        "available_months": [m["_id"] for m in available_months]
+    }
+
+def get_month_name(month: int) -> str:
+    months = {
+        1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
+        5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
+        9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
+    }
+    return months.get(month, "")
+
+@router.get("/report/pdf")
+async def generate_sales_report_pdf(
+    year: int = None,
+    month: int = None,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Gerar PDF do relatório de vendas e comissões"""
+    from fastapi.responses import StreamingResponse
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
+    from io import BytesIO
+    from calendar import monthrange
+    
+    # Se não especificado, usar mês atual
+    now = datetime.now(timezone.utc)
+    year = year or now.year
+    month = month or now.month
+    
+    # Datas de início e fim do mês
+    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
+    _, last_day = monthrange(year, month)
+    end_date = datetime(year, month, last_day, 23, 59, 59, tzinfo=timezone.utc)
+    
+    # Buscar vendas do período
+    query = {
+        "payment_status": "paid",
+        "paid_at": {
+            "$gte": start_date.isoformat(),
+            "$lte": end_date.isoformat()
+        }
+    }
+    
+    sales = await db.sales.find(query, {"_id": 0}).sort("paid_at", 1).to_list(1000)
+    
+    # Calcular totais
+    total_value = sum(s.get("sale_value", 0) for s in sales)
+    
+    # Buscar tipos de comissão ativos
+    commission_types = await db.commission_types.find({"active": True}, {"_id": 0}).to_list(100)
+    
+    # Criar PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    elements = []
+    
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        spaceAfter=20,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#0891b2')
+    )
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Heading2'],
+        fontSize=14,
+        spaceAfter=10,
+        spaceBefore=15,
+        textColor=colors.HexColor('#334155')
+    )
+    normal_style = styles['Normal']
+    
+    # Título
+    month_name = get_month_name(month)
+    elements.append(Paragraph(f"Relatório de Vendas e Comissões", title_style))
+    elements.append(Paragraph(f"{month_name} de {year}", subtitle_style))
+    elements.append(Spacer(1, 0.5*cm))
+    
+    # Resumo
+    elements.append(Paragraph("Resumo do Período", subtitle_style))
+    summary_data = [
+        ["Total de Vendas", str(len(sales))],
+        ["Valor Total", f"R$ {total_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")]
+    ]
+    summary_table = Table(summary_data, colWidths=[8*cm, 6*cm])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f1f5f9')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#334155')),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0'))
+    ]))
+    elements.append(summary_table)
+    elements.append(Spacer(1, 0.5*cm))
+    
+    # Comissões
+    if commission_types:
+        elements.append(Paragraph("Comissões Calculadas", subtitle_style))
+        commission_data = [["Descrição", "Porcentagem", "Valor Calculado"]]
+        total_commissions = 0
+        for ct in commission_types:
+            commission_value = total_value * (ct["percentage"] / 100)
+            total_commissions += commission_value
+            commission_data.append([
+                ct["description"],
+                f"{ct['percentage']}%",
+                f"R$ {commission_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            ])
+        commission_data.append([
+            "TOTAL COMISSÕES", "",
+            f"R$ {total_commissions:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        ])
+        
+        commission_table = Table(commission_data, colWidths=[8*cm, 3*cm, 4*cm])
+        commission_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0891b2')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#f1f5f9')),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+            ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0'))
+        ]))
+        elements.append(commission_table)
+        elements.append(Spacer(1, 0.5*cm))
+    
+    # Lista de Vendas
+    if sales:
+        elements.append(Paragraph("Lista Completa de Vendas", subtitle_style))
+        sales_data = [["#", "Licenciado", "Cliente", "Aparelho", "Origem", "Valor", "Data"]]
+        for i, sale in enumerate(sales, 1):
+            paid_date = sale.get("paid_at", "")[:10] if sale.get("paid_at") else ""
+            origin = "Líder" if sale.get("device_source") == "leader_stock" else "Fábrica"
+            sales_data.append([
+                str(sale.get("sale_number", i)),
+                sale.get("licensee_name", "")[:20],
+                sale.get("customer_name", "")[:20],
+                sale.get("device_serial", "")[:15],
+                origin,
+                f"R$ {sale.get('sale_value', 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                paid_date
+            ])
+        
+        sales_table = Table(sales_data, colWidths=[1*cm, 3.5*cm, 3.5*cm, 2.5*cm, 1.5*cm, 2.5*cm, 2*cm])
+        sales_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0891b2')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('ALIGN', (1, 1), (3, -1), 'LEFT'),
+            ('ALIGN', (5, 1), (5, -1), 'RIGHT'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')])
+        ]))
+        elements.append(sales_table)
+    else:
+        elements.append(Paragraph("Nenhuma venda registrada neste período.", normal_style))
+    
+    # Rodapé
+    elements.append(Spacer(1, 1*cm))
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=colors.HexColor('#94a3b8'),
+        alignment=TA_CENTER
+    )
+    elements.append(Paragraph(
+        f"Relatório gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')} - UniOzoxx",
+        footer_style
+    ))
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    filename = f"relatorio_vendas_{year}_{month:02d}.pdf"
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
