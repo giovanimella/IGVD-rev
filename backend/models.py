@@ -82,6 +82,7 @@ class Module(BaseModel):
     created_by: str
     is_acolhimento: bool = False
     has_assessment: bool = False
+    visibility_delay_months: int = 0  # 0 = aparece imediatamente, X = aparece após X meses
 
 class ModuleCreate(BaseModel):
     title: str
@@ -92,6 +93,7 @@ class ModuleCreate(BaseModel):
     points_reward: int = 0
     is_acolhimento: bool = False
     has_assessment: bool = False
+    visibility_delay_months: int = 0
 
 class Chapter(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
