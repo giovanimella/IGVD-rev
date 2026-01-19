@@ -73,48 +73,48 @@ const Sidebar = () => {
   };
 
   const adminLinks = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/admin/system', icon: Settings, label: 'Painel Sistema' },
-    { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
-    { path: '/admin/users', icon: Users, label: 'Usuários' },
-    { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
-    { path: '/admin/badges', icon: Trophy, label: 'Badges' },
-    { path: '/admin/challenges', icon: Target, label: 'Desafios' },
-    { path: '/admin/certificates', icon: Award, label: 'Certificados' },
-    { path: '/admin/files', icon: FileText, label: 'Arquivos' },
-    { path: '/admin/banners', icon: Image, label: 'Banners' },
-    { path: '/admin/posts', icon: Megaphone, label: 'Comunicados' },
-    { path: '/profile', icon: Settings, label: 'Perfil' },
+    { path: '/dashboard', icon: Home, label: t.sidebar?.dashboard || 'Dashboard' },
+    { path: '/admin/system', icon: Settings, label: t.sidebar?.systemPanel || 'Painel Sistema' },
+    { path: '/admin/modules', icon: BookOpen, label: t.sidebar?.modules || 'Módulos' },
+    { path: '/admin/users', icon: Users, label: t.sidebar?.users || 'Usuários' },
+    { path: '/admin/rewards', icon: Award, label: t.sidebar?.rewards || 'Recompensas' },
+    { path: '/admin/badges', icon: Trophy, label: t.sidebar?.badges || 'Badges' },
+    { path: '/admin/challenges', icon: Target, label: t.sidebar?.challenges || 'Desafios' },
+    { path: '/admin/certificates', icon: Award, label: t.sidebar?.certificates || 'Certificados' },
+    { path: '/admin/files', icon: FileText, label: t.sidebar?.files || 'Arquivos' },
+    { path: '/admin/banners', icon: Image, label: t.sidebar?.banners || 'Banners' },
+    { path: '/admin/posts', icon: Megaphone, label: t.sidebar?.posts || 'Comunicados' },
+    { path: '/profile', icon: Settings, label: t.sidebar?.profile || 'Perfil' },
   ];
 
   const supervisorLinks = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/dashboard', icon: Home, label: t.sidebar?.dashboard || 'Dashboard' },
     { path: '/supervisor/licensees', icon: Users, label: 'Licenciados' },
     { path: '/supervisor/analytics', icon: BarChart3, label: 'Analytics' },
-    { path: '/modules', icon: BookOpen, label: 'Módulos' },
-    { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
-    { path: '/profile', icon: Settings, label: 'Perfil' },
+    { path: '/modules', icon: BookOpen, label: t.sidebar?.modules || 'Módulos' },
+    { path: '/leaderboard', icon: Trophy, label: t.sidebar?.leaderboard || 'Ranking' },
+    { path: '/profile', icon: Settings, label: t.sidebar?.profile || 'Perfil' },
   ];
 
   const licenseeLinks = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
-    { path: '/ozoxx-cast', icon: Radio, label: 'Ozoxx Cast' },
-    { path: '/agenda', icon: Calendar, label: 'Agenda' },
-    { path: '/certificates', icon: Award, label: 'Certificados' },
-    { path: '/rewards', icon: Award, label: 'Recompensas' },
-    { path: '/favorites', icon: Heart, label: 'Favoritos' },
-    { path: '/file-repository', icon: FileText, label: 'Arquivos' },
-    { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
-    { path: '/profile', icon: Settings, label: 'Perfil' },
+    { path: '/dashboard', icon: Home, label: t.sidebar?.dashboard || 'Dashboard' },
+    { path: '/modules', icon: BookOpen, label: t.sidebar?.myModules || 'Meus Módulos' },
+    { path: '/ozoxx-cast', icon: Radio, label: t.sidebar?.ozoxxCast || 'Ozoxx Cast' },
+    { path: '/agenda', icon: Calendar, label: t.sidebar?.agenda || 'Agenda' },
+    { path: '/certificates', icon: Award, label: t.sidebar?.certificates || 'Certificados' },
+    { path: '/rewards', icon: Award, label: t.sidebar?.rewards || 'Recompensas' },
+    { path: '/favorites', icon: Heart, label: t.sidebar?.favorites || 'Favoritos' },
+    { path: '/file-repository', icon: FileText, label: t.sidebar?.files || 'Arquivos' },
+    { path: '/leaderboard', icon: Trophy, label: t.sidebar?.leaderboard || 'Ranking' },
+    { path: '/profile', icon: Settings, label: t.sidebar?.profile || 'Perfil' },
   ];
 
   const links = user?.role === 'admin' ? adminLinks : user?.role === 'supervisor' ? supervisorLinks : licenseeLinks;
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-800">
       {/* Header/Logo */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
         {logoUrl ? (
           <img 
             src={logoUrl} 
