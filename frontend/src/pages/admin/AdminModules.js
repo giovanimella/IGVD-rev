@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { BookOpen, Plus, Edit, Trash2, GraduationCap, Award, ClipboardCheck } from 'lucide-react';
+import { BookOpen, Plus, Edit, Trash2, GraduationCap, Award, ClipboardCheck, Clock } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -25,7 +25,8 @@ const AdminModules = () => {
     has_certificate: false,
     points_reward: 0,
     is_acolhimento: false,
-    has_assessment: false
+    has_assessment: false,
+    visibility_delay_months: 0
   });
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -54,7 +55,8 @@ const AdminModules = () => {
       has_certificate: false,
       points_reward: 0,
       is_acolhimento: false,
-      has_assessment: false
+      has_assessment: false,
+      visibility_delay_months: 0
     });
   };
 
