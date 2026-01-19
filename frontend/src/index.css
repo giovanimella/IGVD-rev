@@ -114,6 +114,19 @@ code {
     background: linear-gradient(135deg, #0B0F18 0%, #151B28 100%);
 }
 
+/* Tooltip CSS variables for Recharts */
+:root {
+    --tooltip-bg: #ffffff;
+    --tooltip-border: #e2e8f0;
+    --tooltip-text: #1e293b;
+}
+
+.dark {
+    --tooltip-bg: #1e293b;
+    --tooltip-border: #334155;
+    --tooltip-text: #ffffff;
+}
+
 /* Dark mode cards with subtle gradient and glow */
 .dark .dark-card {
     background: linear-gradient(145deg, #191E2A 0%, #1A2234 100%);
