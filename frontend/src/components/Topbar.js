@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Award } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import LanguageSelector from './LanguageSelector';
+import ThemeToggle from './ThemeToggle';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
