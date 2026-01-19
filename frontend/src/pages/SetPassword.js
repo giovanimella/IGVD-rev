@@ -109,9 +109,9 @@ const SetPassword = () => {
         {/* Logo */}
         <div className="flex justify-center mb-8">
           {logoUrl ? (
-            <img src={logoUrl} alt="UniOzoxx" className="max-h-16 object-contain" />
+            <img src={logoUrl} alt={platformName} className="max-h-16 object-contain" />
           ) : (
-            <h1 className="text-3xl font-outfit font-bold text-cyan-600">UniOzoxx</h1>
+            <h1 className="text-3xl font-outfit font-bold text-cyan-600">{platformName}</h1>
           )}
         </div>
 
