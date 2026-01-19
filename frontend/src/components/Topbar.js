@@ -11,7 +11,7 @@ const Topbar = () => {
   const { user } = useAuth();
 
   return (
-    <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 lg:px-6 py-3 lg:py-4 sticky top-0 z-30">
+    <header className="bg-white dark:bg-[#0D1117] border-b border-slate-200 dark:border-white/10 px-4 lg:px-6 py-3 lg:py-4 sticky top-0 z-30">
       <div className="flex items-center justify-between">
         {/* Espaço para o botão do menu mobile */}
         <div className="lg:hidden w-12"></div>
@@ -21,7 +21,7 @@ const Topbar = () => {
           <h2 className="text-lg lg:text-2xl font-outfit font-semibold text-slate-900 dark:text-white">
             Bem-vindo, {user?.full_name?.split(' ')[0]}
           </h2>
-          <p className="text-xs lg:text-sm text-slate-500 dark:text-slate-400 capitalize">{user?.role}</p>
+          <p className="text-xs lg:text-sm text-slate-500 dark:text-slate-500 capitalize">{user?.role}</p>
         </div>
 
         {/* Mobile: Nome curto */}
