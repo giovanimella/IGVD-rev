@@ -218,14 +218,34 @@ export const LanguageProvider = ({ children }) => {
     translatedNodesRef.current = new WeakSet();
     pendingTranslationsRef.current = new Map();
 
-    // Coletar textos do main content
-    const mainContent = document.querySelector('main') || document.querySelector('[data-main-content]') || document.body;
-    collectTextNodes(mainContent, targetLang);
+    // Coletar textos de toda a página
+    // 1. Main content
+    const mainContent = document.querySelector('main') || document.querySelector('[data-main-content]');
+    if (mainContent) {
+      collectTextNodes(mainContent, targetLang);
+    }
 
-    // Coletar do sidebar se existir
-    const sidebar = document.querySelector('[data-sidebar]') || document.querySelector('.sidebar');
-    if (sidebar) {
+    // 2. Sidebar (aside element)
+    const sidebars = document.querySelectorAll('aside');
+    sidebars.forEach(sidebar => {
       collectTextNodes(sidebar, targetLang);
+    });
+
+    // 3. Header/Topbar
+    const headers = document.querySelectorAll('header');
+    headers.forEach(header => {
+      collectTextNodes(header, targetLang);
+    });
+
+    // 4. Navigation elements
+    const navs = document.querySelectorAll('nav');
+    navs.forEach(nav => {
+      collectTextNodes(nav, targetLang);
+    });
+
+    // 5. Fallback to body if nothing found
+    if (!mainContent && sidebars.length === 0) {
+      collectTextNodes(document.body, targetLang);
     }
 
     // Agendar processamento
