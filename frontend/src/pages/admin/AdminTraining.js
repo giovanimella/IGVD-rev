@@ -779,13 +779,14 @@ const AdminTraining = () => {
                                 <XCircle className="w-4 h-4" />
                                 Ausente
                               </span>
-                            ) : (
+                            ) : selectedClass.status === 'attendance_open' ? (
                               <>
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   className="border-green-300 text-green-700 hover:bg-green-50"
                                   onClick={() => handleMarkAttendance(reg.id, true)}
+                                  data-testid={`mark-present-${reg.id}`}
                                 >
                                   <UserCheck className="w-4 h-4 mr-1" />
                                   Presente
@@ -795,11 +796,16 @@ const AdminTraining = () => {
                                   variant="outline"
                                   className="border-red-300 text-red-700 hover:bg-red-50"
                                   onClick={() => handleMarkAttendance(reg.id, false)}
+                                  data-testid={`mark-absent-${reg.id}`}
                                 >
                                   <UserX className="w-4 h-4 mr-1" />
                                   Ausente
                                 </Button>
                               </>
+                            ) : (
+                              <span className="text-xs text-slate-400">
+                                Aguardando treinamento
+                              </span>
                             )}
                           </div>
                         </div>
