@@ -213,10 +213,18 @@ const Dashboard = () => {
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Crescimento ao Longo do Tempo</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={progressData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis dataKey="month" stroke="#94a3b8" />
-                  <YAxis stroke="#94a3b8" />
-                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-700" />
+                  <XAxis dataKey="month" className="text-slate-600 dark:text-slate-400" stroke="#64748b" />
+                  <YAxis className="text-slate-600 dark:text-slate-400" stroke="#64748b" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'var(--tooltip-bg, #ffffff)', 
+                      border: '1px solid var(--tooltip-border, #e2e8f0)', 
+                      borderRadius: '8px', 
+                      color: 'var(--tooltip-text, #1e293b)',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }} 
+                  />
                   <Legend />
                   <Line type="monotone" dataKey="licenciados" stroke="#06b6d4" strokeWidth={2} name="Licenciados" />
                   <Line type="monotone" dataKey="modulos" stroke="#8b5cf6" strokeWidth={2} name="Módulos Concluídos" />
@@ -242,7 +250,15 @@ const Dashboard = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'var(--tooltip-bg, #ffffff)', 
+                      border: '1px solid var(--tooltip-border, #e2e8f0)', 
+                      borderRadius: '8px', 
+                      color: 'var(--tooltip-text, #1e293b)',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }} 
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
