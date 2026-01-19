@@ -223,18 +223,45 @@ const AdminTraining = () => {
     const styles = {
       open: 'bg-green-100 text-green-700',
       closed: 'bg-amber-100 text-amber-700',
-      completed: 'bg-slate-100 text-slate-700'
+      completed: 'bg-slate-100 text-slate-700',
+      attendance_open: 'bg-purple-100 text-purple-700'
     };
     const labels = {
       open: 'Aberta',
       closed: 'Fechada',
-      completed: 'Concluída'
+      completed: 'Concluída',
+      attendance_open: 'Presença Aberta'
     };
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || styles.open}`}>
         {labels[status] || status}
       </span>
     );
+  };
+
+  const handleOpenAttendance = async (classId) => {
+    if (!window.confirm('Marcar que o treinamento já ocorreu e abrir página de presença?')) return;
+    
+    try {
+      await axios.put(`${API_URL}/api/training/classes/${classId}/open-attendance`);
+      toast.success('Treinamento marcado como realizado! Página de presença aberta.');
+      fetchData();
+      // Abrir automaticamente o modal de detalhes
+      openClassDetail(classId);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao abrir presença');
+    }
+  };
+
+  const handleCloseAttendance = async (classId) => {
+    try {
+      await axios.put(`${API_URL}/api/training/classes/${classId}/close-attendance`);
+      toast.success('Marcação de presença finalizada!');
+      fetchData();
+      setShowDetailModal(false);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao finalizar presença');
+    }
   };
 
   if (loading) {
