@@ -81,7 +81,8 @@ const AdminModules = () => {
       has_certificate: module.has_certificate,
       points_reward: module.points_reward,
       is_acolhimento: module.is_acolhimento,
-      has_assessment: module.has_assessment
+      has_assessment: module.has_assessment,
+      visibility_delay_months: module.visibility_delay_months || 0
     });
     setShowEditDialog(true);
   };
