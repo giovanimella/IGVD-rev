@@ -20,23 +20,30 @@ const SetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
+  const [platformName, setPlatformName] = useState('UniOzoxx');
 
   useEffect(() => {
     if (!token) {
       toast.error('Token inválido');
       navigate('/login');
     }
-    fetchLogo();
+    fetchBranding();
   }, [token, navigate]);
 
-  const fetchLogo = async () => {
+  const fetchBranding = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/system/logo`);
-      if (response.data.logo_url) {
-        setLogoUrl(`${API_URL}${response.data.logo_url}`);
+      const [logoRes, configRes] = await Promise.all([
+        axios.get(`${API_URL}/api/system/logo`),
+        axios.get(`${API_URL}/api/system/config`)
+      ]);
+      if (logoRes.data.logo_url) {
+        setLogoUrl(`${API_URL}${logoRes.data.logo_url}`);
+      }
+      if (configRes.data.platform_name) {
+        setPlatformName(configRes.data.platform_name);
       }
     } catch (error) {
-      console.error('Erro ao buscar logo:', error);
+      console.error('Erro ao buscar branding:', error);
     }
   };
 
