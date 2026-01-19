@@ -160,7 +160,7 @@ const Sidebar = () => {
       </nav>
 
       {/* User Info & Logout - Fixed at bottom */}
-      <div className="px-3 py-4 border-t border-slate-200 dark:border-slate-700 flex-shrink-0 bg-white dark:bg-slate-800">
+      <div className="px-3 py-4 border-t border-slate-200 dark:border-white/10 flex-shrink-0 bg-white dark:bg-[#0D1117]">
         <div className="flex items-center gap-3 px-4 py-3 mb-2">
           {user?.profile_picture ? (
             <img 
@@ -175,7 +175,7 @@ const Sidebar = () => {
           )}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{user?.full_name}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{user?.role}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-500 capitalize">{user?.role}</p>
           </div>
         </div>
         <button
