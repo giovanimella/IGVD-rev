@@ -34,20 +34,27 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
+  const [platformName, setPlatformName] = useState('UniOzoxx');
 
-  const fetchLogo = async () => {
+  const fetchBranding = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/system/logo`);
-      if (response.data.logo_url) {
-        setLogoUrl(`${API_URL}${response.data.logo_url}`);
+      const [logoRes, configRes] = await Promise.all([
+        axios.get(`${API_URL}/api/system/logo`),
+        axios.get(`${API_URL}/api/system/config`)
+      ]);
+      if (logoRes.data.logo_url) {
+        setLogoUrl(`${API_URL}${logoRes.data.logo_url}`);
+      }
+      if (configRes.data.platform_name) {
+        setPlatformName(configRes.data.platform_name);
       }
     } catch (error) {
-      console.error('Erro ao buscar logo:', error);
+      console.error('Erro ao buscar branding:', error);
     }
   };
 
   useEffect(() => {
-    fetchLogo();
+    fetchBranding();
   }, []);
 
   // Fechar menu ao mudar de rota
