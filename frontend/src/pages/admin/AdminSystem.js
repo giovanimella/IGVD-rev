@@ -11,6 +11,7 @@ const AdminSystem = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [systemConfig, setSystemConfig] = useState({ 
+    platform_name: 'UniOzoxx',
     minimum_passing_score: 70,
     webhook_url: '',
     webhook_enabled: false,
