@@ -20,6 +20,11 @@ db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 
+async def get_platform_name():
+    """Busca o nome da plataforma das configurações do sistema"""
+    config = await db.system_config.find_one({"id": "system_config"})
+    return config.get("platform_name", "UniOzoxx") if config else "UniOzoxx"
+
 # ==================== MODELOS ====================
 
 class SaleCreate(BaseModel):
