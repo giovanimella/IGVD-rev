@@ -397,6 +397,16 @@ const AdminTraining = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Botão para marcar que o treinamento ocorreu */}
+                          {(cls.status === 'open' || cls.status === 'closed') && (
+                            <button
+                              onClick={() => handleOpenAttendance(cls.id)}
+                              className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
+                              title="Marcar que o treinamento ocorreu"
+                            >
+                              <UserCheck className="w-4 h-4 text-purple-500" />
+                            </button>
+                          )}
                           <button
                             onClick={() => openClassDetail(cls.id)}
                             className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
