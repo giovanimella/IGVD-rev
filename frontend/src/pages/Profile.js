@@ -199,8 +199,8 @@ const Profile = () => {
             </div>
 
             <div className="flex-1">
-              <h2 className="text-2xl font-outfit font-bold text-slate-900">{user?.full_name}</h2>
-              <p className="text-slate-600 capitalize">{user?.role}</p>
+              <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white">{user?.full_name}</h2>
+              <p className="text-slate-600 dark:text-slate-400 capitalize">{user?.role}</p>
               
               {/* Photo Actions */}
               <div className="flex gap-2 mt-3">
@@ -236,8 +236,8 @@ const Profile = () => {
               <div>
                 <Label htmlFor="full_name">
                   <div className="flex items-center gap-2 mb-2">
-                    <User className="w-4 h-4 text-slate-600" />
-                    Nome Completo
+                    <User className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                    <span className="text-slate-900 dark:text-white">Nome Completo</span>
                   </div>
                 </Label>
                 <Input
@@ -254,8 +254,8 @@ const Profile = () => {
               <div>
                 <Label htmlFor="email">
                   <div className="flex items-center gap-2 mb-2">
-                    <Mail className="w-4 h-4 text-slate-600" />
-                    Email
+                    <Mail className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                    <span className="text-slate-900 dark:text-white">Email</span>
                   </div>
                 </Label>
                 <Input
@@ -272,8 +272,8 @@ const Profile = () => {
               <div>
                 <Label htmlFor="phone">
                   <div className="flex items-center gap-2 mb-2">
-                    <Phone className="w-4 h-4 text-slate-600" />
-                    Telefone
+                    <Phone className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                    <span className="text-slate-900 dark:text-white">Telefone</span>
                   </div>
                 </Label>
                 <Input
@@ -290,8 +290,8 @@ const Profile = () => {
               {user?.role === 'licenciado' && (
                 <div>
                   <Label>Pontos</Label>
-                  <div className="h-12 flex items-center px-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <span className="text-amber-700 font-semibold">{user?.points || 0} pontos</span>
+                  <div className="h-12 flex items-center px-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <span className="text-amber-700 dark:text-amber-400 font-semibold">{user?.points || 0} pontos</span>
                   </div>
                 </div>
               )}
@@ -312,10 +312,10 @@ const Profile = () => {
         </div>
 
         {/* Change Password Card */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="flex items-center gap-2 mb-6 pb-6 border-b border-slate-200">
-            <Lock className="w-5 h-5 text-slate-700" />
-            <h3 className="text-xl font-outfit font-semibold text-slate-900">Alterar Senha</h3>
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="flex items-center gap-2 mb-6 pb-6 border-b border-slate-200 dark:border-white/10">
+            <Lock className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+            <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white">Alterar Senha</h3>
           </div>
 
           <form onSubmit={handleUpdatePassword} className="space-y-6" data-testid="password-form">
@@ -375,16 +375,16 @@ const Profile = () => {
         </div>
 
         {user?.role === 'licenciado' && (
-          <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200 p-6">
-            <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4">Informações da Conta</h3>
+          <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl border border-cyan-200 dark:border-cyan-700/30 p-6">
+            <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4">Informações da Conta</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg p-4">
-                <p className="text-sm text-slate-600 mb-1">Nível Atual</p>
-                <p className="text-lg font-semibold text-slate-900">{user?.level_title}</p>
+              <div className="bg-white dark:bg-[#151B28] rounded-lg p-4">
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Nível Atual</p>
+                <p className="text-lg font-semibold text-slate-900 dark:text-white">{user?.level_title}</p>
               </div>
-              <div className="bg-white rounded-lg p-4">
-                <p className="text-sm text-slate-600 mb-1">Membro desde</p>
-                <p className="text-lg font-semibold text-slate-900">
+              <div className="bg-white dark:bg-[#151B28] rounded-lg p-4">
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Membro desde</p>
+                <p className="text-lg font-semibold text-slate-900 dark:text-white">
                   {new Date(user?.created_at).toLocaleDateString('pt-BR')}
                 </p>
               </div>
