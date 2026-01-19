@@ -30,6 +30,7 @@ class WebhookLicenseeCreate(BaseModel):
     phone: Optional[str] = None
     leader_id: Optional[str] = None  # ID do líder que indicou
     leader_name: Optional[str] = None  # Nome do líder que indicou
+    kit_type: Optional[str] = None  # "master" ou "senior" - define fluxo de onboarding
 
 
 class WebhookConfigUpdate(BaseModel):
@@ -213,6 +214,12 @@ async def webhook_create_licensee(
     password_token = secrets.token_urlsafe(32)
     token_expires = datetime.now().timestamp() + (48 * 3600)  # 48 horas
     
+    # Determinar stage inicial baseado no kit_type
+    # Kit Master: pula todas as etapas de onboarding, vai direto para "completo"
+    # Kit Senior: segue o fluxo normal de onboarding
+    kit_type = (data.kit_type or "senior").lower()
+    initial_stage = "completo" if kit_type == "master" else "registro"
+    
     # Criar usuário
     user = {
         "id": data.id,  # Usa o ID externo
@@ -227,7 +234,8 @@ async def webhook_create_licensee(
         "password_hash": None,  # Sem senha até o usuário definir
         "password_token": password_token,
         "password_token_expires": token_expires,
-        "current_stage": "registro",
+        "current_stage": initial_stage,
+        "kit_type": kit_type,
         "created_at": datetime.now().isoformat(),
         "updated_at": datetime.now().isoformat(),
         "created_via_webhook": True
@@ -256,6 +264,8 @@ async def webhook_create_licensee(
             "id": data.id,
             "email": data.email,
             "full_name": data.full_name,
+            "kit_type": kit_type,
+            "initial_stage": initial_stage,
             "email_sent": email_sent
         }
     }
