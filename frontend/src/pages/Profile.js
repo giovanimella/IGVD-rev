@@ -148,13 +148,13 @@ const Profile = () => {
     <Layout>
       <div className="space-y-6 max-w-4xl">
         <div>
-          <h1 className="text-3xl font-outfit font-bold text-slate-900">Meu Perfil</h1>
-          <p className="text-slate-600 mt-2">Gerencie suas informações pessoais e configurações</p>
+          <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Meu Perfil</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">Gerencie suas informações pessoais e configurações</p>
         </div>
 
         {/* Profile Info Card */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <div className="flex items-center gap-6 mb-6 pb-6 border-b border-slate-200">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="flex items-center gap-6 mb-6 pb-6 border-b border-slate-200 dark:border-white/10">
             {/* Profile Picture */}
             <div className="relative group">
               {user?.profile_picture ? (

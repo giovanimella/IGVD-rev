@@ -61,13 +61,13 @@ const OzoxxCast = () => {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center h-64 text-center">
-          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+          <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
             <Radio className="w-10 h-10 text-slate-400" />
           </div>
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
             Nenhum vídeo disponível
           </h2>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             Em breve teremos novos conteúdos para você
           </p>
         </div>
@@ -85,10 +85,10 @@ const OzoxxCast = () => {
               <Radio className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900">
+              <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">
                 Ozoxx Cast
               </h1>
-              <p className="text-slate-600">
+              <p className="text-slate-600 dark:text-slate-400">
                 Gravações das lives da fábrica
               </p>
             </div>
@@ -114,15 +114,15 @@ const OzoxxCast = () => {
             
             {selectedVideo && (
               <div className="mt-4">
-                <h2 className="text-xl font-semibold text-slate-900">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                   {selectedVideo.title}
                 </h2>
                 {selectedVideo.description && (
-                  <p className="text-slate-600 mt-2">
+                  <p className="text-slate-600 dark:text-slate-400 mt-2">
                     {selectedVideo.description}
                   </p>
                 )}
-                <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
+                <div className="flex items-center gap-4 mt-3 text-sm text-slate-500 dark:text-slate-400">
                   <span className="flex items-center gap-1">
                     <Eye className="w-4 h-4" />
                     {selectedVideo.views || 0} visualizações
@@ -138,24 +138,24 @@ const OzoxxCast = () => {
 
           {/* Lista de Vídeos */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-200">
-                <h3 className="font-semibold text-slate-900">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-200 dark:border-white/10">
+                <h3 className="font-semibold text-slate-900 dark:text-white">
                   Todos os Vídeos ({videos.length})
                 </h3>
               </div>
-              <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
+              <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto">
                 {videos.map((video) => (
                   <div
                     key={video.id}
                     onClick={() => handleVideoSelect(video)}
-                    className={`p-3 cursor-pointer transition-all hover:bg-slate-50 ${
-                      selectedVideo?.id === video.id ? 'bg-cyan-50 border-l-4 border-cyan-500' : ''
+                    className={`p-3 cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-white/5 ${
+                      selectedVideo?.id === video.id ? 'bg-cyan-50 dark:bg-cyan-500/20 border-l-4 border-cyan-500' : ''
                     }`}
                     data-testid={`video-item-${video.id}`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-24 h-14 bg-slate-200 rounded-lg flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+                      <div className="w-24 h-14 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0 relative overflow-hidden">
                         <Play className="w-6 h-6 text-slate-400" />
                         {selectedVideo?.id === video.id && (
                           <div className="absolute inset-0 bg-cyan-500/20 flex items-center justify-center">
@@ -165,11 +165,11 @@ const OzoxxCast = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={`font-medium text-sm truncate ${
-                          selectedVideo?.id === video.id ? 'text-cyan-700' : 'text-slate-900'
+                          selectedVideo?.id === video.id ? 'text-cyan-700 dark:text-cyan-400' : 'text-slate-900 dark:text-white'
                         }`}>
                           {video.title}
                         </p>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400">
                           <span className="flex items-center gap-1">
                             <Eye className="w-3 h-3" />
                             {video.views || 0}
@@ -178,7 +178,7 @@ const OzoxxCast = () => {
                         </div>
                       </div>
                       <ChevronRight className={`w-4 h-4 flex-shrink-0 ${
-                        selectedVideo?.id === video.id ? 'text-cyan-500' : 'text-slate-300'
+                        selectedVideo?.id === video.id ? 'text-cyan-500' : 'text-slate-300 dark:text-slate-600'
                       }`} />
                     </div>
                   </div>
