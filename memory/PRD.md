@@ -18,7 +18,7 @@ UniOzoxx é uma plataforma LMS (Learning Management System) gamificada desenvolv
 - Recuperação de senha
 - Três níveis de acesso: admin, supervisor, licenciado
 
-### ✅ Modo Escuro/Claro (ATUALIZADO - Janeiro 2026)
+### ✅ Modo Escuro/Claro (COMPLETO - Janeiro 2026)
 - Toggle no topbar para alternar entre temas
 - Preferência salva no localStorage
 - **REFATORAÇÃO COMPLETA:** Dark mode aplicado em TODAS as páginas
@@ -29,8 +29,27 @@ UniOzoxx é uma plataforma LMS (Learning Management System) gamificada desenvolv
   - Texto principal: branco
   - Texto secundário: `slate-400`
 - Classes Tailwind `dark:` aplicadas em todo o sistema
+- Tooltips dos gráficos Recharts adaptados para ambos os temas via CSS variables
 
-### ✅ Sistema de Idiomas i18n (NOVO - Janeiro 2026)
+### ✅ Identidade da Plataforma (NOVO - Janeiro 2026)
+- Nome da plataforma configurável pelo Admin
+- Alteração do nome reflete em toda a plataforma:
+  - Tela de login
+  - Sidebar
+  - Título das páginas
+  - Emails (quando implementado)
+- Logo personalizável
+- Painel centralizado em Admin > Painel Sistema > Identidade da Plataforma
+
+### ✅ Nova Tela de Login (NOVO - Janeiro 2026)
+- Design minimalista e centralizado
+- Logo centralizada no topo
+- Nome da plataforma dinâmico abaixo da logo
+- Removido layout dividido (sem lado esquerdo com gradiente)
+- Suporte a dark mode
+- Campos com estilo limpo e profissional
+
+### ✅ Sistema de Idiomas i18n
 - Seletor de idioma no topbar
 - 3 idiomas: Português (Brasil), English, Español
 - Sidebar e componentes principais traduzidos
