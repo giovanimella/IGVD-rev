@@ -54,20 +54,21 @@ import AdminSales from './pages/admin/AdminSales';
 
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        {/* <ChatProvider> */}
-          <BrowserRouter>
-            <Toaster position="top-right" richColors />
-            {/* <ChatWidget /> */}
-            <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/request-reset" element={<RequestReset />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/set-password" element={<SetPassword />} />
-            <Route path="/register/:token" element={<PublicRegistration />} />
-            
-            <Route
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          {/* <ChatProvider> */}
+            <BrowserRouter>
+              <Toaster position="top-right" richColors />
+              {/* <ChatWidget /> */}
+              <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/request-reset" element={<RequestReset />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/set-password" element={<SetPassword />} />
+              <Route path="/register/:token" element={<PublicRegistration />} />
+              
+              <Route
               path="/dashboard"
               element={
                 <PrivateRoute>
