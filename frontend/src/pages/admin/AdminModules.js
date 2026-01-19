@@ -379,6 +379,32 @@ const AdminModules = () => {
                   onCheckedChange={(checked) => setFormData({...formData, is_acolhimento: checked})}
                 />
               </div>
+              <div className="flex items-center justify-between p-4 bg-amber-50 rounded-lg border border-amber-200">
+                <div>
+                  <Label>Possui Avaliação</Label>
+                  <p className="text-sm text-amber-600">Criar avaliação para este módulo</p>
+                </div>
+                <Switch
+                  checked={formData.has_assessment}
+                  onCheckedChange={(checked) => setFormData({...formData, has_assessment: checked})}
+                />
+              </div>
+              <div className="space-y-2 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-purple-600" />
+                  <Label>Delay de Visibilidade (meses)</Label>
+                </div>
+                <p className="text-sm text-purple-600 mb-2">
+                  0 = aparece imediatamente. Ex: 3 = aparece após 3 meses de cadastro
+                </p>
+                <Input
+                  type="number"
+                  min="0"
+                  value={formData.visibility_delay_months}
+                  onChange={(e) => setFormData({...formData, visibility_delay_months: parseInt(e.target.value) || 0})}
+                  placeholder="0"
+                />
+              </div>
               <Button onClick={handleUpdateModule} className="w-full">
                 Salvar Alterações
               </Button>
