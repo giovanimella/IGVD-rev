@@ -158,8 +158,8 @@ const AdminBanners = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Gerenciar Banners</h1>
-            <p className="text-slate-600 mt-2">Banners rotativos da página inicial</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Gerenciar Banners</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Banners rotativos da página inicial</p>
           </div>
           <button
             onClick={openCreateModal}
@@ -170,27 +170,27 @@ const AdminBanners = () => {
           </button>
         </div>
 
-        <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+        <div className="bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-700/30 rounded-lg p-4">
           <div className="flex items-start space-x-3">
-            <ImageIcon className="w-5 h-5 text-cyan-600 mt-0.5" />
+            <ImageIcon className="w-5 h-5 text-cyan-600 dark:text-cyan-400 mt-0.5" />
             <div>
-              <p className="font-semibold text-cyan-900 mb-1">Resolução Recomendada</p>
-              <p className="text-sm text-cyan-700">Desktop: 800x400px | Mobile: 800x600px</p>
-              <p className="text-xs text-cyan-600 mt-1">Tamanho máximo: 5MB | Formatos: JPG, PNG, WebP</p>
+              <p className="font-semibold text-cyan-900 dark:text-cyan-300 mb-1">Resolução Recomendada</p>
+              <p className="text-sm text-cyan-700 dark:text-cyan-400">Desktop: 800x400px | Mobile: 800x600px</p>
+              <p className="text-xs text-cyan-600 dark:text-cyan-500 mt-1">Tamanho máximo: 5MB | Formatos: JPG, PNG, WebP</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           {banners.length === 0 ? (
             <div className="text-center py-12">
-              <ImageIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500">Nenhum banner cadastrado</p>
+              <ImageIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-500 dark:text-slate-400">Nenhum banner cadastrado</p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-200">
+            <div className="divide-y divide-slate-200 dark:divide-white/5">
               {banners.map((banner, index) => (
-                <div key={banner.id} className="p-4 hover:bg-slate-50 transition-colors">
+                <div key={banner.id} className="p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                   <div className="flex items-center space-x-4">
                     <img
                       src={`${API_URL}${banner.image_url}`}
@@ -198,12 +198,12 @@ const AdminBanners = () => {
                       className="w-32 h-16 object-cover rounded-lg"
                     />
                     <div className="flex-1">
-                      <h3 className="font-semibold text-slate-900">
+                      <h3 className="font-semibold text-slate-900 dark:text-white">
                         {banner.title || 'Sem título'}
                       </h3>
-                      <p className="text-sm text-slate-600">Ordem: {banner.order}</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Ordem: {banner.order}</p>
                       <span className={`inline-block mt-1 px-2 py-1 rounded text-xs font-medium ${
-                        banner.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        banner.active ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400'
                       }`}>
                         {banner.active ? 'Ativo' : 'Inativo'}
                       </span>
@@ -212,26 +212,26 @@ const AdminBanners = () => {
                       <button
                         onClick={() => moveUp(banner, index)}
                         disabled={index === 0}
-                        className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors disabled:opacity-30"
+                        className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors disabled:opacity-30"
                       >
                         <ArrowUp className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => moveDown(banner, index)}
                         disabled={index === banners.length - 1}
-                        className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors disabled:opacity-30"
+                        className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors disabled:opacity-30"
                       >
                         <ArrowDown className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openEditModal(banner)}
-                        className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                        className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(banner.id)}
-                        className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                        className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

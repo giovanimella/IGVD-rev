@@ -196,14 +196,14 @@ const AdminFiles = () => {
   };
 
   const renderFileCard = (file) => (
-    <div key={file.id} className="bg-slate-50 rounded-lg p-4 flex items-center justify-between group">
+    <div key={file.id} className="bg-slate-50 dark:bg-white/5 rounded-lg p-4 flex items-center justify-between group">
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
-          <FileText className="w-5 h-5 text-cyan-600" />
+        <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+          <FileText className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
         </div>
         <div className="min-w-0">
-          <p className="font-medium text-slate-900 truncate">{file.original_filename}</p>
-          <p className="text-xs text-slate-500">
+          <p className="font-medium text-slate-900 dark:text-white truncate">{file.original_filename}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {(file.file_size / 1024 / 1024).toFixed(2)} MB • {file.file_type.toUpperCase()}
           </p>
         </div>
@@ -211,19 +211,19 @@ const AdminFiles = () => {
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={() => openMoveDialog(file)}
-          className="p-2 text-slate-600 hover:bg-slate-200 rounded-lg"
+          className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg"
           title="Mover para pasta"
         >
           <MoveRight className="w-4 h-4" />
         </button>
         <a href={`${API_URL}${file.file_url}`} download target="_blank" rel="noopener noreferrer">
-          <button className="p-2 text-cyan-600 hover:bg-cyan-50 rounded-lg">
+          <button className="p-2 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 rounded-lg">
             <Download className="w-4 h-4" />
           </button>
         </a>
         <button
           onClick={() => handleDeleteFile(file.id)}
-          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -247,8 +247,8 @@ const AdminFiles = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Gerenciar Arquivos</h1>
-            <p className="text-slate-600 mt-1">Organize os materiais em pastas</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Gerenciar Arquivos</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-1">Organize os materiais em pastas</p>
           </div>
           <div className="flex gap-3">
             <Button
@@ -271,10 +271,10 @@ const AdminFiles = () => {
         {/* Pastas */}
         <div className="space-y-4">
           {data.folders.map((folder) => (
-            <div key={folder.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div key={folder.id} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
               {/* Folder Header */}
               <div
-                className="px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50"
+                className="px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5"
                 onClick={() => toggleFolder(folder.id)}
               >
                 <div className="flex items-center gap-4">
@@ -285,20 +285,20 @@ const AdminFiles = () => {
                     {folder.icon}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-900">{folder.name}</h3>
-                    <p className="text-sm text-slate-500">{folder.file_count} arquivo(s)</p>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">{folder.name}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{folder.file_count} arquivo(s)</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleEditFolder(folder); }}
-                    className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                    className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder.id); }}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -312,9 +312,9 @@ const AdminFiles = () => {
               
               {/* Folder Content */}
               {expandedFolders[folder.id] && (
-                <div className="px-6 pb-4 space-y-2 border-t border-slate-100 pt-4">
+                <div className="px-6 pb-4 space-y-2 border-t border-slate-100 dark:border-white/10 pt-4">
                   {folder.files.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-4">Nenhum arquivo nesta pasta</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">Nenhum arquivo nesta pasta</p>
                   ) : (
                     folder.files.map(file => renderFileCard(file))
                   )}
@@ -325,13 +325,13 @@ const AdminFiles = () => {
 
           {/* Arquivos sem pasta */}
           {data.uncategorized.length > 0 && (
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100">
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10">
                 <div className="flex items-center gap-3">
                   <Folder className="w-6 h-6 text-slate-400" />
                   <div>
-                    <h3 className="font-semibold text-slate-900">Sem Pasta</h3>
-                    <p className="text-sm text-slate-500">{data.uncategorized.length} arquivo(s)</p>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">Sem Pasta</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{data.uncategorized.length} arquivo(s)</p>
                   </div>
                 </div>
               </div>
@@ -343,10 +343,10 @@ const AdminFiles = () => {
 
           {/* Empty State */}
           {data.folders.length === 0 && data.uncategorized.length === 0 && (
-            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-              <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">Nenhum arquivo cadastrado</h3>
-              <p className="text-slate-600 mb-4">Crie pastas e faça upload de arquivos</p>
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
+              <FileText className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Nenhum arquivo cadastrado</h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-4">Crie pastas e faça upload de arquivos</p>
             </div>
           )}
         </div>

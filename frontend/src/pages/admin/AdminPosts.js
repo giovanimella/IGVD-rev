@@ -105,8 +105,8 @@ const AdminPosts = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Gerenciar Comunicados</h1>
-            <p className="text-slate-600 mt-2">Posts de novidades e avisos para licenciados</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Gerenciar Comunicados</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Posts de novidades e avisos para licenciados</p>
           </div>
           <button
             onClick={openCreateModal}
@@ -117,41 +117,41 @@ const AdminPosts = () => {
           </button>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           {posts.length === 0 ? (
             <div className="text-center py-12">
-              <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500">Nenhum post cadastrado</p>
+              <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-500 dark:text-slate-400">Nenhum post cadastrado</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
                   <tr>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Título</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Descrição</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Autor</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Data</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Status</th>
-                    <th className="text-right px-6 py-4 text-sm font-semibold text-slate-900">Ações</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Título</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Descrição</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Autor</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Data</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Status</th>
+                    <th className="text-right px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                   {posts.map((post) => (
-                    <tr key={post.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={post.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
-                        <p className="font-semibold text-slate-900">{post.title}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">{post.title}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-slate-600 text-sm line-clamp-2">{post.description}</p>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-2">{post.description}</p>
                       </td>
-                      <td className="px-6 py-4 text-slate-600 text-sm">{post.author_name}</td>
-                      <td className="px-6 py-4 text-slate-600 text-sm">
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">{post.author_name}</td>
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">
                         {format(new Date(post.created_at), 'dd/MM/yyyy', { locale: ptBR })}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          post.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          post.active ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400'
                         }`}>
                           {post.active ? 'Ativo' : 'Inativo'}
                         </span>
@@ -160,13 +160,13 @@ const AdminPosts = () => {
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => openEditModal(post)}
-                            className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                            className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(post.id)}
-                            className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 rounded-lg transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
