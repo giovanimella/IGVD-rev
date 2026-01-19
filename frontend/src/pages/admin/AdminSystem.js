@@ -659,9 +659,9 @@ const AdminSystem = () => {
 
         {/* Logs de Webhook */}
         {webhookLogs.length > 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-outfit font-semibold text-slate-900">Últimos Webhooks</h3>
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Últimos Webhooks</h3>
               <Button variant="outline" size="sm" onClick={fetchWebhookLogs}>
                 <RefreshCw className="w-4 h-4 mr-1" />
                 Atualizar
@@ -672,18 +672,18 @@ const AdminSystem = () => {
                 <div 
                   key={idx} 
                   className={`flex items-center justify-between p-3 rounded-lg text-sm ${
-                    log.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                    log.success ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/30'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      log.type === 'incoming' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                      log.type === 'incoming' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
                     }`}>
                       {log.type === 'incoming' ? 'Entrada' : 'Saída'}
                     </span>
-                    <span className="text-slate-600">{log.event}</span>
+                    <span className="text-slate-600 dark:text-slate-300">{log.event}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-slate-500">
+                  <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
                     <span>{new Date(log.created_at).toLocaleString('pt-BR')}</span>
                     <span className={`w-2 h-2 rounded-full ${log.success ? 'bg-green-500' : 'bg-red-500'}`}></span>
                   </div>
