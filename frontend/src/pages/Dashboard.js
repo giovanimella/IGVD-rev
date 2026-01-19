@@ -338,25 +338,25 @@ const Dashboard = () => {
                 <Link to="/supervisor/licensees" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
                     <Users className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-                    <span className="font-medium text-slate-900">Gerenciar Licenciados</span>
+                    <span className="font-medium text-slate-900 dark:text-white">Gerenciar Licenciados</span>
                   </div>
                   <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
-                <Link to="/modules" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                <Link to="/modules" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-cyan-600" />
-                    <span className="font-medium text-slate-900">Ver Módulos</span>
+                    <BookOpen className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                    <span className="font-medium text-slate-900 dark:text-white">Ver Módulos</span>
                   </div>
                   <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
-                <Link to="/leaderboard" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                <Link to="/leaderboard" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Trophy className="w-5 h-5 text-cyan-600" />
-                    <span className="font-medium text-slate-900">Ver Ranking</span>
+                    <Trophy className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                    <span className="font-medium text-slate-900 dark:text-white">Ver Ranking</span>
                   </div>
                   <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -365,18 +365,18 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Licenciados Recentes</h3>
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Licenciados Recentes</h3>
               <div className="space-y-3">
                 {stats?.licensees?.slice(0, 5).map((licensee) => (
-                  <div key={licensee.id} className="flex items-center justify-between p-3 border border-slate-100 rounded-lg">
+                  <div key={licensee.id} className="flex items-center justify-between p-3 border border-slate-100 dark:border-white/5 rounded-lg">
                     <div>
-                      <p className="font-medium text-slate-900">{licensee.full_name}</p>
-                      <p className="text-xs text-slate-500">{licensee.email}</p>
+                      <p className="font-medium text-slate-900 dark:text-white">{licensee.full_name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{licensee.email}</p>
                     </div>
-                    <span className="text-sm font-semibold text-amber-600">{licensee.points || 0} pts</span>
+                    <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">{licensee.points || 0} pts</span>
                   </div>
-                )) || <p className="text-slate-500 text-center py-4">Nenhum licenciado ainda</p>}
+                )) || <p className="text-slate-500 dark:text-slate-400 text-center py-4">Nenhum licenciado ainda</p>}
               </div>
             </div>
           </div>
