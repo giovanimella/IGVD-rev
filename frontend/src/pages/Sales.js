@@ -217,10 +217,10 @@ const Sales = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900">
+            <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">
               Vendas em Campo
             </h1>
-            <p className="text-slate-600 mt-1">
+            <p className="text-slate-600 dark:text-slate-400 mt-1">
               Registre suas 10 vendas para avançar no onboarding
             </p>
           </div>
@@ -269,10 +269,10 @@ const Sales = () => {
                 key={saleNum}
                 className={`rounded-xl border-2 p-4 transition-all ${
                   isPaid 
-                    ? 'bg-green-50 border-green-300' 
+                    ? 'bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700' 
                     : isPending 
-                      ? 'bg-amber-50 border-amber-300 cursor-pointer hover:shadow-md' 
-                      : 'bg-slate-50 border-slate-200 border-dashed cursor-pointer hover:border-cyan-300 hover:bg-cyan-50'
+                      ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 cursor-pointer hover:shadow-md' 
+                      : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 border-dashed cursor-pointer hover:border-cyan-300 dark:hover:border-cyan-500/50 hover:bg-cyan-50 dark:hover:bg-cyan-900/20'
                 }`}
                 onClick={() => {
                   if (!sale) openNewSaleModal();
@@ -284,26 +284,26 @@ const Sales = () => {
                   <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${
                     isPaid ? 'bg-green-500 text-white' :
                     isPending ? 'bg-amber-500 text-white' :
-                    'bg-slate-200 text-slate-400'
+                    'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'
                   }`}>
                     {isPaid ? <CheckCircle className="w-6 h-6" /> :
                      isPending ? <Clock className="w-6 h-6" /> :
                      <span className="font-bold">{saleNum}</span>}
                   </div>
                   <p className={`text-sm font-medium ${
-                    isPaid ? 'text-green-700' :
-                    isPending ? 'text-amber-700' :
-                    'text-slate-500'
+                    isPaid ? 'text-green-700 dark:text-green-400' :
+                    isPending ? 'text-amber-700 dark:text-amber-400' :
+                    'text-slate-500 dark:text-slate-400'
                   }`}>
                     Venda {saleNum}
                   </p>
                   {sale && (
-                    <p className="text-xs text-slate-600 mt-1 truncate">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
                       {sale.customer_name}
                     </p>
                   )}
                   {isPending && (
-                    <p className="text-xs text-amber-600 mt-1">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                       Aguardando pgto
                     </p>
                   )}
@@ -315,35 +315,35 @@ const Sales = () => {
 
         {/* Sales List */}
         {salesData?.sales?.length > 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-900">Detalhes das Vendas</h2>
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-white/10">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Detalhes das Vendas</h2>
             </div>
-            <div className="divide-y divide-slate-200">
+            <div className="divide-y divide-slate-200 dark:divide-white/5">
               {salesData.sales.map((sale) => (
-                <div key={sale.id} className="p-4 hover:bg-slate-50">
+                <div key={sale.id} className="p-4 hover:bg-slate-50 dark:hover:bg-white/5">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                             sale.payment_status === 'paid' 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-amber-100 text-amber-700'
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+                              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
                           }`}>
                             Venda #{sale.sale_number}
                           </span>
                         </div>
-                        <p className="font-medium text-slate-900">{sale.customer_name}</p>
-                        <p className="text-sm text-slate-500">{sale.customer_cpf}</p>
+                        <p className="font-medium text-slate-900 dark:text-white">{sale.customer_name}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{sale.customer_cpf}</p>
                       </div>
                       
                       <div>
-                        <p className="text-sm text-slate-500 flex items-center gap-1">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                           <Phone className="w-3 h-3" />
                           {formatPhone(sale.customer_phone)}
                         </p>
-                        <p className="text-sm text-slate-500 flex items-center gap-1">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                           <Mail className="w-3 h-3" />
                           {sale.customer_email}
                         </p>
