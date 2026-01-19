@@ -145,10 +145,10 @@ const Sidebar = () => {
                 key={link.path}
                 to={link.path}
                 data-testid={`sidebar-link-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-medium'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-500 dark:text-cyan-400 font-medium border border-cyan-500/30'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
