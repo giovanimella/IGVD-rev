@@ -224,8 +224,8 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-6">Distribuição por Etapa</h3>
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Distribuição por Etapa</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -242,38 +242,38 @@ const Dashboard = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl border border-slate-100 p-6">
-              <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Ações Rápidas</h3>
+            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Ações Rápidas</h3>
               <div className="space-y-3">
-                <Link to="/admin/users" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                <Link to="/admin/users" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Users className="w-5 h-5 text-cyan-600" />
-                    <span className="font-medium text-slate-900">Gerenciar Usuários</span>
+                    <Users className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                    <span className="font-medium text-slate-900 dark:text-white">Gerenciar Usuários</span>
                   </div>
                   <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
-                <Link to="/admin/modules" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                <Link to="/admin/modules" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-cyan-600" />
-                    <span className="font-medium text-slate-900">Gerenciar Módulos</span>
+                    <BookOpen className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                    <span className="font-medium text-slate-900 dark:text-white">Gerenciar Módulos</span>
                   </div>
                   <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
-                <Link to="/admin/rewards" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                <Link to="/admin/rewards" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Award className="w-5 h-5 text-cyan-600" />
-                    <span className="font-medium text-slate-900">Gerenciar Recompensas</span>
+                    <Award className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                    <span className="font-medium text-slate-900 dark:text-white">Gerenciar Recompensas</span>
                   </div>
                   <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
