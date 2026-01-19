@@ -175,8 +175,8 @@ const AdminUsers = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Gerenciar Usuários</h1>
-            <p className="text-slate-600 mt-2">Criar, editar e excluir usuários do sistema</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Gerenciar Usuários</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Criar, editar e excluir usuários do sistema</p>
           </div>
           <button
             onClick={openCreateModal}
@@ -196,78 +196,78 @@ const AdminUsers = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-slate-600 text-sm">Total de Usuários</p>
-              <Users className="w-5 h-5 text-cyan-600" />
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Usuários</p>
+              <Users className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
             </div>
-            <p className="text-3xl font-outfit font-bold text-slate-900">{users.length}</p>
+            <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{users.length}</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-slate-600 text-sm">Licenciados</p>
-              <User className="w-5 h-5 text-green-600" />
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Licenciados</p>
+              <User className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
-            <p className="text-3xl font-outfit font-bold text-slate-900">
+            <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">
               {users.filter(u => u.role === 'licenciado').length}
             </p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-slate-600 text-sm">Supervisores</p>
-              <Shield className="w-5 h-5 text-blue-600" />
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Supervisores</p>
+              <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <p className="text-3xl font-outfit font-bold text-slate-900">
+            <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">
               {users.filter(u => u.role === 'supervisor').length}
             </p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
+              <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
                 <tr>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Usuário</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Email</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Telefone</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Nível</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Supervisor</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900">Pontos</th>
-                  <th className="text-right px-6 py-4 text-sm font-semibold text-slate-900">Ações</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Usuário</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Email</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Telefone</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Nível</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Supervisor</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Pontos</th>
+                  <th className="text-right px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <button
                         onClick={() => openEditModal(user)}
-                        className="font-semibold text-cyan-600 hover:text-cyan-700 hover:underline"
+                        className="font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 hover:underline"
                       >
                         {user.full_name}
                       </button>
                     </td>
-                    <td className="px-6 py-4 text-slate-600">{user.email}</td>
-                    <td className="px-6 py-4 text-slate-600">{user.phone || '-'}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{user.email}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{user.phone || '-'}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleBadge(user.role)}`}>
                         {getRoleLabel(user.role)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600">{getSupervisorName(user.supervisor_id)}</td>
-                    <td className="px-6 py-4 text-slate-900 font-semibold">{user.points || 0}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{getSupervisorName(user.supervisor_id)}</td>
+                    <td className="px-6 py-4 text-slate-900 dark:text-white font-semibold">{user.points || 0}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => openEditModal(user)}
-                          className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                          className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(user.id)}
-                          className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                          className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -284,59 +284,59 @@ const AdminUsers = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-outfit font-bold text-slate-900">
+              <h2 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5 text-slate-600" />
+                <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nome Completo</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nome Completo</label>
                 <input
                   type="text"
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                   required
                   disabled={!!editingUser}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Telefone</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Telefone</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nível</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Nível</label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                   required
                 >
                   <option value="licenciado">Licenciado</option>
@@ -348,11 +348,11 @@ const AdminUsers = () => {
               {/* Campo Supervisor - só aparece se for licenciado */}
               {formData.role === 'licenciado' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Supervisor</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Supervisor</label>
                   <select
                     value={formData.supervisor_id}
                     onChange={(e) => setFormData({ ...formData, supervisor_id: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                   >
                     <option value="">Nenhum supervisor</option>
                     {supervisors.map((supervisor) => (
@@ -366,7 +366,7 @@ const AdminUsers = () => {
 
               {/* Campo Senha */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   <div className="flex items-center gap-2">
                     <Lock className="w-4 h-4" />
                     {editingUser ? 'Nova Senha (deixe vazio para manter)' : 'Senha'}
@@ -376,14 +376,14 @@ const AdminUsers = () => {
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                   placeholder={editingUser ? '••••••••' : 'Digite a senha'}
                   required={!editingUser}
                   minLength={6}
                   data-testid="user-password-input"
                 />
                 {!editingUser && (
-                  <p className="text-xs text-slate-500 mt-1">Mínimo 6 caracteres</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Mínimo 6 caracteres</p>
                 )}
               </div>
 
@@ -391,7 +391,7 @@ const AdminUsers = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="flex-1 px-4 py-2 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                 >
                   Cancelar
                 </button>
@@ -410,24 +410,24 @@ const AdminUsers = () => {
       {/* Modal de Importação */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-outfit font-bold text-slate-900">Importar Usuários</h2>
+              <h2 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">Importar Usuários</h2>
               <button
                 onClick={() => { setShowImportModal(false); setImportFile(null); }}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5 text-slate-600" />
+                <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </button>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-lg">
+              <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-lg">
                 <div className="flex items-start gap-3">
-                  <FileSpreadsheet className="w-6 h-6 text-green-600 flex-shrink-0" />
+                  <FileSpreadsheet className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0" />
                   <div>
-                    <p className="text-sm text-slate-700 font-medium">Formato aceito: CSV</p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">Formato aceito: CSV</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Colunas: email, full_name, phone (opcional), role (opcional), password (opcional)
                     </p>
                   </div>
@@ -436,14 +436,14 @@ const AdminUsers = () => {
 
               <button
                 onClick={downloadTemplate}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-cyan-200 text-cyan-700 rounded-lg hover:bg-cyan-50 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-cyan-200 dark:border-cyan-700 text-cyan-700 dark:text-cyan-400 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/30 transition-colors"
                 data-testid="download-template-btn"
               >
                 <Download className="w-4 h-4" />
                 Baixar Modelo de Importação
               </button>
 
-              <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center">
+              <div className="border-2 border-dashed border-slate-200 dark:border-white/10 rounded-lg p-6 text-center">
                 <input
                   type="file"
                   accept=".csv,.xlsx,.xls"
@@ -454,7 +454,7 @@ const AdminUsers = () => {
                 />
                 <label htmlFor="import-file" className="cursor-pointer">
                   <Upload className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {importFile ? importFile.name : 'Clique para selecionar arquivo'}
                   </p>
                 </label>
@@ -464,7 +464,7 @@ const AdminUsers = () => {
                 <button
                   type="button"
                   onClick={() => { setShowImportModal(false); setImportFile(null); }}
-                  className="flex-1 px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="flex-1 px-4 py-2 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                 >
                   Cancelar
                 </button>

@@ -127,11 +127,11 @@ const AdminModules = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900 flex items-center gap-3">
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white flex items-center gap-3">
               <BookOpen className="w-8 h-8 text-cyan-500" />
               Gerenciar Módulos
             </h1>
-            <p className="text-slate-600 mt-2">Crie e gerencie os módulos de treinamento</p>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Crie e gerencie os módulos de treinamento</p>
           </div>
 
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -243,7 +243,7 @@ const AdminModules = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modules.map((module) => (
-            <div key={module.id} className="bg-white rounded-xl border border-slate-100 overflow-hidden hover:shadow-lg transition-all" data-testid={`module-item-${module.id}`}>
+            <div key={module.id} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden hover:shadow-lg dark:hover:border-cyan-500/30 transition-all" data-testid={`module-item-${module.id}`}>
               <div className="h-32 bg-gradient-to-br from-cyan-500 to-blue-600 relative">
                 <div className="absolute top-3 right-3 flex gap-2">
                   {module.is_acolhimento && (
@@ -264,13 +264,13 @@ const AdminModules = () => {
               </div>
               
               <div className="p-6">
-                <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-2">{module.title}</h3>
-                <p className="text-slate-600 text-sm mb-4 line-clamp-2">{module.description}</p>
+                <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-2">{module.title}</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">{module.description}</p>
                 
                 <div className="flex items-center justify-between text-sm mb-4">
-                  <span className="text-slate-600">{module.chapters_count || 0} capítulos</span>
+                  <span className="text-slate-600 dark:text-slate-400">{module.chapters_count || 0} capítulos</span>
                   {module.points_reward > 0 && (
-                    <span className="flex items-center gap-1 text-amber-600 font-medium">
+                    <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
                       <Award className="w-4 h-4" />
                       {module.points_reward} pts
                     </span>
@@ -290,7 +290,7 @@ const AdminModules = () => {
                     size="sm"
                     variant="outline"
                     onClick={() => navigate(`/admin/module/${module.id}/assessment`)}
-                    className="text-amber-600 hover:bg-amber-50"
+                    className="text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30"
                     title="Avaliação"
                   >
                     <ClipboardCheck className="w-4 h-4" />
@@ -307,7 +307,7 @@ const AdminModules = () => {
                     size="sm"
                     variant="outline"
                     onClick={() => handleDeleteModule(module.id)}
-                    className="text-red-600 hover:bg-red-50"
+                    className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -413,10 +413,10 @@ const AdminModules = () => {
         </Dialog>
 
         {modules.length === 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2">Nenhum módulo cadastrado</h3>
-            <p className="text-slate-600 mb-6">Crie seu primeiro módulo para começar.</p>
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
+            <BookOpen className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">Nenhum módulo cadastrado</h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">Crie seu primeiro módulo para começar.</p>
             <Button onClick={() => setShowCreateDialog(true)} className="bg-cyan-500 hover:bg-cyan-600">
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeiro Módulo
