@@ -58,8 +58,9 @@ const AdminSystem = () => {
 
   const fetchSystemConfig = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/system/config`);
+      const response = await axios.get(`${API_URL}/api/system/config/full`);
       setSystemConfig({
+        platform_name: response.data.platform_name || 'UniOzoxx',
         minimum_passing_score: response.data.minimum_passing_score || 70,
         webhook_url: response.data.webhook_url || '',
         webhook_enabled: response.data.webhook_enabled || false,
