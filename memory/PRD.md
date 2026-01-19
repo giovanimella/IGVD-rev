@@ -21,40 +21,65 @@ UniOzoxx é uma plataforma LMS (Learning Management System) gamificada desenvolv
 ### ✅ Modo Escuro/Claro (COMPLETO - Janeiro 2026)
 - Toggle no topbar para alternar entre temas
 - Preferência salva no localStorage
-- **REFATORAÇÃO COMPLETA:** Dark mode aplicado em TODAS as páginas
-- Cores padronizadas:
-  - Fundo principal: `#0B0F18`
-  - Cards e componentes: `#151B28`
-  - Bordas: `rgba(255, 255, 255, 0.05)`
-  - Texto principal: branco
-  - Texto secundário: `slate-400`
-- Classes Tailwind `dark:` aplicadas em todo o sistema
-- Tooltips dos gráficos Recharts adaptados para ambos os temas via CSS variables
+- Dark mode aplicado em TODAS as páginas
+- Tooltips dos gráficos Recharts adaptados via CSS variables
 
-### ✅ Identidade da Plataforma (NOVO - Janeiro 2026)
-- Nome da plataforma configurável pelo Admin
-- Alteração do nome reflete em toda a plataforma:
+### ✅ Identidade da Plataforma Dinâmica (COMPLETO - Janeiro 2026)
+- Nome da plataforma configurável pelo Admin (`Admin > Painel Sistema`)
+- Nome dinâmico aplicado em:
   - Tela de login
-  - Sidebar
-  - Título das páginas
-  - Emails (quando implementado)
-- Logo personalizável
-- Painel centralizado em Admin > Painel Sistema > Identidade da Plataforma
+  - Sidebar/menu lateral
+  - Todos os templates de email (boas-vindas, reset de senha, webhook)
+  - Relatórios PDF de vendas/comissões
+  - Rodapé dos emails
+  - Campo "De:" dos emails enviados
+- Endpoint público `/api/system/config` para acesso sem autenticação
+- Endpoint privado `/api/system/config/full` para administradores
 
-### ✅ Nova Tela de Login (NOVO - Janeiro 2026)
+### ✅ Nova Tela de Login (COMPLETO - Janeiro 2026)
 - Design minimalista e centralizado
 - Logo centralizada no topo
-- Nome da plataforma dinâmico abaixo da logo
+- Nome da plataforma dinâmico
 - Removido layout dividido (sem lado esquerdo com gradiente)
 - Suporte a dark mode
-- Campos com estilo limpo e profissional
 
-### ✅ Sistema de Idiomas i18n
-- Seletor de idioma no topbar
-- 3 idiomas: Português (Brasil), English, Español
-- Sidebar e componentes principais traduzidos
-- Arquivos de tradução em `/frontend/src/locales/`
-- **STATUS:** Estrutura criada, precisa expandir traduções
+### ✅ Sistema de Idiomas i18n (COMPLETO - Janeiro 2026)
+- Seletor de idioma no topbar com 3 opções:
+  - 🇧🇷 Português (Brasil)
+  - 🇺🇸 English
+  - 🇪🇸 Español
+- Arquivos de tradução completos em `/frontend/src/locales/`:
+  - `pt-BR.json` - 350+ chaves traduzidas
+  - `en.json` - 350+ chaves traduzidas
+  - `es.json` - 350+ chaves traduzidas
+- Cobertura de traduções:
+  - Sidebar completo
+  - Dashboard
+  - Módulos e capítulos
+  - Agenda
+  - Certificados
+  - Favoritos
+  - Arquivos
+  - Recompensas
+  - Perfil
+  - Treinamento presencial
+  - Vendas
+  - Admin dashboard
+  - Admin usuários
+  - Admin sistema
+  - Supervisor pages
+  - Estágios de onboarding
+  - Mensagens de erro
+  - Mensagens de sucesso
+- **STATUS:** Estrutura completa, aplicação incremental nos componentes
+
+### ✅ Emails Dinâmicos (COMPLETO - Janeiro 2026)
+Templates de email atualizados para usar nome dinâmico da plataforma:
+- Email de boas-vindas (novo usuário)
+- Email de reset de senha
+- Email de cadastro via webhook
+- Todos incluem rodapé com `© {platform_name} - Plataforma de Treinamento`
+- Campo "De:" usa formato `{platform_name} <email@domain.com>`
 
 ### ✅ Módulos de Treinamento
 - CRUD de módulos e capítulos
