@@ -67,16 +67,19 @@ async def send_set_password_email(email: str, full_name: str, token: str):
     try:
         reset_url = f"{FRONTEND_URL}/set-password?token={token}"
         
+        # Buscar nome da plataforma
+        platform_name = await get_platform_name()
+        
         html_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #0891b2;">UniOzoxx</h1>
+                <h1 style="color: #0891b2;">{platform_name}</h1>
             </div>
             
             <h2 style="color: #1e293b;">Bem-vindo(a), {full_name}!</h2>
             
             <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                Seu cadastro na plataforma UniOzoxx foi realizado com sucesso!
+                Seu cadastro na plataforma {platform_name} foi realizado com sucesso!
             </p>
             
             <p style="color: #475569; font-size: 16px; line-height: 1.6;">
@@ -106,15 +109,15 @@ async def send_set_password_email(email: str, full_name: str, token: str):
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
             
             <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-                © UniOzoxx - Plataforma de Treinamento
+                © {platform_name} - Plataforma de Treinamento
             </p>
         </div>
         """
         
         resend.Emails.send({
-            "from": f"UniOzoxx <{SENDER_EMAIL}>",
+            "from": f"{platform_name} <{SENDER_EMAIL}>",
             "to": [email],
-            "subject": "Bem-vindo à UniOzoxx - Defina sua senha",
+            "subject": f"Bem-vindo à {platform_name} - Defina sua senha",
             "html": html_content
         })
         
