@@ -744,7 +744,7 @@ async def generate_sales_report_pdf(
         alignment=TA_CENTER
     )
     elements.append(Paragraph(
-        f"Relatório gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')} - UniOzoxx",
+        f"Relatório gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')} - {platform_name}",
         footer_style
     ))
     
