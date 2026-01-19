@@ -670,7 +670,7 @@ const AdminTraining = () => {
               </div>
 
               {/* Ações */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   onClick={() => downloadAttendancePDF(selectedClass.id)}
                   variant="outline"
@@ -678,7 +678,43 @@ const AdminTraining = () => {
                   <Download className="w-4 h-4 mr-2" />
                   Baixar Lista de Presença (PDF)
                 </Button>
+                
+                {(selectedClass.status === 'open' || selectedClass.status === 'closed') && (
+                  <Button
+                    onClick={() => handleOpenAttendance(selectedClass.id)}
+                    className="bg-purple-500 hover:bg-purple-600"
+                  >
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Marcar que Treinamento Ocorreu
+                  </Button>
+                )}
+                
+                {selectedClass.status === 'attendance_open' && (
+                  <Button
+                    onClick={() => handleCloseAttendance(selectedClass.id)}
+                    className="bg-green-500 hover:bg-green-600"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Finalizar Marcação de Presença
+                  </Button>
+                )}
               </div>
+
+              {/* Aviso de Presença Aberta */}
+              {selectedClass.status === 'attendance_open' && (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-purple-900">Presença em Aberto</p>
+                      <p className="text-sm text-purple-700">
+                        Marque a presença de cada participante. Licenciados marcados como PRESENTES
+                        avançarão automaticamente para a etapa de Vendas em Campo.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Lista de Inscritos */}
               <div>
