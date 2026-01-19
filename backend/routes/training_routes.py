@@ -592,6 +592,104 @@ async def close_attendance(
         "status": "completed"
     }
 
+class AttendanceMarkRequest(BaseModel):
+    registration_id: str
+    attendance_status: str  # "present" ou "absent"
+
+@router.put("/classes/{class_id}/mark-attendance")
+async def mark_attendance(
+    class_id: str,
+    data: AttendanceMarkRequest,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Marcar presença de um participante"""
+    cls = await db.training_classes_v2.find_one({"id": class_id})
+    if not cls:
+        raise HTTPException(status_code=404, detail="Turma não encontrada")
+    
+    if cls.get("status") != "attendance_open":
+        raise HTTPException(status_code=400, detail="A marcação de presença não está aberta para esta turma")
+    
+    registration = await db.training_registrations.find_one({"id": data.registration_id})
+    if not registration:
+        raise HTTPException(status_code=404, detail="Inscrição não encontrada")
+    
+    # Atualizar status de presença
+    await db.training_registrations.update_one(
+        {"id": data.registration_id},
+        {"$set": {
+            "attendance_status": data.attendance_status,
+            "attendance_marked_at": datetime.now(timezone.utc).isoformat(),
+            "attendance_marked_by": current_user["sub"]
+        }}
+    )
+    
+    # Se marcou como presente, avançar o licenciado para a etapa de vendas em campo
+    if data.attendance_status == "present":
+        user_id = registration.get("user_id")
+        if user_id:
+            user = await db.users.find_one({"id": user_id}, {"_id": 0})
+            if user and user.get("current_stage") == "treinamento_presencial":
+                await db.users.update_one(
+                    {"id": user_id},
+                    {"$set": {
+                        "current_stage": "vendas_campo",
+                        "training_completed_at": datetime.now(timezone.utc).isoformat(),
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                return {
+                    "message": f"Presença marcada. {user.get('full_name')} avançou para etapa de Vendas em Campo.",
+                    "advanced": True
+                }
+    elif data.attendance_status == "absent":
+        # Realocar para próxima turma
+        user_id = registration.get("user_id")
+        if user_id:
+            # Limpar a turma atual para permitir nova inscrição
+            await db.training_registrations.update_one(
+                {"id": data.registration_id},
+                {"$set": {
+                    "needs_reallocation": True,
+                    "original_class_id": class_id
+                }}
+            )
+            return {
+                "message": "Falta registrada. Licenciado será realocado para próxima turma.",
+                "advanced": False
+            }
+    
+    return {
+        "message": "Presença atualizada com sucesso.",
+        "advanced": False
+    }
+
+@router.get("/classes/{class_id}/attendees")
+async def get_class_attendees(
+    class_id: str,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Obter lista de participantes com status de presença"""
+    cls = await db.training_classes_v2.find_one({"id": class_id}, {"_id": 0})
+    if not cls:
+        raise HTTPException(status_code=404, detail="Turma não encontrada")
+    
+    registrations = await db.training_registrations.find(
+        {"class_id": class_id, "payment_status": "paid"},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Enriquecer com dados do usuário
+    for reg in registrations:
+        user = await db.users.find_one({"id": reg.get("user_id")}, {"_id": 0, "full_name": 1, "email": 1, "phone": 1})
+        if user:
+            reg["user_data"] = user
+    
+    return {
+        "class": cls,
+        "attendees": registrations
+    }
+
 # ==================== GERAÇÃO DE PDF - LISTA DE PRESENÇA ====================
 
 @router.get("/classes/{class_id}/attendance-pdf")
