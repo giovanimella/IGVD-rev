@@ -116,8 +116,8 @@ const SupervisorLicensees = () => {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-outfit font-bold text-slate-900">Meus Licenciados</h1>
-          <p className="text-slate-600 mt-2">Gerencie os licenciados vinculados a você</p>
+          <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Meus Licenciados</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">Gerencie os licenciados vinculados a você</p>
         </div>
 
         {/* Link de Registro */}
@@ -150,7 +150,7 @@ const SupervisorLicensees = () => {
         )}
 
         {/* Busca */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
@@ -158,44 +158,44 @@ const SupervisorLicensees = () => {
               placeholder="Buscar por nome ou email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
             />
           </div>
         </div>
 
         {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm mb-1">Total de Licenciados</p>
-                <p className="text-3xl font-outfit font-bold text-slate-900">{licensees.length}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total de Licenciados</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{licensees.length}</p>
               </div>
-              <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-cyan-600" />
+              <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm mb-1">Completos</p>
-                <p className="text-3xl font-outfit font-bold text-slate-900">
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Completos</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">
                   {licensees.filter((l) => l.current_stage === 'completo').length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm mb-1">Em Treinamento</p>
-                <p className="text-3xl font-outfit font-bold text-slate-900">
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Em Treinamento</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">
                   {licensees.filter((l) => l.current_stage !== 'completo').length}
                 </p>
               </div>
