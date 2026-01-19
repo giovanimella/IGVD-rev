@@ -297,25 +297,25 @@ const AdminSystem = () => {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-outfit font-bold text-slate-900">Painel Administrativo</h1>
-          <p className="text-slate-600 mt-2">Controle total do sistema UniOzoxx LMS</p>
+          <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Painel Administrativo</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">Controle total do sistema UniOzoxx LMS</p>
         </div>
 
         {/* Logo da Plataforma */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-              <Image className="w-5 h-5 text-cyan-600" />
+            <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+              <Image className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
             </div>
             <div>
-              <h3 className="text-lg font-outfit font-semibold text-slate-900">Logo da Plataforma</h3>
-              <p className="text-sm text-slate-500">Faça upload da logo UniOzoxx (PNG, máximo 10MB)</p>
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Logo da Plataforma</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Faça upload da logo UniOzoxx (PNG, máximo 10MB)</p>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
             {/* Preview da Logo */}
-            <div className="w-48 h-24 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center bg-slate-50 overflow-hidden">
+            <div className="w-48 h-24 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-lg flex items-center justify-center bg-slate-50 dark:bg-white/5 overflow-hidden">
               {logoUrl ? (
                 <img 
                   src={logoUrl} 
@@ -362,7 +362,7 @@ const AdminSystem = () => {
             </div>
           </div>
 
-          <p className="text-xs text-slate-500 mt-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
             A logo será exibida na tela de login, no menu lateral e em outros lugares da plataforma.
           </p>
         </div>
@@ -372,14 +372,14 @@ const AdminSystem = () => {
           {quickStats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div key={index} className="bg-white rounded-xl border border-slate-200 p-6">
+              <div key={index} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
+                  <div className={`w-12 h-12 ${stat.bgColor} dark:bg-opacity-20 rounded-lg flex items-center justify-center`}>
                     <Icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
                 </div>
-                <p className="text-slate-600 text-sm mb-1">{stat.label}</p>
-                <p className="text-3xl font-outfit font-bold text-slate-900">{stat.value}</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">{stat.label}</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stat.value}</p>
               </div>
             );
           })}
@@ -387,7 +387,7 @@ const AdminSystem = () => {
 
         {/* Ferramentas Administrativas */}
         <div>
-          <h2 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Ferramentas de Gestão</h2>
+          <h2 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Ferramentas de Gestão</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {adminCards.map((card, index) => {
               const Icon = card.icon;
@@ -395,22 +395,22 @@ const AdminSystem = () => {
                 <a
                   key={index}
                   href={card.link}
-                  className="group bg-white rounded-xl border border-slate-200 p-6 hover:border-cyan-200 hover:shadow-lg transition-all duration-300"
+                  className="group bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6 hover:border-cyan-200 dark:hover:border-cyan-500/30 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className={`w-14 h-14 ${card.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
                       <Icon className="w-7 h-7 text-white" />
                     </div>
                     {card.count !== '-' && (
-                      <span className="bg-slate-100 text-slate-900 px-3 py-1 rounded-full text-sm font-semibold">
+                      <span className="bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white px-3 py-1 rounded-full text-sm font-semibold">
                         {card.count}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-2 group-hover:text-cyan-600 transition-colors">
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
                     {card.title}
                   </h3>
-                  <p className="text-slate-600 text-sm">{card.description}</p>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm">{card.description}</p>
                 </a>
               );
             })}
@@ -418,20 +418,20 @@ const AdminSystem = () => {
         </div>
 
         {/* Configurações do Sistema */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-              <ClipboardCheck className="w-5 h-5 text-cyan-600" />
+            <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+              <ClipboardCheck className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
             </div>
             <div>
-              <h3 className="text-lg font-outfit font-semibold text-slate-900">Configurações de Avaliação</h3>
-              <p className="text-sm text-slate-500">Configure a nota mínima global para aprovação</p>
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Configurações de Avaliação</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Configure a nota mínima global para aprovação</p>
             </div>
           </div>
           
           <div className="flex items-end gap-4">
             <div className="flex-1 max-w-xs">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Nota Mínima para Aprovação (%)
               </label>
               <input
@@ -440,10 +440,10 @@ const AdminSystem = () => {
                 max="100"
                 value={systemConfig.minimum_passing_score}
                 onChange={(e) => setSystemConfig({ ...systemConfig, minimum_passing_score: parseInt(e.target.value) || 0 })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                 data-testid="passing-score-input"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Esta nota será aplicada a todas as avaliações de módulos
               </p>
             </div>
@@ -460,59 +460,59 @@ const AdminSystem = () => {
         </div>
 
         {/* Resumo do Sistema */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-4">Resumo do Sistema</h3>
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4">Resumo do Sistema</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="border-l-4 border-blue-500 pl-4">
-              <p className="text-sm text-slate-600 mb-1">Usuários por Função</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Usuários por Função</p>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Admins:</span>
-                  <span className="font-semibold">{stats?.allUsers?.filter(u => u.role === 'admin').length || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Admins:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{stats?.allUsers?.filter(u => u.role === 'admin').length || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Supervisores:</span>
-                  <span className="font-semibold">{stats?.allUsers?.filter(u => u.role === 'supervisor').length || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Supervisores:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{stats?.allUsers?.filter(u => u.role === 'supervisor').length || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Licenciados:</span>
-                  <span className="font-semibold">{stats?.allUsers?.filter(u => u.role === 'licenciado').length || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Licenciados:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{stats?.allUsers?.filter(u => u.role === 'licenciado').length || 0}</span>
                 </div>
               </div>
             </div>
 
             <div className="border-l-4 border-purple-500 pl-4">
-              <p className="text-sm text-slate-600 mb-1">Conteúdo</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Conteúdo</p>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Módulos Totais:</span>
-                  <span className="font-semibold">{stats?.allModules?.length || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Módulos Totais:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{stats?.allModules?.length || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Módulos Acolhimento:</span>
-                  <span className="font-semibold">{stats?.allModules?.filter(m => m.is_acolhimento).length || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Módulos Acolhimento:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{stats?.allModules?.filter(m => m.is_acolhimento).length || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Com Certificado:</span>
-                  <span className="font-semibold">{stats?.allModules?.filter(m => m.has_certificate).length || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Com Certificado:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{stats?.allModules?.filter(m => m.has_certificate).length || 0}</span>
                 </div>
               </div>
             </div>
 
             <div className="border-l-4 border-amber-500 pl-4">
-              <p className="text-sm text-slate-600 mb-1">Gamificação</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Gamificação</p>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Recompensas Ativas:</span>
-                  <span className="font-semibold">{stats?.allRewards?.filter(r => r.active).length || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Recompensas Ativas:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{stats?.allRewards?.filter(r => r.active).length || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Recompensas Inativas:</span>
-                  <span className="font-semibold">{stats?.allRewards?.filter(r => !r.active).length || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Recompensas Inativas:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{stats?.allRewards?.filter(r => !r.active).length || 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-900">Resgates Pendentes:</span>
-                  <span className="font-semibold text-amber-600">{stats?.dashboard?.pending_redemptions || 0}</span>
+                  <span className="text-slate-900 dark:text-white">Resgates Pendentes:</span>
+                  <span className="font-semibold text-amber-600 dark:text-amber-400">{stats?.dashboard?.pending_redemptions || 0}</span>
                 </div>
               </div>
             </div>
@@ -520,29 +520,29 @@ const AdminSystem = () => {
         </div>
 
         {/* Configurações de Webhook */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Webhook className="w-5 h-5 text-purple-600" />
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
+              <Webhook className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h3 className="text-lg font-outfit font-semibold text-slate-900">Webhooks</h3>
-              <p className="text-sm text-slate-500">Configure integrações com sistemas externos</p>
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Webhooks</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Configure integrações com sistemas externos</p>
             </div>
           </div>
 
           <div className="space-y-6">
             {/* Webhook de Entrada - API Key */}
-            <div className="bg-slate-50 rounded-lg p-4">
-              <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+            <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-4">
+              <h4 className="font-medium text-slate-900 dark:text-white mb-3 flex items-center gap-2">
                 <Key className="w-4 h-4" />
                 Webhook de Entrada (Receber Licenciados)
               </h4>
-              <p className="text-sm text-slate-600 mb-4">
-                Endpoint: <code className="bg-slate-200 px-2 py-1 rounded text-xs">{API_URL}/api/webhook/licensee</code>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                Endpoint: <code className="bg-slate-200 dark:bg-white/10 px-2 py-1 rounded text-xs">{API_URL}/api/webhook/licensee</code>
                 <button 
                   onClick={() => copyToClipboard(`${API_URL}/api/webhook/licensee`)}
-                  className="ml-2 text-cyan-600 hover:text-cyan-700"
+                  className="ml-2 text-cyan-600 dark:text-cyan-400 hover:text-cyan-700"
                 >
                   <Copy className="w-4 h-4 inline" />
                 </button>
@@ -550,28 +550,28 @@ const AdminSystem = () => {
               
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">API Key (Header: X-API-Key)</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">API Key (Header: X-API-Key)</label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <input
                         type={showApiKey ? 'text' : 'password'}
                         value={systemConfig.webhook_api_key || ''}
                         onChange={(e) => setSystemConfig({ ...systemConfig, webhook_api_key: e.target.value })}
-                        className="w-full px-4 py-2 pr-20 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                        className="w-full px-4 py-2 pr-20 border border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                         placeholder="Clique em Gerar para criar uma chave"
                         data-testid="webhook-api-key-input"
                       />
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                         <button 
                           onClick={() => setShowApiKey(!showApiKey)}
-                          className="p-1 text-slate-400 hover:text-slate-600"
+                          className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                         >
                           {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                         {systemConfig.webhook_api_key && (
                           <button 
                             onClick={() => copyToClipboard(systemConfig.webhook_api_key)}
-                            className="p-1 text-slate-400 hover:text-slate-600"
+                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                           >
                             <Copy className="w-4 h-4" />
                           </button>
@@ -588,23 +588,23 @@ const AdminSystem = () => {
             </div>
 
             {/* Webhook de Saída - URL */}
-            <div className="bg-slate-50 rounded-lg p-4">
-              <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+            <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-4">
+              <h4 className="font-medium text-slate-900 dark:text-white mb-3 flex items-center gap-2">
                 <Webhook className="w-4 h-4" />
                 Webhook de Saída (Onboarding Completo)
               </h4>
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                 Envia notificação quando um licenciado atinge "Completo - Acesso Total"
               </p>
               
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">URL de Destino</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">URL de Destino</label>
                   <input
                     type="url"
                     value={systemConfig.webhook_url || ''}
                     onChange={(e) => setSystemConfig({ ...systemConfig, webhook_url: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-white/5 text-slate-900 dark:text-white"
                     placeholder="https://seu-sistema.com/webhook/onboarding"
                     data-testid="webhook-url-input"
                   />
@@ -619,9 +619,9 @@ const AdminSystem = () => {
                       className="sr-only peer"
                       data-testid="webhook-enabled-toggle"
                     />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                   </label>
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-slate-700 dark:text-slate-300">
                     {systemConfig.webhook_enabled ? 'Webhook habilitado' : 'Webhook desabilitado'}
                   </span>
                 </div>
