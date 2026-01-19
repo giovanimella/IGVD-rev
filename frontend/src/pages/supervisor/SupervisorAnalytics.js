@@ -100,8 +100,8 @@ const SupervisorAnalytics = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">Analytics</h1>
-            <p className="text-slate-600 mt-1">Acompanhe o progresso dos seus licenciados</p>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Analytics</h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-1">Acompanhe o progresso dos seus licenciados</p>
           </div>
           <Button onClick={exportCSV} variant="outline" data-testid="export-csv-btn">
             <Download className="w-4 h-4 mr-2" />
@@ -110,7 +110,7 @@ const SupervisorAnalytics = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-slate-200 pb-2">
+        <div className="flex gap-2 border-b border-slate-200 dark:border-white/10 pb-2">
           {[
             { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
             { id: 'licensees', label: 'Licenciados', icon: Users },
@@ -123,8 +123,8 @@ const SupervisorAnalytics = () => {
               data-testid={`tab-${tab.id}`}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-cyan-50 text-cyan-600 font-medium'
-                  : 'text-slate-600 hover:bg-slate-50'
+                  ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-medium'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -138,61 +138,61 @@ const SupervisorAnalytics = () => {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
+              <Card className="dark:bg-[#151B28] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-600">Total Licenciados</p>
-                      <p className="text-3xl font-bold text-slate-900">{overview.total_licensees}</p>
-                      <p className="text-xs text-slate-500 mt-1">{overview.active_licensees} ativos</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Total Licenciados</p>
+                      <p className="text-3xl font-bold text-slate-900 dark:text-white">{overview.total_licensees}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{overview.active_licensees} ativos</p>
                     </div>
-                    <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
-                      <Users className="w-6 h-6 text-cyan-600" />
+                    <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-xl flex items-center justify-center">
+                      <Users className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dark:bg-[#151B28] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-600">Capítulos Completos</p>
-                      <p className="text-3xl font-bold text-slate-900">{overview.total_completions}</p>
-                      <p className="text-xs text-slate-500 mt-1">{overview.total_modules} módulos</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Capítulos Completos</p>
+                      <p className="text-3xl font-bold text-slate-900 dark:text-white">{overview.total_completions}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{overview.total_modules} módulos</p>
                     </div>
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                      <BookOpen className="w-6 h-6 text-green-600" />
+                    <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-xl flex items-center justify-center">
+                      <BookOpen className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dark:bg-[#151B28] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-600">Certificados</p>
-                      <p className="text-3xl font-bold text-slate-900">{overview.certificates_issued}</p>
-                      <p className="text-xs text-slate-500 mt-1">emitidos</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Certificados</p>
+                      <p className="text-3xl font-bold text-slate-900 dark:text-white">{overview.certificates_issued}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">emitidos</p>
                     </div>
-                    <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                      <Award className="w-6 h-6 text-amber-600" />
+                    <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-xl flex items-center justify-center">
+                      <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="dark:bg-[#151B28] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-600">Avaliações</p>
-                      <p className="text-3xl font-bold text-slate-900">{overview.assessments.passed}/{overview.assessments.total}</p>
-                      <p className="text-xs text-slate-500 mt-1">Média: {overview.assessments.average_score}%</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Avaliações</p>
+                      <p className="text-3xl font-bold text-slate-900 dark:text-white">{overview.assessments.passed}/{overview.assessments.total}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Média: {overview.assessments.average_score}%</p>
                     </div>
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                      <Target className="w-6 h-6 text-purple-600" />
+                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-xl flex items-center justify-center">
+                      <Target className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                   </div>
                 </CardContent>
@@ -200,9 +200,9 @@ const SupervisorAnalytics = () => {
             </div>
 
             {/* Top Licensees */}
-            <Card>
+            <Card className="dark:bg-[#151B28] dark:border-white/10">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 dark:text-white">
                   <Trophy className="w-5 h-5 text-amber-500" />
                   Top Licenciados
                 </CardTitle>
@@ -210,7 +210,7 @@ const SupervisorAnalytics = () => {
               <CardContent>
                 <div className="space-y-3">
                   {licensees.slice(0, 5).map((licensee, index) => (
-                    <div key={licensee.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div key={licensee.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
                           index === 0 ? 'bg-amber-500' : index === 1 ? 'bg-slate-400' : index === 2 ? 'bg-amber-700' : 'bg-slate-300'
@@ -220,18 +220,18 @@ const SupervisorAnalytics = () => {
                         {licensee.profile_picture ? (
                           <img src={`${API_URL}${licensee.profile_picture}`} alt="" className="w-10 h-10 rounded-full object-cover" />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                            <span className="text-cyan-600 font-medium">{licensee.full_name?.charAt(0)}</span>
+                          <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-500/20 flex items-center justify-center">
+                            <span className="text-cyan-600 dark:text-cyan-400 font-medium">{licensee.full_name?.charAt(0)}</span>
                           </div>
                         )}
                         <div>
-                          <p className="font-medium text-slate-900">{licensee.full_name}</p>
-                          <p className="text-sm text-slate-500">{licensee.level_title}</p>
+                          <p className="font-medium text-slate-900 dark:text-white">{licensee.full_name}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">{licensee.level_title}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-cyan-600">{licensee.points} pts</p>
-                        <p className="text-xs text-slate-500">{licensee.completed_modules}/{licensee.total_modules} módulos</p>
+                        <p className="font-bold text-cyan-600 dark:text-cyan-400">{licensee.points} pts</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{licensee.completed_modules}/{licensee.total_modules} módulos</p>
                       </div>
                     </div>
                   ))}
@@ -245,9 +245,9 @@ const SupervisorAnalytics = () => {
         {activeTab === 'licensees' && (
           <div className="space-y-4">
             {licensees.map((licensee) => (
-              <Card key={licensee.id} className="overflow-hidden">
+              <Card key={licensee.id} className="overflow-hidden dark:bg-[#151B28] dark:border-white/10">
                 <div
-                  className="p-4 cursor-pointer hover:bg-slate-50 transition-colors"
+                  className="p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                   onClick={() => setExpandedLicensee(expandedLicensee === licensee.id ? null : licensee.id)}
                 >
                   <div className="flex items-center justify-between">
@@ -260,22 +260,22 @@ const SupervisorAnalytics = () => {
                         </div>
                       )}
                       <div>
-                        <p className="font-semibold text-slate-900">{licensee.full_name}</p>
-                        <p className="text-sm text-slate-500">{licensee.email}</p>
+                        <p className="font-semibold text-slate-900 dark:text-white">{licensee.full_name}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{licensee.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-center">
-                        <p className="text-lg font-bold text-cyan-600">{licensee.points}</p>
-                        <p className="text-xs text-slate-500">Pontos</p>
+                        <p className="text-lg font-bold text-cyan-600 dark:text-cyan-400">{licensee.points}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Pontos</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-green-600">{licensee.completed_modules}/{licensee.total_modules}</p>
-                        <p className="text-xs text-slate-500">Módulos</p>
+                        <p className="text-lg font-bold text-green-600 dark:text-green-400">{licensee.completed_modules}/{licensee.total_modules}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Módulos</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-lg font-bold text-amber-600">{licensee.certificates}</p>
-                        <p className="text-xs text-slate-500">Certificados</p>
+                        <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{licensee.certificates}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Certificados</p>
                       </div>
                       {expandedLicensee === licensee.id ? (
                         <ChevronUp className="w-5 h-5 text-slate-400" />
@@ -287,35 +287,35 @@ const SupervisorAnalytics = () => {
                 </div>
                 
                 {expandedLicensee === licensee.id && (
-                  <div className="px-4 pb-4 border-t border-slate-100 pt-4 bg-slate-50">
+                  <div className="px-4 pb-4 border-t border-slate-100 dark:border-white/10 pt-4 bg-slate-50 dark:bg-white/5">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white p-3 rounded-lg">
-                        <div className="flex items-center gap-2 text-slate-600 mb-1">
+                      <div className="bg-white dark:bg-[#151B28] p-3 rounded-lg">
+                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                           <BookOpen className="w-4 h-4" />
                           <span className="text-sm">Capítulos</span>
                         </div>
-                        <p className="text-xl font-bold">{licensee.completed_chapters}</p>
+                        <p className="text-xl font-bold dark:text-white">{licensee.completed_chapters}</p>
                       </div>
-                      <div className="bg-white p-3 rounded-lg">
-                        <div className="flex items-center gap-2 text-slate-600 mb-1">
+                      <div className="bg-white dark:bg-[#151B28] p-3 rounded-lg">
+                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                           <Flame className="w-4 h-4" />
                           <span className="text-sm">Streak</span>
                         </div>
-                        <p className="text-xl font-bold">{licensee.current_streak} dias</p>
+                        <p className="text-xl font-bold dark:text-white">{licensee.current_streak} dias</p>
                       </div>
-                      <div className="bg-white p-3 rounded-lg">
-                        <div className="flex items-center gap-2 text-slate-600 mb-1">
+                      <div className="bg-white dark:bg-[#151B28] p-3 rounded-lg">
+                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                           <Medal className="w-4 h-4" />
                           <span className="text-sm">Nível</span>
                         </div>
-                        <p className="text-xl font-bold">{licensee.level_title}</p>
+                        <p className="text-xl font-bold dark:text-white">{licensee.level_title}</p>
                       </div>
-                      <div className="bg-white p-3 rounded-lg">
-                        <div className="flex items-center gap-2 text-slate-600 mb-1">
+                      <div className="bg-white dark:bg-[#151B28] p-3 rounded-lg">
+                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                           <Clock className="w-4 h-4" />
                           <span className="text-sm">Último Acesso</span>
                         </div>
-                        <p className="text-sm font-medium">
+                        <p className="text-sm font-medium dark:text-white">
                           {licensee.last_access 
                             ? new Date(licensee.last_access).toLocaleDateString('pt-BR')
                             : 'Nunca'
@@ -329,9 +329,9 @@ const SupervisorAnalytics = () => {
             ))}
             
             {licensees.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-                <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600">Nenhum licenciado encontrado</p>
+              <div className="text-center py-12 bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10">
+                <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <p className="text-slate-600 dark:text-slate-400">Nenhum licenciado encontrado</p>
               </div>
             )}
           </div>
@@ -341,19 +341,19 @@ const SupervisorAnalytics = () => {
         {activeTab === 'modules' && (
           <div className="space-y-4">
             {moduleEngagement.map((module) => (
-              <Card key={module.id}>
+              <Card key={module.id} className="dark:bg-[#151B28] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="font-semibold text-slate-900">{module.title}</h3>
-                      <p className="text-sm text-slate-500">{module.total_chapters} capítulos</p>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">{module.title}</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{module.total_chapters} capítulos</p>
                     </div>
                     <div className="flex gap-2">
                       {module.has_assessment && (
-                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">Avaliação</span>
+                        <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full">Avaliação</span>
                       )}
                       {module.has_certificate && (
-                        <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Certificado</span>
+                        <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs rounded-full">Certificado</span>
                       )}
                     </div>
                   </div>
@@ -361,10 +361,10 @@ const SupervisorAnalytics = () => {
                   {/* Progress Bar */}
                   <div className="mb-4">
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-slate-600">Taxa de Conclusão</span>
-                      <span className="font-medium">{module.completion_rate}%</span>
+                      <span className="text-slate-600 dark:text-slate-400">Taxa de Conclusão</span>
+                      <span className="font-medium dark:text-white">{module.completion_rate}%</span>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all"
                         style={{ width: `${module.completion_rate}%` }}
@@ -375,22 +375,22 @@ const SupervisorAnalytics = () => {
                   {/* Stats */}
                   <div className="grid grid-cols-4 gap-4 text-center">
                     <div>
-                      <p className="text-2xl font-bold text-cyan-600">{module.users_started}</p>
-                      <p className="text-xs text-slate-500">Iniciaram</p>
+                      <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{module.users_started}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Iniciaram</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-green-600">{module.users_completed}</p>
-                      <p className="text-xs text-slate-500">Completaram</p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">{module.users_completed}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Completaram</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-purple-600">
+                      <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                         {module.assessment.total > 0 ? `${module.assessment.avg_score}%` : '-'}
                       </p>
-                      <p className="text-xs text-slate-500">Média Avaliação</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Média Avaliação</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-amber-600">{module.certificates_issued}</p>
-                      <p className="text-xs text-slate-500">Certificados</p>
+                      <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{module.certificates_issued}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Certificados</p>
                     </div>
                   </div>
                 </CardContent>
@@ -403,9 +403,9 @@ const SupervisorAnalytics = () => {
         {activeTab === 'activity' && (
           <div className="space-y-6">
             {/* Daily Activity Chart */}
-            <Card>
+            <Card className="dark:bg-[#151B28] dark:border-white/10">
               <CardHeader>
-                <CardTitle>Atividade Diária (últimos 14 dias)</CardTitle>
+                <CardTitle className="dark:text-white">Atividade Diária (últimos 14 dias)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-48 flex items-end gap-1">
@@ -419,7 +419,7 @@ const SupervisorAnalytics = () => {
                           style={{ height: `${Math.max(height, 5)}%` }}
                           title={`${day.active_users} usuários ativos`}
                         />
-                        <span className="text-xs text-slate-500 rotate-45 origin-left">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 rotate-45 origin-left">
                           {new Date(day.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                         </span>
                       </div>
@@ -430,9 +430,9 @@ const SupervisorAnalytics = () => {
             </Card>
 
             {/* Study Heatmap */}
-            <Card>
+            <Card className="dark:bg-[#151B28] dark:border-white/10">
               <CardHeader>
-                <CardTitle>Horários de Estudo (último mês)</CardTitle>
+                <CardTitle className="dark:text-white">Horários de Estudo (último mês)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -449,7 +449,7 @@ const SupervisorAnalytics = () => {
                     {/* Days */}
                     {['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'].map((day, dayIndex) => (
                       <div key={day} className="flex items-center gap-1 mb-1">
-                        <span className="w-20 text-xs text-slate-600 text-right pr-2">{day}</span>
+                        <span className="w-20 text-xs text-slate-600 dark:text-slate-400 text-right pr-2">{day}</span>
                         {Array.from({ length: 24 }, (_, hour) => {
                           const data = heatmap.find(h => h.day === dayIndex && h.hour === hour);
                           return (
@@ -465,13 +465,13 @@ const SupervisorAnalytics = () => {
                     
                     {/* Legend */}
                     <div className="flex items-center gap-2 mt-4 ml-20">
-                      <span className="text-xs text-slate-500">Menos</span>
-                      <div className="w-4 h-4 bg-slate-100 rounded" />
+                      <span className="text-xs text-slate-500 dark:text-slate-400">Menos</span>
+                      <div className="w-4 h-4 bg-slate-100 dark:bg-slate-700 rounded" />
                       <div className="w-4 h-4 bg-cyan-100 rounded" />
                       <div className="w-4 h-4 bg-cyan-300 rounded" />
                       <div className="w-4 h-4 bg-cyan-500 rounded" />
                       <div className="w-4 h-4 bg-cyan-700 rounded" />
-                      <span className="text-xs text-slate-500">Mais</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">Mais</span>
                     </div>
                   </div>
                 </div>

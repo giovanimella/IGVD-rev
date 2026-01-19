@@ -183,17 +183,17 @@ const LicenseeDetail = () => {
     return (
       <div
         key={docKey}
-        className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg hover:border-cyan-300 transition-colors"
+        className="flex items-center justify-between p-4 bg-white dark:bg-[#151B28] border border-slate-200 dark:border-white/10 rounded-lg hover:border-cyan-300 dark:hover:border-cyan-500/30 transition-colors"
         data-testid={`doc-${type}-${docKey}`}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-            <CheckCircle className="w-5 h-5 text-green-600" />
+          <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+            <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <p className="font-medium text-slate-900">{docLabels[docKey] || docKey}</p>
-            <p className="text-xs text-slate-500">{docInfo.filename}</p>
-            <p className="text-xs text-slate-400">
+            <p className="font-medium text-slate-900 dark:text-white">{docLabels[docKey] || docKey}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{docInfo.filename}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
               Enviado em {new Date(docInfo.uploaded_at).toLocaleDateString('pt-BR')}
             </p>
           </div>
