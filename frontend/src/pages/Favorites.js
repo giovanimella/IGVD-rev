@@ -92,15 +92,15 @@ const Favorites = () => {
                 className="group"
                 data-testid={`favorite-card-${fav.chapter_id}`}
               >
-                <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg hover:border-rose-200 transition-all h-full">
+                <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-5 hover:shadow-lg hover:border-rose-200 dark:hover:border-rose-500/30 transition-all h-full">
                   {/* Module Tag */}
                   <div className="flex items-center justify-between mb-3">
-                    <span className="px-3 py-1 bg-cyan-50 text-cyan-700 text-xs font-medium rounded-full">
+                    <span className="px-3 py-1 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 text-xs font-medium rounded-full">
                       {fav.module.title}
                     </span>
                     <button
                       onClick={(e) => removeFavorite(fav.chapter_id, e)}
-                      className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                       data-testid={`remove-favorite-${fav.chapter_id}`}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -108,23 +108,23 @@ const Favorites = () => {
                   </div>
 
                   {/* Content Type Icon */}
-                  <div className="w-12 h-12 bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl flex items-center justify-center text-rose-500 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30 rounded-xl flex items-center justify-center text-rose-500 dark:text-rose-400 mb-4">
                     {getContentIcon(fav.chapter.content_type)}
                   </div>
 
                   {/* Chapter Info */}
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-rose-600 transition-colors line-clamp-2">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors line-clamp-2">
                     {fav.chapter.title}
                   </h3>
                   
                   {fav.chapter.description && (
-                    <p className="text-sm text-slate-500 mb-4 line-clamp-2">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">
                       {fav.chapter.description}
                     </p>
                   )}
 
                   {/* Footer */}
-                  <div className="flex items-center justify-between text-sm text-slate-400 mt-auto pt-4 border-t border-slate-100">
+                  <div className="flex items-center justify-between text-sm text-slate-400 dark:text-slate-500 mt-auto pt-4 border-t border-slate-100 dark:border-white/10">
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
                       <span>{fav.chapter.duration_minutes || 5} min</span>
@@ -138,12 +138,12 @@ const Favorites = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <Heart className="w-20 h-20 text-slate-200 mx-auto mb-4" />
-            <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+            <Heart className="w-20 h-20 text-slate-200 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">
               Nenhum favorito ainda
             </h3>
-            <p className="text-slate-600 mb-6">
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               Clique no ícone de coração nos capítulos para salvá-los aqui
             </p>
             <Link to="/modules">

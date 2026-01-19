@@ -84,10 +84,10 @@ const MyCertificates = () => {
 
         {/* Lista de Certificados */}
         {certificates.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <Award className="w-20 h-20 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">Nenhum certificado ainda</h3>
-            <p className="text-slate-600 mb-6">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+            <Award className="w-20 h-20 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Nenhum certificado ainda</h3>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               Complete módulos com certificado disponível e passe nas avaliações para receber seu certificado!
             </p>
             <Link to="/modules">
@@ -102,7 +102,7 @@ const MyCertificates = () => {
             {certificates.map((cert) => (
               <div
                 key={cert.id}
-                className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {/* Header do Card */}
                 <div className="h-32 bg-gradient-to-br from-amber-500 to-orange-600 relative flex items-center justify-center">
@@ -116,10 +116,10 @@ const MyCertificates = () => {
 
                 {/* Conteúdo */}
                 <div className="p-6">
-                  <h3 className="text-lg font-outfit font-semibold text-slate-900 mb-2">
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-2">
                     {cert.module_title}
                   </h3>
-                  <p className="text-sm text-slate-600 mb-4">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                     Concluído em {new Date(cert.completion_date).toLocaleDateString('pt-BR', {
                       day: '2-digit',
                       month: 'long',
@@ -141,9 +141,9 @@ const MyCertificates = () => {
         )}
 
         {/* Info */}
-        <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-6">
-          <h3 className="font-semibold text-cyan-900 mb-2">Como obter certificados?</h3>
-          <ul className="text-sm text-cyan-800 space-y-2">
+        <div className="bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-700/50 rounded-xl p-6">
+          <h3 className="font-semibold text-cyan-900 dark:text-cyan-300 mb-2">Como obter certificados?</h3>
+          <ul className="text-sm text-cyan-800 dark:text-cyan-400 space-y-2">
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>Complete todos os capítulos do módulo</span>

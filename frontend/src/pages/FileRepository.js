@@ -62,20 +62,20 @@ const FileRepository = () => {
   const renderFileCard = (file) => (
     <div
       key={file.id}
-      className="bg-white rounded-xl border border-slate-100 p-5 hover:shadow-lg hover:border-cyan-200 transition-all group"
+      className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/10 p-5 hover:shadow-lg hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all group"
     >
       <div className="flex items-start justify-between mb-3">
-        <div className="w-12 h-12 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl flex items-center justify-center text-cyan-600">
+        <div className="w-12 h-12 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/30 rounded-xl flex items-center justify-center text-cyan-600 dark:text-cyan-400">
           {getFileIcon(file.file_type)}
         </div>
-        <span className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium uppercase">
+        <span className="px-2.5 py-1 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-full text-xs font-medium uppercase">
           {file.file_type}
         </span>
       </div>
-      <h3 className="text-base font-semibold text-slate-900 mb-1 truncate" title={file.original_filename}>
+      <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1 truncate" title={file.original_filename}>
         {file.original_filename}
       </h3>
-      <p className="text-sm text-slate-500 mb-4">
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
         {formatFileSize(file.file_size)}
       </p>
       <a href={`${API_URL}${file.file_url}`} download target="_blank" rel="noopener noreferrer">
@@ -124,10 +124,10 @@ const FileRepository = () => {
         {data.folders.length > 0 && (
           <div className="space-y-4">
             {data.folders.map((folder) => (
-              <div key={folder.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div key={folder.id} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
                 {/* Folder Header */}
                 <button
-                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors"
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                   onClick={() => toggleFolder(folder.id)}
                 >
                   <div className="flex items-center gap-4">
@@ -138,11 +138,11 @@ const FileRepository = () => {
                       {folder.icon}
                     </div>
                     <div className="text-left">
-                      <h3 className="text-lg font-outfit font-semibold text-slate-900">{folder.name}</h3>
+                      <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">{folder.name}</h3>
                       {folder.description && (
-                        <p className="text-sm text-slate-500">{folder.description}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{folder.description}</p>
                       )}
-                      <p className="text-xs text-slate-400 mt-1">{folder.file_count} arquivo(s)</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{folder.file_count} arquivo(s)</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -161,7 +161,7 @@ const FileRepository = () => {
 
                 {/* Folder Content */}
                 {expandedFolders[folder.id] && folder.files.length > 0 && (
-                  <div className="px-6 pb-6 pt-2 border-t border-slate-100">
+                  <div className="px-6 pb-6 pt-2 border-t border-slate-100 dark:border-white/10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                       {folder.files.map(file => renderFileCard(file))}
                     </div>
@@ -170,8 +170,8 @@ const FileRepository = () => {
 
                 {/* Empty Folder */}
                 {expandedFolders[folder.id] && folder.files.length === 0 && (
-                  <div className="px-6 pb-6 pt-2 border-t border-slate-100">
-                    <p className="text-center text-slate-500 py-8">Esta pasta está vazia</p>
+                  <div className="px-6 pb-6 pt-2 border-t border-slate-100 dark:border-white/10">
+                    <p className="text-center text-slate-500 dark:text-slate-400 py-8">Esta pasta está vazia</p>
                   </div>
                 )}
               </div>
@@ -181,15 +181,15 @@ const FileRepository = () => {
 
         {/* Arquivos sem pasta */}
         {data.uncategorized.length > 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center">
-                  <Folder className="w-6 h-6 text-slate-500" />
+                <div className="w-12 h-12 bg-slate-100 dark:bg-white/10 rounded-xl flex items-center justify-center">
+                  <Folder className="w-6 h-6 text-slate-500 dark:text-slate-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-outfit font-semibold text-slate-900">Outros Arquivos</h3>
-                  <p className="text-sm text-slate-500">{data.uncategorized.length} arquivo(s)</p>
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Outros Arquivos</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{data.uncategorized.length} arquivo(s)</p>
                 </div>
               </div>
             </div>
@@ -203,10 +203,10 @@ const FileRepository = () => {
 
         {/* Empty State */}
         {data.folders.length === 0 && data.uncategorized.length === 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <FileText className="w-20 h-20 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2">Nenhum arquivo disponível</h3>
-            <p className="text-slate-600">Os arquivos estarão disponíveis em breve.</p>
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+            <FileText className="w-20 h-20 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">Nenhum arquivo disponível</h3>
+            <p className="text-slate-600 dark:text-slate-400">Os arquivos estarão disponíveis em breve.</p>
           </div>
         )}
       </div>
