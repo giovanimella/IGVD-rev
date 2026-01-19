@@ -112,9 +112,9 @@ const Sidebar = () => {
   const links = user?.role === 'admin' ? adminLinks : user?.role === 'supervisor' ? supervisorLinks : licenseeLinks;
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-800">
+    <div className="flex flex-col h-full bg-white dark:bg-[#0D1117] dark:border-r dark:border-white/5">
       {/* Header/Logo */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-white/10 flex-shrink-0">
         {logoUrl ? (
           <img 
             src={logoUrl} 
@@ -124,7 +124,7 @@ const Sidebar = () => {
           />
         ) : (
           <>
-            <div className="w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
               <span className="text-white font-outfit font-bold text-xl">U</span>
             </div>
             <div>
