@@ -44,8 +44,8 @@ const PostsList = () => {
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <h2 className="text-2xl font-outfit font-bold text-slate-900 mb-4">
+      <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+        <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white mb-4">
           Novidades e Comunicados
         </h2>
         
@@ -54,11 +54,11 @@ const PostsList = () => {
             <button
               key={post.id}
               onClick={() => setSelectedPost(post)}
-              className="w-full text-left p-4 border border-slate-200 rounded-lg hover:border-cyan-200 hover:bg-cyan-50 transition-all"
+              className="w-full text-left p-4 border border-slate-200 dark:border-white/10 rounded-lg hover:border-cyan-200 dark:hover:border-cyan-500/50 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all"
             >
-              <h3 className="font-semibold text-slate-900 mb-1">{post.title}</h3>
-              <p className="text-sm text-slate-600 mb-2 line-clamp-2">{post.description}</p>
-              <div className="flex items-center text-xs text-slate-500">
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-1">{post.title}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2 line-clamp-2">{post.description}</p>
+              <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                 <Calendar className="w-4 h-4 mr-1" />
                 {format(new Date(post.created_at), 'dd/MM/yyyy', { locale: ptBR })}
               </div>
@@ -69,7 +69,7 @@ const PostsList = () => {
         {!showAll && allPosts.length > 3 && (
           <button
             onClick={() => setShowAll(true)}
-            className="mt-4 text-cyan-600 hover:text-cyan-700 font-medium text-sm"
+            className="mt-4 text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium text-sm"
           >
             Ver mais...
           </button>
@@ -78,7 +78,7 @@ const PostsList = () => {
         {showAll && (
           <button
             onClick={() => setShowAll(false)}
-            className="mt-4 text-cyan-600 hover:text-cyan-700 font-medium text-sm"
+            className="mt-4 text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium text-sm"
           >
             Ver menos
           </button>
@@ -88,13 +88,13 @@ const PostsList = () => {
       {/* Modal do Post */}
       {selectedPost && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex items-start justify-between">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-[#151B28] border-b border-slate-200 dark:border-white/10 p-6 flex items-start justify-between">
               <div className="flex-1">
-                <h2 className="text-2xl font-outfit font-bold text-slate-900 mb-2">
+                <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white mb-2">
                   {selectedPost.title}
                 </h2>
-                <div className="flex items-center text-sm text-slate-500">
+                <div className="flex items-center text-sm text-slate-500 dark:text-slate-400">
                   <Calendar className="w-4 h-4 mr-1" />
                   {format(new Date(selectedPost.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                   <span className="mx-2">•</span>
@@ -103,14 +103,14 @@ const PostsList = () => {
               </div>
               <button
                 onClick={() => setSelectedPost(null)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5 text-slate-600" />
+                <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </button>
             </div>
             
             <div className="p-6">
-              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+              <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
                 {selectedPost.content}
               </p>
             </div>
