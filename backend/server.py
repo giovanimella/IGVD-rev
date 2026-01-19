@@ -16,7 +16,7 @@ from routes import progress_routes, reward_routes, file_routes, upload_routes, s
 from routes import assessment_routes, onboarding_routes, payment_routes, notification_routes, chat_routes
 from routes import banner_routes, post_routes, gamification_routes, system_routes, certificate_routes
 from routes import analytics_routes, profile_routes, favorites_routes, webhook_routes, appointment_routes
-from routes import level_routes, training_routes, sales_routes, ozoxx_cast_routes
+from routes import level_routes, training_routes, sales_routes, ozoxx_cast_routes, translate_routes
 
 app = FastAPI(title="UniOzoxx LMS API")
 
@@ -62,6 +62,7 @@ app.include_router(level_routes.router, prefix="/api")
 app.include_router(training_routes.router, prefix="/api")
 app.include_router(sales_routes.router, prefix="/api")
 app.include_router(ozoxx_cast_routes.router, prefix="/api")
+app.include_router(translate_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
