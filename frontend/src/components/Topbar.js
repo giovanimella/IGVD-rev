@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Award } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import LanguageSelector from './LanguageSelector';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -30,6 +31,7 @@ const Topbar = () => {
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4">
+          <LanguageSelector />
           <NotificationBell />
           
           {user?.role === 'licenciado' && (
