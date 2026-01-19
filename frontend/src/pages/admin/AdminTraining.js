@@ -285,15 +285,15 @@ const AdminTraining = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/admin/system')}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-6 h-6 text-slate-600" />
+              <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
             </button>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900">
+              <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">
                 Treinamentos Presenciais
               </h1>
-              <p className="text-slate-600 mt-1">
+              <p className="text-slate-600 dark:text-slate-400 mt-1">
                 Gerencie turmas e inscrições
               </p>
             </div>
@@ -320,32 +320,32 @@ const AdminTraining = () => {
 
         {/* Resumo de Configuração */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-sm text-slate-500">Fechamento</p>
-            <p className="text-xl font-bold text-slate-900">{config?.days_before_closing || 7} dias antes</p>
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Fechamento</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-white">{config?.days_before_closing || 7} dias antes</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-sm text-slate-500">Valor Individual</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrency(config?.solo_price || 3500)}</p>
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Valor Individual</p>
+            <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(config?.solo_price || 3500)}</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-sm text-slate-500">Valor com Cônjuge</p>
-            <p className="text-xl font-bold text-pink-600">{formatCurrency(config?.couple_price || 6000)}</p>
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Valor com Cônjuge</p>
+            <p className="text-xl font-bold text-pink-600 dark:text-pink-400">{formatCurrency(config?.couple_price || 6000)}</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-sm text-slate-500">Total de Turmas</p>
-            <p className="text-xl font-bold text-slate-900">{classes.length}</p>
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Total de Turmas</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-white">{classes.length}</p>
           </div>
         </div>
 
         {/* Lista de Turmas */}
         {classes.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <GraduationCap className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
+            <GraduationCap className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
               Nenhuma turma cadastrada
             </h3>
-            <p className="text-slate-600 mb-4">
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
               Crie turmas para os licenciados se inscreverem no treinamento presencial
             </p>
             <Button onClick={openNewClassModal}>
@@ -354,46 +354,46 @@ const AdminTraining = () => {
             </Button>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
                   <tr>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Data</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Horário</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Vagas</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Fechamento</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Status</th>
-                    <th className="text-right px-6 py-4 text-sm font-semibold text-slate-700">Ações</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Data</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Horário</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Vagas</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Fechamento</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Status</th>
+                    <th className="text-right px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                   {classes.map((cls) => (
-                    <tr key={cls.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={cls.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-                            <Calendar className="w-5 h-5 text-cyan-600" />
+                          <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900">{formatDate(cls.date)}</p>
-                            <p className="text-sm text-slate-500">{cls.location || 'Local não definido'}</p>
+                            <p className="font-medium text-slate-900 dark:text-white">{formatDate(cls.date)}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{cls.location || 'Local não definido'}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-slate-900">{cls.time || '08:00'}</span>
+                        <span className="text-slate-900 dark:text-white">{cls.time || '08:00'}</span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4 text-slate-400" />
-                          <span className={`font-medium ${cls.available_spots <= 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                          <span className={`font-medium ${cls.available_spots <= 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
                             {cls.enrolled_count}/{cls.capacity}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-slate-600">{formatDate(cls.closing_date)}</span>
+                        <span className="text-slate-600 dark:text-slate-400">{formatDate(cls.closing_date)}</span>
                       </td>
                       <td className="px-6 py-4">
                         {getStatusBadge(cls.status)}
@@ -404,36 +404,36 @@ const AdminTraining = () => {
                           {(cls.status === 'open' || cls.status === 'closed') && (
                             <button
                               onClick={() => handleOpenAttendance(cls.id)}
-                              className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
+                              className="p-2 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
                               title="Marcar que o treinamento ocorreu"
                             >
-                              <UserCheck className="w-4 h-4 text-purple-500" />
+                              <UserCheck className="w-4 h-4 text-purple-500 dark:text-purple-400" />
                             </button>
                           )}
                           <button
                             onClick={() => openClassDetail(cls.id)}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                             title="Ver detalhes"
                           >
-                            <Eye className="w-4 h-4 text-slate-500" />
+                            <Eye className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                           </button>
                           <button
                             onClick={() => downloadAttendancePDF(cls.id)}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                             title="Baixar lista de presença"
                           >
-                            <Download className="w-4 h-4 text-slate-500" />
+                            <Download className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                           </button>
                           <button
                             onClick={() => openEditClassModal(cls)}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                             title="Editar"
                           >
-                            <Edit className="w-4 h-4 text-slate-500" />
+                            <Edit className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                           </button>
                           <button
                             onClick={() => handleDeleteClass(cls.id)}
-                            className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                             title="Excluir"
                           >
                             <Trash2 className="w-4 h-4 text-red-500" />

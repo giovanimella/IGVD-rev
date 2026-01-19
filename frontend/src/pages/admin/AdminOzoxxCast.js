@@ -199,15 +199,15 @@ const AdminOzoxxCast = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/admin/system')}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-6 h-6 text-slate-600" />
+              <ArrowLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
             </button>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900">
+              <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">
                 Ozoxx Cast
               </h1>
-              <p className="text-slate-600 mt-1">
+              <p className="text-slate-600 dark:text-slate-400 mt-1">
                 Gerencie as gravações de lives
               </p>
             </div>
@@ -224,38 +224,38 @@ const AdminOzoxxCast = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Film className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
+                <Film className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Total de Vídeos</p>
-                <p className="text-xl font-bold text-slate-900">{videos.length}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Total de Vídeos</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{videos.length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <Eye className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+                <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Publicados</p>
-                <p className="text-xl font-bold text-slate-900">
+                <p className="text-sm text-slate-500 dark:text-slate-400">Publicados</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">
                   {videos.filter(v => v.active).length}
                 </p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-                <Clock className="w-5 h-5 text-cyan-600" />
+              <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                <Clock className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Total Visualizações</p>
-                <p className="text-xl font-bold text-slate-900">
+                <p className="text-sm text-slate-500 dark:text-slate-400">Total Visualizações</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">
                   {videos.reduce((acc, v) => acc + (v.views || 0), 0)}
                 </p>
               </div>
@@ -265,14 +265,14 @@ const AdminOzoxxCast = () => {
 
         {/* Videos List */}
         {videos.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
+            <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
               <Radio className="w-10 h-10 text-slate-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
               Nenhum vídeo cadastrado
             </h3>
-            <p className="text-slate-600 mb-4">
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
               Envie o primeiro vídeo para começar
             </p>
             <Button onClick={() => setShowUploadModal(true)}>
@@ -281,45 +281,45 @@ const AdminOzoxxCast = () => {
             </Button>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
                   <tr>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Vídeo</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Tamanho</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Visualizações</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700">Status</th>
-                    <th className="text-right px-6 py-4 text-sm font-semibold text-slate-700">Ações</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Vídeo</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Tamanho</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Visualizações</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Status</th>
+                    <th className="text-right px-6 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                   {videos.map((video) => (
-                    <tr key={video.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={video.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-16 h-10 bg-slate-200 rounded-lg flex items-center justify-center">
+                          <div className="w-16 h-10 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center">
                             <Film className="w-5 h-5 text-slate-400" />
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900">{video.title}</p>
-                            <p className="text-sm text-slate-500 truncate max-w-xs">
+                            <p className="font-medium text-slate-900 dark:text-white">{video.title}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 truncate max-w-xs">
                               {video.description || 'Sem descrição'}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-slate-600">{video.file_size_formatted}</span>
+                        <span className="text-slate-600 dark:text-slate-400">{video.file_size_formatted}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-slate-900 font-medium">{video.views || 0}</span>
+                        <span className="text-slate-900 dark:text-white font-medium">{video.views || 0}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           video.active 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-slate-100 text-slate-600'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
                         }`}>
                           {video.active ? 'Publicado' : 'Oculto'}
                         </span>
@@ -328,25 +328,25 @@ const AdminOzoxxCast = () => {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => toggleActive(video)}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                             title={video.active ? 'Ocultar' : 'Publicar'}
                           >
                             {video.active ? (
-                              <EyeOff className="w-4 h-4 text-slate-500" />
+                              <EyeOff className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             ) : (
-                              <Eye className="w-4 h-4 text-slate-500" />
+                              <Eye className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             )}
                           </button>
                           <button
                             onClick={() => openEditModal(video)}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                             title="Editar"
                           >
-                            <Edit className="w-4 h-4 text-slate-500" />
+                            <Edit className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                           </button>
                           <button
                             onClick={() => handleDelete(video.id)}
-                            className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                             title="Excluir"
                           >
                             <Trash2 className="w-4 h-4 text-red-500" />
