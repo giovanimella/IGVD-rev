@@ -21,6 +21,14 @@ SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'noreply@email.ozoxx.com.br')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://trainozoxx.preview.emergentagent.com')
 
 
+# ==================== FUNÇÕES AUXILIARES ====================
+
+async def get_platform_name():
+    """Busca o nome da plataforma das configurações do sistema"""
+    config = await db.system_config.find_one({"id": "system_config"})
+    return config.get("platform_name", "UniOzoxx") if config else "UniOzoxx"
+
+
 # ==================== MODELOS ====================
 
 class WebhookLicenseeCreate(BaseModel):
@@ -39,7 +47,7 @@ class WebhookConfigUpdate(BaseModel):
     webhook_api_key: Optional[str] = None
 
 
-# ==================== FUNÇÕES AUXILIARES ====================
+# ==================== VERIFICAÇÃO API KEY ====================
 
 async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
     """Verifica a API Key do webhook"""
