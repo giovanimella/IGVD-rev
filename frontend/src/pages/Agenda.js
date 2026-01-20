@@ -14,7 +14,12 @@ import {
   MoreHorizontal,
   X,
   Edit,
-  Trash2
+  Trash2,
+  Video,
+  Megaphone,
+  MapPin,
+  Link as LinkIcon,
+  Star
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
