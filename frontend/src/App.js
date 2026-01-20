@@ -51,6 +51,7 @@ import Sales from './pages/Sales';
 import OzoxxCast from './pages/OzoxxCast';
 import AdminOzoxxCast from './pages/admin/AdminOzoxxCast';
 import AdminSales from './pages/admin/AdminSales';
+import AdminCompanyEvents from './pages/admin/AdminCompanyEvents';
 
 function App() {
   return (
