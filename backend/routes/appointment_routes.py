@@ -23,6 +23,28 @@ class AppointmentCreate(BaseModel):
     description: Optional[str] = None
     duration: Optional[str] = None  # Livre: "1 hora", "30 min", etc.
 
+# Modelo para eventos da empresa (globais)
+class CompanyEventCreate(BaseModel):
+    title: str
+    date: str  # ISO format: 2025-01-20
+    time: str  # HH:MM format
+    event_type: str  # live, evento, reuniao, campanha, outro
+    description: Optional[str] = None
+    duration: Optional[str] = None
+    link: Optional[str] = None  # Link para live, reunião online, etc.
+    location: Optional[str] = None  # Local físico (se aplicável)
+
+class CompanyEventUpdate(BaseModel):
+    title: Optional[str] = None
+    date: Optional[str] = None
+    time: Optional[str] = None
+    event_type: Optional[str] = None
+    description: Optional[str] = None
+    duration: Optional[str] = None
+    link: Optional[str] = None
+    location: Optional[str] = None
+    active: Optional[bool] = None
+
 class AppointmentUpdate(BaseModel):
     title: Optional[str] = None
     date: Optional[str] = None
