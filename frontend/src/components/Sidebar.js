@@ -83,6 +83,7 @@ const Sidebar = () => {
     { path: '/admin/system', icon: Settings, label: 'Painel Sistema' },
     { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
+    { path: '/admin/company-events', icon: Calendar, label: 'Eventos Empresa' },
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
     { path: '/admin/badges', icon: Trophy, label: 'Badges' },
     { path: '/admin/challenges', icon: Target, label: 'Desafios' },
