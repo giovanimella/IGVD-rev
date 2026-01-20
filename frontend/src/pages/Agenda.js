@@ -205,7 +205,10 @@ const Agenda = () => {
     }
   };
 
-  const getCategoryInfo = (categoryKey) => {
+  const getCategoryInfo = (categoryKey, isCompanyEvent = false, eventType = null) => {
+    if (isCompanyEvent && eventType) {
+      return companyEventTypes.find(c => c.key === eventType) || companyEventTypes[4];
+    }
     return categories.find(c => c.key === categoryKey) || categories[4];
   };
 
