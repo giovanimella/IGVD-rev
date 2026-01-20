@@ -310,12 +310,13 @@ const Agenda = () => {
                     {/* Indicadores de compromissos */}
                     <div className="mt-1 space-y-1">
                       {dayAppointments.slice(0, 2).map((apt, i) => {
-                        const catInfo = getCategoryInfo(apt.category);
+                        const catInfo = getCategoryInfo(apt.category, apt.is_company_event, apt.event_type);
                         return (
                           <div
                             key={i}
-                            className={`text-xs truncate px-1 py-0.5 rounded ${catInfo.color} text-white`}
+                            className={`text-xs truncate px-1 py-0.5 rounded ${catInfo.color} text-white ${apt.is_company_event ? 'ring-1 ring-yellow-400' : ''}`}
                           >
+                            {apt.is_company_event && <Star className="w-2 h-2 inline mr-0.5" />}
                             {apt.time.slice(0, 5)}
                           </div>
                         );
