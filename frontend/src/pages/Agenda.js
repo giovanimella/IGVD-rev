@@ -57,6 +57,15 @@ const Agenda = () => {
     { key: 'outro', label: 'Outro', icon: MoreHorizontal, color: 'bg-slate-500' }
   ];
 
+  // Tipos de eventos da empresa
+  const companyEventTypes = [
+    { key: 'live', label: 'Live', icon: Video, color: 'bg-red-500' },
+    { key: 'evento', label: 'Evento', icon: CalendarIcon, color: 'bg-purple-500' },
+    { key: 'reuniao', label: 'Reunião', icon: Users, color: 'bg-blue-500' },
+    { key: 'campanha', label: 'Campanha', icon: Megaphone, color: 'bg-orange-500' },
+    { key: 'outro', label: 'Outro', icon: MoreHorizontal, color: 'bg-slate-500' }
+  ];
+
   useEffect(() => {
     fetchAppointments();
   }, [currentDate]);
