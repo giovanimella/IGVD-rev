@@ -131,7 +131,7 @@ async def get_appointments_by_month(
     month: int,
     current_user: dict = Depends(get_current_user)
 ):
-    """Listar compromissos de um mês específico"""
+    """Listar compromissos de um mês específico (pessoais + eventos da empresa)"""
     user_id = current_user.get("sub")
     start_date = f"{year}-{month:02d}-01"
     
@@ -141,7 +141,8 @@ async def get_appointments_by_month(
     else:
         end_date = f"{year}-{month + 1:02d}-01"
     
-    appointments = await db.appointments.find(
+    # Buscar compromissos pessoais
+    personal_appointments = await db.appointments.find(
         {
             "user_id": user_id,
             "date": {
@@ -152,7 +153,36 @@ async def get_appointments_by_month(
         {"_id": 0}
     ).sort([("date", 1), ("time", 1)]).to_list(500)
     
-    return appointments
+    # Buscar eventos da empresa (globais)
+    company_events = await db.company_events.find(
+        {
+            "active": True,
+            "date": {
+                "$gte": start_date,
+                "$lt": end_date
+            }
+        },
+        {"_id": 0}
+    ).sort([("date", 1), ("time", 1)]).to_list(100)
+    
+    # Converter eventos da empresa para formato de compromisso
+    for event in company_events:
+        event["is_company_event"] = True
+        # Mapear event_type para category visual
+        event_type_map = {
+            "live": "treinamento",
+            "evento": "reuniao",
+            "reuniao": "reuniao",
+            "campanha": "lembrete",
+            "outro": "outro"
+        }
+        event["category"] = event_type_map.get(event.get("event_type"), "outro")
+    
+    # Combinar e ordenar
+    all_appointments = personal_appointments + company_events
+    all_appointments.sort(key=lambda x: (x.get("date", ""), x.get("time", "")))
+    
+    return all_appointments
 
 @router.get("/{appointment_id}", response_model=AppointmentResponse)
 async def get_appointment(
