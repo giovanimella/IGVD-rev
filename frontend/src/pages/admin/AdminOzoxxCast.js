@@ -205,7 +205,7 @@ const AdminOzoxxCast = () => {
             </button>
             <div>
               <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">
-                Ozoxx Cast
+                IGVD Cast
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-1">
                 Gerencie as gravações de lives
