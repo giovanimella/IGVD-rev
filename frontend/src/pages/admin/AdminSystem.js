@@ -11,7 +11,7 @@ const AdminSystem = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [systemConfig, setSystemConfig] = useState({ 
-    platform_name: 'UniOzoxx',
+    platform_name: 'IGVD - Instituto Global de Vendas Diretas',
     minimum_passing_score: 70,
     webhook_url: '',
     webhook_enabled: false,
@@ -60,7 +60,7 @@ const AdminSystem = () => {
     try {
       const response = await axios.get(`${API_URL}/api/system/config/full`);
       setSystemConfig({
-        platform_name: response.data.platform_name || 'UniOzoxx',
+        platform_name: response.data.platform_name || 'IGVD',
         minimum_passing_score: response.data.minimum_passing_score || 70,
         webhook_url: response.data.webhook_url || '',
         webhook_enabled: response.data.webhook_enabled || false,

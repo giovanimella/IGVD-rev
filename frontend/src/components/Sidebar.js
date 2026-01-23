@@ -33,7 +33,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
-  const [platformName, setPlatformName] = useState('UniOzoxx');
+  const [platformName, setPlatformName] = useState('IGVD');
 
   const fetchBranding = async () => {
     try {

@@ -16,7 +16,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
-  const [platformName, setPlatformName] = useState('UniOzoxx');
+  const [platformName, setPlatformName] = useState('IGVD');
   const { login } = useAuth();
   const navigate = useNavigate();
 

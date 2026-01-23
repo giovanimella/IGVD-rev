@@ -20,7 +20,7 @@ const SetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
-  const [platformName, setPlatformName] = useState('UniOzoxx');
+  const [platformName, setPlatformName] = useState('IGVD');
 
   useEffect(() => {
     if (!token) {
