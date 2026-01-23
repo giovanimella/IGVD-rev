@@ -3,6 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from auth import get_current_user, require_role
 import os
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
