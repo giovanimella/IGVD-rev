@@ -258,10 +258,10 @@ const AdminSystem = () => {
       count: '-'
     },
     {
-      title: 'Ozoxx Cast',
+      title: 'IGVD Cast',
       description: 'Gerenciar vídeos de lives',
       icon: Radio,
-      link: '/admin/ozoxx-cast',
+      link: '/admin/igvd-cast',
       color: 'bg-pink-500',
       count: '-'
     }
