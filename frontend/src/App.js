@@ -166,7 +166,7 @@ function App() {
             }
           />
           <Route
-            path="/ozoxx-cast"
+            path="/igvd-cast"
             element={
               <PrivateRoute roles={['licenciado']}>
                 <OzoxxCast />
