@@ -21,6 +21,8 @@ const Dashboard = () => {
   const [streak, setStreak] = useState(null);
   const [activeChallenges, setActiveChallenges] = useState([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [growthData, setGrowthData] = useState([]);
+  const [stageDistribution, setStageDistribution] = useState([]);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -33,6 +35,9 @@ const Dashboard = () => {
       fetchGamificationData();
       fetchUpcomingAppointments();
     }
+    if (user?.role === 'admin') {
+      fetchAdminChartData();
+    }
   }, []);
 
   const fetchDashboardStats = async () => {
@@ -43,6 +48,19 @@ const Dashboard = () => {
       console.error('Erro ao buscar estatísticas:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAdminChartData = async () => {
+    try {
+      const [growthRes, stageRes] = await Promise.all([
+        axios.get(`${API_URL}/api/stats/admin/growth`),
+        axios.get(`${API_URL}/api/stats/admin/stage-distribution`)
+      ]);
+      setGrowthData(growthRes.data);
+      setStageDistribution(stageRes.data);
+    } catch (error) {
+      console.error('Erro ao buscar dados dos gráficos:', error);
     }
   };
 
