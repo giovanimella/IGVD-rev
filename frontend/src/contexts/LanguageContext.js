@@ -44,7 +44,7 @@ export const LanguageProvider = ({ children }) => {
 
   // Salvar cache no localStorage quando atualizar
   useEffect(() => {
-    localStorage.setItem('uniozoxx_translation_cache', JSON.stringify(translationCache));
+    localStorage.setItem('igvd_translation_cache', JSON.stringify(translationCache));
   }, [translationCache]);
 
   // Função para criar chave do cache
@@ -315,7 +315,7 @@ export const LanguageProvider = ({ children }) => {
   // Função para mudar idioma
   const setLanguage = useCallback((newLang) => {
     setLanguageState(newLang);
-    localStorage.setItem('uniozoxx_language', newLang);
+    localStorage.setItem('igvd_language', newLang);
     document.documentElement.lang = newLang;
     
     // Forçar refresh para re-renderizar com textos originais
@@ -327,7 +327,7 @@ export const LanguageProvider = ({ children }) => {
   // Limpar cache (útil para admin)
   const clearTranslationCache = useCallback(() => {
     setTranslationCache({});
-    localStorage.removeItem('uniozoxx_translation_cache');
+    localStorage.removeItem('igvd_translation_cache');
   }, []);
 
   const value = {
