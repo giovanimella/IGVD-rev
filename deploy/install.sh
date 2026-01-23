@@ -210,12 +210,23 @@ setup_frontend() {
 REACT_APP_BACKEND_URL=https://${DOMAIN}
 EOF
     
-    # Instalar dependências e build
+    # Instalar dependências
     echo -e "${YELLOW}Instalando dependências Node.js...${NC}"
     yarn install
     
-    echo -e "${YELLOW}Criando build de produção...${NC}"
-    yarn build
+    # Configurar Node.js para usar mais memória (evita erro de heap)
+    echo -e "${YELLOW}Criando build de produção (isso pode demorar alguns minutos)...${NC}"
+    export NODE_OPTIONS="--max-old-space-size=1024"
+    
+    # Tentar build com limite de memória aumentado
+    if ! yarn build; then
+        echo -e "${YELLOW}Build falhou, tentando com mais memória...${NC}"
+        export NODE_OPTIONS="--max-old-space-size=1536"
+        yarn build
+    fi
+    
+    # Limpar variável
+    unset NODE_OPTIONS
     
     echo -e "${GREEN}✓ Frontend configurado e compilado${NC}"
 }
