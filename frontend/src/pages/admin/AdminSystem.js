@@ -120,7 +120,7 @@ const AdminSystem = () => {
 
   const generateApiKey = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let key = 'uniozoxx_';
+    let key = 'igvd_';
     for (let i = 0; i < 32; i++) {
       key += chars.charAt(Math.floor(Math.random() * chars.length));
     }
@@ -303,7 +303,7 @@ const AdminSystem = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Painel Administrativo</h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2">Controle total do sistema UniOzoxx LMS</p>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">Controle total do sistema IGVD LMS</p>
         </div>
 
         {/* Logo da Plataforma */}
@@ -329,7 +329,7 @@ const AdminSystem = () => {
                 value={systemConfig.platform_name}
                 onChange={(e) => setSystemConfig({ ...systemConfig, platform_name: e.target.value })}
                 className="flex-1 px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                placeholder="Ex: UniOzoxx"
+                placeholder="Ex: IGVD"
                 data-testid="platform-name-input"
               />
               <Button
