@@ -121,7 +121,7 @@ const OnboardingDocumentsPJ = () => {
               Onboarding Concluído!
             </h2>
             <p className="text-green-700 mb-6 max-w-md mx-auto">
-              Parabéns! Você completou todas as etapas e agora tem acesso total à plataforma UniOzoxx.
+              Parabéns! Você completou todas as etapas e agora tem acesso total à plataforma IGVD.
             </p>
             <Button 
               onClick={() => navigate('/dashboard')}
