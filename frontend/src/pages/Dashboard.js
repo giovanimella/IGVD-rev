@@ -155,22 +155,17 @@ const Dashboard = () => {
   }
 
   if (user?.role === 'admin') {
-    // Dados mockados para gráficos (em produção, vir da API)
-    const progressData = [
-      { month: 'Jan', licenciados: 10, modulos: 15 },
-      { month: 'Fev', licenciados: 15, modulos: 20 },
-      { month: 'Mar', licenciados: 25, modulos: 30 },
-      { month: 'Abr', licenciados: 30, modulos: 35 },
-      { month: 'Mai', licenciados: 40, modulos: 45 },
-      { month: 'Jun', licenciados: 50, modulos: 50 }
+    // Dados vindos da API (busca real do banco de dados)
+    const progressData = growthData.length > 0 ? growthData : [
+      { month: '-', licenciados: 0, modulos: 0 }
     ];
 
-    const stageDistribution = [
-      { name: 'Registro', value: 5, color: '#06b6d4' },
-      { name: 'Documentos', value: 8, color: '#0ea5e9' },
-      { name: 'Pagamento', value: 12, color: '#3b82f6' },
-      { name: 'Acolhimento', value: 20, color: '#8b5cf6' },
-      { name: 'Completo', value: stats?.total_users || 35, color: '#22c55e' }
+    const chartStageDistribution = stageDistribution.length > 0 ? stageDistribution : [
+      { name: 'Registro', value: 0, color: '#06b6d4' },
+      { name: 'Documentos', value: 0, color: '#8b5cf6' },
+      { name: 'Pagamento', value: 0, color: '#3b82f6' },
+      { name: 'Acolhimento', value: 0, color: '#f59e0b' },
+      { name: 'Completo', value: 0, color: '#22c55e' }
     ];
 
     return (
