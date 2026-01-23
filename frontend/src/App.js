@@ -279,7 +279,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/ozoxx-cast"
+            path="/admin/igvd-cast"
             element={
               <PrivateRoute roles={['admin']}>
                 <AdminOzoxxCast />
