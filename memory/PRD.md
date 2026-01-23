@@ -1,217 +1,177 @@
-# PRD - Plataforma UniOzoxx LMS
-
-## Visão Geral
-UniOzoxx é uma plataforma LMS (Learning Management System) gamificada desenvolvida para gerenciar o processo de onboarding, treinamento e acompanhamento de licenciados da empresa Ozoxx.
-
-## Stack Tecnológico
-- **Frontend:** React 18 + Tailwind CSS + Shadcn/UI
-- **Backend:** FastAPI (Python 3.11)
-- **Banco de Dados:** MongoDB
-- **Autenticação:** JWT
+# IGVD - Instituto Global de Vendas Diretas
+## Product Requirements Document (PRD)
 
 ---
 
-## Funcionalidades Implementadas
+## 📋 Resumo do Projeto
 
-### ✅ Sistema de Autenticação
-- Login/logout com JWT
-- Recuperação de senha
-- Três níveis de acesso: admin, supervisor, licenciado
-
-### ✅ Modo Escuro/Claro (COMPLETO - Janeiro 2026)
-- Toggle no topbar para alternar entre temas
-- Preferência salva no localStorage
-- Dark mode aplicado em TODAS as páginas
-- Tooltips dos gráficos Recharts adaptados via CSS variables
-
-### ✅ Identidade da Plataforma Dinâmica (COMPLETO - Janeiro 2026)
-- Nome da plataforma configurável pelo Admin (`Admin > Painel Sistema`)
-- Nome dinâmico aplicado em:
-  - Tela de login
-  - Sidebar/menu lateral
-  - Todos os templates de email (boas-vindas, reset de senha, webhook)
-  - Relatórios PDF de vendas/comissões
-  - Rodapé dos emails
-  - Campo "De:" dos emails enviados
-- Endpoint público `/api/system/config` para acesso sem autenticação
-- Endpoint privado `/api/system/config/full` para administradores
-
-### ✅ Nova Tela de Login (COMPLETO - Janeiro 2026)
-- Design minimalista e centralizado
-- Logo centralizada no topo
-- Nome da plataforma dinâmico
-- Removido layout dividido (sem lado esquerdo com gradiente)
-- Suporte a dark mode
-
-### ✅ Sistema de Idiomas i18n (COMPLETO - Janeiro 2026)
-- Seletor de idioma no topbar com 3 opções:
-  - 🇧🇷 Português (Brasil)
-  - 🇺🇸 English
-  - 🇪🇸 Español
-- Arquivos de tradução completos em `/frontend/src/locales/`:
-  - `pt-BR.json` - 350+ chaves traduzidas
-  - `en.json` - 350+ chaves traduzidas
-  - `es.json` - 350+ chaves traduzidas
-- Cobertura de traduções:
-  - Sidebar completo
-  - Dashboard
-  - Módulos e capítulos
-  - Agenda
-  - Certificados
-  - Favoritos
-  - Arquivos
-  - Recompensas
-  - Perfil
-  - Treinamento presencial
-  - Vendas
-  - Admin dashboard
-  - Admin usuários
-  - Admin sistema
-  - Supervisor pages
-  - Estágios de onboarding
-  - Mensagens de erro
-  - Mensagens de sucesso
-- **STATUS:** Estrutura completa, aplicação incremental nos componentes
-
-### ✅ Emails Dinâmicos (COMPLETO - Janeiro 2026)
-Templates de email atualizados para usar nome dinâmico da plataforma:
-- Email de boas-vindas (novo usuário)
-- Email de reset de senha
-- Email de cadastro via webhook
-- Todos incluem rodapé com `© {platform_name} - Plataforma de Treinamento`
-- Campo "De:" usa formato `{platform_name} <email@domain.com>`
-
-### ✅ Módulos de Treinamento
-- CRUD de módulos e capítulos
-- Vídeos, textos, arquivos PDF
-- Sistema de progresso
-- **Delay de visibilidade:** Módulos aparecem após X meses do cadastro
-- Avaliações e certificados
-
-### ✅ Sistema de Gamificação
-- Pontos, níveis, badges, desafios
-- Leaderboard (ranking)
-- Recompensas resgatáveis
-
-### ✅ Treinamento Presencial
-- Admin cria turmas com data, local, capacidade
-- Licenciado se inscreve (com ou sem cônjuge)
-- Admin marca que treinamento ocorreu
-- Admin marca presença individual (presente/ausente)
-- Licenciado PRESENTE avança para Vendas em Campo
-- PDF de lista de presença
-
-### ✅ Vendas em Campo
-- Licenciado registra até 10 vendas com dados do cliente
-- Link de pagamento placeholder (aguarda gateway)
-- Notificação automática quando venda é confirmada
-- Ao completar 10 vendas → avança para Documentos PJ
-
-### ✅ Relatório de Vendas por Mês + PDF (NOVO - Janeiro 2026)
-- Filtro por mês e ano
-- Resumo com vendas e comissões do período
-- Lista completa de vendas
-- **Exportar PDF** com relatório completo
-
-### ✅ Sistema de Comissões
-- Admin cria tipos de comissão (descrição + %)
-- Sistema calcula comissões automaticamente
-- Visualização no dashboard e no relatório PDF
-
-### ✅ Notificação de Venda Confirmada (NOVO - Janeiro 2026)
-- Quando pagamento é confirmado, cria notificação automática
-- Aparece no sino de notificações do licenciado
-- Inclui dados da venda (cliente, valor)
-
-### ✅ Ozoxx Cast
-- Admin faz upload de vídeos de lives
-- Licenciados assistem na plataforma
-- Contador de visualizações
-
-### ✅ API Webhook com Kit Type
-- Kit Master: pula onboarding, vai direto para "completo"
-- Kit Senior: segue fluxo normal
+**Nome Original:** UniOzoxx LMS
+**Nome Atual:** IGVD - Instituto Global de Vendas Diretas
+**Domínio:** https://igvd.org
+**Tipo:** Plataforma LMS para treinamento de licenciados de vendas diretas
 
 ---
 
-## Integrações Pendentes
+## ✅ Funcionalidades Implementadas
 
-### 🔜 Gateway de Pagamento
-- PagSeguro ou MercadoPago
-- Para pagamento de treinamento e vendas
-- **Status:** MOCKED com placeholder
+### 🔐 Autenticação e Usuários
+- [x] Login/Logout com JWT
+- [x] Três níveis de usuário: Admin, Supervisor, Licenciado
+- [x] Recuperação de senha por email
+- [x] Definição de senha por link
+
+### 📚 Sistema de Módulos e Capítulos
+- [x] CRUD completo de módulos
+- [x] Capítulos com conteúdo e vídeos
+- [x] Sistema de avaliações
+- [x] Progresso do usuário
+- [x] Módulos com delay de tempo configurável
+
+### 🎮 Gamificação
+- [x] Sistema de badges
+- [x] Desafios semanais
+- [x] Ranking/Leaderboard
+- [x] Sistema de pontuação XP
+- [x] Níveis de usuário
+
+### 💰 Vendas e Comissões
+- [x] Registro de vendas pelos licenciados
+- [x] Sistema de comissões para supervisores
+- [x] Relatórios de vendas (PDF)
+- [x] Dashboard de vendas admin
+
+### 📅 Agenda e Eventos
+- [x] Compromissos pessoais dos licenciados
+- [x] **NOVO:** Eventos da empresa (lives, reuniões, campanhas)
+- [x] Eventos globais aparecem na agenda de todos
+
+### 🎬 IGVD Cast (ex-Ozoxx Cast)
+- [x] Upload de vídeos de lives
+- [x] Organização por categorias
+- [x] Reprodutor de vídeo
+
+### 🌐 Internacionalização
+- [x] **Tradução em tempo real com IA** (Claude Sonnet 4.5)
+- [x] Suporte a Português, Inglês, Espanhol
+- [x] Cache de traduções no localStorage
+
+### 🌙 Tema e Aparência
+- [x] Dark/Light mode
+- [x] Nome da plataforma dinâmico (admin pode alterar)
+- [x] Logo customizável
+- [x] Design responsivo
+
+### 📧 Notificações
+- [x] Envio de emails via Resend
+- [x] Notificações de vendas confirmadas
+- [x] Emails de boas-vindas
+
+### 📁 Outros
+- [x] Repositório de arquivos
+- [x] Sistema de banners
+- [x] Comunicados/Posts
+- [x] Certificados PDF
+- [x] Favoritos
 
 ---
 
-## Arquitetura
+## 🗂️ Arquitetura
 
 ```
 /app/
-├── backend/
-│   └── routes/
-│       ├── sales_routes.py (vendas, comissões, PDF)
-│       ├── training_routes.py (presença)
-│       ├── ozoxx_cast_routes.py
-│       └── ...
-├── frontend/
-│   └── src/
-│       ├── contexts/
-│       │   ├── ThemeContext.js (dark mode)
-│       │   └── LanguageContext.js (i18n)
-│       ├── components/
-│       │   ├── ThemeToggle.js
-│       │   └── LanguageSelector.js
-│       ├── locales/
-│       │   ├── pt-BR.json
-│       │   ├── en.json
-│       │   └── es.json
-│       └── pages/
-│           └── admin/
-│               └── AdminSales.js (relatório mensal + PDF)
-└── memory/
-    └── PRD.md
+├── backend/           # FastAPI + MongoDB
+│   ├── routes/        # Endpoints da API
+│   ├── models.py      # Modelos Pydantic
+│   ├── auth.py        # Autenticação JWT
+│   └── server.py      # Ponto de entrada
+├── frontend/          # React + Tailwind
+│   ├── src/
+│   │   ├── components/  # Componentes reutilizáveis
+│   │   ├── contexts/    # Contextos React
+│   │   ├── pages/       # Páginas da aplicação
+│   │   └── locales/     # Arquivos de tradução
+│   └── build/         # Build de produção
+├── deploy/            # Scripts de instalação
+│   ├── INSTALL.md     # Guia completo
+│   ├── install.sh     # Script automatizado
+│   ├── nginx-igvd.conf
+│   ├── backup.sh
+│   └── update.sh
+└── uploads/           # Arquivos enviados
 ```
 
 ---
 
-## Credenciais de Teste
+## 🔑 Credenciais Padrão
 
-| Perfil | E-mail | Senha |
-|--------|--------|-------|
-| Admin | admin@ozoxx.com | admin123 |
-| Supervisor | supervisor@uniozoxx.com | supervisor123 |
-| Licenciado | licenciado.teste@ozoxx.com | licenciado123 |
-
----
-
-## Changelog
-
-### Janeiro 2026 (Sessão Atual)
-- ✅ **Modo Escuro/Claro** - Toggle no topbar
-- ✅ **Sistema de idiomas i18n** - PT-BR, EN, ES
-- ✅ **Relatório de vendas por mês** - Filtro mensal + exportar PDF
-- ✅ **Notificação de venda confirmada** - Automática ao confirmar pagamento
-
-### Janeiro 2026 (Sessão Anterior)
-- ✅ Sistema de presença no treinamento presencial
-- ✅ Etapa de vendas em campo (10 vendas)
-- ✅ Dashboard de vendas para admin
-- ✅ Sistema de comissões configuráveis
-- ✅ Ozoxx Cast (gravações de lives)
-- ✅ Kit Master/Senior no webhook
-- ✅ Delay de visibilidade em módulos
+| Usuário | Email | Senha |
+|---------|-------|-------|
+| Admin | admin@igvd.org | admin123 |
+| Supervisor | supervisor@igvd.org | supervisor123 |
+| Licenciado | (criar via sistema) | - |
 
 ---
 
-## Próximas Tarefas (Backlog)
+## 🔧 Integrações
 
-### P1 - Alta Prioridade
-1. Integração com gateway de pagamento (PagSeguro/MercadoPago)
+| Serviço | Uso | Status |
+|---------|-----|--------|
+| MongoDB | Banco de dados | ✅ Ativo |
+| Resend | Envio de emails | ✅ Ativo |
+| Emergent LLM (Claude) | Tradução em tempo real | ✅ Ativo |
+| Let's Encrypt | SSL/HTTPS | 📋 Para deploy |
 
-### P2 - Média Prioridade
-1. Aplicar traduções i18n em mais componentes internos
-2. Notificações push para novas turmas de treinamento
+---
 
-### P3 - Baixa Prioridade
-1. Dashboard mobile otimizado
-2. Relatórios exportáveis em Excel
+## 📦 Deploy
+
+### Arquivos Criados
+- `/app/deploy/INSTALL.md` - Guia completo de instalação
+- `/app/deploy/install.sh` - Script automatizado
+- `/app/deploy/nginx-igvd.conf` - Configuração Nginx
+- `/app/deploy/backup.sh` - Script de backup
+- `/app/deploy/update.sh` - Script de atualização
+- `/app/deploy/backend.env.example` - Exemplo de .env backend
+- `/app/deploy/frontend.env.example` - Exemplo de .env frontend
+
+### Domínio Configurado
+- **Produção:** https://igvd.org
+
+---
+
+## 📋 Backlog / Tarefas Futuras
+
+### P0 (Crítico)
+- [ ] Deploy em produção no servidor do cliente
+
+### P1 (Importante)
+- [ ] Integração com gateway de pagamento (PagSeguro/MercadoPago)
+- [ ] Lembretes automáticos por email
+
+### P2 (Melhorias)
+- [ ] App mobile (React Native ou PWA)
+- [ ] Dashboard analytics mais detalhado
+- [ ] Sistema de chat entre usuários
+- [ ] Integração com WhatsApp
+
+---
+
+## 📝 Changelog
+
+### v1.1.0 (Janeiro 2026)
+- Renomeado de "UniOzoxx" para "IGVD - Instituto Global de Vendas Diretas"
+- Adicionado sistema de eventos da empresa
+- Criados scripts de deploy para Ubuntu
+- Configuração para domínio igvd.org
+
+### v1.0.0 (Janeiro 2026)
+- Sistema de tradução em tempo real com IA
+- Dark/Light mode completo
+- Nome da plataforma dinâmico
+- Redesign da página de login
+- Sistema de vendas e comissões
+- IGVD Cast (vídeos de lives)
+
+---
+
+**Última atualização:** Janeiro 2026
