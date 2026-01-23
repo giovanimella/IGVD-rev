@@ -20,7 +20,7 @@ export const useLanguage = () => {
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguageState] = useState(() => {
-    const saved = localStorage.getItem('uniozoxx_language');
+    const saved = localStorage.getItem('igvd_language');
     return saved || 'pt-BR';
   });
   
@@ -28,7 +28,7 @@ export const LanguageProvider = ({ children }) => {
   const [translationCache, setTranslationCache] = useState(() => {
     // Carregar cache do localStorage
     try {
-      const cached = localStorage.getItem('uniozoxx_translation_cache');
+      const cached = localStorage.getItem('igvd_translation_cache');
       return cached ? JSON.parse(cached) : {};
     } catch {
       return {};

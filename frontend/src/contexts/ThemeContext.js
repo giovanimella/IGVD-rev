@@ -12,7 +12,7 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('uniozoxx_theme');
+    const saved = localStorage.getItem('igvd_theme');
     if (saved) {
       return saved === 'dark';
     }
@@ -24,10 +24,10 @@ export const ThemeProvider = ({ children }) => {
     // Apply theme to document
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('uniozoxx_theme', 'dark');
+      localStorage.setItem('igvd_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('uniozoxx_theme', 'light');
+      localStorage.setItem('igvd_theme', 'light');
     }
   }, [isDarkMode]);
 
