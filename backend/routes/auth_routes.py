@@ -29,7 +29,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def get_platform_name():
     """Busca o nome da plataforma das configurações do sistema"""
     config = await db.system_config.find_one({"id": "system_config"})
-    return config.get("platform_name", "UniOzoxx") if config else "UniOzoxx"
+    return config.get("platform_name", "IGVD") if config else "IGVD"
 
 @router.post("/login")
 async def login(credentials: UserLogin):

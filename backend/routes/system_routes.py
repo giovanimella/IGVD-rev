@@ -35,7 +35,7 @@ async def get_system_config():
     
     # Remover campos sensíveis para usuários não autenticados
     public_config = {
-        "platform_name": config.get("platform_name", "UniOzoxx"),
+        "platform_name": config.get("platform_name", "IGVD"),
         "platform_logo": config.get("platform_logo"),
         "minimum_passing_score": config.get("minimum_passing_score", 70)
     }

@@ -49,7 +49,7 @@ async def create_payment(current_user: dict = Depends(get_current_user)):
         "items": [
             {
                 "reference_id": "FRANCHISE_FEE",
-                "name": "Taxa de Franquia UniOzoxx",
+                "name": "Taxa de Franquia IGVD",
                 "quantity": 1,
                 "unit_amount": int(FRANCHISE_FEE * 100)
             }

@@ -443,7 +443,7 @@ class UserChallengeProgress(BaseModel):
 
 class SystemConfig(BaseModel):
     id: str = "system_config"  # ID fixo, só existe uma configuração
-    platform_name: str = "UniOzoxx"  # Nome da plataforma (alterável pelo admin)
+    platform_name: str = "IGVD - Instituto Global de Vendas Diretas"  # Nome da plataforma (alterável pelo admin)
     minimum_passing_score: int = 70  # Nota mínima global para passar (porcentagem)
     certificate_template_path: Optional[str] = None  # Caminho do template de certificado
     certificate_name_y_position: int = 400  # Posição Y do nome no certificado (de baixo para cima)
