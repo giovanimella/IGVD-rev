@@ -248,7 +248,7 @@ const Dashboard = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={stageDistribution}
+                    data={chartStageDistribution}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -257,7 +257,7 @@ const Dashboard = () => {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {stageDistribution.map((entry, index) => (
+                    {chartStageDistribution.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
