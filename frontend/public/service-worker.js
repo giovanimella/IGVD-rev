@@ -39,11 +39,20 @@ self.addEventListener('activate', (event) => {
 
 // Fetch - Network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  // Ignorar requests que não podem ser cacheados
+  if (
+    event.request.method !== 'GET' ||
+    event.request.url.startsWith('chrome-extension://') ||
+    event.request.url.includes('/api/')
+  ) {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
         // Se a resposta for válida, clone e guarde no cache
-        if (response && response.status === 200) {
+        if (response && response.status === 200 && response.type === 'basic') {
           const responseClone = response.clone();
           caches.open(CACHE_NAME)
             .then((cache) => {
