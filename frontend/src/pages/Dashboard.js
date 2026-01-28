@@ -102,9 +102,10 @@ const Dashboard = () => {
   const fetchAccessHistory = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/stats/access-history`);
-      setAccessHistory(response.data);
+      setAccessHistory(response.data || []);
     } catch (error) {
       console.error('Erro ao buscar histórico de acessos:', error);
+      setAccessHistory([]);
     }
   };
 
