@@ -249,6 +249,84 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
             await update_challenge_progress(current_user["sub"])
         
         await db.user_progress.insert_one(progress.model_dump())
+        
+        # Verificar se completou o módulo (mesmo lógica do bloco existing)
+        if should_complete:
+            module_chapters = await db.chapters.find({"module_id": progress_data.module_id}, {"_id": 0}).to_list(1000)
+            all_completed = True
+            for chapter in module_chapters:
+                if chapter["id"] == progress_data.chapter_id:
+                    continue  # Já sabemos que este está completo
+                chapter_progress = await db.user_progress.find_one({
+                    "user_id": current_user["sub"],
+                    "chapter_id": chapter["id"]
+                })
+                if not chapter_progress or not chapter_progress.get("completed", False):
+                    all_completed = False
+                    break
+            
+            if all_completed:
+                module = await db.modules.find_one({"id": progress_data.module_id}, {"_id": 0})
+                if module and module.get("points_reward", 0) > 0:
+                    await db.users.update_one(
+                        {"id": current_user["sub"]},
+                        {"$inc": {"points": module["points_reward"]}}
+                    )
+                
+                # Criar notificação para o usuário
+                user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
+                from routes.notification_routes import create_notification, notify_admins
+                
+                await create_notification(
+                    current_user["sub"],
+                    "Módulo Concluído! 🎉",
+                    f"Parabéns! Você concluiu o módulo '{module['title']}' e ganhou {module.get('points_reward', 0)} pontos!",
+                    "module_completed",
+                    module["id"]
+                )
+                
+                # Notificar admins
+                await notify_admins(
+                    "Licenciado completou módulo",
+                    f"{user['full_name']} concluiu o módulo '{module['title']}'",
+                    "admin_notification",
+                    module["id"]
+                )
+                
+                # Verificar se precisa avançar o estágio do onboarding
+                if user.get("current_stage") == "acolhimento" and module.get("is_acolhimento"):
+                    # Verificar se todos os módulos de acolhimento foram concluídos
+                    acolhimento_modules = await db.modules.find({"is_acolhimento": True}, {"_id": 0, "id": 1}).to_list(100)
+                    all_acolhimento_completed = True
+                    
+                    for acolh_module in acolhimento_modules:
+                        acolh_chapters = await db.chapters.find({"module_id": acolh_module["id"]}, {"_id": 0, "id": 1}).to_list(100)
+                        for acolh_chapter in acolh_chapters:
+                            chapter_prog = await db.user_progress.find_one({
+                                "user_id": current_user["sub"],
+                                "chapter_id": acolh_chapter["id"],
+                                "completed": True
+                            })
+                            if not chapter_prog:
+                                all_acolhimento_completed = False
+                                break
+                        if not all_acolhimento_completed:
+                            break
+                    
+                    if all_acolhimento_completed:
+                        # Avançar para próxima etapa do onboarding (treinamento presencial)
+                        await db.users.update_one(
+                            {"id": current_user["sub"]},
+                            {"$set": {"current_stage": "treinamento_presencial"}}
+                        )
+                        
+                        await create_notification(
+                            current_user["sub"],
+                            "Acolhimento Concluído! 🎓",
+                            "Parabéns! Você concluiu todos os módulos de acolhimento. Agora você pode se inscrever no treinamento presencial.",
+                            "onboarding_stage",
+                            "treinamento_presencial"
+                        )
     
     return {"message": "Progresso atualizado com sucesso"}
 
