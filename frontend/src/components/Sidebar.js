@@ -110,6 +110,9 @@ const Sidebar = () => {
   const licenseeLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
+    { path: '/training', icon: Users, label: 'Treinamento' },
+    { path: '/sales', icon: ShoppingCart, label: 'Minhas Vendas' },
+    { path: '/sales-links', icon: DollarSign, label: 'Links de Pagamento' },
     { path: '/igvd-cast', icon: Radio, label: 'IGVD Cast' },
     { path: '/agenda', icon: Calendar, label: 'Agenda' },
     { path: '/certificates', icon: Award, label: 'Certificados' },
