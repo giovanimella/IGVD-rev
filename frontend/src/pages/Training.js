@@ -575,64 +575,62 @@ const Training = () => {
 
   // Tela de Pagamento
   if (step === 'payment') {
+    // Preparar dados do pagador
+    const payerData = {
+      name: registrationData?.participant_data?.full_name || '',
+      email: registrationData?.participant_data?.email || '',
+      document_type: 'CPF',
+      document_number: registrationData?.participant_data?.cpf?.replace(/\D/g, '') || '',
+      phone: registrationData?.participant_data?.phone || ''
+    };
+
     return (
       <Layout>
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="text-center">
-            <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CreditCard className="w-10 h-10 text-amber-600" />
+            <div className="w-20 h-20 bg-amber-100 dark:bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CreditCard className="w-10 h-10 text-amber-600 dark:text-amber-400" />
             </div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900">
-              Pagamento Pendente
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">
+              Pagamento do Treinamento
             </h1>
-            <p className="text-slate-600 mt-2">
+            <p className="text-slate-600 dark:text-slate-400 mt-2">
               Complete o pagamento para confirmar sua inscrição
             </p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-            <div className="flex justify-between items-center pb-4 border-b border-slate-200">
-              <span className="text-slate-600">Valor do treinamento</span>
-              <span className="text-2xl font-bold text-slate-900">
-                {formatCurrency(registrationData?.price || 0)}
-              </span>
-            </div>
-            
+          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             {registrationData?.has_spouse && (
-              <div className="flex items-center gap-2 text-pink-600">
+              <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
                 <Heart className="w-4 h-4" />
                 <span className="text-sm">Inclui cônjuge</span>
               </div>
             )}
 
-            <div className="bg-amber-50 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-800">
-                  <p className="font-medium">Modo de Teste</p>
-                  <p>A integração com o gateway de pagamento será configurada em breve. Por enquanto, clique no botão abaixo para simular o pagamento.</p>
-                </div>
-              </div>
-            </div>
-
-            <Button
-              onClick={handlePayment}
-              disabled={submitting}
-              className="w-full bg-green-600 hover:bg-green-700 h-12 text-lg"
-              data-testid="pay-btn"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Processando...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Simular Pagamento
-                </>
-              )}
-            </Button>
+            <PaymentCheckout
+              amount={registrationData?.price || 0}
+              description={`Treinamento Presencial - ${registrationData?.has_spouse ? 'Casal' : 'Individual'}`}
+              purpose="training_fee"
+              referenceId={registrationData?.id}
+              payerData={payerData}
+              onSuccess={async (data) => {
+                toast.success('Pagamento confirmado!');
+                // Atualizar status do registro
+                try {
+                  await axios.post(`${API_URL}/api/training/confirm-payment`, {
+                    registration_id: registrationData?.id,
+                    transaction_id: data.transaction_id
+                  });
+                  setStep('confirmed');
+                  fetchData();
+                } catch (error) {
+                  console.error('Erro ao confirmar pagamento:', error);
+                }
+              }}
+              onError={(message) => {
+                toast.error(message || 'Erro no pagamento');
+              }}
+            />
           </div>
         </div>
       </Layout>
