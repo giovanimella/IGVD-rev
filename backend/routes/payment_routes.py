@@ -205,8 +205,21 @@ async def create_credit_card_payment(
 ):
     """Cria um pagamento com cartão de crédito"""
     try:
+        # Preencher dados do pagador a partir do usuário autenticado se necessário
+        filled_payer = await get_or_fill_payer_data(request.payer, current_user["sub"])
+        request.payer = filled_payer
+        
+        # Validar dados obrigatórios
+        if not filled_payer.name or not filled_payer.email:
+            raise HTTPException(
+                status_code=400, 
+                detail="Dados do pagador incompletos. Por favor, preencha nome e email."
+            )
+        
         result = await payment_gateway.process_credit_card_payment(request, current_user["sub"])
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Erro ao criar pagamento com cartão: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar pagamento: {str(e)}")
