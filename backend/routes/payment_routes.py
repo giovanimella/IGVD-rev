@@ -1,195 +1,404 @@
+"""
+Rotas de configuração e processamento de pagamentos
+Sistema Multi-Gateway: PagSeguro e MercadoPago
+"""
 from fastapi import APIRouter, HTTPException, Depends, Request
-from motor.motor_asyncio import AsyncIOMotorClient
-from auth import get_current_user
-import os
-import httpx
-import hmac
+from typing import Optional
+from datetime import datetime
+import logging
+import json
 import hashlib
-from datetime import datetime, timezone
+import hmac
 
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+from auth import get_current_user
+from models_payment import (
+    PaymentSettings, PaymentSettingsUpdate, PaymentGateway, PaymentEnvironment,
+    GatewayCredentials, PixPaymentRequest, CreditCardPaymentRequest,
+    SplitPaymentRequest, Transaction, TransactionResponse, PaymentStatus,
+    WebhookEvent, PaymentPurpose
+)
+from services.payment_gateway import payment_gateway
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 
-PAGSEGURO_API_URL = "https://sandbox.api.pagseguro.com"
-PAGSEGURO_TOKEN = os.environ.get('PAGSEGURO_TOKEN', '')
-FRANCHISE_FEE = 500.00
 
-@router.post("/create-payment")
-async def create_payment(current_user: dict = Depends(get_current_user)):
-    user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    if user.get("current_stage") != "pagamento":
-        raise HTTPException(status_code=400, detail="Você ainda não está na etapa de pagamento")
-    
-    if user.get("payment_status") == "paid":
-        raise HTTPException(status_code=400, detail="Pagamento já realizado")
-    
-    reference_id = f"FRANCHISE_{user['id']}_{int(datetime.now(timezone.utc).timestamp())}"
-    
-    payment_data = {
-        "reference_id": reference_id,
-        "customer": {
-            "name": user["full_name"],
-            "email": user["email"],
-            "tax_id": "12345678909",
-            "phones": [
-                {
-                    "country": "55",
-                    "area": user.get("phone", "11999999999")[:2],
-                    "number": user.get("phone", "11999999999")[2:],
-                    "type": "MOBILE"
-                }
-            ]
-        },
-        "items": [
-            {
-                "reference_id": "FRANCHISE_FEE",
-                "name": "Taxa de Franquia IGVD",
-                "quantity": 1,
-                "unit_amount": int(FRANCHISE_FEE * 100)
-            }
-        ],
-        "qr_codes": [
-            {
-                "amount": {
-                    "value": int(FRANCHISE_FEE * 100)
-                }
-            }
-        ],
-        "notification_urls": [
-            f"{os.environ.get('BACKEND_URL', 'http://localhost:8000')}/api/payments/webhook"
-        ]
-    }
-    
-    transaction_record = {
-        "id": reference_id,
-        "user_id": user["id"],
-        "amount": FRANCHISE_FEE,
-        "status": "pending",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "payment_method": None,
-        "transaction_code": None
-    }
-    
-    await db.transactions.insert_one(transaction_record)
-    
-    await db.users.update_one(
-        {"id": user["id"]},
-        {"$set": {"payment_transaction_id": reference_id}}
-    )
-    
-    return {
-        "reference_id": reference_id,
-        "amount": FRANCHISE_FEE,
-        "status": "pending",
-        "payment_url": f"https://sandbox.pagseguro.uol.com.br/checkout/payment/direct/{reference_id}",
-        "message": "Em produção, aqui seria retornado o link real de pagamento do PagSeguro"
-    }
+# ==================== CONFIGURAÇÕES (ADMIN) ====================
 
-@router.post("/webhook")
-async def pagseguro_webhook(request: Request):
-    body = await request.body()
-    signature = request.headers.get("X-Hub-Signature")
+@router.get("/settings")
+async def get_payment_settings(current_user: dict = Depends(get_current_user)):
+    """Obtém as configurações de pagamento (somente admin)"""
+    if current_user.get("role") not in ["admin"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
     
-    webhook_secret = os.environ.get('PAGSEGURO_WEBHOOK_SECRET', '')
+    settings = await payment_gateway.get_settings()
     
-    if webhook_secret:
-        expected_signature = hmac.new(
-            webhook_secret.encode(),
-            body,
-            hashlib.sha256
-        ).hexdigest()
-        
-        if signature and signature.split("=")[1] != expected_signature:
-            raise HTTPException(status_code=401, detail="Assinatura inválida")
+    # Mascarar credenciais sensíveis
+    settings_dict = settings.model_dump()
     
-    data = await request.json()
+    # Mascarar tokens/secrets
+    def mask_credentials(creds: dict) -> dict:
+        masked = {}
+        for key, value in creds.items():
+            if value and isinstance(value, str) and len(value) > 8:
+                masked[key] = value[:4] + "*" * (len(value) - 8) + value[-4:]
+            else:
+                masked[key] = value
+        return masked
     
-    reference_id = data.get("reference_id")
-    status = data.get("status", "").lower()
+    if settings_dict.get("sandbox_credentials"):
+        settings_dict["sandbox_credentials"] = mask_credentials(settings_dict["sandbox_credentials"])
+    if settings_dict.get("production_credentials"):
+        settings_dict["production_credentials"] = mask_credentials(settings_dict["production_credentials"])
     
-    if not reference_id:
-        return {"message": "No reference_id"}
+    return settings_dict
+
+
+@router.put("/settings")
+async def update_payment_settings(
+    updates: PaymentSettingsUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Atualiza as configurações de pagamento (somente admin)"""
+    if current_user.get("role") not in ["admin"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
     
-    transaction = await db.transactions.find_one({"id": reference_id}, {"_id": 0})
-    if not transaction:
-        return {"message": "Transaction not found"}
+    update_dict = updates.model_dump(exclude_none=True)
     
-    status_mapping = {
-        "paid": "paid",
-        "authorized": "paid",
-        "available": "paid",
-        "pending": "pending",
-        "cancelled": "cancelled",
-        "declined": "declined"
-    }
+    # Converter objetos aninhados para dicionários
+    if "sandbox_credentials" in update_dict:
+        update_dict["sandbox_credentials"] = update_dict["sandbox_credentials"]
+    if "production_credentials" in update_dict:
+        update_dict["production_credentials"] = update_dict["production_credentials"]
     
-    new_status = status_mapping.get(status, "pending")
+    settings = await payment_gateway.update_settings(update_dict)
     
-    await db.transactions.update_one(
-        {"id": reference_id},
-        {"$set": {
-            "status": new_status,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
-            "webhook_data": data
-        }}
-    )
+    return {"message": "Configurações atualizadas com sucesso", "settings": settings.model_dump()}
+
+
+@router.post("/settings/credentials")
+async def update_credentials(
+    gateway: PaymentGateway,
+    environment: PaymentEnvironment,
+    credentials: GatewayCredentials,
+    current_user: dict = Depends(get_current_user)
+):
+    """Atualiza as credenciais de um gateway específico"""
+    if current_user.get("role") not in ["admin"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
     
-    if new_status == "paid":
-        user = await db.users.find_one({"id": transaction["user_id"]}, {"_id": 0})
-        if user and user.get("current_stage") == "pagamento":
-            await db.users.update_one(
-                {"id": transaction["user_id"]},
-                {"$set": {
-                    "payment_status": "paid",
-                    "current_stage": "acolhimento"
-                }}
+    if environment == PaymentEnvironment.SANDBOX:
+        update_key = "sandbox_credentials"
+    else:
+        update_key = "production_credentials"
+    
+    await payment_gateway.update_settings({update_key: credentials.model_dump()})
+    
+    return {"message": f"Credenciais {environment.value} atualizadas com sucesso"}
+
+
+@router.get("/settings/public-key")
+async def get_public_key(current_user: dict = Depends(get_current_user)):
+    """Obtém a public key do gateway ativo para uso no frontend"""
+    settings = await payment_gateway.get_settings()
+    
+    if settings.environment == PaymentEnvironment.SANDBOX:
+        credentials = settings.sandbox_credentials
+    else:
+        credentials = settings.production_credentials
+    
+    if settings.active_gateway == PaymentGateway.MERCADOPAGO:
+        return {
+            "gateway": "mercadopago",
+            "public_key": credentials.mercadopago_public_key
+        }
+    else:
+        return {
+            "gateway": "pagseguro",
+            "public_key": credentials.pagseguro_app_key or credentials.pagseguro_token
+        }
+
+
+# ==================== PROCESSAMENTO DE PAGAMENTOS ====================
+
+@router.post("/pix", response_model=TransactionResponse)
+async def create_pix_payment(
+    request: PixPaymentRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cria um pagamento PIX"""
+    try:
+        result = await payment_gateway.process_pix_payment(request, current_user["sub"])
+        return result
+    except Exception as e:
+        logger.error(f"Erro ao criar pagamento PIX: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao processar pagamento: {str(e)}")
+
+
+@router.post("/credit-card", response_model=TransactionResponse)
+async def create_credit_card_payment(
+    request: CreditCardPaymentRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cria um pagamento com cartão de crédito"""
+    try:
+        result = await payment_gateway.process_credit_card_payment(request, current_user["sub"])
+        return result
+    except Exception as e:
+        logger.error(f"Erro ao criar pagamento com cartão: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao processar pagamento: {str(e)}")
+
+
+@router.post("/split", response_model=TransactionResponse)
+async def create_split_payment(
+    request: SplitPaymentRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cria um pagamento dividido (PIX + Cartão ou múltiplos cartões)"""
+    try:
+        # Validar que os valores batem
+        total_parts = request.pix_amount + request.card1_amount + request.card2_amount
+        if abs(total_parts - request.total_amount) > 0.01:
+            raise HTTPException(
+                status_code=400,
+                detail=f"A soma dos valores ({total_parts}) não corresponde ao total ({request.total_amount})"
             )
-    
-    return {"message": "Webhook processed"}
+        
+        result = await payment_gateway.process_split_payment(request, current_user["sub"])
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erro ao criar pagamento dividido: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao processar pagamento: {str(e)}")
 
-@router.post("/simulate-payment/{transaction_id}")
-async def simulate_payment(transaction_id: str, current_user: dict = Depends(get_current_user)):
-    if os.environ.get('PAGSEGURO_ENVIRONMENT') != 'sandbox':
-        raise HTTPException(status_code=403, detail="Simulação disponível apenas em sandbox")
+
+@router.get("/transaction/{transaction_id}")
+async def get_transaction(
+    transaction_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtém detalhes de uma transação"""
+    transaction = await payment_gateway.get_transaction(transaction_id)
     
-    transaction = await db.transactions.find_one({"id": transaction_id}, {"_id": 0})
     if not transaction:
         raise HTTPException(status_code=404, detail="Transação não encontrada")
     
-    if transaction["user_id"] != current_user["sub"]:
+    # Verificar se o usuário tem acesso
+    if transaction.user_id != current_user["sub"] and current_user.get("role") not in ["admin", "supervisor"]:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
-    await db.transactions.update_one(
-        {"id": transaction_id},
-        {"$set": {
-            "status": "paid",
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        }}
-    )
+    # Atualizar status com o gateway se necessário
+    if transaction.status == PaymentStatus.PENDING and transaction.gateway_transaction_id:
+        service = await payment_gateway.get_gateway_service()
+        status_result = await service.check_payment_status(transaction.gateway_transaction_id)
+        
+        if status_result.get("status") != transaction.status:
+            await payment_gateway.update_transaction_status(
+                transaction_id,
+                status_result.get("status"),
+                status_result
+            )
+            transaction.status = status_result.get("status")
     
-    await db.users.update_one(
-        {"id": current_user["sub"]},
-        {"$set": {
-            "payment_status": "paid",
-            "current_stage": "acolhimento"
-        }}
-    )
-    
-    return {"message": "Pagamento simulado com sucesso", "status": "paid"}
+    return transaction.model_dump()
 
-@router.get("/status/{transaction_id}")
-async def get_payment_status(transaction_id: str, current_user: dict = Depends(get_current_user)):
-    transaction = await db.transactions.find_one({"id": transaction_id}, {"_id": 0})
+
+@router.get("/my-transactions")
+async def get_my_transactions(
+    limit: int = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtém as transações do usuário logado"""
+    transactions = await payment_gateway.get_user_transactions(current_user["sub"], limit)
+    return transactions
+
+
+@router.get("/all-transactions")
+async def get_all_transactions(
+    limit: int = 100,
+    status: Optional[PaymentStatus] = None,
+    purpose: Optional[PaymentPurpose] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtém todas as transações (somente admin)"""
+    if current_user.get("role") not in ["admin", "supervisor"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    db = payment_gateway.db
+    
+    query = {}
+    if status:
+        query["status"] = status
+    if purpose:
+        query["purpose"] = purpose
+    
+    cursor = db.transactions.find(query, {"_id": 0}).sort("created_at", -1).limit(limit)
+    transactions = await cursor.to_list(limit)
+    
+    return transactions
+
+
+# ==================== WEBHOOKS ====================
+
+@router.post("/webhooks/mercadopago")
+async def handle_mercadopago_webhook(request: Request):
+    """Recebe webhooks do MercadoPago"""
+    try:
+        body = await request.body()
+        data = json.loads(body)
+        
+        # Extrair informações do webhook
+        event_type = data.get("type", "")
+        payment_id = data.get("data", {}).get("id")
+        
+        logger.info(f"MercadoPago webhook received: {event_type} for payment {payment_id}")
+        
+        # Salvar evento de webhook
+        webhook_event = WebhookEvent(
+            gateway=PaymentGateway.MERCADOPAGO,
+            event_type=event_type,
+            gateway_event_id=str(data.get("id", "")),
+            gateway_transaction_id=str(payment_id) if payment_id else None,
+            raw_payload=data
+        )
+        
+        await payment_gateway.db.webhook_events.insert_one(webhook_event.model_dump())
+        
+        # Processar atualização de status
+        if event_type == "payment" and payment_id:
+            # Buscar transação pelo gateway_transaction_id
+            transaction = await payment_gateway.db.transactions.find_one(
+                {"gateway_transaction_id": str(payment_id)},
+                {"_id": 0}
+            )
+            
+            if transaction:
+                # Verificar status atual no MercadoPago
+                service = await payment_gateway.get_gateway_service()
+                status_result = await service.check_payment_status(str(payment_id))
+                
+                if status_result.get("status"):
+                    await payment_gateway.update_transaction_status(
+                        transaction["id"],
+                        status_result.get("status"),
+                        status_result
+                    )
+                    
+                    await payment_gateway.add_webhook_notification(
+                        transaction["id"],
+                        {
+                            "timestamp": datetime.now().isoformat(),
+                            "event_type": event_type,
+                            "status": status_result.get("status"),
+                            "raw": data
+                        }
+                    )
+        
+        return {"success": True}
+        
+    except Exception as e:
+        logger.error(f"Erro ao processar webhook MercadoPago: {e}")
+        return {"success": False, "error": str(e)}
+
+
+@router.post("/webhooks/pagseguro")
+async def handle_pagseguro_webhook(request: Request):
+    """Recebe webhooks do PagSeguro"""
+    try:
+        body = await request.body()
+        data = json.loads(body)
+        
+        # Extrair informações do webhook
+        event_type = data.get("notificationType", data.get("type", ""))
+        reference_id = data.get("reference", data.get("reference_id"))
+        
+        logger.info(f"PagSeguro webhook received: {event_type} for reference {reference_id}")
+        
+        # Salvar evento de webhook
+        webhook_event = WebhookEvent(
+            gateway=PaymentGateway.PAGSEGURO,
+            event_type=event_type,
+            gateway_event_id=str(data.get("notificationCode", data.get("id", ""))),
+            transaction_id=reference_id,
+            raw_payload=data
+        )
+        
+        await payment_gateway.db.webhook_events.insert_one(webhook_event.model_dump())
+        
+        # Processar atualização de status se for notificação de transação
+        if reference_id:
+            # Buscar transação
+            transaction = await payment_gateway.db.transactions.find_one(
+                {"$or": [
+                    {"id": reference_id},
+                    {"gateway_transaction_id": reference_id}
+                ]},
+                {"_id": 0}
+            )
+            
+            if transaction and transaction.get("gateway_transaction_id"):
+                # Verificar status atual no PagSeguro
+                service = await payment_gateway.get_gateway_service()
+                status_result = await service.check_payment_status(transaction["gateway_transaction_id"])
+                
+                if status_result.get("status"):
+                    await payment_gateway.update_transaction_status(
+                        transaction["id"],
+                        status_result.get("status"),
+                        status_result
+                    )
+                    
+                    await payment_gateway.add_webhook_notification(
+                        transaction["id"],
+                        {
+                            "timestamp": datetime.now().isoformat(),
+                            "event_type": event_type,
+                            "status": status_result.get("status"),
+                            "raw": data
+                        }
+                    )
+        
+        return {"success": True}
+        
+    except Exception as e:
+        logger.error(f"Erro ao processar webhook PagSeguro: {e}")
+        return {"success": False, "error": str(e)}
+
+
+# ==================== REEMBOLSOS ====================
+
+@router.post("/refund/{transaction_id}")
+async def refund_transaction(
+    transaction_id: str,
+    amount: Optional[float] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Processa um reembolso (somente admin)"""
+    if current_user.get("role") not in ["admin"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    transaction = await payment_gateway.get_transaction(transaction_id)
+    
     if not transaction:
         raise HTTPException(status_code=404, detail="Transação não encontrada")
     
-    if transaction["user_id"] != current_user["sub"] and current_user.get("role") not in ["admin", "supervisor"]:
-        raise HTTPException(status_code=403, detail="Acesso negado")
+    if transaction.status not in [PaymentStatus.APPROVED, PaymentStatus.PAID]:
+        raise HTTPException(status_code=400, detail="Transação não pode ser reembolsada")
     
-    return transaction
+    if not transaction.gateway_transaction_id:
+        raise HTTPException(status_code=400, detail="Transação sem ID do gateway")
+    
+    service = await payment_gateway.get_gateway_service()
+    result = await service.refund_payment(transaction.gateway_transaction_id, amount)
+    
+    if result.get("success"):
+        await payment_gateway.update_transaction_status(
+            transaction_id,
+            PaymentStatus.REFUNDED,
+            result
+        )
+        return {"message": "Reembolso processado com sucesso", **result}
+    else:
+        raise HTTPException(status_code=400, detail=result.get("message", "Erro ao processar reembolso"))
