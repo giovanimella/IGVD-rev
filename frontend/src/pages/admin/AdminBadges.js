@@ -177,7 +177,7 @@ const AdminBadges = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Badges</h1>
+            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Conquistas</h1>
             <p className="text-slate-600 dark:text-slate-400 mt-2">Gerencie as conquistas dos licenciados</p>
           </div>
           <button
@@ -185,7 +185,7 @@ const AdminBadges = () => {
             className="flex items-center gap-2 bg-cyan-500 text-white px-4 py-2 rounded-lg hover:bg-cyan-600 transition-colors"
           >
             <Plus className="w-5 h-5" />
-            Novo Badge
+            Nova Conquista
           </button>
         </div>
 
@@ -197,7 +197,7 @@ const AdminBadges = () => {
                 <Award className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
               </div>
               <div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Badges</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Conquistas</p>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white">{badges.length}</p>
               </div>
             </div>
@@ -208,7 +208,7 @@ const AdminBadges = () => {
                 <Award className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">Badges Ativos</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Conquistas Ativas</p>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white">{badges.filter(b => b.active).length}</p>
               </div>
             </div>
@@ -219,14 +219,14 @@ const AdminBadges = () => {
                 <Gift className="w-6 h-6 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Pontos em Badges</p>
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Pontos</p>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white">{badges.reduce((acc, b) => acc + b.points_reward, 0)}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Badges Grid */}
+        {/* Conquistas Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {badges.map((badge) => (
             <div
