@@ -576,15 +576,6 @@ const Training = () => {
 
   // Tela de Pagamento
   if (step === 'payment') {
-    // Preparar dados do pagador
-    const payerData = {
-      name: registrationData?.participant_data?.full_name || '',
-      email: registrationData?.participant_data?.email || '',
-      document_type: 'CPF',
-      document_number: registrationData?.participant_data?.cpf?.replace(/\D/g, '') || '',
-      phone: registrationData?.participant_data?.phone || ''
-    };
-
     return (
       <Layout>
         <div className="max-w-2xl mx-auto space-y-6">
