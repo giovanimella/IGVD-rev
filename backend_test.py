@@ -99,7 +99,7 @@ class OzoxxAPITester:
             "POST",
             "api/auth/login",
             200,
-            data={"email": "licenciado.teste@ozoxx.com", "password": "licenciado123"}
+            data={"email": "teste.acolhimento@igvd.org", "password": "teste123"}
         )
         if success and 'access_token' in response:
             self.licensee_token = response['access_token']
