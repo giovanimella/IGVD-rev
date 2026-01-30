@@ -1,76 +1,26 @@
 """
 Rotas de configuração e processamento de pagamentos
-Sistema Multi-Gateway: PagSeguro e MercadoPago
+Sistema com MercadoPago Checkout Pro - Pagamento seguro no ambiente do MercadoPago
 """
 from fastapi import APIRouter, HTTPException, Depends, Request
 from typing import Optional
 from datetime import datetime
 import logging
 import json
-import hashlib
-import hmac
+import os
 
 from auth import get_current_user
 from models_payment import (
     PaymentSettings, PaymentSettingsUpdate, PaymentGateway, PaymentEnvironment,
-    GatewayCredentials, PixPaymentRequest, CreditCardPaymentRequest,
-    SplitPaymentRequest, Transaction, TransactionResponse, PaymentStatus,
-    WebhookEvent, PaymentPurpose, PayerInfo
+    GatewayCredentials, CheckoutProRequest, CheckoutProResponse,
+    Transaction, TransactionResponse, PaymentStatus,
+    WebhookEvent, PaymentPurpose, PaymentMethod
 )
 from services.payment_gateway import payment_gateway
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/payments", tags=["payments"])
-
-
-async def get_or_fill_payer_data(payer: PayerInfo, user_id: str) -> PayerInfo:
-    """
-    Preenche dados do pagador a partir do usuário autenticado se necessário.
-    Garante que os dados obrigatórios (nome, email, documento) estejam preenchidos.
-    """
-    db = payment_gateway.db
-    
-    # Verificar se os dados obrigatórios estão presentes
-    name_missing = not payer.name or len(payer.name.strip()) < 3
-    email_missing = not payer.email or '@' not in payer.email
-    document_missing = not payer.document_number or len(payer.document_number.replace('.', '').replace('-', '').strip()) < 11
-    
-    if not (name_missing or email_missing or document_missing):
-        return payer  # Dados já estão completos
-    
-    # Buscar dados do usuário
-    user = await db.users.find_one({"id": user_id}, {"_id": 0})
-    
-    if not user:
-        logger.warning(f"Usuário {user_id} não encontrado para preencher dados do pagador")
-        return payer
-    
-    # Buscar registro de treinamento se existir (contém CPF)
-    training_registration = await db.training_registrations.find_one(
-        {"user_id": user_id}, 
-        {"_id": 0, "participant_data": 1}
-    )
-    
-    # Preencher dados faltantes
-    filled_payer = PayerInfo(
-        name=payer.name if not name_missing else user.get("full_name", ""),
-        email=payer.email if not email_missing else user.get("email", ""),
-        document_type=payer.document_type or "CPF",
-        document_number=payer.document_number if not document_missing else "",
-        phone=payer.phone or user.get("phone", "")
-    )
-    
-    # Se documento ainda faltando, tentar obter do registro de treinamento
-    if document_missing and training_registration:
-        participant = training_registration.get("participant_data", {})
-        cpf = participant.get("cpf", "")
-        if cpf:
-            filled_payer.document_number = cpf.replace(".", "").replace("-", "").strip()
-    
-    logger.info(f"Dados do pagador preenchidos para usuário {user_id}: nome={filled_payer.name}, email={filled_payer.email}, documento={len(filled_payer.document_number) if filled_payer.document_number else 0} chars")
-    
-    return filled_payer
 
 
 # ==================== CONFIGURAÇÕES (ADMIN) ====================
@@ -86,7 +36,6 @@ async def get_payment_settings(current_user: dict = Depends(get_current_user)):
     # Mascarar credenciais sensíveis
     settings_dict = settings.model_dump()
     
-    # Mascarar tokens/secrets
     def mask_credentials(creds: dict) -> dict:
         masked = {}
         for key, value in creds.items():
@@ -114,13 +63,6 @@ async def update_payment_settings(
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     update_dict = updates.model_dump(exclude_none=True)
-    
-    # Converter objetos aninhados para dicionários
-    if "sandbox_credentials" in update_dict:
-        update_dict["sandbox_credentials"] = update_dict["sandbox_credentials"]
-    if "production_credentials" in update_dict:
-        update_dict["production_credentials"] = update_dict["production_credentials"]
-    
     settings = await payment_gateway.update_settings(update_dict)
     
     return {"message": "Configurações atualizadas com sucesso", "settings": settings.model_dump()}
@@ -157,106 +99,92 @@ async def get_public_key(current_user: dict = Depends(get_current_user)):
     else:
         credentials = settings.production_credentials
     
-    if settings.active_gateway == PaymentGateway.MERCADOPAGO:
-        return {
-            "gateway": "mercadopago",
-            "public_key": credentials.mercadopago_public_key
-        }
-    else:
-        return {
-            "gateway": "pagseguro",
-            "public_key": credentials.pagseguro_app_key or credentials.pagseguro_token
-        }
+    return {
+        "gateway": "mercadopago",
+        "public_key": credentials.mercadopago_public_key,
+        "environment": settings.environment.value
+    }
 
 
-# ==================== PROCESSAMENTO DE PAGAMENTOS ====================
+# ==================== CHECKOUT PRO ====================
 
-@router.post("/pix", response_model=TransactionResponse)
-async def create_pix_payment(
-    request: PixPaymentRequest,
+@router.post("/checkout", response_model=CheckoutProResponse)
+async def create_checkout(
+    request: CheckoutProRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    """Cria um pagamento PIX"""
+    """
+    Cria um Checkout Pro do MercadoPago.
+    Retorna uma URL para redirecionar o usuário ao ambiente seguro do MercadoPago.
+    
+    O cliente preencherá todos os dados de pagamento (cartão, PIX, etc) 
+    diretamente no MercadoPago, garantindo máxima segurança.
+    """
     try:
-        # Preencher dados do pagador a partir do usuário autenticado se necessário
-        filled_payer = await get_or_fill_payer_data(request.payer, current_user["sub"])
-        request.payer = filled_payer
+        db = payment_gateway.db
+        user_id = current_user["sub"]
         
-        # Validar dados obrigatórios
-        if not filled_payer.name or not filled_payer.email:
-            raise HTTPException(
-                status_code=400, 
-                detail="Dados do pagador incompletos. Por favor, preencha nome e email."
+        # Buscar dados do usuário para pré-preencher email (opcional)
+        user = await db.users.find_one({"id": user_id}, {"_id": 0})
+        
+        if not request.payer_email and user:
+            request.payer_email = user.get("email")
+            request.payer_name = user.get("full_name")
+        
+        # Criar registro de transação
+        transaction = Transaction(
+            user_id=user_id,
+            gateway=PaymentGateway.MERCADOPAGO,
+            payment_method=PaymentMethod.PIX,  # Será atualizado pelo webhook
+            environment=(await payment_gateway.get_settings()).environment,
+            amount=request.amount,
+            purpose=request.purpose,
+            description=request.title,
+            payer_email=request.payer_email,
+            payer_name=request.payer_name,
+            reference_id=request.reference_id
+        )
+        
+        # Obter serviço do gateway
+        service = await payment_gateway.get_gateway_service()
+        
+        # Criar preferência no MercadoPago
+        result = await service.create_checkout_preference(request, transaction.id)
+        
+        if result.get("success"):
+            # Atualizar transação com dados da preferência
+            transaction.gateway_transaction_id = result.get("preference_id")
+            transaction.metadata = {
+                "preference_id": result.get("preference_id"),
+                "checkout_url": result.get("checkout_url"),
+                "init_point": result.get("init_point"),
+                "sandbox_init_point": result.get("sandbox_init_point")
+            }
+            
+            # Salvar transação
+            await db.transactions.insert_one(transaction.model_dump())
+            
+            logger.info(f"Checkout Pro criado: {transaction.id} -> {result.get('checkout_url')}")
+            
+            return CheckoutProResponse(
+                success=True,
+                message="Checkout criado com sucesso. Redirecione o usuário para a URL de pagamento.",
+                transaction_id=transaction.id,
+                preference_id=result.get("preference_id"),
+                checkout_url=result.get("checkout_url"),
+                status=PaymentStatus.PENDING
             )
-        
-        result = await payment_gateway.process_pix_payment(request, current_user["sub"])
-        return result
-    except HTTPException:
-        raise
+        else:
+            logger.error(f"Erro ao criar checkout: {result.get('message')}")
+            return CheckoutProResponse(
+                success=False,
+                message=result.get("message", "Erro ao criar checkout"),
+                transaction_id="",
+                status=PaymentStatus.FAILED
+            )
+            
     except Exception as e:
-        logger.error(f"Erro ao criar pagamento PIX: {e}")
-        raise HTTPException(status_code=500, detail=f"Erro ao processar pagamento: {str(e)}")
-
-
-@router.post("/credit-card", response_model=TransactionResponse)
-async def create_credit_card_payment(
-    request: CreditCardPaymentRequest,
-    current_user: dict = Depends(get_current_user)
-):
-    """Cria um pagamento com cartão de crédito"""
-    try:
-        # Preencher dados do pagador a partir do usuário autenticado se necessário
-        filled_payer = await get_or_fill_payer_data(request.payer, current_user["sub"])
-        request.payer = filled_payer
-        
-        # Validar dados obrigatórios
-        if not filled_payer.name or not filled_payer.email:
-            raise HTTPException(
-                status_code=400, 
-                detail="Dados do pagador incompletos. Por favor, preencha nome e email."
-            )
-        
-        result = await payment_gateway.process_credit_card_payment(request, current_user["sub"])
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao criar pagamento com cartão: {e}")
-        raise HTTPException(status_code=500, detail=f"Erro ao processar pagamento: {str(e)}")
-
-
-@router.post("/split", response_model=TransactionResponse)
-async def create_split_payment(
-    request: SplitPaymentRequest,
-    current_user: dict = Depends(get_current_user)
-):
-    """Cria um pagamento dividido (PIX + Cartão ou múltiplos cartões)"""
-    try:
-        # Validar que os valores batem
-        total_parts = request.pix_amount + request.card1_amount + request.card2_amount
-        if abs(total_parts - request.total_amount) > 0.01:
-            raise HTTPException(
-                status_code=400,
-                detail=f"A soma dos valores ({total_parts}) não corresponde ao total ({request.total_amount})"
-            )
-        
-        # Preencher dados do pagador a partir do usuário autenticado se necessário
-        filled_payer = await get_or_fill_payer_data(request.payer, current_user["sub"])
-        request.payer = filled_payer
-        
-        # Validar dados obrigatórios
-        if not filled_payer.name or not filled_payer.email:
-            raise HTTPException(
-                status_code=400, 
-                detail="Dados do pagador incompletos. Por favor, preencha nome e email."
-            )
-        
-        result = await payment_gateway.process_split_payment(request, current_user["sub"])
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erro ao criar pagamento dividido: {e}")
+        logger.error(f"Exceção ao criar checkout: {e}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar pagamento: {str(e)}")
 
 
@@ -275,20 +203,62 @@ async def get_transaction(
     if transaction.user_id != current_user["sub"] and current_user.get("role") not in ["admin", "supervisor"]:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
-    # Atualizar status com o gateway se necessário
-    if transaction.status == PaymentStatus.PENDING and transaction.gateway_transaction_id:
-        service = await payment_gateway.get_gateway_service()
-        status_result = await service.check_payment_status(transaction.gateway_transaction_id)
+    return transaction.model_dump()
+
+
+@router.get("/transaction/{transaction_id}/check-status")
+async def check_transaction_status(
+    transaction_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Verifica o status atual de uma transação no MercadoPago.
+    Útil para verificar se o pagamento foi concluído após o redirecionamento.
+    """
+    transaction = await payment_gateway.get_transaction(transaction_id)
+    
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transação não encontrada")
+    
+    # Verificar se o usuário tem acesso
+    if transaction.user_id != current_user["sub"] and current_user.get("role") not in ["admin", "supervisor"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Buscar pagamentos no MercadoPago pela referência externa
+    service = await payment_gateway.get_gateway_service()
+    result = await service.search_payments_by_reference(transaction_id)
+    
+    if result.get("success") and result.get("payments"):
+        # Encontrou pagamentos - atualizar transação com o mais recente
+        latest_payment = result["payments"][0]
         
-        if status_result.get("status") != transaction.status:
+        new_status = latest_payment.get("status", PaymentStatus.PENDING)
+        
+        if new_status != transaction.status:
             await payment_gateway.update_transaction_status(
                 transaction_id,
-                status_result.get("status"),
-                status_result
+                new_status,
+                latest_payment
             )
-            transaction.status = status_result.get("status")
+            transaction.status = new_status
+        
+        return {
+            "transaction_id": transaction_id,
+            "status": new_status.value if hasattr(new_status, 'value') else new_status,
+            "payment_method": latest_payment.get("payment_method"),
+            "payment_type": latest_payment.get("payment_type"),
+            "amount": latest_payment.get("amount"),
+            "date_approved": latest_payment.get("date_approved"),
+            "gateway_payment_id": latest_payment.get("id"),
+            "updated": new_status != transaction.status
+        }
     
-    return transaction.model_dump()
+    return {
+        "transaction_id": transaction_id,
+        "status": transaction.status.value if hasattr(transaction.status, 'value') else transaction.status,
+        "message": "Pagamento ainda não processado ou pendente",
+        "updated": False
+    }
 
 
 @router.get("/my-transactions")
@@ -330,18 +300,36 @@ async def get_all_transactions(
 
 @router.post("/webhooks/mercadopago")
 async def handle_mercadopago_webhook(request: Request):
-    """Recebe webhooks do MercadoPago"""
+    """
+    Recebe webhooks do MercadoPago.
+    Atualiza automaticamente o status das transações quando o pagamento é confirmado.
+    """
     try:
         body = await request.body()
-        data = json.loads(body)
+        data = json.loads(body) if body else {}
+        
+        # Log do webhook recebido
+        logger.info(f"MercadoPago webhook recebido: {json.dumps(data)[:500]}")
         
         # Extrair informações do webhook
-        event_type = data.get("type", "")
-        payment_id = data.get("data", {}).get("id")
+        event_type = data.get("type", data.get("action", ""))
+        payment_id = None
         
-        logger.info(f"MercadoPago webhook received: {event_type} for payment {payment_id}")
+        # Formato de notificação IPN
+        if "data" in data and "id" in data.get("data", {}):
+            payment_id = data["data"]["id"]
+        # Formato alternativo
+        elif "id" in data and data.get("type") == "payment":
+            payment_id = data["id"]
+        # Formato de query params (fallback)
+        elif "topic" in str(request.url):
+            query_params = dict(request.query_params)
+            if query_params.get("topic") == "payment":
+                payment_id = query_params.get("id")
         
         # Salvar evento de webhook
+        db = payment_gateway.db
+        
         webhook_event = WebhookEvent(
             gateway=PaymentGateway.MERCADOPAGO,
             event_type=event_type,
@@ -350,106 +338,81 @@ async def handle_mercadopago_webhook(request: Request):
             raw_payload=data
         )
         
-        await payment_gateway.db.webhook_events.insert_one(webhook_event.model_dump())
+        await db.webhook_events.insert_one(webhook_event.model_dump())
         
         # Processar atualização de status
-        if event_type == "payment" and payment_id:
-            # Buscar transação pelo gateway_transaction_id
-            transaction = await payment_gateway.db.transactions.find_one(
-                {"gateway_transaction_id": str(payment_id)},
-                {"_id": 0}
-            )
+        if payment_id:
+            service = await payment_gateway.get_gateway_service()
             
-            if transaction:
-                # Verificar status atual no MercadoPago
-                service = await payment_gateway.get_gateway_service()
-                status_result = await service.check_payment_status(str(payment_id))
+            # Buscar detalhes do pagamento
+            status_result = await service.check_payment_status(str(payment_id))
+            
+            if status_result.get("status"):
+                # Buscar transação pela external_reference (nosso transaction_id)
+                payment_details = await service.check_payment_status(str(payment_id))
                 
-                if status_result.get("status"):
-                    await payment_gateway.update_transaction_status(
-                        transaction["id"],
-                        status_result.get("status"),
-                        status_result
+                # Buscar por gateway_transaction_id (preference_id) ou metadata
+                transaction = await db.transactions.find_one(
+                    {"$or": [
+                        {"gateway_transaction_id": str(payment_id)},
+                        {"metadata.preference_id": str(payment_id)}
+                    ]},
+                    {"_id": 0}
+                )
+                
+                # Se não encontrou, buscar pelo payment usando a API de search
+                if not transaction:
+                    search_result = await service.search_payments_by_reference(str(payment_id))
+                    # Tentar buscar pela referência externa
+                    for payment in search_result.get("payments", []):
+                        ext_ref = payment.get("external_reference")
+                        if ext_ref:
+                            transaction = await db.transactions.find_one(
+                                {"id": ext_ref},
+                                {"_id": 0}
+                            )
+                            if transaction:
+                                break
+                
+                if transaction:
+                    new_status = status_result.get("status")
+                    
+                    # Atualizar transação
+                    update_data = {
+                        "status": new_status,
+                        "updated_at": datetime.now().isoformat(),
+                        "gateway_payment_id": str(payment_id),
+                        "payment_method_used": status_result.get("payment_method"),
+                        "payment_type_used": status_result.get("payment_type")
+                    }
+                    
+                    if new_status in [PaymentStatus.APPROVED, PaymentStatus.PAID]:
+                        update_data["paid_at"] = datetime.now().isoformat()
+                    
+                    await db.transactions.update_one(
+                        {"id": transaction["id"]},
+                        {"$set": update_data}
                     )
                     
-                    await payment_gateway.add_webhook_notification(
-                        transaction["id"],
-                        {
+                    # Adicionar notificação ao histórico
+                    await db.transactions.update_one(
+                        {"id": transaction["id"]},
+                        {"$push": {"webhook_notifications": {
                             "timestamp": datetime.now().isoformat(),
                             "event_type": event_type,
-                            "status": status_result.get("status"),
+                            "payment_id": str(payment_id),
+                            "status": new_status.value if hasattr(new_status, 'value') else new_status,
                             "raw": data
-                        }
+                        }}}
                     )
+                    
+                    logger.info(f"Transação {transaction['id']} atualizada para status: {new_status}")
         
         return {"success": True}
         
     except Exception as e:
         logger.error(f"Erro ao processar webhook MercadoPago: {e}")
-        return {"success": False, "error": str(e)}
-
-
-@router.post("/webhooks/pagseguro")
-async def handle_pagseguro_webhook(request: Request):
-    """Recebe webhooks do PagSeguro"""
-    try:
-        body = await request.body()
-        data = json.loads(body)
-        
-        # Extrair informações do webhook
-        event_type = data.get("notificationType", data.get("type", ""))
-        reference_id = data.get("reference", data.get("reference_id"))
-        
-        logger.info(f"PagSeguro webhook received: {event_type} for reference {reference_id}")
-        
-        # Salvar evento de webhook
-        webhook_event = WebhookEvent(
-            gateway=PaymentGateway.PAGSEGURO,
-            event_type=event_type,
-            gateway_event_id=str(data.get("notificationCode", data.get("id", ""))),
-            transaction_id=reference_id,
-            raw_payload=data
-        )
-        
-        await payment_gateway.db.webhook_events.insert_one(webhook_event.model_dump())
-        
-        # Processar atualização de status se for notificação de transação
-        if reference_id:
-            # Buscar transação
-            transaction = await payment_gateway.db.transactions.find_one(
-                {"$or": [
-                    {"id": reference_id},
-                    {"gateway_transaction_id": reference_id}
-                ]},
-                {"_id": 0}
-            )
-            
-            if transaction and transaction.get("gateway_transaction_id"):
-                # Verificar status atual no PagSeguro
-                service = await payment_gateway.get_gateway_service()
-                status_result = await service.check_payment_status(transaction["gateway_transaction_id"])
-                
-                if status_result.get("status"):
-                    await payment_gateway.update_transaction_status(
-                        transaction["id"],
-                        status_result.get("status"),
-                        status_result
-                    )
-                    
-                    await payment_gateway.add_webhook_notification(
-                        transaction["id"],
-                        {
-                            "timestamp": datetime.now().isoformat(),
-                            "event_type": event_type,
-                            "status": status_result.get("status"),
-                            "raw": data
-                        }
-                    )
-        
-        return {"success": True}
-        
-    except Exception as e:
-        logger.error(f"Erro ao processar webhook PagSeguro: {e}")
+        # Retornar 200 para não causar retries
         return {"success": False, "error": str(e)}
 
 
@@ -473,11 +436,22 @@ async def refund_transaction(
     if transaction.status not in [PaymentStatus.APPROVED, PaymentStatus.PAID]:
         raise HTTPException(status_code=400, detail="Transação não pode ser reembolsada")
     
-    if not transaction.gateway_transaction_id:
-        raise HTTPException(status_code=400, detail="Transação sem ID do gateway")
+    # Buscar o payment_id real (não o preference_id)
+    gateway_payment_id = transaction.metadata.get("gateway_payment_id") if transaction.metadata else None
+    
+    if not gateway_payment_id:
+        # Tentar buscar pelo transaction_id
+        service = await payment_gateway.get_gateway_service()
+        search_result = await service.search_payments_by_reference(transaction_id)
+        
+        if search_result.get("payments"):
+            gateway_payment_id = search_result["payments"][0].get("id")
+    
+    if not gateway_payment_id:
+        raise HTTPException(status_code=400, detail="ID do pagamento não encontrado para reembolso")
     
     service = await payment_gateway.get_gateway_service()
-    result = await service.refund_payment(transaction.gateway_transaction_id, amount)
+    result = await service.refund_payment(str(gateway_payment_id), amount)
     
     if result.get("success"):
         await payment_gateway.update_transaction_status(
@@ -488,3 +462,65 @@ async def refund_transaction(
         return {"message": "Reembolso processado com sucesso", **result}
     else:
         raise HTTPException(status_code=400, detail=result.get("message", "Erro ao processar reembolso"))
+
+
+# ==================== PÁGINAS DE RETORNO ====================
+
+@router.get("/callback/success")
+async def payment_success_callback(
+    transaction_id: Optional[str] = None,
+    collection_id: Optional[str] = None,
+    collection_status: Optional[str] = None,
+    payment_id: Optional[str] = None,
+    status: Optional[str] = None,
+    external_reference: Optional[str] = None,
+    payment_type: Optional[str] = None,
+    merchant_order_id: Optional[str] = None,
+    preference_id: Optional[str] = None
+):
+    """
+    Endpoint para processar o retorno do MercadoPago após pagamento bem-sucedido.
+    O frontend pode chamar este endpoint para atualizar o status.
+    """
+    # Usar external_reference como transaction_id se não fornecido
+    tx_id = transaction_id or external_reference
+    
+    if not tx_id:
+        return {"success": False, "message": "Transaction ID não fornecido"}
+    
+    db = payment_gateway.db
+    transaction = await db.transactions.find_one({"id": tx_id}, {"_id": 0})
+    
+    if not transaction:
+        return {"success": False, "message": "Transação não encontrada"}
+    
+    # Atualizar com informações do callback
+    update_data = {
+        "updated_at": datetime.now().isoformat()
+    }
+    
+    if collection_id or payment_id:
+        update_data["gateway_payment_id"] = collection_id or payment_id
+    
+    if collection_status or status:
+        mp_status = collection_status or status
+        if mp_status == "approved":
+            update_data["status"] = PaymentStatus.APPROVED
+            update_data["paid_at"] = datetime.now().isoformat()
+        elif mp_status == "pending":
+            update_data["status"] = PaymentStatus.PENDING
+    
+    if payment_type:
+        update_data["payment_type_used"] = payment_type
+    
+    await db.transactions.update_one(
+        {"id": tx_id},
+        {"$set": update_data}
+    )
+    
+    return {
+        "success": True,
+        "transaction_id": tx_id,
+        "status": update_data.get("status", transaction.get("status")),
+        "message": "Pagamento processado"
+    }
