@@ -14,6 +14,65 @@ router = APIRouter(prefix="/progress", tags=["progress"])
 # Porcentagem mínima para marcar como completo
 MIN_WATCH_PERCENTAGE = 90
 
+
+async def check_and_advance_onboarding_stage(user_id: str):
+    """
+    Verifica se o usuário completou todos os módulos de acolhimento
+    e avança automaticamente para a próxima etapa (treinamento_presencial)
+    """
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        return False
+    
+    # Só verifica se o usuário está na etapa de acolhimento
+    if user.get("current_stage") != "acolhimento":
+        return False
+    
+    # Buscar todos os módulos de acolhimento
+    acolhimento_modules = await db.modules.find({"is_acolhimento": True}, {"_id": 0, "id": 1}).to_list(100)
+    
+    if not acolhimento_modules:
+        return False
+    
+    # Verificar se todos os capítulos de todos os módulos de acolhimento foram concluídos
+    all_acolhimento_completed = True
+    
+    for acolh_module in acolhimento_modules:
+        module_chapters = await db.chapters.find({"module_id": acolh_module["id"]}, {"_id": 0, "id": 1}).to_list(100)
+        
+        for chapter in module_chapters:
+            chapter_progress = await db.user_progress.find_one({
+                "user_id": user_id,
+                "chapter_id": chapter["id"],
+                "completed": True
+            })
+            if not chapter_progress:
+                all_acolhimento_completed = False
+                break
+        
+        if not all_acolhimento_completed:
+            break
+    
+    if all_acolhimento_completed:
+        # Avançar para próxima etapa do onboarding (treinamento presencial)
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"current_stage": "treinamento_presencial"}}
+        )
+        
+        # Criar notificação
+        from routes.notification_routes import create_notification
+        await create_notification(
+            user_id,
+            "Acolhimento Concluído! 🎓",
+            "Parabéns! Você concluiu todos os módulos de acolhimento. Agora você pode se inscrever no treinamento presencial.",
+            "onboarding_stage",
+            "treinamento_presencial"
+        )
+        return True
+    
+    return False
+
 async def update_challenge_progress(user_id: str):
     """Atualiza o progresso dos desafios semanais ativos"""
     today = datetime.now().strftime("%Y-%m-%d")
