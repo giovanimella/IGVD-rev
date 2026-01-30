@@ -33,10 +33,11 @@ async def verify_token(token: str):
 async def connect(sid, environ, auth):
     """Evento de conexão"""
     print(f"Cliente conectado: {sid}")
+    print(f"Auth recebido: {auth}")
     
     # Verificar autenticação
     if not auth or 'token' not in auth:
-        print(f"Cliente {sid} sem token de autenticação")
+        print(f"Cliente {sid} sem token de autenticação. Auth: {auth}")
         await sio.disconnect(sid)
         return False
     
