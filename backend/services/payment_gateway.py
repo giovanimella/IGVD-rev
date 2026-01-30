@@ -64,11 +64,15 @@ class PaymentGatewayService:
         return settings.active_gateway, settings.environment, credentials
     
     async def get_gateway_service(self):
-        """Retorna o serviço do gateway ativo (MercadoPago)"""
+        """Retorna o serviço do gateway ativo (MercadoPago ou PagSeguro)"""
         gateway, environment, credentials = await self.get_active_credentials()
         
-        from services.mercadopago_service import MercadoPagoService
-        return MercadoPagoService(credentials, environment)
+        if gateway == PaymentGateway.PAGSEGURO:
+            from services.pagseguro_service import PagSeguroService
+            return PagSeguroService(credentials, environment)
+        else:
+            from services.mercadopago_service import MercadoPagoService
+            return MercadoPagoService(credentials, environment)
     
     async def get_transaction(self, transaction_id: str) -> Optional[Transaction]:
         """Obtém uma transação pelo ID"""
