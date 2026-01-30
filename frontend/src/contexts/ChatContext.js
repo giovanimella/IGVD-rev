@@ -32,7 +32,7 @@ export const ChatProvider = ({ children }) => {
       console.log('Conectando ao Socket.IO...', SOCKET_URL);
       
       const newSocket = io(SOCKET_URL, {
-        path: '/socket.io',
+        path: '/api/socket.io',
         auth: {
           token: token
         },
