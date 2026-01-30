@@ -79,4 +79,4 @@ from socket_handler import sio
 # Criar aplicação combinada FastAPI + Socket.IO
 # Esta é a aplicação que o uvicorn vai usar
 fastapi_app = app
-app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=fastapi_app, socketio_path='socket.io')
+app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=fastapi_app, socketio_path='api/socket.io')
