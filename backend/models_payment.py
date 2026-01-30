@@ -105,33 +105,64 @@ class PaymentSettingsUpdate(BaseModel):
 # ==================== REQUISIÇÕES DE PAGAMENTO ====================
 
 class PayerInfo(BaseModel):
-    """Informações do pagador"""
-    name: str
-    email: str
+    """Informações do pagador (opcional para Checkout Pro)"""
+    name: str = ""
+    email: str = ""
     document_type: str = "CPF"  # CPF ou CNPJ
-    document_number: str
+    document_number: str = ""
     phone: Optional[str] = None
 
 
+class CheckoutProRequest(BaseModel):
+    """
+    Requisição para criar um Checkout Pro do MercadoPago.
+    O cliente será redirecionado para o ambiente seguro do MercadoPago.
+    """
+    amount: float = Field(..., gt=0)
+    title: str  # Título do produto/serviço
+    description: Optional[str] = None
+    purpose: PaymentPurpose
+    reference_id: Optional[str] = None  # ID de referência (ex: ID do treinamento)
+    
+    # Dados opcionais do pagador (MercadoPago coletará se não informado)
+    payer_email: Optional[str] = None
+    payer_name: Optional[str] = None
+    
+    # Configurações do checkout
+    max_installments: int = 12
+    pix_only: bool = False  # Se True, só permite PIX
+
+
+class CheckoutProResponse(BaseModel):
+    """Resposta da criação de um Checkout Pro"""
+    success: bool
+    message: str
+    transaction_id: str
+    preference_id: Optional[str] = None
+    checkout_url: Optional[str] = None  # URL para redirecionar o usuário
+    status: PaymentStatus
+
+
+# Mantidos para compatibilidade com código legado (deprecated)
 class CardInfo(BaseModel):
-    """Informações do cartão (tokenizado)"""
-    token: str  # Token gerado pelo gateway no frontend
-    payment_method_id: str  # visa, mastercard, etc
+    """Informações do cartão (tokenizado) - DEPRECATED: Use Checkout Pro"""
+    token: str
+    payment_method_id: str
     installments: int = 1
     issuer_id: Optional[str] = None
 
 
 class PixPaymentRequest(BaseModel):
-    """Requisição de pagamento PIX"""
+    """Requisição de pagamento PIX - DEPRECATED: Use Checkout Pro"""
     amount: float = Field(..., gt=0)
     description: str
     payer: PayerInfo
     purpose: PaymentPurpose
-    reference_id: Optional[str] = None  # ID de referência (ex: ID do treinamento)
+    reference_id: Optional[str] = None
 
 
 class CreditCardPaymentRequest(BaseModel):
-    """Requisição de pagamento com cartão de crédito"""
+    """Requisição de pagamento com cartão - DEPRECATED: Use Checkout Pro"""
     amount: float = Field(..., gt=0)
     description: str
     payer: PayerInfo
@@ -141,21 +172,15 @@ class CreditCardPaymentRequest(BaseModel):
 
 
 class SplitPaymentRequest(BaseModel):
-    """Requisição de pagamento dividido (PIX + Cartão ou múltiplos cartões)"""
+    """Pagamento dividido - DEPRECATED: Use Checkout Pro"""
     total_amount: float = Field(..., gt=0)
     description: str
     payer: PayerInfo
     purpose: PaymentPurpose
     reference_id: Optional[str] = None
-    
-    # Parte PIX
     pix_amount: float = Field(default=0, ge=0)
-    
-    # Parte Cartão 1
     card1_amount: float = Field(default=0, ge=0)
     card1: Optional[CardInfo] = None
-    
-    # Parte Cartão 2 (opcional - para dividir entre dois cartões)
     card2_amount: float = Field(default=0, ge=0)
     card2: Optional[CardInfo] = None
 
