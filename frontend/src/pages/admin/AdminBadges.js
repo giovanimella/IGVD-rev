@@ -112,7 +112,7 @@ const AdminBadges = () => {
   };
 
   const handleDelete = async (badgeId) => {
-    if (!window.confirm('Tem certeza que deseja excluir este badge?')) return;
+    if (!window.confirm('Tem certeza que deseja excluir esta conquista?')) return;
     
     try {
       await axios.delete(`${API_URL}/api/gamification/badges/${badgeId}`);
@@ -247,7 +247,7 @@ const AdminBadges = () => {
                       setShowAwardModal(true);
                     }}
                     className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-                    title="Conceder Badge"
+                    title="Conceder Conquista"
                   >
                     <Gift className="w-5 h-5" />
                   </button>
@@ -304,7 +304,7 @@ const AdminBadges = () => {
               onClick={openNewBadgeModal}
               className="bg-cyan-500 text-white px-4 py-2 rounded-lg hover:bg-cyan-600 transition-colors"
             >
-              Criar Primeiro Badge
+              Criar Primeira Conquista
             </button>
           </div>
         )}
