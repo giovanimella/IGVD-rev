@@ -272,6 +272,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/payment-settings"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminPaymentSettings />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/admin/sales"
             element={
               <PrivateRoute roles={['admin']}>
