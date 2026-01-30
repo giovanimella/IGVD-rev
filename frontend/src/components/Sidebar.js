@@ -100,6 +100,7 @@ const Sidebar = () => {
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/supervisor/licensees', icon: Users, label: 'Licenciados' },
     { path: '/supervisor/analytics', icon: BarChart3, label: 'Analytics' },
+    { path: '/admin/chat', icon: MessageCircle, label: 'Atendimento' },
     { path: '/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
     { path: '/profile', icon: Settings, label: 'Perfil' },
