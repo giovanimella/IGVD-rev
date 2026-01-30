@@ -79,10 +79,10 @@ class MercadoPagoService:
         
         try:
             # Obter URL base do frontend para back_urls
-            frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
-            webhook_url = os.environ.get('WEBHOOK_URL', os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001'))
+            frontend_url = os.environ.get('FRONTEND_URL', '')
+            webhook_url = os.environ.get('WEBHOOK_URL', os.environ.get('REACT_APP_BACKEND_URL', ''))
             
-            # Construir dados da preferência
+            # Construir dados da preferência (básico)
             preference_data = {
                 "items": [
                     {
@@ -94,37 +94,22 @@ class MercadoPagoService:
                         "unit_price": float(request.amount)
                     }
                 ],
-                "back_urls": {
+                "external_reference": transaction_id,
+                "statement_descriptor": "IGVD"
+            }
+            
+            # Adicionar back_urls apenas se tiver URLs válidas (não localhost)
+            if frontend_url and 'localhost' not in frontend_url and '127.0.0.1' not in frontend_url:
+                preference_data["back_urls"] = {
                     "success": f"{frontend_url}/payment/success?transaction_id={transaction_id}",
                     "failure": f"{frontend_url}/payment/failure?transaction_id={transaction_id}",
                     "pending": f"{frontend_url}/payment/pending?transaction_id={transaction_id}"
-                },
-                "auto_return": "approved",
-                "external_reference": transaction_id,
-                "notification_url": f"{webhook_url}/api/payments/webhooks/mercadopago",
-                "statement_descriptor": "IGVD TREINAMENTO",
-                "expires": True,
-                "expiration_date_from": datetime.now().isoformat(),
-                "expiration_date_to": (datetime.now() + timedelta(hours=24)).isoformat()
-            }
+                }
+                preference_data["auto_return"] = "approved"
             
-            # Configurar métodos de pagamento permitidos
-            payment_methods = {
-                "excluded_payment_types": [],
-                "excluded_payment_methods": [],
-                "installments": request.max_installments or 12,
-                "default_installments": 1
-            }
-            
-            # Se for somente PIX
-            if request.pix_only:
-                payment_methods["excluded_payment_types"] = [
-                    {"id": "credit_card"},
-                    {"id": "debit_card"},
-                    {"id": "ticket"}
-                ]
-            
-            preference_data["payment_methods"] = payment_methods
+            # Adicionar webhook URL apenas se válida
+            if webhook_url and 'localhost' not in webhook_url and '127.0.0.1' not in webhook_url:
+                preference_data["notification_url"] = f"{webhook_url}/api/payments/webhooks/mercadopago"
             
             # Adicionar dados do pagador se fornecidos (opcional - MercadoPago coletará se não informado)
             if request.payer_email:
@@ -139,6 +124,7 @@ class MercadoPagoService:
             
             # Criar preferência no MercadoPago
             logger.info(f"Criando preferência Checkout Pro para transação {transaction_id}")
+            logger.info(f"Dados: {preference_data}")
             
             result = self.sdk.preference().create(preference_data)
             preference = result.get("response", {})
