@@ -4,7 +4,6 @@ import axios from 'axios';
 import Layout from '../../components/Layout';
 import {
   CreditCard,
-  Wallet,
   Settings,
   Save,
   Eye,
@@ -12,10 +11,10 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  RefreshCw,
-  Zap,
-  Shield
+  Shield,
+  ExternalLink
 } from 'lucide-react';
+import { Button } from '../../components/ui/button';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -24,34 +23,14 @@ const AdminPaymentSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSecrets, setShowSecrets] = useState({});
+  const [testingConnection, setTestingConnection] = useState(false);
   
-  // Form state
+  // Form state simplificado
   const [formData, setFormData] = useState({
-    active_gateway: 'mercadopago',
     environment: 'sandbox',
-    pix_enabled: true,
-    credit_card_enabled: true,
-    split_payment_enabled: true,
-    max_installments: 12,
-    min_installment_value: 5.0,
-    // Sandbox credentials
-    sandbox_mercadopago_public_key: '',
-    sandbox_mercadopago_access_token: '',
-    sandbox_mercadopago_client_id: '',
-    sandbox_mercadopago_client_secret: '',
-    sandbox_pagseguro_email: '',
-    sandbox_pagseguro_token: '',
-    sandbox_pagseguro_app_id: '',
-    sandbox_pagseguro_app_key: '',
-    // Production credentials
-    production_mercadopago_public_key: '',
-    production_mercadopago_access_token: '',
-    production_mercadopago_client_id: '',
-    production_mercadopago_client_secret: '',
-    production_pagseguro_email: '',
-    production_pagseguro_token: '',
-    production_pagseguro_app_id: '',
-    production_pagseguro_app_key: '',
+    // Credenciais MercadoPago
+    mercadopago_public_key: '',
+    mercadopago_access_token: '',
   });
 
   useEffect(() => {
@@ -64,34 +43,16 @@ const AdminPaymentSettings = () => {
       setSettings(response.data);
       
       // Preencher form com dados existentes
-      setFormData(prev => ({
-        ...prev,
-        active_gateway: response.data.active_gateway || 'mercadopago',
-        environment: response.data.environment || 'sandbox',
-        pix_enabled: response.data.pix_enabled ?? true,
-        credit_card_enabled: response.data.credit_card_enabled ?? true,
-        split_payment_enabled: response.data.split_payment_enabled ?? true,
-        max_installments: response.data.max_installments || 12,
-        min_installment_value: response.data.min_installment_value || 5.0,
-        // Sandbox
-        sandbox_mercadopago_public_key: response.data.sandbox_credentials?.mercadopago_public_key || '',
-        sandbox_mercadopago_access_token: response.data.sandbox_credentials?.mercadopago_access_token || '',
-        sandbox_mercadopago_client_id: response.data.sandbox_credentials?.mercadopago_client_id || '',
-        sandbox_mercadopago_client_secret: response.data.sandbox_credentials?.mercadopago_client_secret || '',
-        sandbox_pagseguro_email: response.data.sandbox_credentials?.pagseguro_email || '',
-        sandbox_pagseguro_token: response.data.sandbox_credentials?.pagseguro_token || '',
-        sandbox_pagseguro_app_id: response.data.sandbox_credentials?.pagseguro_app_id || '',
-        sandbox_pagseguro_app_key: response.data.sandbox_credentials?.pagseguro_app_key || '',
-        // Production
-        production_mercadopago_public_key: response.data.production_credentials?.mercadopago_public_key || '',
-        production_mercadopago_access_token: response.data.production_credentials?.mercadopago_access_token || '',
-        production_mercadopago_client_id: response.data.production_credentials?.mercadopago_client_id || '',
-        production_mercadopago_client_secret: response.data.production_credentials?.mercadopago_client_secret || '',
-        production_pagseguro_email: response.data.production_credentials?.pagseguro_email || '',
-        production_pagseguro_token: response.data.production_credentials?.pagseguro_token || '',
-        production_pagseguro_app_id: response.data.production_credentials?.pagseguro_app_id || '',
-        production_pagseguro_app_key: response.data.production_credentials?.pagseguro_app_key || '',
-      }));
+      const env = response.data.environment || 'sandbox';
+      const credentials = env === 'sandbox' 
+        ? response.data.sandbox_credentials 
+        : response.data.production_credentials;
+      
+      setFormData({
+        environment: env,
+        mercadopago_public_key: credentials?.mercadopago_public_key || '',
+        mercadopago_access_token: credentials?.mercadopago_access_token || '',
+      });
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
       toast.error('Erro ao carregar configurações de pagamento');
@@ -103,33 +64,16 @@ const AdminPaymentSettings = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const credentialsKey = formData.environment === 'sandbox' 
+        ? 'sandbox_credentials' 
+        : 'production_credentials';
+      
       const payload = {
-        active_gateway: formData.active_gateway,
         environment: formData.environment,
-        pix_enabled: formData.pix_enabled,
-        credit_card_enabled: formData.credit_card_enabled,
-        split_payment_enabled: formData.split_payment_enabled,
-        max_installments: parseInt(formData.max_installments),
-        min_installment_value: parseFloat(formData.min_installment_value),
-        sandbox_credentials: {
-          mercadopago_public_key: formData.sandbox_mercadopago_public_key || null,
-          mercadopago_access_token: formData.sandbox_mercadopago_access_token || null,
-          mercadopago_client_id: formData.sandbox_mercadopago_client_id || null,
-          mercadopago_client_secret: formData.sandbox_mercadopago_client_secret || null,
-          pagseguro_email: formData.sandbox_pagseguro_email || null,
-          pagseguro_token: formData.sandbox_pagseguro_token || null,
-          pagseguro_app_id: formData.sandbox_pagseguro_app_id || null,
-          pagseguro_app_key: formData.sandbox_pagseguro_app_key || null,
-        },
-        production_credentials: {
-          mercadopago_public_key: formData.production_mercadopago_public_key || null,
-          mercadopago_access_token: formData.production_mercadopago_access_token || null,
-          mercadopago_client_id: formData.production_mercadopago_client_id || null,
-          mercadopago_client_secret: formData.production_mercadopago_client_secret || null,
-          pagseguro_email: formData.production_pagseguro_email || null,
-          pagseguro_token: formData.production_pagseguro_token || null,
-          pagseguro_app_id: formData.production_pagseguro_app_id || null,
-          pagseguro_app_key: formData.production_pagseguro_app_key || null,
+        active_gateway: 'mercadopago',
+        [credentialsKey]: {
+          mercadopago_public_key: formData.mercadopago_public_key,
+          mercadopago_access_token: formData.mercadopago_access_token,
         }
       };
 
@@ -137,10 +81,27 @@ const AdminPaymentSettings = () => {
       toast.success('Configurações salvas com sucesso!');
       fetchSettings();
     } catch (error) {
-      console.error('Erro ao salvar configurações:', error);
+      console.error('Erro ao salvar:', error);
       toast.error('Erro ao salvar configurações');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const testConnection = async () => {
+    setTestingConnection(true);
+    try {
+      // Tenta obter a public key como teste de conexão
+      const response = await axios.get(`${API_URL}/api/payments/settings/public-key`);
+      if (response.data.public_key) {
+        toast.success('Conexão com MercadoPago OK!');
+      } else {
+        toast.warning('Public Key não configurada');
+      }
+    } catch (error) {
+      toast.error('Erro ao testar conexão');
+    } finally {
+      setTestingConnection(false);
     }
   };
 
@@ -148,41 +109,16 @@ const AdminPaymentSettings = () => {
     setShowSecrets(prev => ({ ...prev, [field]: !prev[field] }));
   };
 
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const maskValue = (value) => {
+    if (!value || value.length < 10) return value;
+    return value.substring(0, 8) + '•'.repeat(value.length - 16) + value.substring(value.length - 8);
   };
-
-  const CredentialInput = ({ label, field, placeholder, isSecret = false }) => (
-    <div>
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          type={isSecret && !showSecrets[field] ? 'password' : 'text'}
-          value={formData[field] || ''}
-          onChange={(e) => handleChange(field, e.target.value)}
-          placeholder={placeholder}
-          className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent pr-10"
-        />
-        {isSecret && (
-          <button
-            type="button"
-            onClick={() => toggleSecret(field)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-          >
-            {showSecrets[field] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
-        )}
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <RefreshCw className="w-8 h-8 animate-spin text-cyan-500" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
         </div>
       </Layout>
     );
@@ -190,298 +126,263 @@ const AdminPaymentSettings = () => {
 
   return (
     <Layout>
-      <div className="space-y-6" data-testid="payment-settings-page">
+      <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Configurações de Pagamento</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">Gerencie os gateways de pagamento e credenciais</p>
-          </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 bg-cyan-500 text-white px-4 py-2 rounded-lg hover:bg-cyan-600 transition-colors disabled:opacity-50"
-            data-testid="save-settings-btn"
-          >
-            {saving ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            Salvar Configurações
-          </button>
-        </div>
-
-        {/* Gateway Selection */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-cyan-500" />
-            Gateway Ativo
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              onClick={() => handleChange('active_gateway', 'mercadopago')}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                formData.active_gateway === 'mercadopago'
-                  ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-cyan-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                  formData.active_gateway === 'mercadopago' ? 'bg-cyan-500' : 'bg-slate-200 dark:bg-slate-700'
-                }`}>
-                  <CreditCard className={`w-6 h-6 ${
-                    formData.active_gateway === 'mercadopago' ? 'text-white' : 'text-slate-500'
-                  }`} />
-                </div>
-                <div className="text-left">
-                  <p className={`font-semibold ${
-                    formData.active_gateway === 'mercadopago' ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-900 dark:text-white'
-                  }`}>MercadoPago</p>
-                  <p className="text-sm text-slate-500">Líder em pagamentos no Brasil</p>
-                </div>
-                {formData.active_gateway === 'mercadopago' && (
-                  <CheckCircle className="w-6 h-6 text-cyan-500 ml-auto" />
-                )}
-              </div>
-            </button>
-
-            <button
-              onClick={() => handleChange('active_gateway', 'pagseguro')}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                formData.active_gateway === 'pagseguro'
-                  ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-cyan-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                  formData.active_gateway === 'pagseguro' ? 'bg-cyan-500' : 'bg-slate-200 dark:bg-slate-700'
-                }`}>
-                  <Shield className={`w-6 h-6 ${
-                    formData.active_gateway === 'pagseguro' ? 'text-white' : 'text-slate-500'
-                  }`} />
-                </div>
-                <div className="text-left">
-                  <p className={`font-semibold ${
-                    formData.active_gateway === 'pagseguro' ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-900 dark:text-white'
-                  }`}>PagSeguro</p>
-                  <p className="text-sm text-slate-500">Soluções completas de pagamento</p>
-                </div>
-                {formData.active_gateway === 'pagseguro' && (
-                  <CheckCircle className="w-6 h-6 text-cyan-500 ml-auto" />
-                )}
-              </div>
-            </button>
+            <h1 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white flex items-center gap-3">
+              <CreditCard className="w-7 h-7 text-cyan-500" />
+              Configurações de Pagamento
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 mt-1">
+              Configure as credenciais do MercadoPago Checkout Pro
+            </p>
           </div>
         </div>
 
-        {/* Environment Selection */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <Settings className="w-5 h-5 text-cyan-500" />
-            Ambiente
-          </h2>
-          
-          <div className="flex gap-4">
-            <button
-              onClick={() => handleChange('environment', 'sandbox')}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all ${
-                formData.environment === 'sandbox'
-                  ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-amber-300'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <AlertCircle className={`w-5 h-5 ${
-                  formData.environment === 'sandbox' ? 'text-amber-500' : 'text-slate-400'
-                }`} />
-                <span className={`font-medium ${
-                  formData.environment === 'sandbox' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'
-                }`}>Sandbox (Teste)</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => handleChange('environment', 'production')}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all ${
-                formData.environment === 'production'
-                  ? 'border-green-500 bg-green-50 dark:bg-green-500/10'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-green-300'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Zap className={`w-5 h-5 ${
-                  formData.environment === 'production' ? 'text-green-500' : 'text-slate-400'
-                }`} />
-                <span className={`font-medium ${
-                  formData.environment === 'production' ? 'text-green-600 dark:text-green-400' : 'text-slate-700 dark:text-slate-300'
-                }`}>Produção</span>
-              </div>
-            </button>
-          </div>
-
-          {formData.environment === 'production' && (
-            <div className="mt-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg">
-              <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" />
-                Atenção: Você está no modo de produção. Transações reais serão processadas.
+        {/* Info Card */}
+        <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-800 dark:text-blue-300">
+              <p className="font-medium">Checkout Pro</p>
+              <p className="text-blue-600 dark:text-blue-400 mt-1">
+                Os clientes serão redirecionados para o ambiente seguro do MercadoPago para realizar o pagamento.
+                Suporta PIX, Cartão de Crédito, Boleto e mais.
               </p>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Payment Methods */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Métodos de Pagamento</h2>
+        {/* Main Settings Card */}
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6 space-y-6">
           
+          {/* Ambiente */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Ambiente
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setFormData(prev => ({ ...prev, environment: 'sandbox' }))}
+                className={`flex-1 p-4 rounded-xl border-2 transition-all ${
+                  formData.environment === 'sandbox'
+                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-amber-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <AlertCircle className={`w-5 h-5 ${
+                    formData.environment === 'sandbox' ? 'text-amber-600' : 'text-slate-400'
+                  }`} />
+                  <div className="text-left">
+                    <p className={`font-medium ${
+                      formData.environment === 'sandbox' ? 'text-amber-800 dark:text-amber-300' : 'text-slate-700 dark:text-slate-300'
+                    }`}>
+                      Sandbox (Teste)
+                    </p>
+                    <p className="text-xs text-slate-500">Para desenvolvimento</p>
+                  </div>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setFormData(prev => ({ ...prev, environment: 'production' }))}
+                className={`flex-1 p-4 rounded-xl border-2 transition-all ${
+                  formData.environment === 'production'
+                    ? 'border-green-500 bg-green-50 dark:bg-green-500/10'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-green-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <CheckCircle className={`w-5 h-5 ${
+                    formData.environment === 'production' ? 'text-green-600' : 'text-slate-400'
+                  }`} />
+                  <div className="text-left">
+                    <p className={`font-medium ${
+                      formData.environment === 'production' ? 'text-green-800 dark:text-green-300' : 'text-slate-700 dark:text-slate-300'
+                    }`}>
+                      Produção
+                    </p>
+                    <p className="text-xs text-slate-500">Pagamentos reais</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Credenciais */}
           <div className="space-y-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.pix_enabled}
-                onChange={(e) => handleChange('pix_enabled', e.target.checked)}
-                className="w-5 h-5 rounded border-slate-300 text-cyan-500 focus:ring-cyan-500"
-              />
-              <span className="text-slate-700 dark:text-slate-300">PIX</span>
-            </label>
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.credit_card_enabled}
-                onChange={(e) => handleChange('credit_card_enabled', e.target.checked)}
-                className="w-5 h-5 rounded border-slate-300 text-cyan-500 focus:ring-cyan-500"
-              />
-              <span className="text-slate-700 dark:text-slate-300">Cartão de Crédito</span>
-            </label>
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.split_payment_enabled}
-                onChange={(e) => handleChange('split_payment_enabled', e.target.checked)}
-                className="w-5 h-5 rounded border-slate-300 text-cyan-500 focus:ring-cyan-500"
-              />
-              <span className="text-slate-700 dark:text-slate-300">Pagamento Dividido (PIX + Cartão ou múltiplos cartões)</span>
-            </label>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-4">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <Settings className="w-5 h-5 text-cyan-500" />
+              Credenciais MercadoPago
+              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                formData.environment === 'sandbox' 
+                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300' 
+                  : 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300'
+              }`}>
+                {formData.environment === 'sandbox' ? 'SANDBOX' : 'PRODUÇÃO'}
+              </span>
+            </h3>
+            
+            {/* Public Key */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Máximo de Parcelas
+                Public Key
               </label>
-              <input
-                type="number"
-                min="1"
-                max="24"
-                value={formData.max_installments}
-                onChange={(e) => handleChange('max_installments', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              />
+              <div className="relative">
+                <input
+                  type={showSecrets.public_key ? 'text' : 'password'}
+                  value={formData.mercadopago_public_key}
+                  onChange={(e) => setFormData(prev => ({ ...prev, mercadopago_public_key: e.target.value }))}
+                  placeholder="APP_USR-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  className="w-full px-4 py-3 pr-12 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleSecret('public_key')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showSecrets.public_key ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
+
+            {/* Access Token */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Valor Mínimo da Parcela (R$)
+                Access Token
               </label>
-              <input
-                type="number"
-                min="1"
-                step="0.01"
-                value={formData.min_installment_value}
-                onChange={(e) => handleChange('min_installment_value', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              />
+              <div className="relative">
+                <input
+                  type={showSecrets.access_token ? 'text' : 'password'}
+                  value={formData.mercadopago_access_token}
+                  onChange={(e) => setFormData(prev => ({ ...prev, mercadopago_access_token: e.target.value }))}
+                  placeholder="APP_USR-0000000000000000-000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-000000000"
+                  className="w-full px-4 py-3 pr-12 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleSecret('access_token')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showSecrets.access_token ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Nunca compartilhe seu Access Token. Ele dá acesso completo à sua conta.
+              </p>
             </div>
+          </div>
+
+          {/* Link para obter credenciais */}
+          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+              Onde obter as credenciais?
+            </p>
+            <a
+              href="https://www.mercadopago.com.br/developers/panel/app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-cyan-600 dark:text-cyan-400 hover:underline text-sm"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Painel de Desenvolvedores do MercadoPago
+            </a>
+          </div>
+
+          {/* Botões de ação */}
+          <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <Button
+              onClick={testConnection}
+              disabled={testingConnection}
+              variant="outline"
+              className="flex-1"
+            >
+              {testingConnection ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                  Testando...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Testar Conexão
+                </>
+              )}
+            </Button>
+            
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 bg-cyan-500 hover:bg-cyan-600"
+            >
+              {saving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Configurações
+                </>
+              )}
+            </Button>
           </div>
         </div>
 
-        {/* Sandbox Credentials */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-amber-500" />
-            Credenciais Sandbox (Teste)
-          </h2>
-
-          {/* MercadoPago Sandbox */}
-          <div className="mb-6">
-            <h3 className="text-md font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
-              MercadoPago
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CredentialInput label="Public Key" field="sandbox_mercadopago_public_key" placeholder="TEST-..." />
-              <CredentialInput label="Access Token" field="sandbox_mercadopago_access_token" placeholder="TEST-..." isSecret />
-              <CredentialInput label="Client ID" field="sandbox_mercadopago_client_id" placeholder="123456789" />
-              <CredentialInput label="Client Secret" field="sandbox_mercadopago_client_secret" placeholder="..." isSecret />
-            </div>
-          </div>
-
-          {/* PagSeguro Sandbox */}
-          <div>
-            <h3 className="text-md font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
-              PagSeguro
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CredentialInput label="Email" field="sandbox_pagseguro_email" placeholder="email@sandbox.pagseguro.com.br" />
-              <CredentialInput label="Token" field="sandbox_pagseguro_token" placeholder="..." isSecret />
-              <CredentialInput label="App ID" field="sandbox_pagseguro_app_id" placeholder="app123456" />
-              <CredentialInput label="App Key" field="sandbox_pagseguro_app_key" placeholder="..." isSecret />
-            </div>
-          </div>
-        </div>
-
-        {/* Production Credentials */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-green-500" />
-            Credenciais Produção
-          </h2>
-
-          {/* MercadoPago Production */}
-          <div className="mb-6">
-            <h3 className="text-md font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
-              MercadoPago
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CredentialInput label="Public Key" field="production_mercadopago_public_key" placeholder="APP_USR-..." />
-              <CredentialInput label="Access Token" field="production_mercadopago_access_token" placeholder="APP_USR-..." isSecret />
-              <CredentialInput label="Client ID" field="production_mercadopago_client_id" placeholder="123456789" />
-              <CredentialInput label="Client Secret" field="production_mercadopago_client_secret" placeholder="..." isSecret />
-            </div>
-          </div>
-
-          {/* PagSeguro Production */}
-          <div>
-            <h3 className="text-md font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
-              PagSeguro
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CredentialInput label="Email" field="production_pagseguro_email" placeholder="email@seudominio.com.br" />
-              <CredentialInput label="Token" field="production_pagseguro_token" placeholder="..." isSecret />
-              <CredentialInput label="App ID" field="production_pagseguro_app_id" placeholder="app123456" />
-              <CredentialInput label="App Key" field="production_pagseguro_app_key" placeholder="..." isSecret />
-            </div>
-          </div>
-        </div>
-
-        {/* Webhook URLs */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">URLs de Webhook</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-            Configure estas URLs nos painéis dos gateways para receber notificações de pagamento:
-          </p>
+        {/* Status Card */}
+        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+            Status da Integração
+          </h3>
           
           <div className="space-y-3">
-            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">MercadoPago:</p>
-              <code className="text-sm text-cyan-600 dark:text-cyan-400 break-all">
-                {window.location.origin.replace('localhost:3000', 'igvd.org')}/api/payments/webhooks/mercadopago
-              </code>
+            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="text-slate-700 dark:text-slate-300">Gateway Ativo</span>
+              <span className="font-medium text-cyan-600 dark:text-cyan-400">MercadoPago</span>
             </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">PagSeguro:</p>
-              <code className="text-sm text-cyan-600 dark:text-cyan-400 break-all">
-                {window.location.origin.replace('localhost:3000', 'igvd.org')}/api/payments/webhooks/pagseguro
-              </code>
+            
+            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="text-slate-700 dark:text-slate-300">Ambiente</span>
+              <span className={`font-medium ${
+                formData.environment === 'sandbox' 
+                  ? 'text-amber-600 dark:text-amber-400' 
+                  : 'text-green-600 dark:text-green-400'
+              }`}>
+                {formData.environment === 'sandbox' ? 'Sandbox (Teste)' : 'Produção'}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="text-slate-700 dark:text-slate-300">Public Key</span>
+              {formData.mercadopago_public_key ? (
+                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                  <CheckCircle className="w-4 h-4" />
+                  Configurada
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                  <XCircle className="w-4 h-4" />
+                  Não configurada
+                </span>
+              )}
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <span className="text-slate-700 dark:text-slate-300">Access Token</span>
+              {formData.mercadopago_access_token ? (
+                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                  <CheckCircle className="w-4 h-4" />
+                  Configurado
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                  <XCircle className="w-4 h-4" />
+                  Não configurado
+                </span>
+              )}
             </div>
           </div>
         </div>
