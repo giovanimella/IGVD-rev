@@ -1,761 +1,223 @@
 """
-Sistema de Gerenciamento de Vendas em Campo
-- Registro de vendas pelos licenciados
-- Validação e pagamento pelo cliente
-- Dashboard de relatórios para admin
-- Sistema de comissões configuráveis
+Rotas para gerenciamento de links de pagamento (10 vendas)
 """
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, EmailStr
-from typing import Optional, List
-from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
-from auth import get_current_user, require_role
-import uuid
+from typing import Optional
+from datetime import datetime, timedelta
 import os
+import uuid
+
+from auth import get_current_user
+from models_payment import PaymentLink, CreatePaymentLinkRequest, PaymentGateway
+
+router = APIRouter(prefix="/sales", tags=["sales"])
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-router = APIRouter(prefix="/sales", tags=["sales"])
 
-async def get_platform_name():
-    """Busca o nome da plataforma das configurações do sistema"""
-    config = await db.system_config.find_one({"id": "system_config"})
-    return config.get("platform_name", "UniOzoxx") if config else "UniOzoxx"
-
-# ==================== MODELOS ====================
-
-class SaleCreate(BaseModel):
-    customer_name: str
-    customer_phone: str
-    customer_email: EmailStr
-    customer_cpf: str
-    device_serial: str
-    device_source: str  # "leader_stock" ou "factory"
-    sale_value: float
-    sale_number: int  # 1-10
-
-class SaleUpdate(BaseModel):
-    customer_name: Optional[str] = None
-    customer_phone: Optional[str] = None
-    customer_email: Optional[EmailStr] = None
-    customer_cpf: Optional[str] = None
-    device_serial: Optional[str] = None
-    device_source: Optional[str] = None
-    sale_value: Optional[float] = None
-
-class CommissionTypeCreate(BaseModel):
-    description: str
-    percentage: float
-    active: bool = True
-
-class CommissionTypeUpdate(BaseModel):
-    description: Optional[str] = None
-    percentage: Optional[float] = None
-    active: Optional[bool] = None
-
-# ==================== ROTAS DE VENDAS (LICENCIADO) ====================
-
-@router.get("/my-sales")
-async def get_my_sales(current_user: dict = Depends(get_current_user)):
-    """Obter todas as vendas do licenciado logado"""
-    sales = await db.sales.find(
-        {"licensee_id": current_user["sub"]},
+@router.get("/my-links")
+async def get_my_links(current_user: dict = Depends(get_current_user)):
+    """Obtém os links de pagamento do usuário"""
+    links = await db.payment_links.find(
+        {"user_id": current_user["sub"]},
         {"_id": 0}
-    ).sort("sale_number", 1).to_list(10)
+    ).sort("created_at", -1).to_list(100)
     
-    # Contar vendas completadas (pagas)
-    completed_count = sum(1 for s in sales if s.get("payment_status") == "paid")
-    
-    return {
-        "sales": sales,
-        "total_sales": len(sales),
-        "completed_sales": completed_count,
-        "remaining_sales": 10 - completed_count
-    }
+    return links
 
-@router.post("/register")
-async def register_sale(
-    data: SaleCreate,
-    current_user: dict = Depends(get_current_user)
-):
-    """Registrar uma nova venda"""
-    # Verificar se usuário está na etapa correta
-    user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    if user.get("current_stage") != "vendas_campo":
-        raise HTTPException(status_code=400, detail="Você não está na etapa de vendas em campo")
-    
-    # Verificar se já existe venda com esse número
-    existing = await db.sales.find_one({
-        "licensee_id": current_user["sub"],
-        "sale_number": data.sale_number
-    })
-    
-    if existing:
-        raise HTTPException(status_code=400, detail=f"Já existe uma venda registrada com o número {data.sale_number}")
-    
-    # Verificar se número de venda é válido (1-10)
-    if data.sale_number < 1 or data.sale_number > 10:
-        raise HTTPException(status_code=400, detail="Número de venda deve ser entre 1 e 10")
-    
-    # Buscar dados do líder
-    leader_id = user.get("leader_id")
-    leader_name = user.get("leader_name")
-    
-    # Gerar link de pagamento placeholder (será substituído pelo gateway real)
-    payment_link = f"PAYMENT_LINK_PLACEHOLDER_{uuid.uuid4().hex[:12].upper()}"
-    
-    # Criar venda
-    sale = {
-        "id": str(uuid.uuid4()),
-        "licensee_id": current_user["sub"],
-        "licensee_name": user.get("full_name"),
-        "leader_id": leader_id,
-        "leader_name": leader_name,
-        "sale_number": data.sale_number,
-        "customer_name": data.customer_name,
-        "customer_phone": data.customer_phone,
-        "customer_email": data.customer_email,
-        "customer_cpf": data.customer_cpf,
-        "device_serial": data.device_serial,
-        "device_source": data.device_source,
-        "sale_value": data.sale_value,
-        "payment_status": "pending",  # pending, paid
-        "payment_link": payment_link,
-        "payment_transaction_id": None,
-        "paid_at": None,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
-    }
-    
-    await db.sales.insert_one(sale)
-    sale.pop("_id", None)
-    
-    return {
-        "message": "Venda registrada com sucesso",
-        "sale": sale,
-        "payment_link": payment_link
-    }
 
-@router.put("/{sale_id}")
-async def update_sale(
-    sale_id: str,
-    data: SaleUpdate,
-    current_user: dict = Depends(get_current_user)
-):
-    """Atualizar dados de uma venda (apenas se ainda não foi paga)"""
-    sale = await db.sales.find_one({
-        "id": sale_id,
-        "licensee_id": current_user["sub"]
-    })
-    
-    if not sale:
-        raise HTTPException(status_code=404, detail="Venda não encontrada")
-    
-    if sale.get("payment_status") == "paid":
-        raise HTTPException(status_code=400, detail="Não é possível editar uma venda já paga")
-    
-    updates = {k: v for k, v in data.model_dump().items() if v is not None}
-    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
-    
-    await db.sales.update_one(
-        {"id": sale_id},
-        {"$set": updates}
-    )
-    
-    updated_sale = await db.sales.find_one({"id": sale_id}, {"_id": 0})
-    return updated_sale
-
-@router.delete("/{sale_id}")
-async def delete_sale(
-    sale_id: str,
-    current_user: dict = Depends(get_current_user)
-):
-    """Excluir uma venda (apenas se ainda não foi paga)"""
-    sale = await db.sales.find_one({
-        "id": sale_id,
-        "licensee_id": current_user["sub"]
-    })
-    
-    if not sale:
-        raise HTTPException(status_code=404, detail="Venda não encontrada")
-    
-    if sale.get("payment_status") == "paid":
-        raise HTTPException(status_code=400, detail="Não é possível excluir uma venda já paga")
-    
-    await db.sales.delete_one({"id": sale_id})
-    return {"message": "Venda excluída com sucesso"}
-
-@router.post("/{sale_id}/simulate-payment")
-async def simulate_sale_payment(
-    sale_id: str,
-    current_user: dict = Depends(get_current_user)
-):
-    """Simular pagamento de uma venda (modo teste)"""
-    sale = await db.sales.find_one({
-        "id": sale_id,
-        "licensee_id": current_user["sub"]
-    })
-    
-    if not sale:
-        raise HTTPException(status_code=404, detail="Venda não encontrada")
-    
-    if sale.get("payment_status") == "paid":
-        raise HTTPException(status_code=400, detail="Venda já foi paga")
-    
-    transaction_id = f"SALE_{uuid.uuid4().hex[:12].upper()}"
-    
-    await db.sales.update_one(
-        {"id": sale_id},
-        {"$set": {
-            "payment_status": "paid",
-            "payment_transaction_id": transaction_id,
-            "paid_at": datetime.now(timezone.utc).isoformat(),
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        }}
-    )
-    
-    # Criar notificação de venda confirmada para o licenciado
-    notification = {
-        "id": str(uuid.uuid4()),
+@router.get("/my-progress")
+async def get_my_progress(current_user: dict = Depends(get_current_user)):
+    """Obtém o progresso das 10 vendas do usuário"""
+    # Contar transações aprovadas/pagas do usuário
+    completed_sales = await db.transactions.count_documents({
         "user_id": current_user["sub"],
-        "type": "sale_confirmed",
-        "title": "Venda Confirmada!",
-        "message": f"O pagamento da venda #{sale.get('sale_number')} para {sale.get('customer_name')} foi confirmado no valor de R$ {sale.get('sale_value', 0):.2f}.",
-        "data": {
-            "sale_id": sale_id,
-            "customer_name": sale.get("customer_name"),
-            "sale_value": sale.get("sale_value"),
-            "transaction_id": transaction_id
-        },
-        "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.notifications.insert_one(notification)
-    
-    # Verificar se completou as 10 vendas
-    user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
-    paid_sales = await db.sales.count_documents({
-        "licensee_id": current_user["sub"],
-        "payment_status": "paid"
+        "purpose": "sales_link",
+        "status": {"$in": ["approved", "paid"]}
     })
     
-    # Se completou 10 vendas, avançar para próxima etapa
-    if paid_sales >= 10 and user.get("current_stage") == "vendas_campo":
-        await db.users.update_one(
-            {"id": current_user["sub"]},
-            {"$set": {
-                "current_stage": "documentos_pj",
-                "updated_at": datetime.now(timezone.utc).isoformat()
-            }}
-        )
-        
-        # Notificação de conclusão da etapa
-        completion_notification = {
-            "id": str(uuid.uuid4()),
-            "user_id": current_user["sub"],
-            "type": "stage_completed",
-            "title": "Etapa Concluída!",
-            "message": "Parabéns! Você completou as 10 vendas em campo e avançou para a etapa de Documentos PJ.",
-            "data": {"stage": "vendas_campo", "next_stage": "documentos_pj"},
-            "read": False,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.notifications.insert_one(completion_notification)
-        
-        return {
-            "message": "Parabéns! Você completou as 10 vendas e avançou para a próxima etapa!",
-            "transaction_id": transaction_id,
-            "status": "paid",
-            "advanced_to_next_stage": True
-        }
+    # Obter configuração do sistema
+    config = await db.system_config.find_one({}, {"_id": 0})
+    total_required = config.get("required_sales", 10) if config else 10
     
     return {
-        "message": "Pagamento simulado com sucesso",
-        "transaction_id": transaction_id,
-        "status": "paid",
-        "completed_sales": paid_sales,
-        "remaining_sales": 10 - paid_sales
+        "completed": completed_sales,
+        "total": total_required
     }
 
-# ==================== TIPOS DE COMISSÃO (ADMIN) ====================
 
-@router.get("/commission-types")
-async def get_commission_types(current_user: dict = Depends(require_role(["admin"]))):
-    """Listar tipos de comissão cadastrados"""
-    types = await db.commission_types.find({}, {"_id": 0}).sort("created_at", 1).to_list(100)
-    return types
-
-@router.post("/commission-types")
-async def create_commission_type(
-    data: CommissionTypeCreate,
-    current_user: dict = Depends(require_role(["admin"]))
+@router.post("/create-link")
+async def create_payment_link(
+    request: CreatePaymentLinkRequest,
+    current_user: dict = Depends(get_current_user)
 ):
-    """Criar novo tipo de comissão"""
-    commission_type = {
-        "id": str(uuid.uuid4()),
-        "description": data.description,
-        "percentage": data.percentage,
-        "active": data.active,
-        "created_by": current_user["sub"],
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
+    """Cria um novo link de pagamento"""
+    # Obter configurações de pagamento
+    settings = await db.payment_settings.find_one({}, {"_id": 0})
+    active_gateway = settings.get("active_gateway", "mercadopago") if settings else "mercadopago"
     
-    await db.commission_types.insert_one(commission_type)
-    commission_type.pop("_id", None)
+    # Calcular data de expiração se fornecida
+    expires_at = None
+    if request.expires_in_days:
+        expires_at = (datetime.now() + timedelta(days=request.expires_in_days)).isoformat()
     
-    return commission_type
-
-@router.put("/commission-types/{type_id}")
-async def update_commission_type(
-    type_id: str,
-    data: CommissionTypeUpdate,
-    current_user: dict = Depends(require_role(["admin"]))
-):
-    """Atualizar tipo de comissão"""
-    existing = await db.commission_types.find_one({"id": type_id})
-    if not existing:
-        raise HTTPException(status_code=404, detail="Tipo de comissão não encontrado")
-    
-    updates = {k: v for k, v in data.model_dump().items() if v is not None}
-    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
-    
-    await db.commission_types.update_one(
-        {"id": type_id},
-        {"$set": updates}
+    # Criar link
+    link = PaymentLink(
+        user_id=current_user["sub"],
+        title=request.title,
+        description=request.description,
+        amount=request.amount,
+        gateway=PaymentGateway(active_gateway),
+        max_uses=request.max_uses,
+        expires_at=expires_at
     )
     
-    updated = await db.commission_types.find_one({"id": type_id}, {"_id": 0})
-    return updated
-
-@router.delete("/commission-types/{type_id}")
-async def delete_commission_type(
-    type_id: str,
-    current_user: dict = Depends(require_role(["admin"]))
-):
-    """Excluir tipo de comissão"""
-    result = await db.commission_types.delete_one({"id": type_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Tipo de comissão não encontrado")
+    # Gerar URL do link
+    # Em produção, você integraria com o gateway para criar um link de checkout
+    link.gateway_link_url = f"{os.environ.get('FRONTEND_URL', '')}/pay/{link.id}"
     
-    return {"message": "Tipo de comissão excluído com sucesso"}
-
-# ==================== RELATÓRIOS E DASHBOARD (ADMIN) ====================
-
-@router.get("/report/summary")
-async def get_sales_summary(
-    current_user: dict = Depends(require_role(["admin"]))
-):
-    """Obter resumo geral das vendas"""
-    # Total de vendas
-    total_sales = await db.sales.count_documents({})
-    paid_sales = await db.sales.count_documents({"payment_status": "paid"})
-    pending_sales = await db.sales.count_documents({"payment_status": "pending"})
+    await db.payment_links.insert_one(link.model_dump())
     
-    # Valor total
+    return {
+        "message": "Link criado com sucesso",
+        "link": link.model_dump()
+    }
+
+
+@router.get("/links/{link_id}")
+async def get_link(link_id: str):
+    """Obtém um link de pagamento pelo ID (público)"""
+    link = await db.payment_links.find_one({"id": link_id}, {"_id": 0})
+    
+    if not link:
+        raise HTTPException(status_code=404, detail="Link não encontrado")
+    
+    if not link.get("is_active"):
+        raise HTTPException(status_code=400, detail="Link inativo")
+    
+    # Verificar se expirou
+    if link.get("expires_at"):
+        expires_at = datetime.fromisoformat(link["expires_at"])
+        if datetime.now() > expires_at:
+            raise HTTPException(status_code=400, detail="Link expirado")
+    
+    # Verificar limite de usos
+    if link.get("max_uses") and link.get("uses_count", 0) >= link["max_uses"]:
+        raise HTTPException(status_code=400, detail="Limite de usos atingido")
+    
+    return link
+
+
+@router.delete("/links/{link_id}")
+async def delete_link(link_id: str, current_user: dict = Depends(get_current_user)):
+    """Exclui um link de pagamento"""
+    link = await db.payment_links.find_one({"id": link_id}, {"_id": 0})
+    
+    if not link:
+        raise HTTPException(status_code=404, detail="Link não encontrado")
+    
+    if link["user_id"] != current_user["sub"] and current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    await db.payment_links.delete_one({"id": link_id})
+    
+    return {"message": "Link excluído com sucesso"}
+
+
+@router.put("/links/{link_id}/toggle")
+async def toggle_link(link_id: str, current_user: dict = Depends(get_current_user)):
+    """Ativa/desativa um link de pagamento"""
+    link = await db.payment_links.find_one({"id": link_id}, {"_id": 0})
+    
+    if not link:
+        raise HTTPException(status_code=404, detail="Link não encontrado")
+    
+    if link["user_id"] != current_user["sub"] and current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    new_status = not link.get("is_active", True)
+    
+    await db.payment_links.update_one(
+        {"id": link_id},
+        {"$set": {"is_active": new_status, "updated_at": datetime.now().isoformat()}}
+    )
+    
+    return {"message": f"Link {'ativado' if new_status else 'desativado'}", "is_active": new_status}
+
+
+@router.post("/links/{link_id}/use")
+async def increment_link_usage(link_id: str):
+    """Incrementa o contador de uso do link (chamado após pagamento bem-sucedido)"""
+    result = await db.payment_links.update_one(
+        {"id": link_id},
+        {
+            "$inc": {"uses_count": 1},
+            "$set": {"updated_at": datetime.now().isoformat()}
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Link não encontrado")
+    
+    return {"message": "Uso registrado"}
+
+
+@router.get("/all-links")
+async def get_all_links(
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtém todos os links (admin apenas)"""
+    if current_user.get("role") not in ["admin", "supervisor"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    links = await db.payment_links.find({}, {"_id": 0}).sort("created_at", -1).to_list(limit)
+    
+    # Adicionar nome do usuário a cada link
+    for link in links:
+        user = await db.users.find_one({"id": link["user_id"]}, {"_id": 0, "full_name": 1})
+        link["user_name"] = user.get("full_name", "Desconhecido") if user else "Desconhecido"
+    
+    return links
+
+
+@router.get("/leaderboard")
+async def get_sales_leaderboard(current_user: dict = Depends(get_current_user)):
+    """Obtém o ranking de vendas"""
+    # Agregar vendas por usuário
     pipeline = [
-        {"$match": {"payment_status": "paid"}},
-        {"$group": {"_id": None, "total": {"$sum": "$sale_value"}}}
-    ]
-    result = await db.sales.aggregate(pipeline).to_list(1)
-    total_value = result[0]["total"] if result else 0
-    
-    # Vendas por origem do aparelho
-    pipeline_source = [
-        {"$match": {"payment_status": "paid"}},
-        {"$group": {"_id": "$device_source", "count": {"$sum": 1}, "value": {"$sum": "$sale_value"}}}
-    ]
-    by_source = await db.sales.aggregate(pipeline_source).to_list(10)
-    
-    # Buscar tipos de comissão ativos
-    commission_types = await db.commission_types.find({"active": True}, {"_id": 0}).to_list(100)
-    
-    # Calcular comissões
-    commissions = []
-    for ct in commission_types:
-        commission_value = total_value * (ct["percentage"] / 100)
-        commissions.append({
-            "id": ct["id"],
-            "description": ct["description"],
-            "percentage": ct["percentage"],
-            "calculated_value": round(commission_value, 2)
-        })
-    
-    return {
-        "total_sales": total_sales,
-        "paid_sales": paid_sales,
-        "pending_sales": pending_sales,
-        "total_value": round(total_value, 2),
-        "by_device_source": {item["_id"]: {"count": item["count"], "value": round(item["value"], 2)} for item in by_source},
-        "commissions": commissions
-    }
-
-@router.get("/report/all")
-async def get_all_sales(
-    status: Optional[str] = None,
-    licensee_id: Optional[str] = None,
-    current_user: dict = Depends(require_role(["admin", "supervisor"]))
-):
-    """Listar todas as vendas com filtros"""
-    query = {}
-    
-    if status:
-        query["payment_status"] = status
-    
-    if licensee_id:
-        query["licensee_id"] = licensee_id
-    
-    # Se for supervisor, filtrar apenas seus licenciados
-    if current_user["role"] == "supervisor":
-        # Buscar IDs dos licenciados do supervisor
-        licensees = await db.users.find(
-            {"leader_id": current_user["sub"], "role": "licenciado"},
-            {"id": 1}
-        ).to_list(1000)
-        licensee_ids = [l["id"] for l in licensees]
-        query["licensee_id"] = {"$in": licensee_ids}
-    
-    sales = await db.sales.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    
-    # Agrupar por licenciado para estatísticas
-    licensee_stats = {}
-    for sale in sales:
-        lid = sale["licensee_id"]
-        if lid not in licensee_stats:
-            licensee_stats[lid] = {
-                "licensee_id": lid,
-                "licensee_name": sale.get("licensee_name"),
-                "leader_name": sale.get("leader_name"),
-                "total_sales": 0,
-                "paid_sales": 0,
-                "total_value": 0
+        {
+            "$match": {
+                "purpose": "sales_link",
+                "status": {"$in": ["approved", "paid"]}
             }
-        licensee_stats[lid]["total_sales"] += 1
-        if sale.get("payment_status") == "paid":
-            licensee_stats[lid]["paid_sales"] += 1
-            licensee_stats[lid]["total_value"] += sale.get("sale_value", 0)
+        },
+        {
+            "$group": {
+                "_id": "$user_id",
+                "total_sales": {"$sum": 1},
+                "total_amount": {"$sum": "$amount"}
+            }
+        },
+        {"$sort": {"total_sales": -1}},
+        {"$limit": 10}
+    ]
     
-    return {
-        "sales": sales,
-        "licensee_stats": list(licensee_stats.values())
-    }
-
-@router.get("/report/licensee/{licensee_id}")
-async def get_licensee_sales(
-    licensee_id: str,
-    current_user: dict = Depends(require_role(["admin", "supervisor"]))
-):
-    """Obter vendas de um licenciado específico"""
-    # Se for supervisor, verificar se é seu licenciado
-    if current_user["role"] == "supervisor":
-        licensee = await db.users.find_one({
-            "id": licensee_id,
-            "leader_id": current_user["sub"]
-        })
-        if not licensee:
-            raise HTTPException(status_code=403, detail="Acesso negado")
+    results = await db.transactions.aggregate(pipeline).to_list(10)
     
-    sales = await db.sales.find(
-        {"licensee_id": licensee_id},
-        {"_id": 0}
-    ).sort("sale_number", 1).to_list(10)
-    
-    # Buscar dados do licenciado
-    licensee = await db.users.find_one({"id": licensee_id}, {"_id": 0, "full_name": 1, "leader_name": 1})
-    
-    # Estatísticas
-    paid_sales = [s for s in sales if s.get("payment_status") == "paid"]
-    total_value = sum(s.get("sale_value", 0) for s in paid_sales)
-    
-    return {
-        "licensee": licensee,
-        "sales": sales,
-        "total_sales": len(sales),
-        "paid_sales": len(paid_sales),
-        "pending_sales": len(sales) - len(paid_sales),
-        "total_value": round(total_value, 2)
-    }
-
-@router.get("/report/by-month")
-async def get_sales_by_month(
-    year: int = None,
-    month: int = None,
-    current_user: dict = Depends(require_role(["admin"]))
-):
-    """Obter relatório de vendas e comissões por mês"""
-    from calendar import monthrange
-    
-    # Se não especificado, usar mês atual
-    now = datetime.now(timezone.utc)
-    year = year or now.year
-    month = month or now.month
-    
-    # Datas de início e fim do mês
-    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
-    _, last_day = monthrange(year, month)
-    end_date = datetime(year, month, last_day, 23, 59, 59, tzinfo=timezone.utc)
-    
-    # Buscar vendas do período
-    query = {
-        "payment_status": "paid",
-        "paid_at": {
-            "$gte": start_date.isoformat(),
-            "$lte": end_date.isoformat()
-        }
-    }
-    
-    sales = await db.sales.find(query, {"_id": 0}).sort("paid_at", 1).to_list(1000)
-    
-    # Calcular totais
-    total_value = sum(s.get("sale_value", 0) for s in sales)
-    
-    # Buscar tipos de comissão ativos
-    commission_types = await db.commission_types.find({"active": True}, {"_id": 0}).to_list(100)
-    
-    # Calcular comissões
-    commissions = []
-    for ct in commission_types:
-        commission_value = total_value * (ct["percentage"] / 100)
-        commissions.append({
-            "id": ct["id"],
-            "description": ct["description"],
-            "percentage": ct["percentage"],
-            "calculated_value": round(commission_value, 2)
+    # Adicionar nomes dos usuários
+    leaderboard = []
+    for i, result in enumerate(results):
+        user = await db.users.find_one({"id": result["_id"]}, {"_id": 0, "full_name": 1})
+        leaderboard.append({
+            "rank": i + 1,
+            "user_id": result["_id"],
+            "user_name": user.get("full_name", "Anônimo") if user else "Anônimo",
+            "total_sales": result["total_sales"],
+            "total_amount": result["total_amount"]
         })
     
-    # Agrupar por origem do aparelho
-    by_source = {}
-    for sale in sales:
-        source = sale.get("device_source", "unknown")
-        if source not in by_source:
-            by_source[source] = {"count": 0, "value": 0}
-        by_source[source]["count"] += 1
-        by_source[source]["value"] += sale.get("sale_value", 0)
-    
-    # Meses disponíveis para filtro
-    pipeline_months = [
-        {"$match": {"payment_status": "paid", "paid_at": {"$ne": None}}},
-        {"$group": {
-            "_id": {"$substr": ["$paid_at", 0, 7]},
-            "count": {"$sum": 1}
-        }},
-        {"$sort": {"_id": -1}}
-    ]
-    available_months = await db.sales.aggregate(pipeline_months).to_list(24)
-    
-    return {
-        "year": year,
-        "month": month,
-        "month_name": get_month_name(month),
-        "total_sales": len(sales),
-        "total_value": round(total_value, 2),
-        "commissions": commissions,
-        "by_device_source": by_source,
-        "sales": sales,
-        "available_months": [m["_id"] for m in available_months]
-    }
-
-def get_month_name(month: int) -> str:
-    months = {
-        1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
-        5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
-        9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
-    }
-    return months.get(month, "")
-
-@router.get("/report/pdf")
-async def generate_sales_report_pdf(
-    year: int = None,
-    month: int = None,
-    current_user: dict = Depends(require_role(["admin"]))
-):
-    """Gerar PDF do relatório de vendas e comissões"""
-    from fastapi.responses import StreamingResponse
-    from reportlab.lib import colors
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import cm
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-    from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
-    from io import BytesIO
-    from calendar import monthrange
-    
-    # Se não especificado, usar mês atual
-    now = datetime.now(timezone.utc)
-    year = year or now.year
-    month = month or now.month
-    
-    # Datas de início e fim do mês
-    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
-    _, last_day = monthrange(year, month)
-    end_date = datetime(year, month, last_day, 23, 59, 59, tzinfo=timezone.utc)
-    
-    # Buscar vendas do período
-    query = {
-        "payment_status": "paid",
-        "paid_at": {
-            "$gte": start_date.isoformat(),
-            "$lte": end_date.isoformat()
-        }
-    }
-    
-    sales = await db.sales.find(query, {"_id": 0}).sort("paid_at", 1).to_list(1000)
-    
-    # Calcular totais
-    total_value = sum(s.get("sale_value", 0) for s in sales)
-    
-    # Buscar nome da plataforma
-    platform_name = await get_platform_name()
-    
-    # Buscar tipos de comissão ativos
-    commission_types = await db.commission_types.find({"active": True}, {"_id": 0}).to_list(100)
-    
-    # Criar PDF
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=1.5*cm, bottomMargin=1.5*cm)
-    elements = []
-    
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=18,
-        spaceAfter=20,
-        alignment=TA_CENTER,
-        textColor=colors.HexColor('#0891b2')
-    )
-    subtitle_style = ParagraphStyle(
-        'CustomSubtitle',
-        parent=styles['Heading2'],
-        fontSize=14,
-        spaceAfter=10,
-        spaceBefore=15,
-        textColor=colors.HexColor('#334155')
-    )
-    normal_style = styles['Normal']
-    
-    # Título
-    month_name = get_month_name(month)
-    elements.append(Paragraph(f"Relatório de Vendas e Comissões - {platform_name}", title_style))
-    elements.append(Paragraph(f"{month_name} de {year}", subtitle_style))
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # Resumo
-    elements.append(Paragraph("Resumo do Período", subtitle_style))
-    summary_data = [
-        ["Total de Vendas", str(len(sales))],
-        ["Valor Total", f"R$ {total_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")]
-    ]
-    summary_table = Table(summary_data, colWidths=[8*cm, 6*cm])
-    summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f1f5f9')),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#334155')),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0'))
-    ]))
-    elements.append(summary_table)
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # Comissões
-    if commission_types:
-        elements.append(Paragraph("Comissões Calculadas", subtitle_style))
-        commission_data = [["Descrição", "Porcentagem", "Valor Calculado"]]
-        total_commissions = 0
-        for ct in commission_types:
-            commission_value = total_value * (ct["percentage"] / 100)
-            total_commissions += commission_value
-            commission_data.append([
-                ct["description"],
-                f"{ct['percentage']}%",
-                f"R$ {commission_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-            ])
-        commission_data.append([
-            "TOTAL COMISSÕES", "",
-            f"R$ {total_commissions:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        ])
-        
-        commission_table = Table(commission_data, colWidths=[8*cm, 3*cm, 4*cm])
-        commission_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0891b2')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#f1f5f9')),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-            ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0'))
-        ]))
-        elements.append(commission_table)
-        elements.append(Spacer(1, 0.5*cm))
-    
-    # Lista de Vendas
-    if sales:
-        elements.append(Paragraph("Lista Completa de Vendas", subtitle_style))
-        sales_data = [["#", "Licenciado", "Cliente", "Aparelho", "Origem", "Valor", "Data"]]
-        for i, sale in enumerate(sales, 1):
-            paid_date = sale.get("paid_at", "")[:10] if sale.get("paid_at") else ""
-            origin = "Líder" if sale.get("device_source") == "leader_stock" else "Fábrica"
-            sales_data.append([
-                str(sale.get("sale_number", i)),
-                sale.get("licensee_name", "")[:20],
-                sale.get("customer_name", "")[:20],
-                sale.get("device_serial", "")[:15],
-                origin,
-                f"R$ {sale.get('sale_value', 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
-                paid_date
-            ])
-        
-        sales_table = Table(sales_data, colWidths=[1*cm, 3.5*cm, 3.5*cm, 2.5*cm, 1.5*cm, 2.5*cm, 2*cm])
-        sales_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0891b2')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('ALIGN', (1, 1), (3, -1), 'LEFT'),
-            ('ALIGN', (5, 1), (5, -1), 'RIGHT'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')])
-        ]))
-        elements.append(sales_table)
-    else:
-        elements.append(Paragraph("Nenhuma venda registrada neste período.", normal_style))
-    
-    # Rodapé
-    elements.append(Spacer(1, 1*cm))
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=colors.HexColor('#94a3b8'),
-        alignment=TA_CENTER
-    )
-    elements.append(Paragraph(
-        f"Relatório gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')} - {platform_name}",
-        footer_style
-    ))
-    
-    doc.build(elements)
-    buffer.seek(0)
-    
-    filename = f"relatorio_vendas_{year}_{month:02d}.pdf"
-    
-    return StreamingResponse(
-        buffer,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
-    )
-
+    return leaderboard
