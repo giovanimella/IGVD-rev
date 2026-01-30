@@ -54,6 +54,7 @@ import OzoxxCast from './pages/OzoxxCast';
 import AdminOzoxxCast from './pages/admin/AdminOzoxxCast';
 import AdminSales from './pages/admin/AdminSales';
 import AdminCompanyEvents from './pages/admin/AdminCompanyEvents';
+import PaymentCallback from './pages/PaymentCallback';
 
 function App() {
   return (
