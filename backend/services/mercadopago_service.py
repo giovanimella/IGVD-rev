@@ -23,11 +23,22 @@ class MercadoPagoService:
     def __init__(self, credentials: GatewayCredentials, environment: PaymentEnvironment):
         self.credentials = credentials
         self.environment = environment
-        self.access_token = credentials.mercadopago_access_token
-        self.public_key = credentials.mercadopago_public_key
+        
+        # Usar credenciais do banco, ou fallback para variáveis de ambiente
+        self.access_token = (
+            credentials.mercadopago_access_token 
+            if credentials.mercadopago_access_token 
+            else os.environ.get('MERCADOPAGO_ACCESS_TOKEN')
+        )
+        self.public_key = (
+            credentials.mercadopago_public_key 
+            if credentials.mercadopago_public_key 
+            else os.environ.get('MERCADOPAGO_PUBLIC_KEY')
+        )
         
         if self.access_token:
             self.sdk = mercadopago.SDK(self.access_token)
+            logger.info(f"MercadoPago SDK inicializado (token: {self.access_token[:20]}...)")
         else:
             self.sdk = None
             logger.warning("MercadoPago: Access token não configurado")
