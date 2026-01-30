@@ -3,10 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-// import { ChatProvider } from './contexts/ChatContext';
+import { ChatProvider } from './contexts/ChatContext';
 import { PrivateRoute } from './components/PrivateRoute';
 import { Toaster } from './components/ui/sonner';
-// import ChatWidget from './components/ChatWidget';
+import ChatWidget from './components/ChatWidget';
 
 import Login from './pages/Login';
 import RequestReset from './pages/RequestReset';
@@ -58,10 +58,10 @@ function App() {
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          {/* <ChatProvider> */}
+          <ChatProvider>
             <BrowserRouter>
               <Toaster position="top-right" richColors />
-              {/* <ChatWidget /> */}
+              <ChatWidget />
               <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/request-reset" element={<RequestReset />} />
@@ -387,7 +387,7 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
-      {/* </ChatProvider> */}
+      </ChatProvider>
       </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
