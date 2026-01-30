@@ -283,6 +283,40 @@ async def get_my_progress(current_user: dict = Depends(get_current_user)):
     progress = await db.user_progress.find({"user_id": current_user["sub"]}, {"_id": 0}).to_list(1000)
     return progress
 
+
+@router.post("/check-stage-advancement")
+async def check_stage_advancement(current_user: dict = Depends(get_current_user)):
+    """
+    Endpoint para verificar e avançar o estágio de onboarding manualmente.
+    Útil para casos onde o usuário completou todos os módulos mas não avançou automaticamente.
+    """
+    advanced = await check_and_advance_onboarding_stage(current_user["sub"])
+    
+    if advanced:
+        return {
+            "message": "Parabéns! Você avançou para a etapa de Treinamento Presencial!",
+            "advanced": True,
+            "new_stage": "treinamento_presencial"
+        }
+    
+    # Verificar estágio atual
+    user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0, "current_stage": 1})
+    current_stage = user.get("current_stage", "acolhimento") if user else "acolhimento"
+    
+    if current_stage != "acolhimento":
+        return {
+            "message": f"Você já está na etapa: {current_stage}",
+            "advanced": False,
+            "current_stage": current_stage
+        }
+    
+    return {
+        "message": "Você ainda não completou todos os módulos de acolhimento.",
+        "advanced": False,
+        "current_stage": current_stage
+    }
+
+
 @router.get("/module/{module_id}")
 async def get_module_progress(module_id: str, current_user: dict = Depends(get_current_user)):
     progress = await db.user_progress.find({
