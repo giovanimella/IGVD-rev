@@ -23,6 +23,7 @@ import {
 import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
 import { Checkbox } from '../components/ui/checkbox';
+import PaymentCheckout from '../components/PaymentCheckout';
 
 const Training = () => {
   const [loading, setLoading] = useState(true);
