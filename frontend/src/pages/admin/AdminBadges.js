@@ -309,13 +309,13 @@ const AdminBadges = () => {
           </div>
         )}
 
-        {/* Modal de Badge */}
+        {/* Modal de Conquista */}
         {showModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-slate-900">
-                  {editingBadge ? 'Editar Badge' : 'Novo Badge'}
+                  {editingBadge ? 'Editar Conquista' : 'Nova Conquista'}
                 </h2>
                 <button
                   onClick={() => setShowModal(false)}
