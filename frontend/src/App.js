@@ -35,6 +35,7 @@ import AdminAssessment from './pages/admin/AdminAssessment';
 import AdminCertificates from './pages/admin/AdminCertificates';
 import AdminLevels from './pages/admin/AdminLevels';
 import AdminTraining from './pages/admin/AdminTraining';
+import AdminPaymentSettings from './pages/admin/AdminPaymentSettings';
 import SupervisorLicensees from './pages/supervisor/SupervisorLicensees';
 import SupervisorAnalytics from './pages/supervisor/SupervisorAnalytics';
 import LicenseeDetail from './pages/supervisor/LicenseeDetail';
