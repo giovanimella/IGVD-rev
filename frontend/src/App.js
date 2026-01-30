@@ -168,6 +168,14 @@ function App() {
             }
           />
           <Route
+            path="/sales-links"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <SalesLinks />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/igvd-cast"
             element={
               <PrivateRoute roles={['licenciado']}>
