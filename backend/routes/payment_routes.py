@@ -15,13 +15,62 @@ from models_payment import (
     PaymentSettings, PaymentSettingsUpdate, PaymentGateway, PaymentEnvironment,
     GatewayCredentials, PixPaymentRequest, CreditCardPaymentRequest,
     SplitPaymentRequest, Transaction, TransactionResponse, PaymentStatus,
-    WebhookEvent, PaymentPurpose
+    WebhookEvent, PaymentPurpose, PayerInfo
 )
 from services.payment_gateway import payment_gateway
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/payments", tags=["payments"])
+
+
+async def get_or_fill_payer_data(payer: PayerInfo, user_id: str) -> PayerInfo:
+    """
+    Preenche dados do pagador a partir do usuário autenticado se necessário.
+    Garante que os dados obrigatórios (nome, email, documento) estejam preenchidos.
+    """
+    db = payment_gateway.db
+    
+    # Verificar se os dados obrigatórios estão presentes
+    name_missing = not payer.name or len(payer.name.strip()) < 3
+    email_missing = not payer.email or '@' not in payer.email
+    document_missing = not payer.document_number or len(payer.document_number.replace('.', '').replace('-', '').strip()) < 11
+    
+    if not (name_missing or email_missing or document_missing):
+        return payer  # Dados já estão completos
+    
+    # Buscar dados do usuário
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    
+    if not user:
+        logger.warning(f"Usuário {user_id} não encontrado para preencher dados do pagador")
+        return payer
+    
+    # Buscar registro de treinamento se existir (contém CPF)
+    training_registration = await db.training_registrations.find_one(
+        {"user_id": user_id}, 
+        {"_id": 0, "participant_data": 1}
+    )
+    
+    # Preencher dados faltantes
+    filled_payer = PayerInfo(
+        name=payer.name if not name_missing else user.get("full_name", ""),
+        email=payer.email if not email_missing else user.get("email", ""),
+        document_type=payer.document_type or "CPF",
+        document_number=payer.document_number if not document_missing else "",
+        phone=payer.phone or user.get("phone", "")
+    )
+    
+    # Se documento ainda faltando, tentar obter do registro de treinamento
+    if document_missing and training_registration:
+        participant = training_registration.get("participant_data", {})
+        cpf = participant.get("cpf", "")
+        if cpf:
+            filled_payer.document_number = cpf.replace(".", "").replace("-", "").strip()
+    
+    logger.info(f"Dados do pagador preenchidos para usuário {user_id}: nome={filled_payer.name}, email={filled_payer.email}, documento={len(filled_payer.document_number) if filled_payer.document_number else 0} chars")
+    
+    return filled_payer
 
 
 # ==================== CONFIGURAÇÕES (ADMIN) ====================
