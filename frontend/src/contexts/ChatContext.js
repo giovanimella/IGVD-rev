@@ -61,7 +61,7 @@ export const ChatProvider = ({ children }) => {
         setMessages((prev) => [...prev, message]);
         
         // Atualizar contador de não lidas se o chat não estiver aberto
-        if (!isChatOpen && message.sender_id !== user?.id) {
+        if (message.sender_id !== user?.id) {
           setUnreadCount((prev) => prev + 1);
         }
       });
@@ -87,7 +87,7 @@ export const ChatProvider = ({ children }) => {
         newSocket.close();
       };
     }
-  }, [user, token, SOCKET_URL, isChatOpen]);
+  }, [user, token, SOCKET_URL]);
 
   // Buscar ou criar conversa
   const getOrCreateConversation = useCallback(async () => {
