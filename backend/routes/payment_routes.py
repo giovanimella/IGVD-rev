@@ -99,14 +99,23 @@ async def get_public_key(current_user: dict = Depends(get_current_user)):
     else:
         credentials = settings.production_credentials
     
-    return {
-        "gateway": "mercadopago",
-        "public_key": credentials.mercadopago_public_key,
-        "environment": settings.environment.value
-    }
+    if settings.active_gateway == PaymentGateway.MERCADOPAGO:
+        return {
+            "gateway": "mercadopago",
+            "public_key": credentials.mercadopago_public_key,
+            "environment": settings.environment.value,
+            "configured": bool(credentials.mercadopago_access_token)
+        }
+    else:
+        return {
+            "gateway": "pagseguro",
+            "public_key": credentials.pagseguro_token[:8] + "..." if credentials.pagseguro_token else None,
+            "environment": settings.environment.value,
+            "configured": bool(credentials.pagseguro_token and credentials.pagseguro_email)
+        }
 
 
-# ==================== CHECKOUT PRO ====================
+# ==================== CHECKOUT ====================
 
 @router.post("/checkout", response_model=CheckoutProResponse)
 async def create_checkout(
@@ -114,11 +123,11 @@ async def create_checkout(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Cria um Checkout Pro do MercadoPago.
-    Retorna uma URL para redirecionar o usuário ao ambiente seguro do MercadoPago.
+    Cria um Checkout externo (MercadoPago ou PagSeguro).
+    Retorna uma URL para redirecionar o usuário ao ambiente seguro do gateway.
     
-    O cliente preencherá todos os dados de pagamento (cartão, PIX, etc) 
-    diretamente no MercadoPago, garantindo máxima segurança.
+    O cliente preencherá todos os dados de pagamento diretamente no gateway,
+    garantindo máxima segurança.
     """
     try:
         db = payment_gateway.db
