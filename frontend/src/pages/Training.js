@@ -610,10 +610,11 @@ const Training = () => {
 
             <PaymentCheckout
               amount={registrationData?.price || 0}
+              title={`Treinamento Presencial IGVD`}
               description={`Treinamento Presencial - ${registrationData?.has_spouse ? 'Casal' : 'Individual'}`}
               purpose="training_fee"
               referenceId={registrationData?.id}
-              payerData={payerData}
+              maxInstallments={12}
               onSuccess={async (data) => {
                 toast.success('Pagamento confirmado!');
                 // Atualizar status do registro
