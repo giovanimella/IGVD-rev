@@ -22,8 +22,9 @@ active_connections = {}
 async def verify_token(token: str):
     """Verifica o token JWT"""
     try:
-        SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+        ALGORITHM = os.environ.get('JWT_ALGORITHM', 'HS256')
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except Exception as e:
         print(f"Erro ao verificar token: {e}")
