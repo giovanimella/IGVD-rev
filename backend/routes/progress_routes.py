@@ -191,6 +191,8 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
             detail=f"Você precisa assistir pelo menos {MIN_WATCH_PERCENTAGE}% do conteúdo para marcar como completo. Progresso atual: {progress_data.watched_percentage}%"
         )
     
+    newly_completed = False  # Flag para saber se este capítulo acabou de ser completado
+    
     if existing:
         update_data = {
             "watched_percentage": progress_data.watched_percentage
@@ -199,101 +201,16 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
         if should_complete and not existing.get("completed", False):
             update_data["completed"] = True
             update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+            newly_completed = True
             
             # Atualizar progresso dos desafios semanais
             await update_challenge_progress(current_user["sub"])
-            
-            module_chapters = await db.chapters.find({"module_id": progress_data.module_id}, {"_id": 0}).to_list(1000)
-            all_completed = True
-            for chapter in module_chapters:
-                if chapter["id"] == progress_data.chapter_id:
-                    continue
-                chapter_progress = await db.user_progress.find_one({
-                    "user_id": current_user["sub"],
-                    "chapter_id": chapter["id"]
-                })
-                if not chapter_progress or not chapter_progress.get("completed", False):
-                    all_completed = False
-                    break
-            
-            if all_completed:
-                module = await db.modules.find_one({"id": progress_data.module_id}, {"_id": 0})
-                if module and module.get("points_reward", 0) > 0:
-                    await db.users.update_one(
-                        {"id": current_user["sub"]},
-                        {"$inc": {"points": module["points_reward"]}}
-                    )
-                
-                # Criar notificação para o usuário
-                user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
-                from routes.notification_routes import create_notification, notify_admins
-                
-                await create_notification(
-                    current_user["sub"],
-                    "Módulo Concluído! 🎉",
-                    f"Parabéns! Você concluiu o módulo '{module['title']}' e ganhou {module.get('points_reward', 0)} pontos!",
-                    "module_completed",
-                    module["id"]
-                )
-                
-                # Notificar admins
-                await notify_admins(
-                    "Licenciado completou módulo",
-                    f"{user['full_name']} concluiu o módulo '{module['title']}'",
-                    "admin_notification",
-                    module["id"]
-                )
-                
-                # Verificar se precisa avançar o estágio do onboarding
-                if user.get("current_stage") == "acolhimento" and module.get("is_acolhimento"):
-                    # Verificar se todos os módulos de acolhimento foram concluídos
-                    acolhimento_modules = await db.modules.find({"is_acolhimento": True}, {"_id": 0, "id": 1}).to_list(100)
-                    all_acolhimento_completed = True
-                    
-                    for acolh_module in acolhimento_modules:
-                        module_chapters = await db.chapters.find({"module_id": acolh_module["id"]}, {"_id": 0, "id": 1}).to_list(100)
-                        for chapter in module_chapters:
-                            chapter_progress = await db.user_progress.find_one({
-                                "user_id": current_user["sub"],
-                                "chapter_id": chapter["id"],
-                                "completed": True
-                            })
-                            if not chapter_progress:
-                                all_acolhimento_completed = False
-                                break
-                        if not all_acolhimento_completed:
-                            break
-                    
-                    if all_acolhimento_completed:
-                        # Avançar para próxima etapa do onboarding (treinamento presencial)
-                        await db.users.update_one(
-                            {"id": current_user["sub"]},
-                            {"$set": {"current_stage": "treinamento_presencial"}}
-                        )
-                        
-                        await create_notification(
-                            current_user["sub"],
-                            "Acolhimento Concluído! 🎓",
-                            "Parabéns! Você concluiu todos os módulos de acolhimento. Agora você pode se inscrever no treinamento presencial.",
-                            "onboarding_stage",
-                            "treinamento_presencial"
-                        )
         
         await db.user_progress.update_one(
             {"id": existing["id"]},
             {"$set": update_data}
         )
     else:
-        # Validação para novo progresso
-        can_complete = progress_data.watched_percentage >= MIN_WATCH_PERCENTAGE
-        should_complete = progress_data.completed and can_complete
-        
-        if progress_data.completed and not can_complete:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Você precisa assistir pelo menos {MIN_WATCH_PERCENTAGE}% do conteúdo para marcar como completo. Progresso atual: {progress_data.watched_percentage}%"
-            )
-        
         progress = UserProgress(
             user_id=current_user["sub"],
             module_id=progress_data.module_id,
@@ -304,35 +221,40 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
         
         if should_complete:
             progress.completed_at = datetime.now(timezone.utc).isoformat()
+            newly_completed = True
             # Atualizar progresso dos desafios semanais
             await update_challenge_progress(current_user["sub"])
         
         await db.user_progress.insert_one(progress.model_dump())
+    
+    # Se o capítulo foi marcado como completo, verificar se completou o módulo
+    if newly_completed:
+        module_chapters = await db.chapters.find({"module_id": progress_data.module_id}, {"_id": 0}).to_list(1000)
+        all_module_completed = True
         
-        # Verificar se completou o módulo (mesmo lógica do bloco existing)
-        if should_complete:
-            module_chapters = await db.chapters.find({"module_id": progress_data.module_id}, {"_id": 0}).to_list(1000)
-            all_completed = True
-            for chapter in module_chapters:
-                if chapter["id"] == progress_data.chapter_id:
-                    continue  # Já sabemos que este está completo
-                chapter_progress = await db.user_progress.find_one({
-                    "user_id": current_user["sub"],
-                    "chapter_id": chapter["id"]
-                })
-                if not chapter_progress or not chapter_progress.get("completed", False):
-                    all_completed = False
-                    break
-            
-            if all_completed:
-                module = await db.modules.find_one({"id": progress_data.module_id}, {"_id": 0})
-                if module and module.get("points_reward", 0) > 0:
+        for chapter in module_chapters:
+            if chapter["id"] == progress_data.chapter_id:
+                continue  # Já sabemos que este está completo
+            chapter_progress = await db.user_progress.find_one({
+                "user_id": current_user["sub"],
+                "chapter_id": chapter["id"],
+                "completed": True
+            })
+            if not chapter_progress:
+                all_module_completed = False
+                break
+        
+        if all_module_completed:
+            module = await db.modules.find_one({"id": progress_data.module_id}, {"_id": 0})
+            if module:
+                # Dar pontos de recompensa
+                if module.get("points_reward", 0) > 0:
                     await db.users.update_one(
                         {"id": current_user["sub"]},
                         {"$inc": {"points": module["points_reward"]}}
                     )
                 
-                # Criar notificação para o usuário
+                # Criar notificações
                 user = await db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
                 from routes.notification_routes import create_notification, notify_admins
                 
@@ -344,48 +266,15 @@ async def update_progress(progress_data: ProgressUpdate, current_user: dict = De
                     module["id"]
                 )
                 
-                # Notificar admins
                 await notify_admins(
                     "Licenciado completou módulo",
                     f"{user['full_name']} concluiu o módulo '{module['title']}'",
                     "admin_notification",
                     module["id"]
                 )
-                
-                # Verificar se precisa avançar o estágio do onboarding
-                if user.get("current_stage") == "acolhimento" and module.get("is_acolhimento"):
-                    # Verificar se todos os módulos de acolhimento foram concluídos
-                    acolhimento_modules = await db.modules.find({"is_acolhimento": True}, {"_id": 0, "id": 1}).to_list(100)
-                    all_acolhimento_completed = True
-                    
-                    for acolh_module in acolhimento_modules:
-                        acolh_chapters = await db.chapters.find({"module_id": acolh_module["id"]}, {"_id": 0, "id": 1}).to_list(100)
-                        for acolh_chapter in acolh_chapters:
-                            chapter_prog = await db.user_progress.find_one({
-                                "user_id": current_user["sub"],
-                                "chapter_id": acolh_chapter["id"],
-                                "completed": True
-                            })
-                            if not chapter_prog:
-                                all_acolhimento_completed = False
-                                break
-                        if not all_acolhimento_completed:
-                            break
-                    
-                    if all_acolhimento_completed:
-                        # Avançar para próxima etapa do onboarding (treinamento presencial)
-                        await db.users.update_one(
-                            {"id": current_user["sub"]},
-                            {"$set": {"current_stage": "treinamento_presencial"}}
-                        )
-                        
-                        await create_notification(
-                            current_user["sub"],
-                            "Acolhimento Concluído! 🎓",
-                            "Parabéns! Você concluiu todos os módulos de acolhimento. Agora você pode se inscrever no treinamento presencial.",
-                            "onboarding_stage",
-                            "treinamento_presencial"
-                        )
+        
+        # SEMPRE verificar se deve avançar o estágio de onboarding após completar um capítulo
+        await check_and_advance_onboarding_stage(current_user["sub"])
     
     return {"message": "Progresso atualizado com sucesso"}
 
