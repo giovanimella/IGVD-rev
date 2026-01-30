@@ -1,26 +1,24 @@
 """
-Serviço de integração com MercadoPago
-Suporta PIX, Cartão de Crédito e Pagamentos Divididos
+Serviço de integração com MercadoPago Checkout Pro
+O cliente é redirecionado para o ambiente seguro do MercadoPago para realizar o pagamento
 """
 import mercadopago
 import logging
+import os
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 
 from models_payment import (
     PaymentEnvironment, GatewayCredentials, PaymentStatus,
-    PixPaymentRequest, CreditCardPaymentRequest, SplitPaymentRequest
+    CheckoutProRequest
 )
 
 logger = logging.getLogger(__name__)
 
 
 class MercadoPagoService:
-    """Serviço de integração com MercadoPago"""
-    
-    SANDBOX_URL = "https://api.mercadopago.com"
-    PRODUCTION_URL = "https://api.mercadopago.com"
+    """Serviço de integração com MercadoPago Checkout Pro"""
     
     def __init__(self, credentials: GatewayCredentials, environment: PaymentEnvironment):
         self.credentials = credentials
@@ -56,57 +54,105 @@ class MercadoPagoService:
         }
         return status_map.get(mp_status, PaymentStatus.PENDING)
     
-    async def create_pix_payment(self, request: PixPaymentRequest, transaction_id: str) -> Dict[str, Any]:
-        """Cria um pagamento PIX"""
+    async def create_checkout_preference(self, request: CheckoutProRequest, transaction_id: str) -> Dict[str, Any]:
+        """
+        Cria uma preferência do Checkout Pro
+        Retorna a URL para redirecionar o usuário ao ambiente seguro do MercadoPago
+        """
         if not self.sdk:
             return {
                 "success": False,
-                "message": "MercadoPago não configurado",
+                "message": "MercadoPago não configurado. Configure o Access Token nas configurações de pagamento.",
                 "status": PaymentStatus.FAILED
             }
         
         try:
-            payment_data = {
-                "transaction_amount": float(request.amount),
-                "description": request.description,
-                "payment_method_id": "pix",
-                "payer": {
-                    "email": request.payer.email,
-                    "first_name": request.payer.name.split()[0] if request.payer.name else "",
-                    "last_name": " ".join(request.payer.name.split()[1:]) if request.payer.name and len(request.payer.name.split()) > 1 else "",
-                    "identification": {
-                        "type": request.payer.document_type,
-                        "number": request.payer.document_number
+            # Obter URL base do frontend para back_urls
+            frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+            webhook_url = os.environ.get('WEBHOOK_URL', os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001'))
+            
+            # Construir dados da preferência
+            preference_data = {
+                "items": [
+                    {
+                        "id": transaction_id,
+                        "title": request.title,
+                        "description": request.description or request.title,
+                        "quantity": 1,
+                        "currency_id": "BRL",
+                        "unit_price": float(request.amount)
                     }
+                ],
+                "back_urls": {
+                    "success": f"{frontend_url}/payment/success?transaction_id={transaction_id}",
+                    "failure": f"{frontend_url}/payment/failure?transaction_id={transaction_id}",
+                    "pending": f"{frontend_url}/payment/pending?transaction_id={transaction_id}"
                 },
-                "external_reference": transaction_id
+                "auto_return": "approved",
+                "external_reference": transaction_id,
+                "notification_url": f"{webhook_url}/api/payments/webhooks/mercadopago",
+                "statement_descriptor": "IGVD TREINAMENTO",
+                "expires": True,
+                "expiration_date_from": datetime.now().isoformat(),
+                "expiration_date_to": (datetime.now() + timedelta(hours=24)).isoformat()
             }
             
-            request_options = mercadopago.config.RequestOptions()
-            request_options.custom_headers = {
-                "x-idempotency-key": self._get_idempotency_key("pix")
+            # Configurar métodos de pagamento permitidos
+            payment_methods = {
+                "excluded_payment_types": [],
+                "excluded_payment_methods": [],
+                "installments": request.max_installments or 12,
+                "default_installments": 1
             }
             
-            result = self.sdk.payment().create(payment_data, request_options)
-            payment = result.get("response", {})
+            # Se for somente PIX
+            if request.pix_only:
+                payment_methods["excluded_payment_types"] = [
+                    {"id": "credit_card"},
+                    {"id": "debit_card"},
+                    {"id": "ticket"}
+                ]
+            
+            preference_data["payment_methods"] = payment_methods
+            
+            # Adicionar dados do pagador se fornecidos (opcional - MercadoPago coletará se não informado)
+            if request.payer_email:
+                preference_data["payer"] = {
+                    "email": request.payer_email
+                }
+                if request.payer_name:
+                    names = request.payer_name.split(" ", 1)
+                    preference_data["payer"]["name"] = names[0]
+                    if len(names) > 1:
+                        preference_data["payer"]["surname"] = names[1]
+            
+            # Criar preferência no MercadoPago
+            logger.info(f"Criando preferência Checkout Pro para transação {transaction_id}")
+            
+            result = self.sdk.preference().create(preference_data)
+            preference = result.get("response", {})
             
             if result.get("status") in [200, 201]:
-                # Extrair dados do QR Code PIX
-                pix_data = payment.get("point_of_interaction", {}).get("transaction_data", {})
+                init_point = preference.get("init_point")
+                sandbox_init_point = preference.get("sandbox_init_point")
+                
+                # Usar sandbox em ambiente de teste
+                checkout_url = sandbox_init_point if self.environment == PaymentEnvironment.SANDBOX else init_point
+                
+                logger.info(f"Preferência criada com sucesso: {preference.get('id')}")
                 
                 return {
                     "success": True,
-                    "message": "Pagamento PIX criado com sucesso",
-                    "gateway_transaction_id": str(payment.get("id")),
-                    "status": self._map_status(payment.get("status", "pending")),
-                    "pix_qr_code": pix_data.get("qr_code"),
-                    "pix_qr_code_base64": pix_data.get("qr_code_base64"),
-                    "pix_copy_paste": pix_data.get("qr_code"),
-                    "pix_expiration": payment.get("date_of_expiration")
+                    "message": "Preferência de pagamento criada com sucesso",
+                    "preference_id": preference.get("id"),
+                    "checkout_url": checkout_url,
+                    "init_point": init_point,
+                    "sandbox_init_point": sandbox_init_point,
+                    "status": PaymentStatus.PENDING
                 }
             else:
-                error_message = payment.get("message", "Erro ao criar pagamento PIX")
-                logger.error(f"MercadoPago PIX error: {result}")
+                error_message = preference.get("message", "Erro ao criar preferência de pagamento")
+                logger.error(f"Erro ao criar preferência: {result}")
                 return {
                     "success": False,
                     "message": error_message,
@@ -114,179 +160,10 @@ class MercadoPagoService:
                 }
                 
         except Exception as e:
-            logger.error(f"MercadoPago PIX exception: {e}")
+            logger.error(f"Exceção ao criar preferência Checkout Pro: {e}")
             return {
                 "success": False,
                 "message": f"Erro ao processar pagamento: {str(e)}",
-                "status": PaymentStatus.FAILED
-            }
-    
-    async def create_credit_card_payment(self, request: CreditCardPaymentRequest, transaction_id: str) -> Dict[str, Any]:
-        """Cria um pagamento com cartão de crédito"""
-        if not self.sdk:
-            return {
-                "success": False,
-                "message": "MercadoPago não configurado",
-                "status": PaymentStatus.FAILED
-            }
-        
-        try:
-            payment_data = {
-                "transaction_amount": float(request.amount),
-                "token": request.card.token,
-                "description": request.description,
-                "payment_method_id": request.card.payment_method_id,
-                "installments": request.card.installments,
-                "payer": {
-                    "email": request.payer.email,
-                    "first_name": request.payer.name.split()[0] if request.payer.name else "",
-                    "last_name": " ".join(request.payer.name.split()[1:]) if request.payer.name and len(request.payer.name.split()) > 1 else "",
-                    "identification": {
-                        "type": request.payer.document_type,
-                        "number": request.payer.document_number
-                    }
-                },
-                "external_reference": transaction_id
-            }
-            
-            if request.card.issuer_id:
-                payment_data["issuer_id"] = request.card.issuer_id
-            
-            request_options = mercadopago.config.RequestOptions()
-            request_options.custom_headers = {
-                "x-idempotency-key": self._get_idempotency_key("card")
-            }
-            
-            result = self.sdk.payment().create(payment_data, request_options)
-            payment = result.get("response", {})
-            
-            if result.get("status") in [200, 201]:
-                mp_status = payment.get("status", "pending")
-                status = self._map_status(mp_status)
-                
-                return {
-                    "success": status in [PaymentStatus.APPROVED, PaymentStatus.AUTHORIZED, PaymentStatus.PENDING],
-                    "message": "Pagamento processado" if status != PaymentStatus.DECLINED else "Pagamento recusado",
-                    "gateway_transaction_id": str(payment.get("id")),
-                    "status": status,
-                    "status_detail": payment.get("status_detail"),
-                    "authorization_code": payment.get("authorization_code")
-                }
-            else:
-                error_message = payment.get("message", "Erro ao processar cartão")
-                logger.error(f"MercadoPago Card error: {result}")
-                return {
-                    "success": False,
-                    "message": error_message,
-                    "status": PaymentStatus.FAILED
-                }
-                
-        except Exception as e:
-            logger.error(f"MercadoPago Card exception: {e}")
-            return {
-                "success": False,
-                "message": f"Erro ao processar pagamento: {str(e)}",
-                "status": PaymentStatus.FAILED
-            }
-    
-    async def create_split_payment(self, request: SplitPaymentRequest, transaction_id: str) -> Dict[str, Any]:
-        """Cria um pagamento dividido (PIX + Cartão ou múltiplos cartões)"""
-        if not self.sdk:
-            return {
-                "success": False,
-                "message": "MercadoPago não configurado",
-                "status": PaymentStatus.FAILED
-            }
-        
-        results = {
-            "success": True,
-            "message": "Pagamento dividido processado",
-            "status": PaymentStatus.PENDING,
-            "pix_transaction_id": None,
-            "card_transaction_id": None,
-            "card2_transaction_id": None,
-            "pix_qr_code": None,
-            "pix_qr_code_base64": None,
-            "pix_copy_paste": None
-        }
-        
-        try:
-            # Processar parte PIX
-            if request.pix_amount > 0:
-                pix_request = PixPaymentRequest(
-                    amount=request.pix_amount,
-                    description=f"{request.description} (PIX)",
-                    payer=request.payer,
-                    purpose=request.purpose,
-                    reference_id=f"{transaction_id}_pix"
-                )
-                
-                pix_result = await self.create_pix_payment(pix_request, f"{transaction_id}_pix")
-                
-                if pix_result.get("success"):
-                    results["pix_transaction_id"] = pix_result.get("gateway_transaction_id")
-                    results["pix_qr_code"] = pix_result.get("pix_qr_code")
-                    results["pix_qr_code_base64"] = pix_result.get("pix_qr_code_base64")
-                    results["pix_copy_paste"] = pix_result.get("pix_copy_paste")
-                else:
-                    results["success"] = False
-                    results["message"] = f"Erro no PIX: {pix_result.get('message')}"
-                    results["status"] = PaymentStatus.FAILED
-            
-            # Processar parte Cartão 1
-            if request.card1_amount > 0 and request.card1:
-                card_request = CreditCardPaymentRequest(
-                    amount=request.card1_amount,
-                    description=f"{request.description} (Cartão 1)",
-                    payer=request.payer,
-                    card=request.card1,
-                    purpose=request.purpose,
-                    reference_id=f"{transaction_id}_card1"
-                )
-                
-                card_result = await self.create_credit_card_payment(card_request, f"{transaction_id}_card1")
-                
-                if card_result.get("success"):
-                    results["card_transaction_id"] = card_result.get("gateway_transaction_id")
-                else:
-                    results["success"] = False
-                    results["message"] = f"Erro no Cartão 1: {card_result.get('message')}"
-                    results["status"] = PaymentStatus.FAILED
-            
-            # Processar parte Cartão 2 (se houver)
-            if request.card2_amount > 0 and request.card2:
-                card2_request = CreditCardPaymentRequest(
-                    amount=request.card2_amount,
-                    description=f"{request.description} (Cartão 2)",
-                    payer=request.payer,
-                    card=request.card2,
-                    purpose=request.purpose,
-                    reference_id=f"{transaction_id}_card2"
-                )
-                
-                card2_result = await self.create_credit_card_payment(card2_request, f"{transaction_id}_card2")
-                
-                if card2_result.get("success"):
-                    results["card2_transaction_id"] = card2_result.get("gateway_transaction_id")
-                else:
-                    results["success"] = False
-                    results["message"] = f"Erro no Cartão 2: {card2_result.get('message')}"
-                    results["status"] = PaymentStatus.FAILED
-            
-            # Definir ID principal da transação
-            results["gateway_transaction_id"] = (
-                results.get("card_transaction_id") or 
-                results.get("pix_transaction_id") or 
-                results.get("card2_transaction_id")
-            )
-            
-            return results
-            
-        except Exception as e:
-            logger.error(f"MercadoPago Split exception: {e}")
-            return {
-                "success": False,
-                "message": f"Erro ao processar pagamento dividido: {str(e)}",
                 "status": PaymentStatus.FAILED
             }
     
@@ -303,14 +180,59 @@ class MercadoPagoService:
                 return {
                     "status": self._map_status(payment.get("status", "pending")),
                     "status_detail": payment.get("status_detail"),
-                    "gateway_status": payment.get("status")
+                    "gateway_status": payment.get("status"),
+                    "payment_method": payment.get("payment_method_id"),
+                    "payment_type": payment.get("payment_type_id"),
+                    "transaction_amount": payment.get("transaction_amount"),
+                    "date_approved": payment.get("date_approved")
                 }
             else:
                 return {"status": PaymentStatus.FAILED, "message": "Pagamento não encontrado"}
                 
         except Exception as e:
-            logger.error(f"MercadoPago check status error: {e}")
+            logger.error(f"Erro ao verificar status do pagamento: {e}")
             return {"status": PaymentStatus.FAILED, "message": str(e)}
+    
+    async def search_payments_by_reference(self, external_reference: str) -> Dict[str, Any]:
+        """Busca pagamentos por referência externa (transaction_id)"""
+        if not self.sdk:
+            return {"success": False, "payments": [], "message": "SDK não configurado"}
+        
+        try:
+            filters = {
+                "external_reference": external_reference
+            }
+            
+            result = self.sdk.payment().search(filters)
+            
+            if result.get("status") == 200:
+                results = result.get("response", {}).get("results", [])
+                
+                payments = []
+                for payment in results:
+                    payments.append({
+                        "id": payment.get("id"),
+                        "status": self._map_status(payment.get("status", "pending")),
+                        "gateway_status": payment.get("status"),
+                        "status_detail": payment.get("status_detail"),
+                        "payment_method": payment.get("payment_method_id"),
+                        "payment_type": payment.get("payment_type_id"),
+                        "amount": payment.get("transaction_amount"),
+                        "date_created": payment.get("date_created"),
+                        "date_approved": payment.get("date_approved")
+                    })
+                
+                return {
+                    "success": True,
+                    "payments": payments,
+                    "total": len(payments)
+                }
+            else:
+                return {"success": False, "payments": [], "message": "Erro ao buscar pagamentos"}
+                
+        except Exception as e:
+            logger.error(f"Erro ao buscar pagamentos por referência: {e}")
+            return {"success": False, "payments": [], "message": str(e)}
     
     async def refund_payment(self, gateway_transaction_id: str, amount: Optional[float] = None) -> Dict[str, Any]:
         """Processa um reembolso"""
@@ -322,8 +244,7 @@ class MercadoPagoService:
             if amount:
                 refund_data["amount"] = float(amount)
             
-            request_options = mercadopago.config.RequestOptions()
-            result = self.sdk.refund().create(int(gateway_transaction_id), refund_data, request_options)
+            result = self.sdk.refund().create(int(gateway_transaction_id), refund_data)
             refund = result.get("response", {})
             
             if result.get("status") in [200, 201]:
@@ -340,7 +261,7 @@ class MercadoPagoService:
                 }
                 
         except Exception as e:
-            logger.error(f"MercadoPago refund error: {e}")
+            logger.error(f"Erro ao processar reembolso: {e}")
             return {"success": False, "message": str(e)}
     
     def get_public_key(self) -> Optional[str]:
