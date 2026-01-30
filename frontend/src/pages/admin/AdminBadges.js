@@ -59,8 +59,8 @@ const AdminBadges = () => {
       const response = await axios.get(`${API_URL}/api/gamification/badges/all`);
       setBadges(response.data);
     } catch (error) {
-      console.error('Erro ao buscar badges:', error);
-      toast.error('Erro ao carregar badges');
+      console.error('Erro ao buscar conquistas:', error);
+      toast.error('Erro ao carregar conquistas');
     } finally {
       setLoading(false);
     }
@@ -81,18 +81,18 @@ const AdminBadges = () => {
     try {
       if (editingBadge) {
         await axios.put(`${API_URL}/api/gamification/badges/${editingBadge.id}`, formData);
-        toast.success('Badge atualizado com sucesso!');
+        toast.success('Conquista atualizada com sucesso!');
       } else {
         await axios.post(`${API_URL}/api/gamification/badges`, formData);
-        toast.success('Badge criado com sucesso!');
+        toast.success('Conquista criada com sucesso!');
       }
       
       setShowModal(false);
       resetForm();
       fetchBadges();
     } catch (error) {
-      console.error('Erro ao salvar badge:', error);
-      toast.error('Erro ao salvar badge');
+      console.error('Erro ao salvar conquista:', error);
+      toast.error('Erro ao salvar conquista');
     }
   };
 
@@ -116,11 +116,11 @@ const AdminBadges = () => {
     
     try {
       await axios.delete(`${API_URL}/api/gamification/badges/${badgeId}`);
-      toast.success('Badge excluído com sucesso!');
+      toast.success('Conquista excluída com sucesso!');
       fetchBadges();
     } catch (error) {
-      console.error('Erro ao excluir badge:', error);
-      toast.error('Erro ao excluir badge');
+      console.error('Erro ao excluir conquista:', error);
+      toast.error('Erro ao excluir conquista');
     }
   };
 
@@ -129,13 +129,13 @@ const AdminBadges = () => {
     
     try {
       await axios.post(`${API_URL}/api/gamification/badges/${selectedBadge.id}/award/${selectedUserId}`);
-      toast.success(`Badge "${selectedBadge.name}" concedido com sucesso!`);
+      toast.success(`Conquista "${selectedBadge.name}" concedida com sucesso!`);
       setShowAwardModal(false);
       setSelectedBadge(null);
       setSelectedUserId('');
     } catch (error) {
-      console.error('Erro ao conceder badge:', error);
-      toast.error(error.response?.data?.detail || 'Erro ao conceder badge');
+      console.error('Erro ao conceder conquista:', error);
+      toast.error(error.response?.data?.detail || 'Erro ao conceder conquista');
     }
   };
 
