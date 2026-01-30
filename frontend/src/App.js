@@ -402,6 +402,11 @@ function App() {
             }
           />
 
+          {/* Rotas de callback do MercadoPago */}
+          <Route path="/payment/success" element={<PaymentCallback />} />
+          <Route path="/payment/failure" element={<PaymentCallback />} />
+          <Route path="/payment/pending" element={<PaymentCallback />} />
+
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
