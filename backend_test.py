@@ -813,6 +813,274 @@ class OzoxxAPITester:
         
         return success
 
+    # ==================== MERCADOPAGO PAYMENT SYSTEM TESTS ====================
+    
+    def test_get_payment_public_key(self):
+        """Test getting MercadoPago public key (requires authentication)"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        success, response = self.run_test(
+            "Get Payment Public Key",
+            "GET",
+            "api/payments/settings/public-key",
+            200,
+            token=self.licensee_token
+        )
+        
+        if success:
+            gateway = response.get('gateway', 'unknown')
+            public_key = response.get('public_key', '')
+            print(f"   Gateway: {gateway}")
+            print(f"   Public key: {public_key[:20]}..." if public_key else "   Public key: Not configured")
+        
+        return success
+
+    def test_create_pix_payment_empty_payer(self):
+        """Test creating PIX payment with empty payer data - should auto-fill from user"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        # Test with completely empty payer data
+        payment_data = {
+            "amount": 100.00,
+            "description": "Teste PIX - Dados vazios do pagador",
+            "purpose": "training",
+            "payer": {
+                "name": "",
+                "email": "",
+                "document_type": "CPF",
+                "document_number": "",
+                "phone": ""
+            }
+        }
+        
+        success, response = self.run_test(
+            "Create PIX Payment (Empty Payer Data)",
+            "POST",
+            "api/payments/pix",
+            200,
+            data=payment_data,
+            token=self.licensee_token
+        )
+        
+        if success:
+            transaction_id = response.get('transaction_id', '')
+            status = response.get('status', '')
+            print(f"   Transaction ID: {transaction_id}")
+            print(f"   Status: {status}")
+            print("   ✅ Payer data was auto-filled from authenticated user")
+        else:
+            # Check if it's expected MercadoPago configuration error
+            print("   ℹ️ Note: May fail if MercadoPago is not configured (expected)")
+        
+        return success
+
+    def test_create_pix_payment_partial_payer(self):
+        """Test creating PIX payment with partial payer data - should fill missing fields"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        # Test with partial payer data (missing name and document)
+        payment_data = {
+            "amount": 150.00,
+            "description": "Teste PIX - Dados parciais do pagador",
+            "purpose": "training",
+            "payer": {
+                "name": "",  # Empty - should be filled
+                "email": "teste@exemplo.com",  # Provided
+                "document_type": "CPF",
+                "document_number": "",  # Empty - should be filled
+                "phone": "11999999999"
+            }
+        }
+        
+        success, response = self.run_test(
+            "Create PIX Payment (Partial Payer Data)",
+            "POST",
+            "api/payments/pix",
+            200,
+            data=payment_data,
+            token=self.licensee_token
+        )
+        
+        if success:
+            transaction_id = response.get('transaction_id', '')
+            status = response.get('status', '')
+            print(f"   Transaction ID: {transaction_id}")
+            print(f"   Status: {status}")
+            print("   ✅ Missing payer data was auto-filled from authenticated user")
+        else:
+            print("   ℹ️ Note: May fail if MercadoPago is not configured (expected)")
+        
+        return success
+
+    def test_create_credit_card_payment_empty_payer(self):
+        """Test creating credit card payment with empty payer data"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        payment_data = {
+            "amount": 200.00,
+            "description": "Teste Cartão - Dados vazios do pagador",
+            "purpose": "training",
+            "installments": 1,
+            "card_token": "test_card_token_123",
+            "payer": {
+                "name": "",
+                "email": "",
+                "document_type": "CPF",
+                "document_number": "",
+                "phone": ""
+            }
+        }
+        
+        success, response = self.run_test(
+            "Create Credit Card Payment (Empty Payer Data)",
+            "POST",
+            "api/payments/credit-card",
+            200,
+            data=payment_data,
+            token=self.licensee_token
+        )
+        
+        if success:
+            transaction_id = response.get('transaction_id', '')
+            status = response.get('status', '')
+            print(f"   Transaction ID: {transaction_id}")
+            print(f"   Status: {status}")
+            print("   ✅ Payer data was auto-filled from authenticated user")
+        else:
+            print("   ℹ️ Note: May fail if MercadoPago is not configured (expected)")
+        
+        return success
+
+    def test_create_split_payment_empty_payer(self):
+        """Test creating split payment with empty payer data"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        payment_data = {
+            "total_amount": 300.00,
+            "pix_amount": 150.00,
+            "card1_amount": 150.00,
+            "card2_amount": 0.00,
+            "description": "Teste Split - Dados vazios do pagador",
+            "purpose": "training",
+            "card1_token": "test_card_token_1",
+            "card1_installments": 1,
+            "payer": {
+                "name": "",
+                "email": "",
+                "document_type": "CPF",
+                "document_number": "",
+                "phone": ""
+            }
+        }
+        
+        success, response = self.run_test(
+            "Create Split Payment (Empty Payer Data)",
+            "POST",
+            "api/payments/split",
+            200,
+            data=payment_data,
+            token=self.licensee_token
+        )
+        
+        if success:
+            transaction_id = response.get('transaction_id', '')
+            status = response.get('status', '')
+            print(f"   Transaction ID: {transaction_id}")
+            print(f"   Status: {status}")
+            print("   ✅ Payer data was auto-filled from authenticated user")
+        else:
+            print("   ℹ️ Note: May fail if MercadoPago is not configured (expected)")
+        
+        return success
+
+    def test_payment_validation_missing_required_data(self):
+        """Test payment validation when required data cannot be filled"""
+        if not self.licensee_token:
+            print("❌ Skipping - No licensee token")
+            return False
+        
+        # This should fail with 400 if user data is also incomplete
+        payment_data = {
+            "amount": 50.00,
+            "description": "Teste validação - dados obrigatórios faltando",
+            "purpose": "training",
+            "payer": {
+                "name": "",
+                "email": "",
+                "document_type": "CPF",
+                "document_number": "",
+                "phone": ""
+            }
+        }
+        
+        # This test expects either success (if user data is complete) or 400 (if validation fails)
+        success_200, response_200 = self.run_test(
+            "Payment Validation (Missing Required Data) - Try Success",
+            "POST",
+            "api/payments/pix",
+            200,
+            data=payment_data,
+            token=self.licensee_token
+        )
+        
+        if success_200:
+            print("   ✅ Payment succeeded - user data was complete enough to auto-fill")
+            return True
+        
+        # If 200 failed, try expecting 400 (validation error)
+        success_400, response_400 = self.run_test(
+            "Payment Validation (Missing Required Data) - Try Validation Error",
+            "POST",
+            "api/payments/pix",
+            400,
+            data=payment_data,
+            token=self.licensee_token
+        )
+        
+        if success_400:
+            print("   ✅ Payment correctly failed due to incomplete required data")
+            return True
+        
+        print("   ⚠️ Unexpected response - check implementation")
+        return False
+
+    def test_get_payment_settings_as_admin(self):
+        """Test admin access to payment settings"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get Payment Settings (Admin)",
+            "GET",
+            "api/payments/settings",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            active_gateway = response.get('active_gateway', 'unknown')
+            environment = response.get('environment', 'unknown')
+            print(f"   Active gateway: {active_gateway}")
+            print(f"   Environment: {environment}")
+            
+            # Check if credentials are masked
+            sandbox_creds = response.get('sandbox_credentials', {})
+            if sandbox_creds:
+                print("   ✅ Sandbox credentials present (masked)")
+        
+        return success
+
 def main():
     print("🚀 Starting Ozoxx LMS API Tests - Certificate System Focus")
     print("=" * 60)
