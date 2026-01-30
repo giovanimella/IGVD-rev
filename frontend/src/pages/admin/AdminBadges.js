@@ -472,12 +472,12 @@ const AdminBadges = () => {
           </div>
         )}
 
-        {/* Modal de Conceder Badge */}
+        {/* Modal de Conceder Conquista */}
         {showAwardModal && selectedBadge && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl max-w-md w-full">
               <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-slate-900">Conceder Badge</h2>
+                <h2 className="text-xl font-semibold text-slate-900">Conceder Conquista</h2>
                 <button
                   onClick={() => setShowAwardModal(false)}
                   className="p-2 hover:bg-slate-100 rounded-lg"
