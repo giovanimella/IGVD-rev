@@ -87,7 +87,7 @@ const Sidebar = () => {
     { path: '/admin/chat', icon: MessageCircle, label: 'Atendimento' },
     { path: '/admin/company-events', icon: Calendar, label: 'Eventos Empresa' },
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
-    { path: '/admin/badges', icon: Trophy, label: 'Badges' },
+    { path: '/admin/badges', icon: Trophy, label: 'Conquistas' },
     { path: '/admin/challenges', icon: Target, label: 'Desafios' },
     { path: '/admin/certificates', icon: Award, label: 'Certificados' },
     { path: '/admin/files', icon: FileText, label: 'Arquivos' },
