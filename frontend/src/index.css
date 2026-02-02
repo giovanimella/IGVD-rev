@@ -42,41 +42,41 @@ code {
     }
 
     .dark {
-        /* Deep dark blue-grey background like Dashdark X */
-        --background: 222 58% 7%;
-        --foreground: 210 20% 98%;
+        /* Esquema de cores personalizado baseado em #3a919b e #1b4c51 */
+        --background: 185 50% 12%;
+        --foreground: 180 20% 98%;
         
         /* Cards with slightly lighter shade */
-        --card: 220 40% 13%;
-        --card-foreground: 210 20% 98%;
+        --card: 185 45% 18%;
+        --card-foreground: 180 20% 98%;
         
         /* Popover same as card */
-        --popover: 220 40% 13%;
-        --popover-foreground: 210 20% 98%;
+        --popover: 185 45% 18%;
+        --popover-foreground: 180 20% 98%;
         
-        /* Primary cyan accent */
-        --primary: 187 100% 42%;
+        /* Primary - cor principal #3a919b */
+        --primary: 186 45% 42%;
         --primary-foreground: 0 0% 100%;
         
         /* Secondary for muted elements */
-        --secondary: 220 30% 20%;
-        --secondary-foreground: 210 20% 90%;
+        --secondary: 185 40% 25%;
+        --secondary-foreground: 180 20% 90%;
         
         /* Muted backgrounds */
-        --muted: 220 30% 18%;
-        --muted-foreground: 215 20% 65%;
+        --muted: 185 45% 20%;
+        --muted-foreground: 180 20% 70%;
         
-        /* Accent purple/violet */
-        --accent: 259 70% 60%;
+        /* Accent - variação mais clara */
+        --accent: 186 50% 50%;
         --accent-foreground: 0 0% 100%;
         
         --destructive: 0 62% 50%;
         --destructive-foreground: 0 0% 98%;
         
         /* Subtle borders */
-        --border: 220 30% 22%;
-        --input: 220 30% 18%;
-        --ring: 187 100% 42%;
+        --border: 185 40% 28%;
+        --input: 185 45% 20%;
+        --ring: 186 45% 42%;
     }
 }
 
