@@ -106,34 +106,35 @@ const RankingSidebar = () => {
       )}
 
       {/* Lista de Ranking - Estilo da imagem de referência */}
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2" data-testid="ranking-list">
+      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2.5" data-testid="ranking-list">
         {leaderboard.map((user, index) => (
           <div 
             key={user.id || index}
             className="relative flex items-center bg-white rounded-full overflow-visible shadow-md hover:shadow-lg transition-all hover:scale-[1.02]"
+            style={{ marginLeft: '8px' }}
             data-testid={`ranking-item-${index}`}
           >
-            {/* Position Number */}
+            {/* Position Number - Estilo inclinado */}
             <div 
-              className={`absolute -left-1 w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md ${
-                index === 0 ? 'bg-amber-500' :
-                index === 1 ? 'bg-slate-400' :
-                index === 2 ? 'bg-amber-700' :
-                'bg-cyan-500'
+              className={`absolute -left-2 w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-lg z-10 ${
+                index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600' :
+                index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500' :
+                index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-800' :
+                'bg-gradient-to-br from-cyan-400 to-cyan-600'
               }`}
-              style={{ transform: 'rotate(-3deg)' }}
+              style={{ transform: 'rotate(-5deg)' }}
             >
               {String(index + 1).padStart(2, '0')}
             </div>
 
             {/* User Avatar in Diamond Shape */}
-            <div className="relative ml-8 -my-1">
+            <div className="relative ml-9 -my-1.5 z-0">
               <div 
-                className={`w-10 h-10 rotate-45 overflow-hidden border-2 shadow-md ${
-                  index === 0 ? 'border-amber-400 bg-amber-100' :
-                  index === 1 ? 'border-slate-400 bg-slate-100' :
-                  index === 2 ? 'border-amber-600 bg-amber-200' :
-                  'border-cyan-400 bg-cyan-100'
+                className={`w-11 h-11 rotate-45 overflow-hidden border-[3px] shadow-md ${
+                  index === 0 ? 'border-amber-400 bg-amber-50' :
+                  index === 1 ? 'border-slate-400 bg-slate-50' :
+                  index === 2 ? 'border-amber-600 bg-amber-50' :
+                  'border-cyan-400 bg-cyan-50'
                 }`}
               >
                 {user.profile_picture ? (
@@ -143,8 +144,13 @@ const RankingSidebar = () => {
                     className="w-full h-full object-cover -rotate-45 scale-150"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center -rotate-45 bg-gradient-to-br from-slate-100 to-slate-200">
-                    <span className="font-bold text-xs text-slate-600">
+                  <div className={`w-full h-full flex items-center justify-center -rotate-45 ${
+                    index === 0 ? 'bg-gradient-to-br from-amber-100 to-amber-200' :
+                    index === 1 ? 'bg-gradient-to-br from-slate-100 to-slate-200' :
+                    index === 2 ? 'bg-gradient-to-br from-amber-100 to-orange-200' :
+                    'bg-gradient-to-br from-cyan-100 to-blue-200'
+                  }`}>
+                    <span className="font-bold text-xs text-slate-700">
                       {getInitials(user.full_name)}
                     </span>
                   </div>
@@ -153,11 +159,11 @@ const RankingSidebar = () => {
             </div>
 
             {/* User Info */}
-            <div className="flex-1 pl-4 pr-4 py-2.5 flex items-center justify-between min-w-0">
-              <span className="text-slate-800 font-semibold text-sm truncate uppercase">
+            <div className="flex-1 pl-3 pr-4 py-3 flex items-center justify-between min-w-0">
+              <span className="text-slate-800 font-bold text-sm truncate uppercase tracking-wide">
                 {user.full_name?.split(' ')[0]}
               </span>
-              <span className={`font-bold text-sm ${
+              <span className={`font-extrabold text-sm ${
                 index === 0 ? 'text-amber-500' :
                 index === 1 ? 'text-slate-500' :
                 index === 2 ? 'text-amber-700' :
