@@ -126,23 +126,23 @@ const Sidebar = () => {
   const links = user?.role === 'admin' ? adminLinks : user?.role === 'supervisor' ? supervisorLinks : licenseeLinks;
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white dark:bg-[#0D1117] dark:border-r dark:border-white/5">
+    <div className="flex flex-col h-full text-white" style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }}>
       {/* Header/Logo */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-white/10 flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-white/20 flex-shrink-0">
         {logoUrl ? (
           <img 
             src={logoUrl} 
             alt={platformName}
-            className="max-h-10 max-w-[140px] object-contain"
+            className="max-h-10 max-w-[140px] object-contain brightness-0 invert"
             data-testid="sidebar-logo"
           />
         ) : (
           <>
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
               <span className="text-white font-outfit font-bold text-xl">{platformName.charAt(0)}</span>
             </div>
             <div>
-              <h1 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">{platformName}</h1>
+              <h1 className="text-xl font-outfit font-bold text-white">{platformName}</h1>
             </div>
           </>
         )}
@@ -161,8 +161,8 @@ const Sidebar = () => {
                 data-testid={`sidebar-link-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-500 dark:text-cyan-400 font-medium border border-cyan-500/30'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white/20 text-white font-medium border border-white/30'
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
@@ -174,28 +174,28 @@ const Sidebar = () => {
       </nav>
 
       {/* User Info & Logout - Fixed at bottom */}
-      <div className="px-3 py-4 border-t border-slate-200 dark:border-white/10 flex-shrink-0 bg-white dark:bg-[#0D1117]">
+      <div className="px-3 py-4 border-t border-white/20 flex-shrink-0">
         <div className="flex items-center gap-3 px-4 py-3 mb-2">
           {user?.profile_picture ? (
             <img 
               src={`${API_URL}${user.profile_picture}`} 
               alt="" 
-              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              className="w-10 h-10 rounded-full object-cover flex-shrink-0 border-2 border-white/30"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
               <span className="text-white font-medium">{user?.full_name?.charAt(0)}</span>
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{user?.full_name}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-500 capitalize">{user?.role}</p>
+            <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
+            <p className="text-xs text-white/60 capitalize">{user?.role}</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
           data-testid="sidebar-logout-button"
-          className="flex items-center gap-3 px-4 py-3 w-full text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors"
+          className="flex items-center gap-3 px-4 py-3 w-full text-white/80 hover:bg-red-500/30 hover:text-white rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
           <span>Sair</span>
@@ -209,7 +209,8 @@ const Sidebar = () => {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg border border-slate-200"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg shadow-lg border border-white/20 text-white"
+        style={{ background: '#3a919b' }}
         data-testid="mobile-menu-button"
         aria-label="Menu"
       >
@@ -226,16 +227,16 @@ const Sidebar = () => {
 
       {/* Mobile Sidebar */}
       <aside
-        className={`lg:hidden fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ${
+        className={`lg:hidden fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ maxHeight: '100vh', height: '100%' }}
+        style={{ maxHeight: '100vh', height: '100%', background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }}
       >
         <SidebarContent />
       </aside>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 bg-white border-r border-slate-200 h-screen sticky top-0">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 h-screen sticky top-0" style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }}>
         <SidebarContent />
       </aside>
     </>
