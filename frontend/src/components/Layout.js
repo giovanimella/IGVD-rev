@@ -1,8 +1,15 @@
 import React from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import RankingSidebar from './RankingSidebar';
+import { useAuth } from '../contexts/AuthContext';
 
-const Layout = ({ children }) => {
+const Layout = ({ children, hideRankingSidebar = false }) => {
+  const { user } = useAuth();
+  
+  // Mostrar ranking sidebar apenas para licenciados e supervisores
+  const showRanking = !hideRankingSidebar && (user?.role === 'licenciado' || user?.role === 'supervisor');
+  
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-[#0B0F18]">
       <Sidebar />
@@ -12,6 +19,7 @@ const Layout = ({ children }) => {
           {children}
         </main>
       </div>
+      {showRanking && <RankingSidebar />}
     </div>
   );
 };
