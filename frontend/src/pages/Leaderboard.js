@@ -35,7 +35,7 @@ const Leaderboard = () => {
   }
 
   return (
-    <Layout>
+    <Layout hideRankingSidebar={true}>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white flex items-center gap-3">
