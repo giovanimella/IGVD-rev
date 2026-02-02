@@ -122,8 +122,8 @@ code {
 }
 
 .dark {
-    --tooltip-bg: #1e293b;
-    --tooltip-border: #334155;
+    --tooltip-bg: #1b4c51;
+    --tooltip-border: #3a919b;
     --tooltip-text: #ffffff;
 }
 
