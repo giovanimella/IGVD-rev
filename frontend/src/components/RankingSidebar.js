@@ -35,7 +35,7 @@ const RankingSidebar = () => {
 
   if (loading) {
     return (
-      <aside className="hidden xl:flex xl:flex-col xl:w-72 bg-gradient-to-b from-cyan-500 to-blue-600 dark:from-cyan-600 dark:to-blue-700 h-screen sticky top-0 overflow-hidden">
+      <aside className="hidden xl:flex xl:flex-col xl:w-72 h-screen sticky top-0 overflow-hidden" style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }}>
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
@@ -46,7 +46,7 @@ const RankingSidebar = () => {
   const top3 = leaderboard.slice(0, 3);
 
   return (
-    <aside className="hidden xl:flex xl:flex-col xl:w-72 bg-gradient-to-b from-cyan-500 to-blue-600 dark:from-cyan-600 dark:to-blue-700 h-screen sticky top-0 overflow-hidden" data-testid="ranking-sidebar">
+    <aside className="hidden xl:flex xl:flex-col xl:w-72 h-screen sticky top-0 overflow-hidden" style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }} data-testid="ranking-sidebar">
       {/* Header */}
       <div className="px-4 py-4 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center gap-2">
