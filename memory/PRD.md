@@ -31,6 +31,7 @@
 - [x] Sistema de badges
 - [x] Desafios semanais
 - [x] Ranking/Leaderboard
+- [x] **NOVO:** Sidebar de Ranking na direita (estilo pódio + lista)
 - [x] Sistema de pontuação XP
 - [x] Níveis de usuário
 
