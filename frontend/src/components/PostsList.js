@@ -44,7 +44,7 @@ const PostsList = () => {
 
   return (
     <>
-      <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+      <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
         <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white mb-4">
           Novidades e Comunicados
         </h2>
@@ -88,8 +88,8 @@ const PostsList = () => {
       {/* Modal do Post */}
       {selectedPost && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white dark:bg-[#151B28] border-b border-slate-200 dark:border-white/10 p-6 flex items-start justify-between">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-[#1b4c51] border-b border-slate-200 dark:border-white/10 p-6 flex items-start justify-between">
               <div className="flex-1">
                 <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white mb-2">
                   {selectedPost.title}

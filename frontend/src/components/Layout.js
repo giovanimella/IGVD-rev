@@ -11,7 +11,7 @@ const Layout = ({ children, hideRankingSidebar = false }) => {
   const showRanking = !hideRankingSidebar && (user?.role === 'licenciado' || user?.role === 'supervisor');
   
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-[#0B0F18]">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-[#142d30]">
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
         <Topbar />

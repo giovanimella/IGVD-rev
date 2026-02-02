@@ -47,7 +47,7 @@ const Modules = () => {
         </div>
 
         {modules.length === 0 ? (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-8 lg:p-12 text-center">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-8 lg:p-12 text-center">
             <BookOpen className="w-12 lg:w-16 h-12 lg:h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-lg lg:text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">Nenhum módulo disponível</h3>
             <p className="text-slate-600 dark:text-slate-400 text-sm lg:text-base">Os módulos estarão disponíveis em breve.</p>
@@ -59,7 +59,7 @@ const Modules = () => {
                 key={module.id}
                 to={`/module/${module.id}`}
                 data-testid={`module-card-${module.id}`}
-                className="group bg-white dark:bg-[#151B28] rounded-xl overflow-hidden border border-slate-100 dark:border-white/5 hover:shadow-lg dark:hover:border-cyan-500/30 transition-all duration-300"
+                className="group bg-white dark:bg-[#1b4c51] rounded-xl overflow-hidden border border-slate-100 dark:border-white/5 hover:shadow-lg dark:hover:border-cyan-500/30 transition-all duration-300"
               >
                 <div className="h-36 lg:h-48 bg-gradient-to-br from-cyan-500 to-blue-600 relative overflow-hidden">
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>

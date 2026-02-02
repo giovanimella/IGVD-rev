@@ -204,7 +204,7 @@ const ModuleDetail = () => {
                   <div
                     key={chapter.id}
                     data-testid={`chapter-item-${chapter.id}`}
-                    className={`bg-white dark:bg-[#151B28] rounded-xl border p-6 transition-all ${
+                    className={`bg-white dark:bg-[#1b4c51] rounded-xl border p-6 transition-all ${
                       isCompleted ? 'border-green-200 dark:border-green-800/50 bg-green-50/50 dark:bg-green-900/10' : 'border-slate-200 dark:border-white/10 hover:shadow-md dark:hover:border-cyan-500/30'
                     }`}
                   >
@@ -273,7 +273,7 @@ const ModuleDetail = () => {
                 );
               })
             ) : (
-              <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
                 <BookOpen className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                 <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">Nenhum capítulo disponível</h3>
                 <p className="text-slate-600 dark:text-slate-400">Os capítulos estarão disponíveis em breve.</p>

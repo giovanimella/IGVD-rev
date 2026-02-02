@@ -209,7 +209,7 @@ const AdminPaymentSettings = () => {
         </div>
 
         {/* Gateway Selection */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <Wallet className="w-5 h-5 text-cyan-500" />
             Gateway Ativo
@@ -275,7 +275,7 @@ const AdminPaymentSettings = () => {
         </div>
 
         {/* Environment Selection */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <Settings className="w-5 h-5 text-cyan-500" />
             Ambiente
@@ -330,7 +330,7 @@ const AdminPaymentSettings = () => {
         </div>
 
         {/* Payment Methods */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Métodos de Pagamento</h2>
           
           <div className="space-y-4">
@@ -396,7 +396,7 @@ const AdminPaymentSettings = () => {
         </div>
 
         {/* Sandbox Credentials */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-amber-500" />
             Credenciais Sandbox (Teste)
@@ -430,7 +430,7 @@ const AdminPaymentSettings = () => {
         </div>
 
         {/* Production Credentials */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <Zap className="w-5 h-5 text-green-500" />
             Credenciais Produção
@@ -464,7 +464,7 @@ const AdminPaymentSettings = () => {
         </div>
 
         {/* Webhook URLs */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">URLs de Webhook</h2>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
             Configure estas URLs nos painéis dos gateways para receber notificações de pagamento:

@@ -84,7 +84,7 @@ const MyCertificates = () => {
 
         {/* Lista de Certificados */}
         {certificates.length === 0 ? (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
             <Award className="w-20 h-20 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Nenhum certificado ainda</h3>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
@@ -102,7 +102,7 @@ const MyCertificates = () => {
             {certificates.map((cert) => (
               <div
                 key={cert.id}
-                className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {/* Header do Card */}
                 <div className="h-32 bg-gradient-to-br from-amber-500 to-orange-600 relative flex items-center justify-center">

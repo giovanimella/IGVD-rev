@@ -45,7 +45,7 @@ const Leaderboard = () => {
           <p className="text-slate-600 dark:text-slate-400 mt-2">Veja os licenciados com melhor desempenho</p>
         </div>
 
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full" data-testid="leaderboard-table">
               <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">

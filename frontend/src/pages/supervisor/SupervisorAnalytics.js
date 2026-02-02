@@ -138,7 +138,7 @@ const SupervisorAnalytics = () => {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="dark:bg-[#151B28] dark:border-white/10">
+              <Card className="dark:bg-[#1b4c51] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -153,7 +153,7 @@ const SupervisorAnalytics = () => {
                 </CardContent>
               </Card>
 
-              <Card className="dark:bg-[#151B28] dark:border-white/10">
+              <Card className="dark:bg-[#1b4c51] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -168,7 +168,7 @@ const SupervisorAnalytics = () => {
                 </CardContent>
               </Card>
 
-              <Card className="dark:bg-[#151B28] dark:border-white/10">
+              <Card className="dark:bg-[#1b4c51] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -183,7 +183,7 @@ const SupervisorAnalytics = () => {
                 </CardContent>
               </Card>
 
-              <Card className="dark:bg-[#151B28] dark:border-white/10">
+              <Card className="dark:bg-[#1b4c51] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -200,7 +200,7 @@ const SupervisorAnalytics = () => {
             </div>
 
             {/* Top Licensees */}
-            <Card className="dark:bg-[#151B28] dark:border-white/10">
+            <Card className="dark:bg-[#1b4c51] dark:border-white/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 dark:text-white">
                   <Trophy className="w-5 h-5 text-amber-500" />
@@ -245,7 +245,7 @@ const SupervisorAnalytics = () => {
         {activeTab === 'licensees' && (
           <div className="space-y-4">
             {licensees.map((licensee) => (
-              <Card key={licensee.id} className="overflow-hidden dark:bg-[#151B28] dark:border-white/10">
+              <Card key={licensee.id} className="overflow-hidden dark:bg-[#1b4c51] dark:border-white/10">
                 <div
                   className="p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
                   onClick={() => setExpandedLicensee(expandedLicensee === licensee.id ? null : licensee.id)}
@@ -289,28 +289,28 @@ const SupervisorAnalytics = () => {
                 {expandedLicensee === licensee.id && (
                   <div className="px-4 pb-4 border-t border-slate-100 dark:border-white/10 pt-4 bg-slate-50 dark:bg-white/5">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white dark:bg-[#151B28] p-3 rounded-lg">
+                      <div className="bg-white dark:bg-[#1b4c51] p-3 rounded-lg">
                         <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                           <BookOpen className="w-4 h-4" />
                           <span className="text-sm">Capítulos</span>
                         </div>
                         <p className="text-xl font-bold dark:text-white">{licensee.completed_chapters}</p>
                       </div>
-                      <div className="bg-white dark:bg-[#151B28] p-3 rounded-lg">
+                      <div className="bg-white dark:bg-[#1b4c51] p-3 rounded-lg">
                         <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                           <Flame className="w-4 h-4" />
                           <span className="text-sm">Streak</span>
                         </div>
                         <p className="text-xl font-bold dark:text-white">{licensee.current_streak} dias</p>
                       </div>
-                      <div className="bg-white dark:bg-[#151B28] p-3 rounded-lg">
+                      <div className="bg-white dark:bg-[#1b4c51] p-3 rounded-lg">
                         <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                           <Medal className="w-4 h-4" />
                           <span className="text-sm">Nível</span>
                         </div>
                         <p className="text-xl font-bold dark:text-white">{licensee.level_title}</p>
                       </div>
-                      <div className="bg-white dark:bg-[#151B28] p-3 rounded-lg">
+                      <div className="bg-white dark:bg-[#1b4c51] p-3 rounded-lg">
                         <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 mb-1">
                           <Clock className="w-4 h-4" />
                           <span className="text-sm">Último Acesso</span>
@@ -329,7 +329,7 @@ const SupervisorAnalytics = () => {
             ))}
             
             {licensees.length === 0 && (
-              <div className="text-center py-12 bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10">
+              <div className="text-center py-12 bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10">
                 <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                 <p className="text-slate-600 dark:text-slate-400">Nenhum licenciado encontrado</p>
               </div>
@@ -341,7 +341,7 @@ const SupervisorAnalytics = () => {
         {activeTab === 'modules' && (
           <div className="space-y-4">
             {moduleEngagement.map((module) => (
-              <Card key={module.id} className="dark:bg-[#151B28] dark:border-white/10">
+              <Card key={module.id} className="dark:bg-[#1b4c51] dark:border-white/10">
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -403,7 +403,7 @@ const SupervisorAnalytics = () => {
         {activeTab === 'activity' && (
           <div className="space-y-6">
             {/* Daily Activity Chart */}
-            <Card className="dark:bg-[#151B28] dark:border-white/10">
+            <Card className="dark:bg-[#1b4c51] dark:border-white/10">
               <CardHeader>
                 <CardTitle className="dark:text-white">Atividade Diária (últimos 14 dias)</CardTitle>
               </CardHeader>
@@ -430,7 +430,7 @@ const SupervisorAnalytics = () => {
             </Card>
 
             {/* Study Heatmap */}
-            <Card className="dark:bg-[#151B28] dark:border-white/10">
+            <Card className="dark:bg-[#1b4c51] dark:border-white/10">
               <CardHeader>
                 <CardTitle className="dark:text-white">Horários de Estudo (último mês)</CardTitle>
               </CardHeader>

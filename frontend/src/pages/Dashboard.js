@@ -178,7 +178,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-4 lg:p-6 hover:border-cyan-100 dark:hover:border-cyan-500/30 transition-all" data-testid="stat-card-users">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-4 lg:p-6 hover:border-cyan-100 dark:hover:border-cyan-500/30 transition-all" data-testid="stat-card-users">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
                   <Users className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -188,7 +188,7 @@ const Dashboard = () => {
               <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_users || 0}</p>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-blue-500/30 transition-all" data-testid="stat-card-modules">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-blue-500/30 transition-all" data-testid="stat-card-modules">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
                   <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -198,7 +198,7 @@ const Dashboard = () => {
               <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_modules || 0}</p>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-amber-500/30 transition-all" data-testid="stat-card-rewards">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-amber-500/30 transition-all" data-testid="stat-card-rewards">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
                   <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -208,7 +208,7 @@ const Dashboard = () => {
               <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_rewards || 0}</p>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-orange-500/30 transition-all" data-testid="stat-card-pending">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-cyan-100 dark:hover:border-orange-500/30 transition-all" data-testid="stat-card-pending">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-500/20 rounded-lg flex items-center justify-center">
                   <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
@@ -221,7 +221,7 @@ const Dashboard = () => {
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Crescimento ao Longo do Tempo</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={progressData}>
@@ -244,7 +244,7 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Distribuição por Etapa</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -277,7 +277,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Ações Rápidas</h3>
               <div className="space-y-3">
                 <Link to="/admin/users" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
@@ -326,7 +326,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
                   <Users className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -336,7 +336,7 @@ const Dashboard = () => {
               <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_licensees || 0}</p>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
                   <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -346,7 +346,7 @@ const Dashboard = () => {
               <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{stats?.total_modules || 0}</p>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                   <Award className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -360,7 +360,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Ações Rápidas</h3>
               <div className="space-y-3">
                 <Link to="/supervisor/licensees" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
@@ -393,7 +393,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Licenciados Recentes</h3>
               <div className="space-y-3">
                 {stats?.licensees?.slice(0, 5).map((licensee) => (
@@ -461,7 +461,7 @@ const Dashboard = () => {
                   return (
                     <div 
                       key={apt.id} 
-                      className="bg-white dark:bg-[#151B28] rounded-lg p-4 border border-slate-200 dark:border-white/10 hover:border-cyan-300 dark:hover:border-cyan-500/50 transition-colors"
+                      className="bg-white dark:bg-[#1b4c51] rounded-lg p-4 border border-slate-200 dark:border-white/10 hover:border-cyan-300 dark:hover:border-cyan-500/50 transition-colors"
                       data-testid={`upcoming-apt-${apt.id}`}
                     >
                       <div className="flex items-start gap-3">
@@ -510,7 +510,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -522,7 +522,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                   <BookOpen className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -534,7 +534,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
                   <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
@@ -571,7 +571,7 @@ const Dashboard = () => {
             </div>
 
             {/* Badges Conquistados */}
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-amber-500" />
@@ -652,7 +652,7 @@ const Dashboard = () => {
           {/* Progress Chart + Atividades Recentes + Gráfico de Acessos */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Gráfico de Pizza - Progresso de Módulos */}
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Progresso de Módulos</h3>
               {stats?.total_modules > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -684,7 +684,7 @@ const Dashboard = () => {
             </div>
 
             {/* Lista de Atividades Recentes */}
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <CheckCircle className="w-5 h-5 text-green-500" />
                 <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white">Atividades Recentes</h3>
@@ -718,7 +718,7 @@ const Dashboard = () => {
             </div>
 
             {/* Gráfico de Acessos - Últimos 7 Dias */}
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Activity className="w-5 h-5 text-cyan-500" />
                 <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white">Acessos (7 dias)</h3>
@@ -747,7 +747,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Link to="/modules" className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-8 hover:shadow-lg dark:hover:border-cyan-500/30 transition-all group">
+            <Link to="/modules" className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-8 hover:shadow-lg dark:hover:border-cyan-500/30 transition-all group">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-cyan-100 dark:bg-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                   <BookOpen className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />

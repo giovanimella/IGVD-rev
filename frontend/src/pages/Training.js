@@ -600,7 +600,7 @@ const Training = () => {
             </p>
           </div>
 
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             {registrationData?.has_spouse && (
               <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
                 <Heart className="w-4 h-4" />

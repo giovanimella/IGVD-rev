@@ -92,7 +92,7 @@ const Favorites = () => {
                 className="group"
                 data-testid={`favorite-card-${fav.chapter_id}`}
               >
-                <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-5 hover:shadow-lg hover:border-rose-200 dark:hover:border-rose-500/30 transition-all h-full">
+                <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-5 hover:shadow-lg hover:border-rose-200 dark:hover:border-rose-500/30 transition-all h-full">
                   {/* Module Tag */}
                   <div className="flex items-center justify-between mb-3">
                     <span className="px-3 py-1 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 text-xs font-medium rounded-full">
@@ -138,7 +138,7 @@ const Favorites = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
             <Heart className="w-20 h-20 text-slate-200 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">
               Nenhum favorito ainda

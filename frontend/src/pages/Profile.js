@@ -153,7 +153,7 @@ const Profile = () => {
         </div>
 
         {/* Profile Info Card */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <div className="flex items-center gap-6 mb-6 pb-6 border-b border-slate-200 dark:border-white/10">
             {/* Profile Picture */}
             <div className="relative group">
@@ -312,7 +312,7 @@ const Profile = () => {
         </div>
 
         {/* Change Password Card */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <div className="flex items-center gap-2 mb-6 pb-6 border-b border-slate-200 dark:border-white/10">
             <Lock className="w-5 h-5 text-slate-700 dark:text-slate-300" />
             <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white">Alterar Senha</h3>
@@ -378,11 +378,11 @@ const Profile = () => {
           <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl border border-cyan-200 dark:border-cyan-700/30 p-6">
             <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4">Informações da Conta</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white dark:bg-[#151B28] rounded-lg p-4">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-lg p-4">
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Nível Atual</p>
                 <p className="text-lg font-semibold text-slate-900 dark:text-white">{user?.level_title}</p>
               </div>
-              <div className="bg-white dark:bg-[#151B28] rounded-lg p-4">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-lg p-4">
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Membro desde</p>
                 <p className="text-lg font-semibold text-slate-900 dark:text-white">
                   {new Date(user?.created_at).toLocaleDateString('pt-BR')}

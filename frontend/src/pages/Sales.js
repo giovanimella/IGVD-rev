@@ -315,7 +315,7 @@ const Sales = () => {
 
         {/* Sales List */}
         {salesData?.sales?.length > 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-white/10">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Detalhes das Vendas</h2>
             </div>

@@ -138,7 +138,7 @@ const OzoxxCast = () => {
 
           {/* Lista de Vídeos */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-200 dark:border-white/10">
                 <h3 className="font-semibold text-slate-900 dark:text-white">
                   Todos os Vídeos ({videos.length})

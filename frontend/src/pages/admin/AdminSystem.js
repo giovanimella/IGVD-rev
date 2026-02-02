@@ -307,7 +307,7 @@ const AdminSystem = () => {
         </div>
 
         {/* Logo da Plataforma */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
               <Image className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
@@ -328,7 +328,7 @@ const AdminSystem = () => {
                 type="text"
                 value={systemConfig.platform_name}
                 onChange={(e) => setSystemConfig({ ...systemConfig, platform_name: e.target.value })}
-                className="flex-1 px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                className="flex-1 px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                 placeholder="Ex: IGVD"
                 data-testid="platform-name-input"
               />
@@ -407,7 +407,7 @@ const AdminSystem = () => {
           {quickStats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div key={index} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+              <div key={index} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-12 h-12 ${stat.bgColor} dark:bg-opacity-20 rounded-lg flex items-center justify-center`}>
                     <Icon className={`w-6 h-6 ${stat.color}`} />
@@ -430,7 +430,7 @@ const AdminSystem = () => {
                 <a
                   key={index}
                   href={card.link}
-                  className="group bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6 hover:border-cyan-200 dark:hover:border-cyan-500/30 hover:shadow-lg transition-all duration-300"
+                  className="group bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6 hover:border-cyan-200 dark:hover:border-cyan-500/30 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className={`w-14 h-14 ${card.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
@@ -453,7 +453,7 @@ const AdminSystem = () => {
         </div>
 
         {/* Configurações do Sistema */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
               <ClipboardCheck className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
@@ -495,7 +495,7 @@ const AdminSystem = () => {
         </div>
 
         {/* Resumo do Sistema */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4">Resumo do Sistema</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="border-l-4 border-blue-500 pl-4">
@@ -555,7 +555,7 @@ const AdminSystem = () => {
         </div>
 
         {/* Configurações de Webhook */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
               <Webhook className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -694,7 +694,7 @@ const AdminSystem = () => {
 
         {/* Logs de Webhook */}
         {webhookLogs.length > 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Últimos Webhooks</h3>
               <Button variant="outline" size="sm" onClick={fetchWebhookLogs}>

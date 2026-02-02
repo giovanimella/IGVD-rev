@@ -43,7 +43,7 @@ const StageProgressBar = ({ currentStage }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6" data-testid="stage-progress-bar">
+    <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6" data-testid="stage-progress-bar">
       <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Seu Progresso no Onboarding</h3>
       
       <div className="relative">

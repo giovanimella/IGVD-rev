@@ -196,14 +196,14 @@ const AdminUsers = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-slate-600 dark:text-slate-400 text-sm">Total de Usuários</p>
               <Users className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
             </div>
             <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{users.length}</p>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-slate-600 dark:text-slate-400 text-sm">Licenciados</p>
               <User className="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -212,7 +212,7 @@ const AdminUsers = () => {
               {users.filter(u => u.role === 'licenciado').length}
             </p>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-slate-600 dark:text-slate-400 text-sm">Supervisores</p>
               <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -223,7 +223,7 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
@@ -284,7 +284,7 @@ const AdminUsers = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
@@ -410,7 +410,7 @@ const AdminUsers = () => {
       {/* Modal de Importação */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">Importar Usuários</h2>
               <button

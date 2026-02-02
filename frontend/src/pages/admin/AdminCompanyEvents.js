@@ -224,14 +224,14 @@ const AdminCompanyEvents = () => {
               placeholder="Buscar eventos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
               data-testid="search-events"
             />
           </div>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+            className="px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
             data-testid="filter-type"
           >
             <option value="all">Todos os tipos</option>
@@ -243,7 +243,7 @@ const AdminCompanyEvents = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-[#151B28] p-4 rounded-xl border border-slate-200 dark:border-white/10">
+          <div className="bg-white dark:bg-[#1b4c51] p-4 rounded-xl border border-slate-200 dark:border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
                 <Calendar className="w-5 h-5 text-cyan-500" />
@@ -254,7 +254,7 @@ const AdminCompanyEvents = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] p-4 rounded-xl border border-slate-200 dark:border-white/10">
+          <div className="bg-white dark:bg-[#1b4c51] p-4 rounded-xl border border-slate-200 dark:border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
                 <CheckCircle className="w-5 h-5 text-green-500" />
@@ -267,7 +267,7 @@ const AdminCompanyEvents = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] p-4 rounded-xl border border-slate-200 dark:border-white/10">
+          <div className="bg-white dark:bg-[#1b4c51] p-4 rounded-xl border border-slate-200 dark:border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
                 <Video className="w-5 h-5 text-red-500" />
@@ -280,7 +280,7 @@ const AdminCompanyEvents = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] p-4 rounded-xl border border-slate-200 dark:border-white/10">
+          <div className="bg-white dark:bg-[#1b4c51] p-4 rounded-xl border border-slate-200 dark:border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
                 <Megaphone className="w-5 h-5 text-orange-500" />
@@ -297,7 +297,7 @@ const AdminCompanyEvents = () => {
 
         {/* Lista de Eventos Futuros */}
         {upcomingEvents.length > 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
             <div className="p-4 border-b border-slate-200 dark:border-white/10">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-cyan-500" />
@@ -398,7 +398,7 @@ const AdminCompanyEvents = () => {
 
         {/* Lista de Eventos Passados */}
         {pastEvents.length > 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
             <div className="p-4 border-b border-slate-200 dark:border-white/10">
               <h2 className="text-lg font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-2">
                 <Clock className="w-5 h-5" />
@@ -444,7 +444,7 @@ const AdminCompanyEvents = () => {
 
         {/* Empty State */}
         {filteredEvents.length === 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
             <Calendar className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
               Nenhum evento encontrado
@@ -480,7 +480,7 @@ const AdminCompanyEvents = () => {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                 placeholder="Ex: Live de Lançamento do Produto"
                 required
                 data-testid="event-title-input"
@@ -496,7 +496,7 @@ const AdminCompanyEvents = () => {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                   required
                   data-testid="event-date-input"
                 />
@@ -509,7 +509,7 @@ const AdminCompanyEvents = () => {
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                   required
                   data-testid="event-time-input"
                 />
@@ -524,7 +524,7 @@ const AdminCompanyEvents = () => {
                 <select
                   value={formData.event_type}
                   onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                   data-testid="event-type-select"
                 >
                   {eventTypes.map(type => (
@@ -540,7 +540,7 @@ const AdminCompanyEvents = () => {
                   type="text"
                   value={formData.duration}
                   onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                   placeholder="Ex: 1 hora"
                   data-testid="event-duration-input"
                 />
@@ -555,7 +555,7 @@ const AdminCompanyEvents = () => {
                 type="url"
                 value={formData.link}
                 onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                 placeholder="https://youtube.com/live/..."
                 data-testid="event-link-input"
               />
@@ -569,7 +569,7 @@ const AdminCompanyEvents = () => {
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                 placeholder="Ex: Sede da empresa, São Paulo"
                 data-testid="event-location-input"
               />
@@ -582,7 +582,7 @@ const AdminCompanyEvents = () => {
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                 rows={3}
                 placeholder="Detalhes do evento que os licenciados verão..."
                 data-testid="event-description-input"

@@ -271,7 +271,7 @@ const AdminFiles = () => {
         {/* Pastas */}
         <div className="space-y-4">
           {data.folders.map((folder) => (
-            <div key={folder.id} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+            <div key={folder.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
               {/* Folder Header */}
               <div
                 className="px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5"
@@ -325,7 +325,7 @@ const AdminFiles = () => {
 
           {/* Arquivos sem pasta */}
           {data.uncategorized.length > 0 && (
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10">
                 <div className="flex items-center gap-3">
                   <Folder className="w-6 h-6 text-slate-400" />
@@ -343,7 +343,7 @@ const AdminFiles = () => {
 
           {/* Empty State */}
           {data.folders.length === 0 && data.uncategorized.length === 0 && (
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
               <FileText className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Nenhum arquivo cadastrado</h3>
               <p className="text-slate-600 dark:text-slate-400 mb-4">Crie pastas e faça upload de arquivos</p>

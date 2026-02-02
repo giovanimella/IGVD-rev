@@ -224,7 +224,7 @@ const AdminOzoxxCast = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
                 <Film className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -235,7 +235,7 @@ const AdminOzoxxCast = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                 <Eye className="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -248,7 +248,7 @@ const AdminOzoxxCast = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
                 <Clock className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
@@ -265,7 +265,7 @@ const AdminOzoxxCast = () => {
 
         {/* Videos List */}
         {videos.length === 0 ? (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
             <div className="w-20 h-20 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
               <Radio className="w-10 h-10 text-slate-400" />
             </div>
@@ -281,7 +281,7 @@ const AdminOzoxxCast = () => {
             </Button>
           </div>
         ) : (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">

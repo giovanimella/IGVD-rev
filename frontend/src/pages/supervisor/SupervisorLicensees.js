@@ -150,7 +150,7 @@ const SupervisorLicensees = () => {
         )}
 
         {/* Busca */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
@@ -165,7 +165,7 @@ const SupervisorLicensees = () => {
 
         {/* Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Total de Licenciados</p>
@@ -177,7 +177,7 @@ const SupervisorLicensees = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Completos</p>
@@ -191,7 +191,7 @@ const SupervisorLicensees = () => {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Em Treinamento</p>
@@ -207,7 +207,7 @@ const SupervisorLicensees = () => {
         </div>
 
         {/* Lista de Licenciados */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">

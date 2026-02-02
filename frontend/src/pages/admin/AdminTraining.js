@@ -320,19 +320,19 @@ const AdminTraining = () => {
 
         {/* Resumo de Configuração */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">Fechamento</p>
             <p className="text-xl font-bold text-slate-900 dark:text-white">{config?.days_before_closing || 7} dias antes</p>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">Valor Individual</p>
             <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(config?.solo_price || 3500)}</p>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">Valor com Cônjuge</p>
             <p className="text-xl font-bold text-pink-600 dark:text-pink-400">{formatCurrency(config?.couple_price || 6000)}</p>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-4">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">Total de Turmas</p>
             <p className="text-xl font-bold text-slate-900 dark:text-white">{classes.length}</p>
           </div>
@@ -340,7 +340,7 @@ const AdminTraining = () => {
 
         {/* Lista de Turmas */}
         {classes.length === 0 ? (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
             <GraduationCap className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
               Nenhuma turma cadastrada
@@ -354,7 +354,7 @@ const AdminTraining = () => {
             </Button>
           </div>
         ) : (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">

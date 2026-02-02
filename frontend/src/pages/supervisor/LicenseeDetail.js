@@ -183,7 +183,7 @@ const LicenseeDetail = () => {
     return (
       <div
         key={docKey}
-        className="flex items-center justify-between p-4 bg-white dark:bg-[#151B28] border border-slate-200 dark:border-white/10 rounded-lg hover:border-cyan-300 dark:hover:border-cyan-500/30 transition-colors"
+        className="flex items-center justify-between p-4 bg-white dark:bg-[#1b4c51] border border-slate-200 dark:border-white/10 rounded-lg hover:border-cyan-300 dark:hover:border-cyan-500/30 transition-colors"
         data-testid={`doc-${type}-${docKey}`}
       >
         <div className="flex items-center gap-3">
@@ -267,7 +267,7 @@ const LicenseeDetail = () => {
           <div className="space-y-6">
             {/* Informações Básicas */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
                     <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -299,7 +299,7 @@ const LicenseeDetail = () => {
                 <p className="text-amber-700 dark:text-amber-400 text-sm mt-1">{licensee.level_title || 'Iniciante'}</p>
               </div>
 
-              <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                     <BookOpen className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -312,7 +312,7 @@ const LicenseeDetail = () => {
 
             {/* Recompensas Pendentes */}
             {redemptions.filter(r => r.status === 'pending').length > 0 && (
-              <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
                 <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
                   <Gift className="w-5 h-5 mr-2 text-amber-600" />
                   Recompensas Pendentes
@@ -349,7 +349,7 @@ const LicenseeDetail = () => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {licensee.leader_name && (
-                    <div className="flex items-center gap-3 bg-white dark:bg-[#151B28] rounded-lg p-4 border border-indigo-100 dark:border-indigo-800/50">
+                    <div className="flex items-center gap-3 bg-white dark:bg-[#1b4c51] rounded-lg p-4 border border-indigo-100 dark:border-indigo-800/50">
                       <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center">
                         <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                       </div>
@@ -360,7 +360,7 @@ const LicenseeDetail = () => {
                     </div>
                   )}
                   {licensee.leader_id && (
-                    <div className="flex items-center gap-3 bg-white dark:bg-[#151B28] rounded-lg p-4 border border-indigo-100 dark:border-indigo-800/50">
+                    <div className="flex items-center gap-3 bg-white dark:bg-[#1b4c51] rounded-lg p-4 border border-indigo-100 dark:border-indigo-800/50">
                       <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center">
                         <Hash className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                       </div>
@@ -375,7 +375,7 @@ const LicenseeDetail = () => {
             )}
 
             {/* Informações Adicionais */}
-            <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
               <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
                 <Clock className="w-5 h-5 mr-2 text-slate-600 dark:text-slate-400" />
                 Informações Adicionais
@@ -451,7 +451,7 @@ const LicenseeDetail = () => {
                     renderDocumentCard(key, value, 'pf')
                   )
                 ) : (
-                  <div className="text-center py-8 bg-white dark:bg-[#151B28] rounded-lg border border-slate-200 dark:border-white/10">
+                  <div className="text-center py-8 bg-white dark:bg-[#1b4c51] rounded-lg border border-slate-200 dark:border-white/10">
                     <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-500 dark:text-slate-400">Nenhum documento PF enviado ainda</p>
                   </div>
@@ -481,7 +481,7 @@ const LicenseeDetail = () => {
                     renderDocumentCard(key, value, 'pj')
                   )
                 ) : (
-                  <div className="text-center py-8 bg-white dark:bg-[#151B28] rounded-lg border border-slate-200 dark:border-white/10">
+                  <div className="text-center py-8 bg-white dark:bg-[#1b4c51] rounded-lg border border-slate-200 dark:border-white/10">
                     <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                     <p className="text-slate-500 dark:text-slate-400">Nenhum documento PJ enviado ainda</p>
                   </div>
@@ -493,7 +493,7 @@ const LicenseeDetail = () => {
 
         {/* Tab Content: Agenda */}
         {activeTab === 'agenda' && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white flex items-center">
                 <Calendar className="w-5 h-5 mr-2 text-cyan-600 dark:text-cyan-400" />
@@ -581,7 +581,7 @@ const LicenseeDetail = () => {
 
         {/* Tab Content: Progresso */}
         {activeTab === 'progress' && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
             <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
               <BookOpen className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
               Progresso nos Módulos

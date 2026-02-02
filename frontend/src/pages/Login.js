@@ -57,7 +57,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B0F18] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#142d30] p-4">
       <div className="w-full max-w-md">
         {/* Logo centralizada */}
         <div className="flex flex-col items-center mb-8">
@@ -77,7 +77,7 @@ const Login = () => {
         </div>
 
         {/* Card de Login */}
-        <div className="bg-white dark:bg-[#151B28] rounded-2xl shadow-lg border border-slate-200 dark:border-white/10 p-8">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-2xl shadow-lg border border-slate-200 dark:border-white/10 p-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-outfit font-bold text-slate-900 dark:text-white mb-2">Bem-vindo de volta</h2>
             <p className="text-slate-600 dark:text-slate-400">Entre com suas credenciais para continuar</p>
@@ -94,7 +94,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-12 dark:bg-[#0B0F18] dark:border-white/10 dark:text-white"
+                className="h-12 dark:bg-[#142d30] dark:border-white/10 dark:text-white"
               />
             </div>
 
@@ -109,7 +109,7 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-12 pr-10 dark:bg-[#0B0F18] dark:border-white/10 dark:text-white"
+                  className="h-12 pr-10 dark:bg-[#142d30] dark:border-white/10 dark:text-white"
                 />
                 <button
                   type="button"

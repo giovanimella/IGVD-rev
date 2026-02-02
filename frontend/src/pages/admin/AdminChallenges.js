@@ -164,7 +164,7 @@ const AdminChallenges = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
                 <Target className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -175,7 +175,7 @@ const AdminChallenges = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                 <Trophy className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -186,7 +186,7 @@ const AdminChallenges = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -200,7 +200,7 @@ const AdminChallenges = () => {
         </div>
 
         {/* Challenges List */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 dark:bg-white/5">

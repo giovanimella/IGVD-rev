@@ -160,7 +160,7 @@ const AdminCertificates = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
                 <Award className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -171,7 +171,7 @@ const AdminCertificates = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                 <FileText className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -184,7 +184,7 @@ const AdminCertificates = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
                 <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -198,7 +198,7 @@ const AdminCertificates = () => {
         </div>
 
         {/* Configuração do Template */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           <div className="p-6 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center gap-3">
               <Settings className="w-5 h-5 text-slate-600 dark:text-slate-400" />
@@ -314,7 +314,7 @@ const AdminCertificates = () => {
         </div>
 
         {/* Certificados Emitidos */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Award className="w-5 h-5 text-slate-600 dark:text-slate-400" />
@@ -377,7 +377,7 @@ const AdminCertificates = () => {
 
         {/* Estatísticas por Módulo */}
         {stats?.by_module?.length > 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-6">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Certificados por Módulo</h3>
             <div className="space-y-3">
               {stats.by_module.map((item, index) => (

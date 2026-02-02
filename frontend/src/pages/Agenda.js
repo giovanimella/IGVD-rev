@@ -250,7 +250,7 @@ const Agenda = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendário */}
-          <div className="lg:col-span-2 bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+          <div className="lg:col-span-2 bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
             {/* Navegação do mês */}
             <div className="flex items-center justify-between mb-6">
               <button
@@ -293,7 +293,7 @@ const Agenda = () => {
                     onClick={() => handleDateClick(dayInfo)}
                     className={`
                       min-h-[80px] p-2 rounded-lg cursor-pointer transition-all border
-                      ${dayInfo.isCurrentMonth ? 'bg-white dark:bg-[#151B28]' : 'bg-slate-50 dark:bg-white/5'}
+                      ${dayInfo.isCurrentMonth ? 'bg-white dark:bg-[#1b4c51]' : 'bg-slate-50 dark:bg-white/5'}
                       ${isSelected ? 'border-cyan-500 ring-2 ring-cyan-200 dark:ring-cyan-500/30' : 'border-transparent hover:border-slate-200 dark:hover:border-white/20'}
                       ${isToday(dayInfo.date) ? 'bg-cyan-50 dark:bg-cyan-900/30' : ''}
                     `}
@@ -334,7 +334,7 @@ const Agenda = () => {
           </div>
 
           {/* Lista de compromissos do dia */}
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">
                 {selectedDate ? (
@@ -500,7 +500,7 @@ const Agenda = () => {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                 placeholder="Ex: Reunião com cliente"
                 required
                 data-testid="appointment-title-input"
@@ -516,7 +516,7 @@ const Agenda = () => {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                   required
                   data-testid="appointment-date-input"
                 />
@@ -529,7 +529,7 @@ const Agenda = () => {
                   type="time"
                   value={formData.time}
                   onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                   required
                   data-testid="appointment-time-input"
                 />
@@ -544,7 +544,7 @@ const Agenda = () => {
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                   data-testid="appointment-category-select"
                 >
                   {categories.map(cat => (
@@ -560,7 +560,7 @@ const Agenda = () => {
                   type="text"
                   value={formData.duration}
                   onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                   placeholder="Ex: 1 hora"
                   data-testid="appointment-duration-input"
                 />
@@ -574,7 +574,7 @@ const Agenda = () => {
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#0B0F18] text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-white/20 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white dark:bg-[#142d30] text-slate-900 dark:text-white"
                 rows={3}
                 placeholder="Detalhes do compromisso..."
                 data-testid="appointment-description-input"

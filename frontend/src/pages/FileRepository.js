@@ -62,7 +62,7 @@ const FileRepository = () => {
   const renderFileCard = (file) => (
     <div
       key={file.id}
-      className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/10 p-5 hover:shadow-lg hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all group"
+      className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/10 p-5 hover:shadow-lg hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all group"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="w-12 h-12 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/30 rounded-xl flex items-center justify-center text-cyan-600 dark:text-cyan-400">
@@ -124,7 +124,7 @@ const FileRepository = () => {
         {data.folders.length > 0 && (
           <div className="space-y-4">
             {data.folders.map((folder) => (
-              <div key={folder.id} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
+              <div key={folder.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
                 {/* Folder Header */}
                 <button
                   className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
@@ -181,7 +181,7 @@ const FileRepository = () => {
 
         {/* Arquivos sem pasta */}
         {data.uncategorized.length > 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-slate-100 dark:bg-white/10 rounded-xl flex items-center justify-center">
@@ -203,7 +203,7 @@ const FileRepository = () => {
 
         {/* Empty State */}
         {data.folders.length === 0 && data.uncategorized.length === 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-12 text-center">
             <FileText className="w-20 h-20 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">Nenhum arquivo disponível</h3>
             <p className="text-slate-600 dark:text-slate-400">Os arquivos estarão disponíveis em breve.</p>

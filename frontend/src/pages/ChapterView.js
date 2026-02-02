@@ -238,7 +238,7 @@ const ChapterView = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-4">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Progresso do Capítulo</span>
             <span className={`text-sm font-medium ${watchedPercentage >= MIN_PERCENTAGE ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
@@ -257,7 +257,7 @@ const ChapterView = () => {
         </div>
 
         {/* Content */}
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden" ref={contentRef}>
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden" ref={contentRef}>
           {chapter.content_type === 'video' && embedUrl && (
             <div className="aspect-video bg-black">
               <iframe
@@ -361,7 +361,7 @@ const ChapterView = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/10 p-4">
+        <div className="flex items-center justify-between bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-4">
           <div className="flex items-center gap-3">
             {isCompleted ? (
               <div className="flex items-center gap-2 text-green-600 dark:text-green-400">

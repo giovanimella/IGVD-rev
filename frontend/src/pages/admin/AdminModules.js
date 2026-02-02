@@ -243,7 +243,7 @@ const AdminModules = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modules.map((module) => (
-            <div key={module.id} className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden hover:shadow-lg dark:hover:border-cyan-500/30 transition-all" data-testid={`module-item-${module.id}`}>
+            <div key={module.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden hover:shadow-lg dark:hover:border-cyan-500/30 transition-all" data-testid={`module-item-${module.id}`}>
               <div className="h-32 bg-gradient-to-br from-cyan-500 to-blue-600 relative">
                 <div className="absolute top-3 right-3 flex gap-2">
                   {module.is_acolhimento && (
@@ -413,7 +413,7 @@ const AdminModules = () => {
         </Dialog>
 
         {modules.length === 0 && (
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 p-12 text-center">
             <BookOpen className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-2">Nenhum módulo cadastrado</h3>
             <p className="text-slate-600 dark:text-slate-400 mb-6">Crie seu primeiro módulo para começar.</p>

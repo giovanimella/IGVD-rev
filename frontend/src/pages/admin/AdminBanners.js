@@ -181,7 +181,7 @@ const AdminBanners = () => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+        <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           {banners.length === 0 ? (
             <div className="text-center py-12">
               <ImageIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />

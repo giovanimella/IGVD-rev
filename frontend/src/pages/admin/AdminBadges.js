@@ -191,7 +191,7 @@ const AdminBadges = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
                 <Award className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -202,7 +202,7 @@ const AdminBadges = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
                 <Award className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -213,7 +213,7 @@ const AdminBadges = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
                 <Gift className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -231,7 +231,7 @@ const AdminBadges = () => {
           {badges.map((badge) => (
             <div
               key={badge.id}
-              className={`bg-white dark:bg-[#151B28] rounded-xl border ${badge.active ? 'border-slate-100 dark:border-white/5' : 'border-red-200 dark:border-red-700/30 bg-red-50 dark:bg-red-900/20'} p-6 hover:shadow-lg dark:hover:border-cyan-500/30 transition-all`}
+              className={`bg-white dark:bg-[#1b4c51] rounded-xl border ${badge.active ? 'border-slate-100 dark:border-white/5' : 'border-red-200 dark:border-red-700/30 bg-red-50 dark:bg-red-900/20'} p-6 hover:shadow-lg dark:hover:border-cyan-500/30 transition-all`}
             >
               <div className="flex items-start justify-between mb-4">
                 <div
@@ -296,7 +296,7 @@ const AdminBadges = () => {
         </div>
 
         {badges.length === 0 && (
-          <div className="text-center py-12 bg-white dark:bg-[#151B28] rounded-xl border border-slate-100 dark:border-white/5">
+          <div className="text-center py-12 bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5">
             <Award className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Nenhum badge cadastrado</h3>
             <p className="text-slate-600 dark:text-slate-400 mb-4">Crie badges para motivar seus licenciados!</p>
