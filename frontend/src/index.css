@@ -111,7 +111,7 @@ code {
 }
 
 .dark body {
-    background: linear-gradient(135deg, #0B0F18 0%, #151B28 100%);
+    background: linear-gradient(135deg, #1b4c51 0%, #142d30 100%);
 }
 
 /* Tooltip CSS variables for Recharts */
