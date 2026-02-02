@@ -129,8 +129,8 @@ code {
 
 /* Dark mode cards with subtle gradient and glow */
 .dark .dark-card {
-    background: linear-gradient(145deg, #191E2A 0%, #1A2234 100%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(145deg, #1b4c51 0%, #163b3f 100%);
+    border: 1px solid rgba(58, 145, 155, 0.2);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -138,14 +138,14 @@ code {
 .dark input,
 .dark textarea,
 .dark select {
-    background-color: #191E2A !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: #163b3f !important;
+    border-color: rgba(58, 145, 155, 0.3) !important;
     color: #E0E0E0 !important;
 }
 
 .dark input::placeholder,
 .dark textarea::placeholder {
-    color: #6B7280 !important;
+    color: #7ca8ad !important;
 }
 
 /* Dark mode tables */
@@ -154,15 +154,15 @@ code {
 }
 
 .dark thead {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: rgba(58, 145, 155, 0.1);
 }
 
 .dark tbody tr {
-    border-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(58, 145, 155, 0.15);
 }
 
 .dark tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgba(58, 145, 155, 0.08);
 }
 
 @layer base {
