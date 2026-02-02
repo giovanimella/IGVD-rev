@@ -159,6 +159,13 @@
 
 ## 📝 Changelog
 
+### v1.2.0 (Fevereiro 2026)
+- **NOVO:** Sidebar de Ranking na direita da tela
+  - Pódio visual com top 3 (troféus ouro/prata/bronze)
+  - Lista estilizada com avatares em formato losango
+  - Botão "Ver Ranking Completo"
+  - Visível apenas para licenciados e supervisores
+
 ### v1.1.0 (Janeiro 2026)
 - Renomeado de "UniOzoxx" para "IGVD - Instituto Global de Vendas Diretas"
 - Adicionado sistema de eventos da empresa
