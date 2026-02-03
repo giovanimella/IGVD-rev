@@ -188,43 +188,53 @@ async def get_stage_distribution(current_user: dict = Depends(require_role(["adm
     para o gráfico de pizza do dashboard admin
     """
     # Contar usuários em cada etapa
-    # Etapas: registro, documentos, pagamento, acolhimento, completo
+    # Etapas: registro, documentos, pagamento, treinamento, acolhimento, completo
     
     # Total de licenciados
     total = await db.users.count_documents({"role": "licenciado"})
     
-    # Contagem por etapa
+    # Contagem por etapa (usando current_stage)
     registro = await db.users.count_documents({
         "role": "licenciado",
-        "onboarding_stage": "registro"
+        "current_stage": "registro"
     })
     
     documentos = await db.users.count_documents({
         "role": "licenciado",
-        "onboarding_stage": {"$in": ["documentos", "documentos_pf", "documentos_pj"]}
+        "current_stage": {"$in": ["documentos", "documentos_pf", "documentos_pj"]}
     })
     
     pagamento = await db.users.count_documents({
         "role": "licenciado",
-        "onboarding_stage": "pagamento"
+        "current_stage": "pagamento"
+    })
+    
+    treinamento = await db.users.count_documents({
+        "role": "licenciado",
+        "current_stage": {"$in": ["treinamento", "treinamento_presencial"]}
     })
     
     acolhimento = await db.users.count_documents({
         "role": "licenciado",
-        "onboarding_stage": "acolhimento"
+        "current_stage": "acolhimento"
     })
     
     completo = await db.users.count_documents({
         "role": "licenciado",
-        "onboarding_stage": "completo"
+        "current_stage": "completo"
     })
     
-    # Se não houver dados de onboarding_stage, considerar todos como "registro"
-    if registro + documentos + pagamento + acolhimento + completo == 0 and total > 0:
+    # Se não houver dados de current_stage, considerar todos como "registro"
+    total_com_etapa = registro + documentos + pagamento + treinamento + acolhimento + completo
+    if total_com_etapa == 0 and total > 0:
         # Verificar usuários sem etapa definida
         sem_etapa = await db.users.count_documents({
             "role": "licenciado",
-            "onboarding_stage": {"$exists": False}
+            "$or": [
+                {"current_stage": {"$exists": False}},
+                {"current_stage": None},
+                {"current_stage": ""}
+            ]
         })
         registro = sem_etapa
     
@@ -232,6 +242,7 @@ async def get_stage_distribution(current_user: dict = Depends(require_role(["adm
         {"name": "Registro", "value": registro, "color": "#06b6d4"},
         {"name": "Documentos", "value": documentos, "color": "#8b5cf6"},
         {"name": "Pagamento", "value": pagamento, "color": "#3b82f6"},
+        {"name": "Treinamento", "value": treinamento, "color": "#ec4899"},
         {"name": "Acolhimento", "value": acolhimento, "color": "#f59e0b"},
         {"name": "Completo", "value": completo, "color": "#22c55e"}
     ]
