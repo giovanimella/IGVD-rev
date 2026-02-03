@@ -70,6 +70,7 @@
 - [x] Envio de emails via Resend
 - [x] Notificações de vendas confirmadas
 - [x] Emails de boas-vindas
+- [x] **NOVO:** Badge de notificação no menu "Atendimento" (mensagens não lidas)
 
 ### 📁 Outros
 - [x] Repositório de arquivos
