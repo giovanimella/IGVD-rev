@@ -99,7 +99,7 @@ function App() {
           <Route
             path="/module/:moduleId/chapter/:chapterId"
             element={
-              <PrivateRoute roles={['licenciado']}>
+              <PrivateRoute roles={['licenciado', 'admin', 'supervisor']}>
                 <ChapterView />
               </PrivateRoute>
             }
@@ -107,7 +107,7 @@ function App() {
           <Route
             path="/module/:moduleId/live"
             element={
-              <PrivateRoute roles={['licenciado']}>
+              <PrivateRoute roles={['licenciado', 'admin', 'supervisor']}>
                 <LiveClassView />
               </PrivateRoute>
             }
@@ -115,7 +115,7 @@ function App() {
           <Route
             path="/module/:moduleId/assessment"
             element={
-              <PrivateRoute roles={['licenciado']}>
+              <PrivateRoute roles={['licenciado', 'admin', 'supervisor']}>
                 <ModuleAssessment />
               </PrivateRoute>
             }
