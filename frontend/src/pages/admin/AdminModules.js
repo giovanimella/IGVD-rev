@@ -332,8 +332,14 @@ const AdminModules = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modules.map((module) => (
             <div key={module.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden hover:shadow-lg dark:hover:border-cyan-500/30 transition-all" data-testid={`module-item-${module.id}`}>
-              <div className="h-32 bg-gradient-to-br from-cyan-500 to-blue-600 relative">
-                <div className="absolute top-3 right-3 flex gap-2">
+              <div className={`h-32 relative ${module.module_type === 'live_class' ? 'bg-gradient-to-br from-red-500 to-rose-600' : 'bg-gradient-to-br from-cyan-500 to-blue-600'}`}>
+                <div className="absolute top-3 right-3 flex gap-2 flex-wrap justify-end">
+                  {module.module_type === 'live_class' && (
+                    <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium flex items-center gap-1">
+                      <Video className="w-3 h-3" />
+                      Ao Vivo
+                    </span>
+                  )}
                   {module.is_acolhimento && (
                     <span className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded text-xs font-medium">
                       Acolhimento
@@ -343,6 +349,12 @@ const AdminModules = () => {
                     <span className="px-2 py-1 bg-white/90 text-slate-700 rounded text-xs font-medium flex items-center gap-1">
                       <GraduationCap className="w-3 h-3" />
                       Certificado
+                    </span>
+                  )}
+                  {module.allow_rewatch === false && (
+                    <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium flex items-center gap-1">
+                      <RefreshCcw className="w-3 h-3" />
+                      Sem Replay
                     </span>
                   )}
                 </div>
@@ -356,7 +368,9 @@ const AdminModules = () => {
                 <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">{module.description}</p>
                 
                 <div className="flex items-center justify-between text-sm mb-4">
-                  <span className="text-slate-600 dark:text-slate-400">{module.chapters_count || 0} capítulos</span>
+                  <span className="text-slate-600 dark:text-slate-400">
+                    {module.module_type === 'live_class' ? 'Aula ao Vivo' : `${module.chapters_count || 0} capítulos`}
+                  </span>
                   {module.points_reward > 0 && (
                     <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
                       <Award className="w-4 h-4" />
