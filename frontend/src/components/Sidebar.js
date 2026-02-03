@@ -178,6 +178,7 @@ const Sidebar = () => {
           {links.map((link) => {
             const Icon = link.icon;
             const isActive = location.pathname === link.path;
+            const showBadge = link.path === '/admin/chat' && unreadCount > 0;
             return (
               <Link
                 key={link.path}
@@ -189,8 +190,20 @@ const Sidebar = () => {
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <span className="truncate">{link.label}</span>
+                <div className="relative">
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {showBadge && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
+                <span className="truncate flex-1">{link.label}</span>
+                {showBadge && (
+                  <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                    {unreadCount}
+                  </span>
+                )}
               </Link>
             );
           })}
