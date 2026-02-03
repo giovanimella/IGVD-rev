@@ -466,6 +466,20 @@ class SystemConfig(BaseModel):
     webhook_api_key: Optional[str] = None  # API Key para autenticar webhooks de entrada
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
+# ==================== CHAT DE AULA AO VIVO ====================
+
+class LiveChatMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    module_id: str
+    user_id: str
+    user_name: str
+    message: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class LiveChatMessageCreate(BaseModel):
+    module_id: str
+    message: str
+
 # ==================== CERTIFICADOS ====================
 
 class Certificate(BaseModel):
