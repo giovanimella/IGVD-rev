@@ -19,6 +19,7 @@
 - [x] Três níveis de usuário: Admin, Supervisor, Licenciado
 - [x] Recuperação de senha por email
 - [x] Definição de senha por link
+- [x] **NOVO:** Admin pode avançar/alterar etapa de acolhimento de licenciados
 
 ### 📚 Sistema de Módulos e Capítulos
 - [x] CRUD completo de módulos
