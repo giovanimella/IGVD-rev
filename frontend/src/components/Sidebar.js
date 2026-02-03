@@ -35,6 +35,7 @@ const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
   const [platformName, setPlatformName] = useState('IGVD');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchBranding = async () => {
     try {
@@ -53,13 +54,36 @@ const Sidebar = () => {
     }
   };
 
+  const fetchUnreadCount = async () => {
+    if (!user) return;
+    try {
+      const response = await axios.get(`${API_URL}/api/chat/unread-count`);
+      setUnreadCount(response.data.unread_count || 0);
+    } catch (error) {
+      console.error('Erro ao buscar mensagens não lidas:', error);
+    }
+  };
+
   useEffect(() => {
     fetchBranding();
   }, []);
 
+  // Buscar contagem de mensagens não lidas periodicamente
+  useEffect(() => {
+    if (user?.role === 'admin' || user?.role === 'supervisor') {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 30000); // A cada 30 segundos
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
   // Fechar menu ao mudar de rota
   useEffect(() => {
     setIsMobileOpen(false);
+    // Atualizar contagem quando mudar de rota
+    if (user?.role === 'admin' || user?.role === 'supervisor') {
+      fetchUnreadCount();
+    }
   }, [location.pathname]);
 
   // Prevenir scroll do body quando menu mobile está aberto
