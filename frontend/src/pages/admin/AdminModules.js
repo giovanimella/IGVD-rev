@@ -507,6 +507,74 @@ const AdminModules = () => {
                   placeholder="0"
                 />
               </div>
+              {/* Tipo de Módulo */}
+              <div className="space-y-2 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                <div className="flex items-center gap-2">
+                  <Video className="w-4 h-4 text-indigo-600" />
+                  <Label>Tipo de Módulo</Label>
+                </div>
+                <select
+                  value={formData.module_type}
+                  onChange={(e) => setFormData({...formData, module_type: e.target.value})}
+                  className="w-full px-3 py-2 rounded-lg border border-indigo-200 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="standard">Padrão (Capítulos)</option>
+                  <option value="live_class">Aula ao Vivo</option>
+                </select>
+              </div>
+              {/* Configurações de Aula ao Vivo */}
+              {formData.module_type === 'live_class' && (
+                <div className="space-y-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                  <div className="flex items-center gap-2 text-red-700">
+                    <Video className="w-4 h-4" />
+                    <Label className="font-semibold">Configurações da Transmissão</Label>
+                  </div>
+                  <div>
+                    <Label>Plataforma</Label>
+                    <select
+                      value={formData.live_stream_platform}
+                      onChange={(e) => setFormData({...formData, live_stream_platform: e.target.value})}
+                      className="w-full px-3 py-2 rounded-lg border border-red-200 bg-white text-slate-900"
+                    >
+                      <option value="youtube">YouTube</option>
+                      <option value="twitch">Twitch</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label>URL da Transmissão</Label>
+                    <Input
+                      value={formData.live_stream_url}
+                      onChange={(e) => setFormData({...formData, live_stream_url: e.target.value})}
+                      placeholder={formData.live_stream_platform === 'youtube' 
+                        ? 'https://youtube.com/watch?v=... ou https://youtube.com/live/...'
+                        : 'https://twitch.tv/channel'
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label>Data/Hora Agendada (opcional)</Label>
+                    <Input
+                      type="datetime-local"
+                      value={formData.live_stream_scheduled}
+                      onChange={(e) => setFormData({...formData, live_stream_scheduled: e.target.value})}
+                    />
+                  </div>
+                </div>
+              )}
+              {/* Permitir Rewatching */}
+              <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <RefreshCcw className="w-4 h-4 text-emerald-600" />
+                    <Label>Permitir Reassistir</Label>
+                  </div>
+                  <p className="text-sm text-emerald-600">Licenciados podem reassistir capítulos concluídos</p>
+                </div>
+                <Switch
+                  checked={formData.allow_rewatch}
+                  onCheckedChange={(checked) => setFormData({...formData, allow_rewatch: checked})}
+                />
+              </div>
               <Button onClick={handleUpdateModule} className="w-full">
                 Salvar Alterações
               </Button>
