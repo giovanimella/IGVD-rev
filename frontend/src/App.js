@@ -47,6 +47,7 @@ import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
 import Agenda from './pages/Agenda';
 import ChapterView from './pages/ChapterView';
+import LiveClassView from './pages/LiveClassView';
 import Training from './pages/Training';
 import SalesLinks from './pages/SalesLinks';
 import Sales from './pages/Sales';
