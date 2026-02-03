@@ -26,6 +26,9 @@
 - [x] Sistema de avaliações
 - [x] Progresso do usuário
 - [x] Módulos com delay de tempo configurável
+- [x] **NOVO:** Configuração de rewatching por módulo (admin pode habilitar/desabilitar)
+- [x] **NOVO:** Tipo de módulo "Aula ao Vivo" com embed YouTube/Twitch
+- [x] **NOVO:** Chat de aula ao vivo (mensagens em tempo real durante transmissão)
 
 ### 🎮 Gamificação
 - [x] Sistema de badges
