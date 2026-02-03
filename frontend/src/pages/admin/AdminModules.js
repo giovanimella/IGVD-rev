@@ -26,7 +26,12 @@ const AdminModules = () => {
     points_reward: 0,
     is_acolhimento: false,
     has_assessment: false,
-    visibility_delay_months: 0
+    visibility_delay_months: 0,
+    allow_rewatch: true,
+    module_type: 'standard',
+    live_stream_url: '',
+    live_stream_platform: 'youtube',
+    live_stream_scheduled: ''
   });
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
