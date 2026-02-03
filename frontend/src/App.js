@@ -105,6 +105,14 @@ function App() {
             }
           />
           <Route
+            path="/module/:moduleId/live"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <LiveClassView />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/module/:moduleId/assessment"
             element={
               <PrivateRoute roles={['licenciado']}>
