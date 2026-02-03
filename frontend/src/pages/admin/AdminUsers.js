@@ -151,6 +151,36 @@ const AdminUsers = () => {
     }
   };
 
+  const openStageModal = (user) => {
+    setStageUser(user);
+    setNewStage(user.current_stage || 'registro');
+    setShowStageModal(true);
+  };
+
+  const handleUpdateStage = async () => {
+    if (!stageUser || !newStage) return;
+    
+    setUpdatingStage(true);
+    try {
+      await axios.put(`${API_URL}/api/users/${stageUser.id}/stage`, {
+        current_stage: newStage
+      });
+      toast.success(`Etapa atualizada para "${STAGES.find(s => s.value === newStage)?.label}" com sucesso!`);
+      setShowStageModal(false);
+      setStageUser(null);
+      fetchUsers();
+    } catch (error) {
+      console.error('Erro ao atualizar etapa:', error);
+      toast.error(error.response?.data?.detail || 'Erro ao atualizar etapa');
+    } finally {
+      setUpdatingStage(false);
+    }
+  };
+
+  const getStageInfo = (stage) => {
+    return STAGES.find(s => s.value === stage) || STAGES[0];
+  };
+
   const getRoleBadge = (role) => {
     const badges = {
       admin: 'bg-red-100 text-red-800',
