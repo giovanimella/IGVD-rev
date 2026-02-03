@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Users, Plus, Edit, Trash2, X, Mail, User, Shield, Upload, Download, Lock, FileSpreadsheet } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, X, Mail, User, Shield, Upload, Download, Lock, FileSpreadsheet, ArrowRight, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '../../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../components/ui/dialog';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -10,6 +12,10 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showStageModal, setShowStageModal] = useState(false);
+  const [stageUser, setStageUser] = useState(null);
+  const [newStage, setNewStage] = useState('');
+  const [updatingStage, setUpdatingStage] = useState(false);
   const [importFile, setImportFile] = useState(null);
   const [importing, setImporting] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -21,6 +27,15 @@ const AdminUsers = () => {
     supervisor_id: '',
     password: ''
   });
+
+  const STAGES = [
+    { value: 'registro', label: 'Registro', color: 'bg-gray-100 text-gray-700' },
+    { value: 'documentos', label: 'Documentos', color: 'bg-blue-100 text-blue-700' },
+    { value: 'pagamento', label: 'Pagamento', color: 'bg-yellow-100 text-yellow-700' },
+    { value: 'treinamento', label: 'Treinamento', color: 'bg-purple-100 text-purple-700' },
+    { value: 'acolhimento', label: 'Acolhimento', color: 'bg-cyan-100 text-cyan-700' },
+    { value: 'completo', label: 'Completo', color: 'bg-green-100 text-green-700' }
+  ];
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
