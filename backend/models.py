@@ -83,6 +83,11 @@ class Module(BaseModel):
     is_acolhimento: bool = False
     has_assessment: bool = False
     visibility_delay_months: int = 0  # 0 = aparece imediatamente, X = aparece após X meses
+    allow_rewatch: bool = True  # Se o licenciado pode reassistir capítulos concluídos
+    module_type: str = "standard"  # 'standard', 'live_class'
+    live_stream_url: Optional[str] = None  # URL do YouTube/Twitch para aulas ao vivo
+    live_stream_platform: Optional[str] = None  # 'youtube', 'twitch'
+    live_stream_scheduled: Optional[str] = None  # Data/hora agendada da transmissão
 
 class ModuleCreate(BaseModel):
     title: str
@@ -94,6 +99,11 @@ class ModuleCreate(BaseModel):
     is_acolhimento: bool = False
     has_assessment: bool = False
     visibility_delay_months: int = 0
+    allow_rewatch: bool = True
+    module_type: str = "standard"
+    live_stream_url: Optional[str] = None
+    live_stream_platform: Optional[str] = None
+    live_stream_scheduled: Optional[str] = None
 
 class Chapter(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
