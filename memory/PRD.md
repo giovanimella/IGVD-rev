@@ -150,9 +150,11 @@
 
 ### P0 (Crítico)
 - [ ] Deploy em produção no servidor do cliente
+- [ ] **BUG:** Pagamento - objeto `payer` enviado vazio para MercadoPago (bloqueia pagamentos)
 
 ### P1 (Importante)
-- [ ] Integração com gateway de pagamento (PagSeguro/MercadoPago)
+- [ ] Integração com gateway de pagamento (PagSeguro/MercadoPago) - em progresso
+- [ ] **BUG:** Upload de arquivos - caminhos hardcoded `/app/uploads/` precisam ser variáveis de ambiente
 - [ ] Lembretes automáticos por email
 
 ### P2 (Melhorias)
@@ -164,6 +166,29 @@
 ---
 
 ## 📝 Changelog
+
+### v1.3.0 (Fevereiro 2026)
+- **NOVO:** Módulo de Aula ao Vivo
+  - Novo tipo de módulo com embed YouTube/Twitch
+  - Chat em tempo real durante transmissões
+  - Badge "Ao Vivo" nos cards de módulos
+  - Página dedicada para assistir transmissões
+  
+- **NOVO:** Configuração de Rewatching por Módulo
+  - Admin pode habilitar/desabilitar reassistir capítulos para cada módulo
+  - Botão "Reassistir" aparece para capítulos concluídos quando habilitado
+  
+- **NOVO:** Admin pode alterar etapa de acolhimento de licenciados
+  - Modal de confirmação com aviso de segurança
+  - Seleção visual das 6 etapas: Registro, Documentos, Pagamento, Treinamento, Acolhimento, Completo
+  - Coluna "Etapa" na tabela de usuários com badge clicável
+  
+- **NOVO:** Badge de notificação no menu "Atendimento"
+  - Contador de mensagens não lidas (atualiza a cada 30s)
+  - Animação pulse para chamar atenção
+  
+- **FIX:** Template de certificado agora mostra status "Configurado" corretamente
+  - Corrigido endpoint de `/api/system/config` para `/api/system/config/full`
 
 ### v1.2.0 (Fevereiro 2026)
 - **NOVO:** Sidebar de Ranking na direita da tela
