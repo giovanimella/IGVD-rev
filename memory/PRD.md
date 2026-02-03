@@ -78,6 +78,7 @@
 - [x] Comunicados/Posts
 - [x] Certificados PDF
 - [x] Favoritos
+- [x] **FIX:** Template de certificado agora mostra status "Configurado" corretamente
 
 ---
 
