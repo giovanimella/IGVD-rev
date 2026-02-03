@@ -92,7 +92,12 @@ const AdminModules = () => {
       points_reward: module.points_reward,
       is_acolhimento: module.is_acolhimento,
       has_assessment: module.has_assessment,
-      visibility_delay_months: module.visibility_delay_months || 0
+      visibility_delay_months: module.visibility_delay_months || 0,
+      allow_rewatch: module.allow_rewatch !== false,
+      module_type: module.module_type || 'standard',
+      live_stream_url: module.live_stream_url || '',
+      live_stream_platform: module.live_stream_platform || 'youtube',
+      live_stream_scheduled: module.live_stream_scheduled || ''
     });
     setShowEditDialog(true);
   };
