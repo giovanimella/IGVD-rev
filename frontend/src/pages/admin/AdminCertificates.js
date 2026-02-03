@@ -30,7 +30,7 @@ const AdminCertificates = () => {
   const fetchData = async () => {
     try {
       const [configRes, certsRes, statsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/system/config`),
+        axios.get(`${API_URL}/api/system/config/full`),
         axios.get(`${API_URL}/api/certificates/all`),
         axios.get(`${API_URL}/api/certificates/stats`)
       ]);
