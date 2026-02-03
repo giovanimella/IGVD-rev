@@ -337,12 +337,87 @@ const AdminUsers = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       </div>
+
+      {/* Modal de Alterar Etapa */}
+      <Dialog open={showStageModal} onOpenChange={setShowStageModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ArrowRight className="w-5 h-5 text-cyan-500" />
+              Alterar Etapa do Licenciado
+            </DialogTitle>
+            <DialogDescription>
+              Alterando etapa de: <strong>{stageUser?.full_name}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-4">
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  Alterar a etapa manualmente pode afetar o fluxo de onboarding do licenciado. 
+                  Certifique-se de que esta ação é necessária.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Etapa Atual: <span className={`px-2 py-1 rounded text-xs ${getStageInfo(stageUser?.current_stage).color}`}>
+                  {getStageInfo(stageUser?.current_stage).label}
+                </span>
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Nova Etapa
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {STAGES.map((stage) => (
+                  <button
+                    key={stage.value}
+                    type="button"
+                    onClick={() => setNewStage(stage.value)}
+                    className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                      newStage === stage.value
+                        ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300'
+                        : 'border-slate-200 dark:border-white/10 hover:border-slate-300 text-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    {stage.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowStageModal(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleUpdateStage}
+                disabled={updatingStage || newStage === stageUser?.current_stage}
+                className="flex-1 bg-cyan-500 hover:bg-cyan-600"
+              >
+                {updatingStage ? 'Salvando...' : 'Confirmar Alteração'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal */}
       {showModal && (
