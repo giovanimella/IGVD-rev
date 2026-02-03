@@ -90,6 +90,57 @@ async def update_user(user_id: str, updates: dict, current_user: dict = Depends(
     
     return {"message": "Usuário atualizado com sucesso"}
 
+@router.put("/{user_id}/stage")
+async def update_user_stage(
+    user_id: str, 
+    stage_data: dict, 
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Atualiza a etapa de acolhimento de um licenciado (apenas admin)"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    new_stage = stage_data.get("current_stage")
+    valid_stages = ["registro", "documentos", "pagamento", "treinamento", "acolhimento", "completo"]
+    
+    if new_stage not in valid_stages:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Etapa inválida. Valores válidos: {', '.join(valid_stages)}"
+        )
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "current_stage": new_stage,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "message": f"Etapa atualizada para '{new_stage}' com sucesso",
+        "previous_stage": user.get("current_stage"),
+        "new_stage": new_stage
+    }
+
+@router.get("/{user_id}/stage-history")
+async def get_user_stage_history(
+    user_id: str,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Retorna informações da etapa atual do usuário"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    return {
+        "user_id": user_id,
+        "full_name": user.get("full_name"),
+        "current_stage": user.get("current_stage", "registro"),
+        "available_stages": ["registro", "documentos", "pagamento", "treinamento", "acolhimento", "completo"]
+    }
+
 @router.delete("/{user_id}")
 async def delete_user(user_id: str, current_user: dict = Depends(require_role(["admin"]))):
     result = await db.users.delete_one({"id": user_id})
