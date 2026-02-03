@@ -261,6 +261,22 @@ const ModuleDetail = () => {
                             <Play className="w-4 h-4 mr-1" />
                             {chapter.content_type === 'video' ? 'Assistir' : 'Ver Conteúdo'}
                           </Button>
+                        ) : module?.allow_rewatch !== false ? (
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">
+                              <CheckCircle className="w-4 h-4" />
+                              Concluído
+                            </span>
+                            <Button
+                              onClick={() => navigate(`/module/${id}/chapter/${chapter.id}`)}
+                              size="sm"
+                              variant="outline"
+                              data-testid={`rewatch-chapter-${chapter.id}`}
+                            >
+                              <Play className="w-4 h-4 mr-1" />
+                              Reassistir
+                            </Button>
+                          </div>
                         ) : (
                           <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">
                             <CheckCircle className="w-4 h-4" />
