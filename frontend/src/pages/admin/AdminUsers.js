@@ -275,15 +275,16 @@ const AdminUsers = () => {
                 <tr>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Usuário</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Email</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Telefone</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Nível</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Supervisor</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Etapa</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Pontos</th>
                   <th className="text-right px-6 py-4 text-sm font-semibold text-slate-900 dark:text-white">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-white/5">
-                {users.map((user) => (
+                {users.map((user) => {
+                  const stageInfo = getStageInfo(user.current_stage);
+                  return (
                   <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <button
@@ -292,27 +293,44 @@ const AdminUsers = () => {
                       >
                         {user.full_name}
                       </button>
+                      {user.phone && (
+                        <p className="text-xs text-slate-400 mt-1">{user.phone}</p>
+                      )}
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{user.email}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{user.phone || '-'}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm">{user.email}</td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleBadge(user.role)}`}>
                         {getRoleLabel(user.role)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{getSupervisorName(user.supervisor_id)}</td>
+                    <td className="px-6 py-4">
+                      {user.role === 'licenciado' ? (
+                        <button
+                          onClick={() => openStageModal(user)}
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${stageInfo.color} hover:opacity-80 transition-opacity flex items-center gap-1`}
+                          data-testid={`stage-btn-${user.id}`}
+                        >
+                          {stageInfo.label}
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      ) : (
+                        <span className="text-slate-400 text-sm">-</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 text-slate-900 dark:text-white font-semibold">{user.points || 0}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => openEditModal(user)}
                           className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
+                          title="Editar"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(user.id)}
                           className="p-2 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition-colors"
+                          title="Deletar"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
