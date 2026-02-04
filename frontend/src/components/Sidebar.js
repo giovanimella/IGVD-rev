@@ -119,17 +119,22 @@ const Sidebar = () => {
     { path: '/admin/badges', icon: Trophy, label: 'Conquistas' },
     { path: '/admin/challenges', icon: Target, label: 'Desafios' },
     { path: '/admin/certificates', icon: Award, label: 'Certificados' },
+    { path: '/admin/terms', icon: FileCheck, label: 'Termos de Aceite' },
+    { path: '/admin/whatsapp', icon: Smartphone, label: 'WhatsApp' },
     { path: '/admin/files', icon: FileText, label: 'Arquivos' },
     { path: '/admin/banners', icon: Image, label: 'Banners' },
     { path: '/admin/posts', icon: Megaphone, label: 'Comunicados' },
+    { path: '/timeline', icon: MessagesSquare, label: 'Comunidade' },
     { path: '/profile', icon: Settings, label: 'Perfil' },
   ];
 
   const supervisorLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/supervisor/advanced', icon: LayoutDashboard, label: 'Painel Avançado' },
     { path: '/supervisor/licensees', icon: Users, label: 'Licenciados' },
     { path: '/supervisor/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/admin/chat', icon: MessageCircle, label: 'Atendimento' },
+    { path: '/timeline', icon: MessagesSquare, label: 'Comunidade' },
     { path: '/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/leaderboard', icon: Trophy, label: 'Ranking' },
     { path: '/profile', icon: Settings, label: 'Perfil' },
@@ -138,6 +143,7 @@ const Sidebar = () => {
   const licenseeLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
+    { path: '/timeline', icon: MessagesSquare, label: 'Comunidade' },
     { path: '/training', icon: Users, label: 'Treinamento' },
     { path: '/sales', icon: ShoppingCart, label: 'Minhas Vendas' },
     { path: '/sales-links', icon: DollarSign, label: 'Links de Pagamento' },
