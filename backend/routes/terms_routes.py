@@ -50,7 +50,7 @@ async def create_term(
         version=term_data.version,
         is_active=term_data.is_active,
         is_required=term_data.is_required,
-        created_by=current_user["id"]
+        created_by=current_user["sub"]
     )
     
     await db.digital_terms.insert_one(term.model_dump())
