@@ -517,19 +517,19 @@ async def get_advanced_dashboard(current_user: dict = Depends(require_role(["sup
         
         # Estimativa de conclusão baseada no ritmo
         estimated_completion = None
-        if completed_chapters > 0 and total_chapters > completed_chapters:
+        if completed_chapters > 0 and total_chapters_all > completed_chapters:
             # Calcular dias desde criação
             try:
                 created_dt = datetime.fromisoformat(licensee.get("created_at", now.isoformat()).replace("Z", "+00:00").replace("+00:00", ""))
                 days_active = max((now - created_dt).days, 1)
                 chapters_per_day = completed_chapters / days_active
-                remaining_chapters = total_chapters - completed_chapters
+                remaining_chapters = total_chapters_all - completed_chapters
                 if chapters_per_day > 0:
                     days_to_complete = remaining_chapters / chapters_per_day
                     estimated_completion = (now + timedelta(days=int(days_to_complete))).strftime("%Y-%m-%d")
             except:
                 pass
-        elif completed_chapters >= total_chapters:
+        elif completed_chapters >= total_chapters_all:
             estimated_completion = "Concluído"
         
         user_data = {
@@ -544,7 +544,7 @@ async def get_advanced_dashboard(current_user: dict = Depends(require_role(["sup
             "completed_modules": completed_modules,
             "total_modules": total_modules,
             "completed_chapters": completed_chapters,
-            "total_chapters": total_chapters,
+            "total_chapters": total_chapters_all,
             "completion_percentage": round(completion_percentage, 1),
             "days_since_access": days_since_access,
             "last_access": last_access_str,
