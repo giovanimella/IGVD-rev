@@ -365,8 +365,49 @@ const AdminModules = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modules.map((module) => (
             <div key={module.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden hover:shadow-lg dark:hover:border-cyan-500/30 transition-all" data-testid={`module-item-${module.id}`}>
-              <div className={`h-32 relative ${module.module_type === 'live_class' ? 'bg-gradient-to-br from-red-500 to-rose-600' : 'bg-gradient-to-br from-cyan-500 to-blue-600'}`}>
-                <div className="absolute top-3 right-3 flex gap-2 flex-wrap justify-end">
+              <div 
+                className={`h-40 relative ${module.module_type === 'live_class' ? 'bg-gradient-to-br from-red-500 to-rose-600' : 'bg-gradient-to-br from-cyan-500 to-blue-600'}`}
+                style={module.cover_image ? {
+                  backgroundImage: `url(${API_URL}${module.cover_image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                } : {}}
+              >
+                {/* Overlay escuro para imagens de capa */}
+                {module.cover_image && <div className="absolute inset-0 bg-black/30"></div>}
+                
+                {/* Botão de upload/remover capa */}
+                <div className="absolute top-3 left-3 z-10">
+                  {module.cover_image ? (
+                    <button
+                      onClick={() => handleRemoveCover(module.id)}
+                      className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                      title="Remover capa"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <label className="p-2 bg-white/90 hover:bg-white text-slate-700 rounded-lg cursor-pointer transition-colors flex items-center gap-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleCoverUpload(module.id, e.target.files[0])}
+                        disabled={uploadingCover === module.id}
+                      />
+                      {uploadingCover === module.id ? (
+                        <div className="w-4 h-4 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Image className="w-4 h-4" />
+                          <span className="text-xs">Capa</span>
+                        </>
+                      )}
+                    </label>
+                  )}
+                </div>
+
+                <div className="absolute top-3 right-3 flex gap-2 flex-wrap justify-end z-10">
                   {module.module_type === 'live_class' && (
                     <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium flex items-center gap-1">
                       <Video className="w-3 h-3" />
