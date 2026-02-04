@@ -432,7 +432,7 @@ const AdminModules = () => {
                     </span>
                   )}
                 </div>
-                <div className="absolute bottom-3 left-3 text-white">
+                <div className="absolute bottom-3 left-3 text-white z-10">
                   <p className="text-sm opacity-90">Ordem: {module.order}</p>
                 </div>
               </div>
