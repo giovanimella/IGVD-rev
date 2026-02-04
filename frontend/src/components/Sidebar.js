@@ -23,7 +23,11 @@ import {
   Radio,
   ShoppingCart,
   DollarSign,
-  MessageCircle
+  MessageCircle,
+  FileCheck,
+  Smartphone,
+  MessagesSquare,
+  LayoutDashboard
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
