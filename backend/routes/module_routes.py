@@ -116,3 +116,65 @@ async def delete_module(module_id: str, current_user: dict = Depends(require_rol
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Módulo não encontrado")
     return {"message": "Módulo deletado com sucesso"}
+
+@router.post("/{module_id}/cover")
+async def upload_module_cover(
+    module_id: str, 
+    file: UploadFile = File(...),
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Upload de imagem de capa para o módulo"""
+    module = await db.modules.find_one({"id": module_id}, {"_id": 0})
+    if not module:
+        raise HTTPException(status_code=404, detail="Módulo não encontrado")
+    
+    # Validar tipo de arquivo
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Tipo de arquivo não permitido. Use JPG, PNG, WebP ou GIF")
+    
+    # Gerar nome único para o arquivo
+    file_extension = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    new_filename = f"{module_id}_{uuid.uuid4().hex[:8]}.{file_extension}"
+    file_path = COVER_IMAGES_DIR / new_filename
+    
+    # Salvar arquivo
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Atualizar módulo com URL da imagem
+    cover_url = f"/uploads/module_covers/{new_filename}"
+    await db.modules.update_one(
+        {"id": module_id},
+        {"$set": {"cover_image": cover_url}}
+    )
+    
+    return {
+        "message": "Imagem de capa enviada com sucesso",
+        "cover_url": cover_url
+    }
+
+@router.delete("/{module_id}/cover")
+async def delete_module_cover(
+    module_id: str,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Remove a imagem de capa do módulo"""
+    module = await db.modules.find_one({"id": module_id}, {"_id": 0})
+    if not module:
+        raise HTTPException(status_code=404, detail="Módulo não encontrado")
+    
+    # Remover arquivo físico se existir
+    if module.get("cover_image"):
+        file_path = Path("/app") / module["cover_image"].lstrip("/")
+        if file_path.exists():
+            file_path.unlink()
+    
+    # Atualizar módulo
+    await db.modules.update_one(
+        {"id": module_id},
+        {"$set": {"cover_image": None}}
+    )
+    
+    return {"message": "Imagem de capa removida com sucesso"}
