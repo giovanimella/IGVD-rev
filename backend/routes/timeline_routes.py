@@ -241,7 +241,7 @@ async def react_to_post(
     # Criar nova reação
     reaction = TimelineReaction(
         post_id=post_id,
-        user_id=current_user["id"],
+        user_id=current_user["sub"],
         reaction_type=reaction_type
     )
     
