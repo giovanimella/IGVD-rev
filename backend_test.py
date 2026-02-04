@@ -813,6 +813,417 @@ class OzoxxAPITester:
         
         return success
 
+    # ==================== NEW FEATURES TESTS ====================
+    
+    # ==================== TIMELINE/SOCIAL FEED TESTS ====================
+    
+    def test_get_timeline_posts(self):
+        """Test getting timeline posts (requires auth)"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get Timeline Posts",
+            "GET",
+            "api/timeline/posts",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            posts = response.get('posts', [])
+            total = response.get('total', 0)
+            print(f"   Found {len(posts)} posts (total: {total})")
+        
+        return success
+
+    def test_create_timeline_post(self):
+        """Test creating a timeline post with content"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        post_data = {
+            "content": "🎉 Bem-vindos à nova timeline da Ozoxx! Compartilhem suas conquistas e experiências aqui. #OzoxxComunidade #Sucesso"
+        }
+        
+        success, response = self.run_test(
+            "Create Timeline Post",
+            "POST",
+            "api/timeline/posts",
+            200,
+            data=post_data,
+            token=self.admin_token
+        )
+        
+        if success and response:
+            post = response.get('post', {})
+            self.test_post_id = post.get('id')
+            print(f"   Created post ID: {self.test_post_id}")
+            print(f"   Author: {post.get('author_name', 'Unknown')}")
+        
+        return success
+
+    def test_react_to_post(self):
+        """Test reacting to a post with 'like'"""
+        if not self.admin_token or not hasattr(self, 'test_post_id') or not self.test_post_id:
+            print("❌ Skipping - No admin token or post ID")
+            return False
+        
+        success, response = self.run_test(
+            "React to Post (Like)",
+            "POST",
+            f"api/timeline/posts/{self.test_post_id}/react?reaction_type=like",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            reacted = response.get('reacted', False)
+            reaction_type = response.get('reaction_type', 'none')
+            print(f"   Reaction added: {reacted} ({reaction_type})")
+        
+        return success
+
+    def test_add_comment_to_post(self):
+        """Test adding comment to post"""
+        if not self.admin_token or not hasattr(self, 'test_post_id') or not self.test_post_id:
+            print("❌ Skipping - No admin token or post ID")
+            return False
+        
+        comment_data = {
+            "content": "Excelente iniciativa! A comunidade Ozoxx está cada vez mais forte! 💪"
+        }
+        
+        success, response = self.run_test(
+            "Add Comment to Post",
+            "POST",
+            f"api/timeline/posts/{self.test_post_id}/comments",
+            200,
+            data=comment_data,
+            token=self.admin_token
+        )
+        
+        if success and response:
+            comment = response.get('comment', {})
+            print(f"   Comment added by: {comment.get('author_name', 'Unknown')}")
+        
+        return success
+
+    def test_get_post_comments(self):
+        """Test getting comments from a post"""
+        if not self.admin_token or not hasattr(self, 'test_post_id') or not self.test_post_id:
+            print("❌ Skipping - No admin token or post ID")
+            return False
+        
+        success, response = self.run_test(
+            "Get Post Comments",
+            "GET",
+            f"api/timeline/posts/{self.test_post_id}/comments",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            comments = response.get('comments', [])
+            print(f"   Found {len(comments)} comments")
+        
+        return success
+
+    def test_delete_timeline_post(self):
+        """Test deleting post (author or admin)"""
+        if not self.admin_token or not hasattr(self, 'test_post_id') or not self.test_post_id:
+            print("❌ Skipping - No admin token or post ID")
+            return False
+        
+        success, response = self.run_test(
+            "Delete Timeline Post",
+            "DELETE",
+            f"api/timeline/posts/{self.test_post_id}",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            print("   ✅ Post deleted successfully")
+        
+        return success
+
+    # ==================== TERMS OF ACCEPTANCE TESTS ====================
+    
+    def test_get_all_terms_admin(self):
+        """Test admin getting all terms"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get All Terms (Admin)",
+            "GET",
+            "api/terms/admin/all",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            terms = response.get('terms', [])
+            print(f"   Found {len(terms)} terms in system")
+            for term in terms:
+                print(f"   - {term.get('title', 'Unknown')} v{term.get('version', '1.0')} (Active: {term.get('is_active', False)})")
+        
+        return success
+
+    def test_create_term_admin(self):
+        """Test admin creating a new term"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        term_data = {
+            "title": "Termos de Uso da Plataforma Ozoxx LMS",
+            "content": """
+            <h2>Termos de Uso - Plataforma Ozoxx LMS</h2>
+            
+            <h3>1. Aceitação dos Termos</h3>
+            <p>Ao acessar e utilizar a plataforma Ozoxx LMS, você concorda em cumprir e estar vinculado aos seguintes termos e condições de uso.</p>
+            
+            <h3>2. Uso da Plataforma</h3>
+            <p>A plataforma destina-se exclusivamente ao treinamento e capacitação de licenciados Ozoxx. O conteúdo é propriedade intelectual da empresa.</p>
+            
+            <h3>3. Responsabilidades do Usuário</h3>
+            <ul>
+                <li>Manter a confidencialidade das credenciais de acesso</li>
+                <li>Utilizar a plataforma de forma ética e profissional</li>
+                <li>Não compartilhar conteúdo protegido por direitos autorais</li>
+            </ul>
+            
+            <h3>4. Privacidade</h3>
+            <p>Seus dados pessoais são protegidos conforme nossa Política de Privacidade e a LGPD.</p>
+            
+            <p><strong>Data de vigência:</strong> Janeiro de 2025</p>
+            """,
+            "version": "2.0",
+            "is_active": True,
+            "is_required": True
+        }
+        
+        success, response = self.run_test(
+            "Create Term (Admin)",
+            "POST",
+            "api/terms/admin",
+            200,
+            data=term_data,
+            token=self.admin_token
+        )
+        
+        if success and response:
+            term = response.get('term', {})
+            self.test_term_id = term.get('id')
+            print(f"   Created term ID: {self.test_term_id}")
+            print(f"   Title: {term.get('title', 'Unknown')}")
+            print(f"   Version: {term.get('version', '1.0')}")
+        
+        return success
+
+    def test_get_active_term_user(self):
+        """Test user getting active term"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get Active Term (User)",
+            "GET",
+            "api/terms/active",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            term = response.get('term')
+            needs_acceptance = response.get('needs_acceptance', False)
+            already_accepted = response.get('already_accepted', False)
+            
+            if term:
+                print(f"   Active term: {term.get('title', 'Unknown')} v{term.get('version', '1.0')}")
+                print(f"   Needs acceptance: {needs_acceptance}")
+                print(f"   Already accepted: {already_accepted}")
+            else:
+                print("   No active term found")
+        
+        return success
+
+    def test_check_terms_status(self):
+        """Test checking if user needs to accept terms"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Check Terms Status",
+            "GET",
+            "api/terms/check",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            needs_acceptance = response.get('needs_acceptance', False)
+            term_id = response.get('term_id')
+            term_title = response.get('term_title')
+            
+            print(f"   Needs acceptance: {needs_acceptance}")
+            if needs_acceptance:
+                print(f"   Term to accept: {term_title} (ID: {term_id})")
+        
+        return success
+
+    def test_accept_term(self):
+        """Test accepting the active term"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Accept Term",
+            "POST",
+            "api/terms/accept",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            acceptance = response.get('acceptance', {})
+            print(f"   Term accepted at: {acceptance.get('accepted_at', 'Unknown')}")
+            print(f"   User: {acceptance.get('user_name', 'Unknown')}")
+        
+        return success
+
+    # ==================== WHATSAPP NOTIFICATION TESTS ====================
+    
+    def test_get_whatsapp_config(self):
+        """Test getting WhatsApp config (admin only)"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get WhatsApp Config",
+            "GET",
+            "api/whatsapp/config",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            enabled = response.get('enabled', False)
+            api_url = response.get('api_url', 'Not set')
+            instance_name = response.get('instance_name', 'Not set')
+            
+            print(f"   WhatsApp enabled: {enabled}")
+            print(f"   API URL: {api_url}")
+            print(f"   Instance: {instance_name}")
+            
+            # Show notification settings
+            notify_settings = {
+                'new_modules': response.get('notify_new_modules', False),
+                'birthday': response.get('notify_birthday', False),
+                'live_classes': response.get('notify_live_classes', False),
+                'custom': response.get('notify_custom', False)
+            }
+            print(f"   Notifications: {notify_settings}")
+        
+        return success
+
+    def test_update_whatsapp_config(self):
+        """Test updating WhatsApp config"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        config_data = {
+            "enabled": True,
+            "notify_birthday": True,
+            "notify_new_modules": True,
+            "notify_live_classes": True,
+            "notify_custom": True,
+            "access_reminder_days": 7
+        }
+        
+        success, response = self.run_test(
+            "Update WhatsApp Config",
+            "PUT",
+            "api/whatsapp/config",
+            200,
+            data=config_data,
+            token=self.admin_token
+        )
+        
+        if success:
+            print("   ✅ WhatsApp config updated successfully")
+        
+        return success
+
+    def test_get_whatsapp_messages(self):
+        """Test getting WhatsApp message history (admin only)"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Get WhatsApp Messages",
+            "GET",
+            "api/whatsapp/messages",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            messages = response.get('messages', [])
+            stats = response.get('stats', {})
+            
+            print(f"   Found {len(messages)} messages")
+            print(f"   Stats: Total: {stats.get('total', 0)}, Sent: {stats.get('sent', 0)}, Failed: {stats.get('failed', 0)}")
+        
+        return success
+
+    # ==================== ADVANCED SUPERVISOR DASHBOARD TESTS ====================
+    
+    def test_advanced_supervisor_dashboard(self):
+        """Test advanced supervisor dashboard (admin/supervisor)"""
+        if not self.admin_token:
+            print("❌ Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Advanced Supervisor Dashboard",
+            "GET",
+            "api/analytics/supervisor/advanced-dashboard",
+            200,
+            token=self.admin_token
+        )
+        
+        if success:
+            summary = response.get('summary', {})
+            active_users = response.get('active_users', [])
+            delayed_users = response.get('delayed_users', [])
+            inactive_users = response.get('inactive_users', [])
+            
+            print(f"   Total licensees: {summary.get('total_licensees', 0)}")
+            print(f"   Active: {summary.get('active_count', 0)}")
+            print(f"   Delayed: {summary.get('delayed_count', 0)}")
+            print(f"   Inactive: {summary.get('inactive_count', 0)}")
+            print(f"   Avg completion: {summary.get('avg_completion_percentage', 0)}%")
+            
+            if delayed_users:
+                print(f"   Most delayed user: {delayed_users[0].get('full_name', 'Unknown')} ({delayed_users[0].get('days_since_access', 0)} days)")
+            
+            if inactive_users:
+                print(f"   Most inactive user: {inactive_users[0].get('full_name', 'Unknown')} ({inactive_users[0].get('days_since_access', 0)} days)")
+        
+        return success
+
 def main():
     print("🚀 Starting Ozoxx LMS API Tests - Certificate System Focus")
     print("=" * 60)
