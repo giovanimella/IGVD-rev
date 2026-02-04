@@ -531,7 +531,6 @@ class TimelineComment(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 class TimelineCommentCreate(BaseModel):
-    post_id: str
     content: str
 
 class TimelineLike(BaseModel):
