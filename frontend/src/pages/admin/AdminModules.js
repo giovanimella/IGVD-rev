@@ -128,6 +128,38 @@ const AdminModules = () => {
     }
   };
 
+  const handleCoverUpload = async (moduleId, file) => {
+    if (!file) return;
+    
+    setUploadingCover(moduleId);
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      await axios.post(`${API_URL}/api/modules/${moduleId}/cover`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Imagem de capa enviada com sucesso');
+      fetchModules();
+    } catch (error) {
+      toast.error('Erro ao enviar imagem de capa');
+    } finally {
+      setUploadingCover(null);
+    }
+  };
+
+  const handleRemoveCover = async (moduleId) => {
+    if (!window.confirm('Remover imagem de capa?')) return;
+    
+    try {
+      await axios.delete(`${API_URL}/api/modules/${moduleId}/cover`);
+      toast.success('Imagem de capa removida');
+      fetchModules();
+    } catch (error) {
+      toast.error('Erro ao remover imagem de capa');
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
