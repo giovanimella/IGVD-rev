@@ -268,7 +268,7 @@ async def download_acceptance(
         raise HTTPException(status_code=404, detail="Aceite não encontrado")
     
     # Verificar se é do usuário atual ou admin
-    if acceptance["user_id"] != current_user["id"] and current_user["role"] != "admin":
+    if acceptance["user_id"] != current_user["sub"] and current_user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Sem permissão")
     
     # Buscar termo
