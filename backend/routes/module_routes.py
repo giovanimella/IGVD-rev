@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from motor.motor_asyncio import AsyncIOMotorClient
 from models import Module, ModuleCreate
 from auth import get_current_user, require_role
 import os
+import uuid
+from pathlib import Path
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 
@@ -11,6 +13,10 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/modules", tags=["modules"])
+
+# Diretório para imagens de capa
+COVER_IMAGES_DIR = Path("/app/uploads/module_covers")
+COVER_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.get("/")
 async def get_all_modules(current_user: dict = Depends(get_current_user)):
