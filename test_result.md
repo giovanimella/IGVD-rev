@@ -142,6 +142,54 @@ frontend:
           comment: "⚠️ UNABLE TO TEST COMPLETELY - The gamification cards are implemented in the Dashboard.js code and visible in the component structure (Streak card, Meus Badges card, Desafio da Semana card). However, testing was blocked by authentication issues. The licensee user credentials provided (licenciado.teste@ozoxx.com / licenciado123) do not work. Found existing licensee users in system (licenciado@teste.com, bianca.araujo.vieira@gmail.com, marketing2@ozoxx.com.br) but could not determine correct passwords. Code implementation appears correct based on component analysis."
 
 backend:
+  - task: "Timeline/Social Feed API Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/timeline_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - All timeline/social feed endpoints working correctly. GET /api/timeline/posts returns posts list (empty initially). POST /api/timeline/posts creates posts with content successfully. POST /api/timeline/posts/{post_id}/react?reaction_type=like adds reactions. POST /api/timeline/posts/{post_id}/comments adds comments. GET /api/timeline/posts/{post_id}/comments retrieves comments. DELETE /api/timeline/posts/{post_id} deletes posts (author/admin). All authentication and authorization working properly. MINOR FIX APPLIED: Fixed JWT token field access from 'id' to 'sub' and model validation for comments."
+
+  - task: "Terms of Acceptance API Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/terms_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - All terms of acceptance endpoints working correctly. GET /api/terms/admin/all lists all terms (admin only). POST /api/terms/admin creates new terms with title, content, version fields. GET /api/terms/active returns active term for users. GET /api/terms/check verifies if user needs to accept terms. POST /api/terms/accept processes term acceptance with proper tracking (IP, user agent, timestamp). Admin can manage terms, users can view and accept active terms. MINOR FIX APPLIED: Fixed JWT token field access from 'id' to 'sub'."
+
+  - task: "WhatsApp Notification API Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/whatsapp_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - All WhatsApp notification endpoints working correctly. GET /api/whatsapp/config returns configuration (admin only). PUT /api/whatsapp/config updates settings (enabled, notify_birthday, notify_new_modules, etc.). GET /api/whatsapp/messages returns message history with statistics. Configuration management working properly with proper admin authentication. Integration ready for Evolution API when configured."
+
+  - task: "Advanced Supervisor Dashboard API"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/analytics_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - Advanced supervisor dashboard endpoint working correctly. GET /api/analytics/supervisor/advanced-dashboard returns comprehensive analytics including total licensees, active/delayed/inactive user counts, average completion percentage, and detailed user progress tracking. Proper admin/supervisor authentication required. Dashboard provides insights for user management and progress monitoring."
+
   - task: "Gamification API Endpoints"
     implemented: true
     working: true
