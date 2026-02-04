@@ -48,6 +48,44 @@ async def delete_reward(reward_id: str, current_user: dict = Depends(require_rol
         raise HTTPException(status_code=404, detail="Recompensa não encontrada")
     return {"message": "Recompensa deletada com sucesso"}
 
+@router.post("/{reward_id}/image")
+async def upload_reward_image(
+    reward_id: str,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Upload de imagem para a recompensa"""
+    reward = await db.rewards.find_one({"id": reward_id}, {"_id": 0})
+    if not reward:
+        raise HTTPException(status_code=404, detail="Recompensa não encontrada")
+    
+    # Validar tipo de arquivo
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Tipo de arquivo não permitido. Use JPG, PNG, WebP ou GIF")
+    
+    # Gerar nome único
+    file_extension = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    new_filename = f"{reward_id}_{uuid.uuid4().hex[:8]}.{file_extension}"
+    file_path = REWARD_IMAGES_DIR / new_filename
+    
+    # Salvar arquivo
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Atualizar recompensa
+    image_url = f"/uploads/reward_images/{new_filename}"
+    await db.rewards.update_one(
+        {"id": reward_id},
+        {"$set": {"image_url": image_url}}
+    )
+    
+    return {
+        "message": "Imagem enviada com sucesso",
+        "image_url": image_url
+    }
+
 @router.post("/redeem/{reward_id}")
 async def redeem_reward(reward_id: str, current_user: dict = Depends(get_current_user)):
     reward = await db.rewards.find_one({"id": reward_id}, {"_id": 0})
