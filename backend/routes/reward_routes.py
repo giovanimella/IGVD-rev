@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from motor.motor_asyncio import AsyncIOMotorClient
 from models import Reward, RewardCreate, RewardRedemption
 from auth import get_current_user, require_role
 import os
+import uuid
+from pathlib import Path
 from datetime import datetime, timezone
 
 mongo_url = os.environ['MONGO_URL']
@@ -10,6 +12,10 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/rewards", tags=["rewards"])
+
+# Diretório para imagens de recompensas
+REWARD_IMAGES_DIR = Path("/app/uploads/reward_images")
+REWARD_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.get("/")
 async def get_all_rewards(current_user: dict = Depends(get_current_user)):
