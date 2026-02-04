@@ -177,7 +177,7 @@ async def check_terms_status(
         return {"needs_acceptance": False}
     
     acceptance = await db.term_acceptances.find_one({
-        "user_id": current_user["id"],
+        "user_id": current_user["sub"],
         "term_id": term["id"]
     })
     
