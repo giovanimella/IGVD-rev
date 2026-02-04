@@ -78,11 +78,18 @@ const Modules = () => {
                       : 'opacity-60 cursor-not-allowed'
                   }`}
                 >
-                  <div className={`h-36 lg:h-48 relative overflow-hidden ${
-                    isLiveClass 
-                      ? 'bg-gradient-to-br from-red-500 to-rose-600' 
-                      : 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                  }`}>
+                  <div 
+                    className={`h-36 lg:h-48 relative overflow-hidden ${
+                      isLiveClass 
+                        ? 'bg-gradient-to-br from-red-500 to-rose-600' 
+                        : 'bg-gradient-to-br from-cyan-500 to-blue-600'
+                    }`}
+                    style={module.cover_image ? {
+                      backgroundImage: `url(${API_URL}${module.cover_image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    } : {}}
+                  >
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
                     
                     {/* Locked Overlay */}
@@ -91,7 +98,7 @@ const Modules = () => {
                         <Lock className="w-8 h-8 mb-2" />
                         <p className="text-sm font-medium">Disponível em {module.months_until_available} {module.months_until_available === 1 ? 'mês' : 'meses'}</p>
                       </div>
-                    )}
+                    )}}
                     
                     <div className="absolute bottom-4 left-4 right-4">
                       <div className="flex items-center gap-2 text-white/90 text-sm mb-2">
