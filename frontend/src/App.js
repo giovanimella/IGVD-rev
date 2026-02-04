@@ -59,6 +59,7 @@ import AdminOzoxxCast from './pages/admin/AdminOzoxxCast';
 import AdminSales from './pages/admin/AdminSales';
 import AdminCompanyEvents from './pages/admin/AdminCompanyEvents';
 import Timeline from './pages/Timeline';
+import TermsAcceptanceModal from './components/TermsAcceptanceModal';
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function App() {
             <BrowserRouter>
               <Toaster position="top-right" richColors />
               <ChatWidget />
+              <TermsAcceptanceWrapper />
               <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/request-reset" element={<RequestReset />} />
