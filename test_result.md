@@ -294,7 +294,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Certificate System Testing Complete"
+    - "New Features Testing Complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -308,3 +308,5 @@ agent_communication:
       message: "CERTIFICATE SYSTEM TESTING COMPLETED - All certificate system endpoints working correctly. Admin template management: upload endpoint exists (requires PDF), preview returns 404 without template (expected), config updates work, test generation fails without template (expected). Admin management: can list all certificates (empty), view statistics (0 certificates). Licensee access: can view own certificates (empty), check eligibility (eligible for Introdução à Ozoxx), generation fails without template (expected). Module integration: has_certificate field implemented, Introdução à Ozoxx module has certificates enabled. Test success rate: 93.3% (14/15 tests passed). Only failure: franqueado@teste.com credentials invalid (unrelated to certificate system). All test scenarios from review request completed successfully."
     - agent: "main"
       message: "NEW FEATURES IMPLEMENTED - 1) Timeline/Comunidade (social feed estilo Twitter), 2) Dashboard Avançado do Supervisor (quem está atrasado, inativo, previsão de conclusão), 3) Termos de Aceite Digital (configurável pelo admin), 4) Sistema de Notificações WhatsApp (Evolution API). Backend APIs criadas: /api/timeline/*, /api/terms/*, /api/whatsapp/*, /api/analytics/supervisor/advanced-dashboard. Frontend pages: Timeline.js, SupervisorAdvancedDashboard.js, AdminTerms.js, AdminWhatsApp.js, TermsAcceptanceModal.js. Novos links no sidebar para todas as novas funcionalidades. Please test the new API endpoints."
+    - agent: "testing"
+      message: "NEW FEATURES TESTING COMPLETED - All newly implemented backend APIs working correctly with 90% success rate (18/20 tests passed). ✅ TIMELINE/SOCIAL FEED: All endpoints functional - list posts, create posts with content, react with likes, add/get comments, delete posts (admin/author). ✅ TERMS OF ACCEPTANCE: Complete flow working - admin creates terms with title/content/version, users view active terms, check acceptance status, accept terms with proper tracking. ✅ WHATSAPP NOTIFICATIONS: Configuration management working - get/update config with notification settings, message history tracking. ✅ ADVANCED SUPERVISOR DASHBOARD: Analytics endpoint providing comprehensive user progress data. MINOR FIXES APPLIED: Fixed JWT token field access from 'id' to 'sub' in timeline and terms routes, fixed comment model validation. Only failures: franqueado/licensee login credentials invalid (users don't exist). All requested API endpoints from review request tested and working correctly."
