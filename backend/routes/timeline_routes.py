@@ -135,7 +135,7 @@ async def get_post(
     # Verificar se o usuário curtiu
     user_reaction = await db.timeline_reactions.find_one({
         "post_id": post_id,
-        "user_id": current_user["id"]
+        "user_id": current_user["sub"]
     })
     post["user_reacted"] = user_reaction is not None
     post["user_reaction_type"] = user_reaction["reaction_type"] if user_reaction else None
