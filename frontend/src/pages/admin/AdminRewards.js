@@ -270,33 +270,43 @@ const AdminRewards = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-outfit font-semibold text-slate-900 mb-4">Solicitações de Resgate</h2>
-          <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+          <h2 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Solicitações de Resgate</h2>
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden">
             {redemptions.length === 0 ? (
               <div className="p-12 text-center">
-                <Award className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600">Nenhuma solicitação de resgate</p>
+                <Award className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <p className="text-slate-600 dark:text-slate-400">Nenhuma solicitação de resgate</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-100 dark:divide-white/5">
                 {redemptions.map((redemption) => (
                   <div key={redemption.id} className="p-6" data-testid={`redemption-item-${redemption.id}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-                          <span className="text-cyan-600 font-semibold">
-                            {redemption.user?.full_name?.charAt(0).toUpperCase()}
-                          </span>
+                        {/* Imagem da recompensa ou avatar */}
+                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+                          {redemption.reward?.image_url ? (
+                            <img 
+                              src={`${API_URL}${redemption.reward.image_url}`}
+                              alt={redemption.reward?.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-cyan-600 dark:text-cyan-400 font-semibold text-lg">
+                              {redemption.user?.full_name?.charAt(0).toUpperCase()}
+                            </span>
+                          )}
                         </div>
                         <div>
-                          <h4 className="font-semibold text-slate-900">{redemption.user?.full_name}</h4>
-                          <p className="text-sm text-slate-600">{redemption.reward?.title}</p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Solicitado em {new Date(redemption.requested_at).toLocaleDateString()}
+                          <h4 className="font-semibold text-slate-900 dark:text-white">{redemption.user?.full_name}</h4>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">{redemption.reward?.title}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                            Solicitado em {new Date(redemption.requested_at).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        {/* Status: Pendente */}
                         {redemption.status === 'pending' && (
                           <>
                             <Button
@@ -315,22 +325,49 @@ const AdminRewards = () => {
                             </Button>
                           </>
                         )}
+                        
+                        {/* Status: Aprovado -> pode marcar como Enviado */}
                         {redemption.status === 'approved' && (
                           <Button
                             size="sm"
-                            onClick={() => handleMarkDelivered(redemption.id)}
+                            onClick={() => handleMarkShipped(redemption.id)}
                             className="bg-blue-500 hover:bg-blue-600"
                           >
-                            Marcar como Entregue
+                            <Truck className="w-4 h-4 mr-1" />
+                            Marcar como Enviado
                           </Button>
                         )}
+                        
+                        {/* Status: Enviado -> pode marcar como Entregue */}
+                        {redemption.status === 'shipped' && (
+                          <>
+                            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium flex items-center gap-1">
+                              <Truck className="w-3 h-3" />
+                              Enviado
+                            </span>
+                            <Button
+                              size="sm"
+                              onClick={() => handleMarkDelivered(redemption.id)}
+                              className="bg-green-500 hover:bg-green-600"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Marcar como Entregue
+                            </Button>
+                          </>
+                        )}
+                        
+                        {/* Status: Entregue */}
                         {redemption.status === 'delivered' && (
-                          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-sm font-medium flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
                             Entregue
                           </span>
                         )}
+                        
+                        {/* Status: Rejeitado */}
                         {redemption.status === 'rejected' && (
-                          <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                          <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-sm font-medium flex items-center gap-1">
+                            <X className="w-3 h-3" />
                             Rejeitado
                           </span>
                         )}
