@@ -313,7 +313,7 @@ async def delete_comment(
         raise HTTPException(status_code=404, detail="Comentário não encontrado")
     
     # Verificar permissão
-    is_author = comment["author_id"] == current_user["id"]
+    is_author = comment["author_id"] == current_user["sub"]
     is_moderator = current_user["role"] in ["admin", "supervisor"]
     
     if not is_author and not is_moderator:
