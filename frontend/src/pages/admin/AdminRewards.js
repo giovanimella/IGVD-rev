@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Award, Plus, Edit, Trash2 } from 'lucide-react';
+import { Award, Plus, Edit, Trash2, Upload, Package, Truck, CheckCircle, X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -14,6 +14,7 @@ const AdminRewards = () => {
   const [redemptions, setRedemptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
