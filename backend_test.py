@@ -14,6 +14,8 @@ class OzoxxAPITester:
         self.test_module_id = None
         self.test_assessment_id = None
         self.test_question_ids = []
+        self.test_post_id = None  # For timeline tests
+        self.test_term_id = None  # For terms tests
 
     def run_test(self, name, method, endpoint, expected_status, data=None, token=None):
         """Run a single API test"""
