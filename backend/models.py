@@ -38,6 +38,11 @@ class User(BaseModel):
     training_attended: bool = False
     field_sales_count: int = 0
     field_sales_notes: List[dict] = []
+    # Novos campos
+    birthday: Optional[str] = None  # Data de aniversário (YYYY-MM-DD)
+    terms_accepted: bool = False  # Se aceitou os termos
+    terms_accepted_at: Optional[str] = None  # Data/hora de aceite
+    last_access_at: Optional[str] = None  # Último acesso à plataforma
 
 class UserResponse(BaseModel):
     id: str
