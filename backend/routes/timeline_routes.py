@@ -90,10 +90,14 @@ async def create_post(
     if current_user["role"] not in ["licenciado", "admin", "supervisor"]:
         raise HTTPException(status_code=403, detail="Sem permissão")
     
+    user_id = current_user["sub"]
+    # Buscar dados completos do usuário do banco
+    user_data = await get_user_data(user_id)
+    
     post = TimelinePost(
-        author_id=current_user["sub"],
-        author_name=current_user.get("full_name", "Unknown User"),
-        author_avatar=current_user.get("profile_picture"),
+        author_id=user_id,
+        author_name=user_data.get("full_name", "Usuário") if user_data else "Usuário",
+        author_avatar=user_data.get("profile_picture") if user_data else None,
         content=post_data.content,
         image_url=post_data.image_url
     )
