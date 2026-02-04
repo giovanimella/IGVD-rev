@@ -75,7 +75,7 @@ async def upload_reward_image(
         f.write(content)
     
     # Atualizar recompensa
-    image_url = f"/uploads/reward_images/{new_filename}"
+    image_url = f"/api/uploads/reward_images/{new_filename}"
     await db.rewards.update_one(
         {"id": reward_id},
         {"$set": {"image_url": image_url}}

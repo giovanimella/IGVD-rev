@@ -144,7 +144,7 @@ async def upload_module_cover(
         f.write(content)
     
     # Atualizar módulo com URL da imagem
-    cover_url = f"/uploads/module_covers/{new_filename}"
+    cover_url = f"/api/uploads/module_covers/{new_filename}"
     await db.modules.update_one(
         {"id": module_id},
         {"$set": {"cover_image": cover_url}}
