@@ -218,7 +218,7 @@ async def react_to_post(
     # Verificar se já reagiu
     existing_reaction = await db.timeline_reactions.find_one({
         "post_id": post_id,
-        "user_id": current_user["id"]
+        "user_id": current_user["sub"]
     })
     
     if existing_reaction:
