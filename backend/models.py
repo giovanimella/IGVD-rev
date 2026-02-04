@@ -494,3 +494,114 @@ class Certificate(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 import secrets
+
+# ==================== TIMELINE SOCIAL (COMUNIDADE) ====================
+
+class TimelinePost(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    author_id: str
+    author_name: str
+    author_avatar: Optional[str] = None
+    content: str
+    image_url: Optional[str] = None  # URL da imagem anexada
+    likes_count: int = 0
+    comments_count: int = 0
+    is_pinned: bool = False  # Post fixado no topo
+    is_active: bool = True  # Se foi excluído/moderado
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class TimelinePostCreate(BaseModel):
+    content: str
+    image_url: Optional[str] = None
+
+class TimelineComment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    post_id: str
+    author_id: str
+    author_name: str
+    author_avatar: Optional[str] = None
+    content: str
+    is_active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class TimelineCommentCreate(BaseModel):
+    post_id: str
+    content: str
+
+class TimelineLike(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    post_id: str
+    user_id: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class TimelineReaction(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    post_id: str
+    user_id: str
+    reaction_type: str  # 'like', 'love', 'celebrate', 'support', 'insightful'
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+# ==================== TERMOS DE ACEITE DIGITAL ====================
+
+class DigitalTerm(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    content: str  # HTML ou Markdown do conteúdo do termo
+    version: str = "1.0"
+    is_active: bool = True  # Termo atual ativo
+    is_required: bool = True  # Se é obrigatório aceitar
+    created_by: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class DigitalTermCreate(BaseModel):
+    title: str
+    content: str
+    version: str = "1.0"
+    is_active: bool = True
+    is_required: bool = True
+
+class TermAcceptance(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    user_name: str
+    user_email: str
+    term_id: str
+    term_version: str
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    accepted_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+# ==================== CONFIGURAÇÕES DE WHATSAPP (EVOLUTION API) ====================
+
+class WhatsAppConfig(BaseModel):
+    id: str = "whatsapp_config"
+    enabled: bool = False
+    api_url: Optional[str] = None  # URL da Evolution API
+    api_key: Optional[str] = None  # API Key da Evolution API
+    instance_name: Optional[str] = None  # Nome da instância
+    # Configurações de notificações
+    notify_new_modules: bool = True  # Notificar novos módulos
+    notify_tips: bool = True  # Enviar dicas periódicas
+    notify_access_reminder: bool = True  # Lembrete de acesso (X dias sem acessar)
+    notify_birthday: bool = True  # Feliz aniversário
+    notify_live_classes: bool = True  # Aulas ao vivo
+    notify_custom: bool = True  # Notas personalizadas do admin
+    access_reminder_days: int = 7  # Dias sem acesso para enviar lembrete
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class WhatsAppMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    phone: str
+    message_type: str  # 'new_module', 'tip', 'reminder', 'birthday', 'live_class', 'custom'
+    content: str
+    status: str = "pending"  # 'pending', 'sent', 'failed'
+    error_message: Optional[str] = None
+    sent_at: Optional[str] = None
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class WhatsAppCustomMessage(BaseModel):
+    user_ids: List[str]  # Lista de IDs de usuários para enviar
+    message: str
