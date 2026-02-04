@@ -243,7 +243,7 @@ async def get_my_acceptances(
 ):
     """Listar meus aceites de termos"""
     acceptances = await db.term_acceptances.find(
-        {"user_id": current_user["id"]}
+        {"user_id": current_user["sub"]}
     ).sort("accepted_at", -1).to_list(100)
     
     # Buscar detalhes dos termos
