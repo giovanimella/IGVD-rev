@@ -567,7 +567,8 @@ async def get_advanced_dashboard(current_user: dict = Depends(require_role(["sup
     
     # Estatísticas gerais
     total_licensees = len(licensees)
-    avg_completion = sum(l["completion_percentage"] for l in licensees) / max(total_licensees, 1) if licensees else 0
+    all_user_data = active_users + delayed_users + inactive_users
+    avg_completion = sum(u["completion_percentage"] for u in all_user_data) / max(total_licensees, 1) if all_user_data else 0
     
     return {
         "summary": {
