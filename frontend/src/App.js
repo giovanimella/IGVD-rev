@@ -461,15 +461,21 @@ function App() {
 
 // Wrapper para verificar termos de aceite
 function TermsAcceptanceWrapper() {
+  const { user } = useAuth();
   const location = window.location.pathname;
   const publicPaths = ['/login', '/request-reset', '/reset-password', '/set-password', '/register'];
   
-  // Não mostrar em páginas públicas
-  if (publicPaths.some(path => location.startsWith(path))) {
+  // Não mostrar em páginas públicas ou se não tiver usuário logado
+  if (!user || publicPaths.some(path => location.startsWith(path))) {
     return null;
   }
   
   return <TermsAcceptanceModal />;
+}
+
+// Hook para acessar auth no wrapper
+function useAuth() {
+  return React.useContext(require('./contexts/AuthContext').AuthContext);
 }
 
 export default App;
