@@ -286,11 +286,15 @@ async def add_comment(
     if not post:
         raise HTTPException(status_code=404, detail="Post não encontrado")
     
+    user_id = current_user["sub"]
+    # Buscar dados completos do usuário do banco
+    user_data = await get_user_data(user_id)
+    
     comment = TimelineComment(
         post_id=post_id,
-        author_id=current_user["sub"],
-        author_name=current_user.get("full_name", "Unknown User"),
-        author_avatar=current_user.get("profile_picture"),
+        author_id=user_id,
+        author_name=user_data.get("full_name", "Usuário") if user_data else "Usuário",
+        author_avatar=user_data.get("profile_picture") if user_data else None,
         content=comment_data.content
     )
     
@@ -315,6 +319,11 @@ async def get_comments(
     
     for comment in comments:
         comment["_id"] = str(comment.get("_id", ""))
+        # Buscar dados atualizados do autor
+        author_data = await get_user_data(comment.get("author_id"))
+        if author_data:
+            comment["author_name"] = author_data.get("full_name", "Usuário")
+            comment["author_avatar"] = author_data.get("profile_picture")
     
     return {"comments": comments}
 
