@@ -609,3 +609,21 @@ class WhatsAppMessage(BaseModel):
 class WhatsAppCustomMessage(BaseModel):
     user_ids: List[str]  # Lista de IDs de usuários para enviar
     message: str
+
+# ==================== FILTRO DE PALAVRAS (COMUNIDADE) ====================
+
+class BannedWord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    word: str  # Palavra proibida (será armazenada em lowercase)
+    created_by: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class BannedWordCreate(BaseModel):
+    word: str
+
+class BannedWordsConfig(BaseModel):
+    id: str = "banned_words_config"
+    enabled: bool = True  # Se o filtro está ativo
+    block_post: bool = True  # Bloquear post inteiro ou apenas censurar
+    replacement: str = "***"  # Texto de substituição
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
