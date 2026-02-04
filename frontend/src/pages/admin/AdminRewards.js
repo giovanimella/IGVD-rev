@@ -211,27 +211,58 @@ const AdminRewards = () => {
           <h2 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Recompensas Cadastradas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rewards.map((reward) => (
-              <div key={reward.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6" data-testid={`reward-item-${reward.id}`}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
-                    <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <button
-                    onClick={() => handleDeleteReward(reward.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+              <div key={reward.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden" data-testid={`reward-item-${reward.id}`}>
+                {/* Imagem da recompensa */}
+                <div className="h-40 relative bg-gradient-to-br from-amber-400 to-orange-500">
+                  {reward.image_url ? (
+                    <img 
+                      src={`${API_URL}${reward.image_url}`} 
+                      alt={reward.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Award className="w-16 h-16 text-white/50" />
+                    </div>
+                  )}
+                  {/* Botão de upload */}
+                  <label className="absolute bottom-2 right-2 p-2 bg-white/90 hover:bg-white text-slate-700 rounded-lg cursor-pointer transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(reward.id, e.target.files[0])}
+                      disabled={uploadingImage === reward.id}
+                    />
+                    {uploadingImage === reward.id ? (
+                      <div className="w-4 h-4 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                  </label>
                 </div>
-                <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-2">{reward.title}</h3>
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{reward.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600 dark:text-slate-400">Pontos: <strong className="text-slate-900 dark:text-white">{reward.required_points}</strong></span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    reward.active ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
-                  }`}>
-                    {reward.active ? 'Ativa' : 'Inativa'}
-                  </span>
+                
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">{reward.title}</h3>
+                    <button
+                      onClick={() => handleDeleteReward(reward.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{reward.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">
+                      Pontos: <strong className="text-slate-900 dark:text-white">{reward.required_points}</strong>
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      reward.active ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
+                    }`}>
+                      {reward.active ? 'Ativa' : 'Inativa'}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
