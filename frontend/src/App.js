@@ -36,8 +36,11 @@ import AdminCertificates from './pages/admin/AdminCertificates';
 import AdminLevels from './pages/admin/AdminLevels';
 import AdminTraining from './pages/admin/AdminTraining';
 import AdminPaymentSettings from './pages/admin/AdminPaymentSettings';
+import AdminTerms from './pages/admin/AdminTerms';
+import AdminWhatsApp from './pages/admin/AdminWhatsApp';
 import SupervisorLicensees from './pages/supervisor/SupervisorLicensees';
 import SupervisorAnalytics from './pages/supervisor/SupervisorAnalytics';
+import SupervisorAdvancedDashboard from './pages/supervisor/SupervisorAdvancedDashboard';
 import LicenseeDetail from './pages/supervisor/LicenseeDetail';
 import PublicRegistration from './pages/PublicRegistration';
 import OnboardingDocuments from './pages/OnboardingDocuments';
@@ -55,6 +58,7 @@ import OzoxxCast from './pages/OzoxxCast';
 import AdminOzoxxCast from './pages/admin/AdminOzoxxCast';
 import AdminSales from './pages/admin/AdminSales';
 import AdminCompanyEvents from './pages/admin/AdminCompanyEvents';
+import Timeline from './pages/Timeline';
 
 function App() {
   return (
