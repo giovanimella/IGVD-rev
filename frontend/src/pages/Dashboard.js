@@ -246,33 +246,50 @@ const Dashboard = () => {
 
             <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-6">Distribuição por Etapa</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={chartStageDistribution}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {chartStageDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'var(--tooltip-bg, #ffffff)', 
-                      border: '1px solid var(--tooltip-border, #e2e8f0)', 
-                      borderRadius: '8px', 
-                      color: 'var(--tooltip-text, #1e293b)',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }} 
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="flex flex-col lg:flex-row items-center gap-6">
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={chartStageDistribution.filter(item => item.value > 0)}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={90}
+                      fill="#8884d8"
+                      dataKey="value"
+                      paddingAngle={2}
+                    >
+                      {chartStageDistribution.filter(item => item.value > 0).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'var(--tooltip-bg, #ffffff)', 
+                        border: '1px solid var(--tooltip-border, #e2e8f0)', 
+                        borderRadius: '8px', 
+                        color: 'var(--tooltip-text, #1e293b)',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                      formatter={(value, name) => [`${value} licenciados`, name]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Legenda externa */}
+                <div className="flex flex-wrap lg:flex-col gap-2 justify-center">
+                  {chartStageDistribution.map((item, index) => (
+                    <div key={index} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-white/5">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                        {item.name}: <strong>{item.value}</strong>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
