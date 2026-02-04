@@ -18,6 +18,7 @@ const AdminModules = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingModule, setEditingModule] = useState(null);
+  const [uploadingCover, setUploadingCover] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
