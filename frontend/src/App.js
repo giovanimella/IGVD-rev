@@ -461,7 +461,7 @@ function App() {
 
 // Wrapper para verificar termos de aceite
 function TermsAcceptanceWrapper() {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const location = window.location.pathname;
   const publicPaths = ['/login', '/request-reset', '/reset-password', '/set-password', '/register'];
   
@@ -473,9 +473,18 @@ function TermsAcceptanceWrapper() {
   return <TermsAcceptanceModal />;
 }
 
-// Hook para acessar auth no wrapper
-function useAuth() {
-  return React.useContext(require('./contexts/AuthContext').AuthContext);
-}
+// Hook para acessar auth no wrapper - importando do contexto
+const useAuthContext = () => {
+  const context = React.useContext(
+    React.createContext(null)
+  );
+  // Fallback - usar o hook do AuthContext diretamente
+  try {
+    const { useAuth } = require('./contexts/AuthContext');
+    return useAuth();
+  } catch {
+    return { user: null, token: null };
+  }
+};
 
 export default App;
