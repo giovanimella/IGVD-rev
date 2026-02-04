@@ -170,14 +170,35 @@ async def reject_redemption(redemption_id: str, current_user: dict = Depends(req
     
     return {"message": "Resgate rejeitado"}
 
+@router.put("/redemptions/{redemption_id}/ship")
+async def mark_shipped(redemption_id: str, current_user: dict = Depends(require_role(["admin"]))):
+    """Marca a recompensa como enviada"""
+    redemption = await db.reward_redemptions.find_one({"id": redemption_id}, {"_id": 0})
+    if not redemption:
+        raise HTTPException(status_code=404, detail="Resgate não encontrado")
+    
+    if redemption["status"] != "approved":
+        raise HTTPException(status_code=400, detail="Resgate precisa estar aprovado para ser enviado")
+    
+    await db.reward_redemptions.update_one(
+        {"id": redemption_id},
+        {"$set": {
+            "status": "shipped",
+            "shipped_at": datetime.now(timezone.utc).isoformat(),
+            "shipped_by": current_user["sub"]
+        }}
+    )
+    
+    return {"message": "Recompensa marcada como enviada"}
+
 @router.put("/redemptions/{redemption_id}/deliver")
 async def mark_delivered(redemption_id: str, current_user: dict = Depends(require_role(["admin"]))):
     redemption = await db.reward_redemptions.find_one({"id": redemption_id}, {"_id": 0})
     if not redemption:
         raise HTTPException(status_code=404, detail="Resgate não encontrado")
     
-    if redemption["status"] != "approved":
-        raise HTTPException(status_code=400, detail="Resgate precisa estar aprovado")
+    if redemption["status"] not in ["approved", "shipped"]:
+        raise HTTPException(status_code=400, detail="Resgate precisa estar aprovado ou enviado")
     
     await db.reward_redemptions.update_one(
         {"id": redemption_id},
