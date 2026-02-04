@@ -99,6 +99,36 @@ const AdminRewards = () => {
     }
   };
 
+  const handleMarkShipped = async (redemptionId) => {
+    try {
+      await axios.put(`${API_URL}/api/rewards/redemptions/${redemptionId}/ship`);
+      toast.success('Recompensa marcada como enviada');
+      fetchData();
+    } catch (error) {
+      toast.error('Erro ao marcar como enviada');
+    }
+  };
+
+  const handleImageUpload = async (rewardId, file) => {
+    if (!file) return;
+    
+    setUploadingImage(rewardId);
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      await axios.post(`${API_URL}/api/rewards/${rewardId}/image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Imagem enviada com sucesso');
+      fetchData();
+    } catch (error) {
+      toast.error('Erro ao enviar imagem');
+    } finally {
+      setUploadingImage(null);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
