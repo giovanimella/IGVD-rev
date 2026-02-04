@@ -77,8 +77,8 @@ async def create_post(
         raise HTTPException(status_code=403, detail="Sem permissão")
     
     post = TimelinePost(
-        author_id=current_user["id"],
-        author_name=current_user["full_name"],
+        author_id=current_user["sub"],
+        author_name=current_user.get("full_name", "Unknown User"),
         author_avatar=current_user.get("profile_picture"),
         content=post_data.content,
         image_url=post_data.image_url
