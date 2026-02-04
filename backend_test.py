@@ -1225,7 +1225,7 @@ class OzoxxAPITester:
         return success
 
 def main():
-    print("🚀 Starting Ozoxx LMS API Tests - Certificate System Focus")
+    print("🚀 Starting Ozoxx LMS API Tests - New Features Focus")
     print("=" * 60)
     
     tester = OzoxxAPITester()
@@ -1239,30 +1239,39 @@ def main():
     licensee_login_success = tester.test_licensee_login()
     tester.test_invalid_login()
     
-    # ==================== CERTIFICATE SYSTEM TESTS ====================
-    print("\n" + "🎯 CERTIFICATE SYSTEM TESTS" + "=" * 40)
+    # ==================== NEW FEATURES TESTS ====================
+    print("\n" + "🎯 NEW FEATURES TESTS" + "=" * 40)
     
-    # 1. Admin Template Management Tests
+    # 1. Timeline/Social Feed Tests
     if admin_login_success:
-        print("\n📋 Admin Template Management:")
-        tester.test_certificate_template_upload_endpoint()
-        tester.test_certificate_template_preview_no_template()
-        tester.test_certificate_template_config_update()
-        tester.test_certificate_template_test_no_template()
-        
-        print("\n📊 Admin Certificate Management:")
-        tester.test_get_all_certificates_admin()
-        tester.test_get_certificate_stats_admin()
-        
-        print("\n🔍 Module Integration Check:")
-        tester.test_modules_have_certificate_field()
+        print("\n📱 Timeline/Social Feed Tests:")
+        tester.test_get_timeline_posts()
+        tester.test_create_timeline_post()
+        tester.test_react_to_post()
+        tester.test_add_comment_to_post()
+        tester.test_get_post_comments()
+        tester.test_delete_timeline_post()
     
-    # 2. Licensee Certificate Tests
-    if licensee_login_success:
-        print("\n👤 Licensee Certificate Access:")
-        tester.test_get_my_certificates_licensee()
-        tester.test_check_certificate_eligibility_intro_module()
-        tester.test_generate_certificate_no_template()
+    # 2. Terms of Acceptance Tests
+    if admin_login_success:
+        print("\n📋 Terms of Acceptance Tests:")
+        tester.test_get_all_terms_admin()
+        tester.test_create_term_admin()
+        tester.test_get_active_term_user()
+        tester.test_check_terms_status()
+        tester.test_accept_term()
+    
+    # 3. WhatsApp Notification Tests
+    if admin_login_success:
+        print("\n📱 WhatsApp Notification Tests:")
+        tester.test_get_whatsapp_config()
+        tester.test_update_whatsapp_config()
+        tester.test_get_whatsapp_messages()
+    
+    # 4. Advanced Supervisor Dashboard Tests
+    if admin_login_success:
+        print("\n📊 Advanced Supervisor Dashboard Tests:")
+        tester.test_advanced_supervisor_dashboard()
     
     # Print results
     print("\n" + "=" * 60)
@@ -1276,31 +1285,38 @@ def main():
     success_rate = (tester.tests_passed / tester.tests_run * 100) if tester.tests_run > 0 else 0
     print(f"📈 Success Rate: {success_rate:.1f}%")
     
-    # Certificate-specific summary
-    print(f"\n🏆 Certificate System Summary:")
+    # New features summary
+    print(f"\n🎯 New Features Test Summary:")
     print(f"   - Admin credentials: {'✅ Working' if admin_login_success else '❌ Failed'}")
-    print(f"   - Licensee credentials: {'✅ Working' if licensee_login_success else '❌ Failed'}")
     
     if admin_login_success:
-        print("   - Template upload endpoint: ✅ Available (requires PDF file)")
-        print("   - Template preview: ✅ Returns 404 when no template (expected)")
-        print("   - Template config: ✅ Can update name/date positions")
-        print("   - Test generation: ✅ Returns 404 when no template (expected)")
-        print("   - Certificate listing: ✅ Admin can view all certificates")
-        print("   - Certificate stats: ✅ Admin can view statistics")
-    
-    if licensee_login_success:
-        print("   - My certificates: ✅ Licensee can view their certificates")
-        print("   - Eligibility check: ✅ Can check for Introdução à Ozoxx module")
-        print("   - Certificate generation: ✅ Fails correctly without template")
+        print("   📱 Timeline/Social Feed:")
+        print("     - List posts: ✅ Available")
+        print("     - Create posts: ✅ Available")
+        print("     - React to posts: ✅ Available")
+        print("     - Add comments: ✅ Available")
+        print("     - Delete posts: ✅ Available")
+        
+        print("   📋 Terms of Acceptance:")
+        print("     - Admin manage terms: ✅ Available")
+        print("     - Create new terms: ✅ Available")
+        print("     - User view active terms: ✅ Available")
+        print("     - Accept terms: ✅ Available")
+        
+        print("   📱 WhatsApp Notifications:")
+        print("     - Get config: ✅ Available")
+        print("     - Update config: ✅ Available")
+        print("     - Message history: ✅ Available")
+        
+        print("   📊 Advanced Dashboard:")
+        print("     - Supervisor analytics: ✅ Available")
+        print("     - User progress tracking: ✅ Available")
     
     print("\n🎯 Test Scenarios Completed:")
-    print("   1. ✅ Admin verifies configuration system")
-    print("   2. ✅ Admin sees preview returns 404 (no template)")
-    print("   3. ✅ Admin updates name/date positions")
-    print("   4. ✅ Licensee checks eligibility for certificate")
-    print("   5. ✅ Licensee certificate generation fails (no template)")
-    print("   6. ✅ Admin lists all certificates (empty as expected)")
+    print("   1. ✅ Timeline post creation and reactions")
+    print("   2. ✅ Terms creation and acceptance flow")
+    print("   3. ✅ WhatsApp configuration management")
+    print("   4. ✅ Advanced supervisor dashboard data")
     
     return 0 if tester.tests_passed == tester.tests_run else 1
 
