@@ -6,7 +6,7 @@ import { FileText, CheckCircle, Download, X } from 'lucide-react';
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const TermsAcceptanceModal = ({ onAccepted }) => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [term, setTerm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accepted, setAccepted] = useState(false);
@@ -14,12 +14,19 @@ const TermsAcceptanceModal = ({ onAccepted }) => {
   const [needsAcceptance, setNeedsAcceptance] = useState(false);
 
   useEffect(() => {
-    checkTerms();
-  }, []);
+    // Só verificar termos se o usuário estiver logado
+    if (user && token) {
+      checkTerms();
+    } else {
+      setLoading(false);
+    }
+  }, [user, token]);
 
   const checkTerms = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/terms/active`);
+      const response = await axios.get(`${API_URL}/api/terms/active`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (response.data.needs_acceptance && response.data.term) {
         setTerm(response.data.term);
         setNeedsAcceptance(true);
@@ -42,7 +49,9 @@ const TermsAcceptanceModal = ({ onAccepted }) => {
 
     setSubmitting(true);
     try {
-      await axios.post(`${API_URL}/api/terms/accept`);
+      await axios.post(`${API_URL}/api/terms/accept`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setNeedsAcceptance(false);
       if (onAccepted) onAccepted();
     } catch (error) {
@@ -52,11 +61,8 @@ const TermsAcceptanceModal = ({ onAccepted }) => {
     }
   };
 
-  if (loading) {
-    return null;
-  }
-
-  if (!needsAcceptance || !term) {
+  // Não mostrar se estiver carregando, não precisar de aceite, ou usuário não logado
+  if (loading || !needsAcceptance || !term || !user) {
     return null;
   }
 
