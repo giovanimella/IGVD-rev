@@ -459,4 +459,17 @@ function App() {
   );
 }
 
+// Wrapper para verificar termos de aceite
+function TermsAcceptanceWrapper() {
+  const location = window.location.pathname;
+  const publicPaths = ['/login', '/request-reset', '/reset-password', '/set-password', '/register'];
+  
+  // Não mostrar em páginas públicas
+  if (publicPaths.some(path => location.startsWith(path))) {
+    return null;
+  }
+  
+  return <TermsAcceptanceModal />;
+}
+
 export default App;
