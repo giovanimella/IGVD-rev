@@ -382,6 +382,22 @@ function App() {
             }
           />
           <Route
+            path="/admin/terms"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminTerms />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/whatsapp"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminWhatsApp />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/favorites"
             element={
               <PrivateRoute roles={['licenciado']}>
@@ -390,10 +406,26 @@ function App() {
             }
           />
           <Route
+            path="/timeline"
+            element={
+              <PrivateRoute roles={['licenciado', 'admin', 'supervisor']}>
+                <Timeline />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/supervisor/licensees"
             element={
               <PrivateRoute roles={['supervisor']}>
                 <SupervisorLicensees />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/supervisor/advanced"
+            element={
+              <PrivateRoute roles={['supervisor', 'admin']}>
+                <SupervisorAdvancedDashboard />
               </PrivateRoute>
             }
           />
