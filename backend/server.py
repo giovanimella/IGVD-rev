@@ -65,6 +65,9 @@ app.include_router(sales_routes.router, prefix="/api")
 app.include_router(ozoxx_cast_routes.router, prefix="/api")
 app.include_router(translate_routes.router, prefix="/api")
 app.include_router(live_class_routes.router, prefix="/api")
+app.include_router(timeline_routes.router, prefix="/api")
+app.include_router(terms_routes.router, prefix="/api")
+app.include_router(whatsapp_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
