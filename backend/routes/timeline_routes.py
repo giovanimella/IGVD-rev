@@ -20,6 +20,12 @@ TIMELINE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
 
+# Função auxiliar para buscar dados completos do usuário
+async def get_user_data(user_id: str):
+    """Busca dados completos do usuário pelo ID"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "full_name": 1, "profile_picture": 1})
+    return user
+
 # ==================== POSTS ====================
 
 @router.get("/posts")
@@ -30,6 +36,7 @@ async def get_posts(
 ):
     """Lista posts da timeline (paginado)"""
     skip = (page - 1) * limit
+    user_id = current_user["sub"]
     
     # Buscar posts ativos, ordenados por fixados primeiro, depois por data
     posts = await db.timeline_posts.find(
@@ -39,9 +46,16 @@ async def get_posts(
         ("created_at", -1)
     ]).skip(skip).limit(limit).to_list(limit)
     
-    # Para cada post, verificar se o usuário atual curtiu
+    # Para cada post, verificar se o usuário atual curtiu e buscar dados do autor
     for post in posts:
         post["_id"] = str(post.get("_id", ""))
+        
+        # Buscar dados atualizados do autor
+        author_data = await get_user_data(post.get("author_id"))
+        if author_data:
+            post["author_name"] = author_data.get("full_name", "Usuário")
+            post["author_avatar"] = author_data.get("profile_picture")
+        
         # Verificar se o usuário curtiu
         user_reaction = await db.timeline_reactions.find_one({
             "post_id": post["id"],
