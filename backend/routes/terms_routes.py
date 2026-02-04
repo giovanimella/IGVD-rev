@@ -210,9 +210,9 @@ async def accept_term(
     
     # Registrar aceite
     acceptance = TermAcceptance(
-        user_id=current_user["id"],
-        user_name=current_user["full_name"],
-        user_email=current_user["email"],
+        user_id=current_user["sub"],
+        user_name=current_user.get("full_name", "Unknown User"),
+        user_email=current_user.get("email", "unknown@email.com"),
         term_id=term["id"],
         term_version=term["version"],
         ip_address=request.client.host if request.client else None,
