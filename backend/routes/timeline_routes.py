@@ -270,8 +270,8 @@ async def add_comment(
     
     comment = TimelineComment(
         post_id=post_id,
-        author_id=current_user["id"],
-        author_name=current_user["full_name"],
+        author_id=current_user["sub"],
+        author_name=current_user.get("full_name", "Unknown User"),
         author_avatar=current_user.get("profile_picture"),
         content=comment_data.content
     )
