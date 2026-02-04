@@ -154,7 +154,7 @@ async def get_active_term(
     
     # Verificar se usuário já aceitou este termo
     acceptance = await db.term_acceptances.find_one({
-        "user_id": current_user["id"],
+        "user_id": current_user["sub"],
         "term_id": term["id"]
     })
     
