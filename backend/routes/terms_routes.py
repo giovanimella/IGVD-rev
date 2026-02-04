@@ -223,7 +223,7 @@ async def accept_term(
     
     # Atualizar usuário
     await db.users.update_one(
-        {"id": current_user["id"]},
+        {"id": current_user["sub"]},
         {"$set": {
             "terms_accepted": True,
             "terms_accepted_at": acceptance.accepted_at,
