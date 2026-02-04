@@ -449,6 +449,17 @@ async def get_advanced_dashboard(current_user: dict = Depends(require_role(["sup
     licensee_ids = [l["id"] for l in licensees]
     total_modules = await db.modules.count_documents({})
     
+    # Buscar todos os capítulos UMA VEZ (fora do loop)
+    all_chapters = await db.chapters.find({}, {"_id": 0, "module_id": 1}).to_list(1000)
+    chapters_per_module = {}
+    for c in all_chapters:
+        mid = c.get("module_id")
+        if mid:
+            if mid not in chapters_per_module:
+                chapters_per_module[mid] = 0
+            chapters_per_module[mid] += 1
+    total_chapters_all = sum(chapters_per_module.values())
+    
     # Calcular dias desde último acesso para cada licenciado
     now = datetime.now()
     
@@ -481,25 +492,15 @@ async def get_advanced_dashboard(current_user: dict = Depends(require_role(["sup
                     module_progress[mid] = 0
                 module_progress[mid] += 1
         
-        # Contar capítulos por módulo
-        chapters = await db.chapters.find({}, {"_id": 0, "module_id": 1}).to_list(1000)
-        chapters_per_module = {}
-        for c in chapters:
-            mid = c.get("module_id")
-            if mid not in chapters_per_module:
-                chapters_per_module[mid] = 0
-            chapters_per_module[mid] += 1
-        
         completed_modules = sum(
             1 for mid, count in module_progress.items()
             if chapters_per_module.get(mid, 0) > 0 and count >= chapters_per_module.get(mid, 0)
         )
         
-        total_chapters = sum(chapters_per_module.values())
         completed_chapters = len(progress)
         
         # Calcular previsão de conclusão
-        completion_percentage = (completed_chapters / max(total_chapters, 1)) * 100
+        completion_percentage = (completed_chapters / max(total_chapters_all, 1)) * 100
         
         # Calcular dias desde último acesso
         days_since_access = None
