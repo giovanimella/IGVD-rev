@@ -1,9 +1,18 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Award } from 'lucide-react';
+import { Award, User as UserIcon, LogOut, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import LanguageSelector from './LanguageSelector';
 import ThemeToggle from './ThemeToggle';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
