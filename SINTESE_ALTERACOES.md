@@ -395,6 +395,9 @@ As seguintes collections serão criadas automaticamente:
 - `term_acceptances` - Registro de aceites
 - `whatsapp_config` - Configurações do WhatsApp
 - `whatsapp_messages` - Histórico de mensagens
+- `banned_words` - Palavras proibidas
+- `banned_words_config` - Configurações do filtro de palavras
+- `landing_page_config` - Configurações da landing page
 
 ---
 
