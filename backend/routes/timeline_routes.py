@@ -1,12 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Query
 from motor.motor_asyncio import AsyncIOMotorClient
-from models import TimelinePost, TimelinePostCreate, TimelineComment, TimelineCommentCreate, TimelineLike, TimelineReaction
+from models import TimelinePost, TimelinePostCreate, TimelineComment, TimelineCommentCreate, TimelineLike, TimelineReaction, BannedWord, BannedWordCreate, BannedWordsConfig
 from auth import get_current_user, require_role
 import os
 from datetime import datetime
 from pathlib import Path
 import uuid
 import shutil
+import re
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -25,6 +26,56 @@ async def get_user_data(user_id: str):
     """Busca dados completos do usuário pelo ID"""
     user = await db.users.find_one({"id": user_id}, {"_id": 0, "full_name": 1, "profile_picture": 1})
     return user
+
+# ==================== FILTRO DE PALAVRAS ====================
+
+async def get_filter_config():
+    """Busca configuração do filtro de palavras"""
+    config = await db.banned_words_config.find_one({"id": "banned_words_config"})
+    if not config:
+        default_config = BannedWordsConfig()
+        await db.banned_words_config.insert_one(default_config.model_dump())
+        return default_config.model_dump()
+    return config
+
+async def check_banned_words(text: str):
+    """Verifica se o texto contém palavras proibidas"""
+    config = await get_filter_config()
+    
+    if not config.get("enabled", True):
+        return {"has_banned": False, "text": text, "found_words": []}
+    
+    # Buscar todas as palavras proibidas
+    banned_words = await db.banned_words.find({}, {"_id": 0, "word": 1}).to_list(1000)
+    banned_list = [w["word"].lower() for w in banned_words]
+    
+    if not banned_list:
+        return {"has_banned": False, "text": text, "found_words": []}
+    
+    text_lower = text.lower()
+    found_words = []
+    
+    for word in banned_list:
+        # Usar regex para encontrar a palavra como palavra completa ou parte de palavra
+        pattern = re.compile(re.escape(word), re.IGNORECASE)
+        if pattern.search(text_lower):
+            found_words.append(word)
+    
+    if not found_words:
+        return {"has_banned": False, "text": text, "found_words": []}
+    
+    # Se configurado para bloquear, retorna erro
+    if config.get("block_post", True):
+        return {"has_banned": True, "text": text, "found_words": found_words, "block": True}
+    
+    # Se configurado para censurar, substitui as palavras
+    censored_text = text
+    replacement = config.get("replacement", "***")
+    for word in found_words:
+        pattern = re.compile(re.escape(word), re.IGNORECASE)
+        censored_text = pattern.sub(replacement, censored_text)
+    
+    return {"has_banned": True, "text": censored_text, "found_words": found_words, "block": False}
 
 # ==================== POSTS ====================
 
