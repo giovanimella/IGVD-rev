@@ -643,10 +643,12 @@ class LandingPageConfig(BaseModel):
     hero_image_url: Optional[str] = None
     hero_button_text: str = "COMEÇAR AGORA"
     hero_button_link: str = "/login"
-    # Cores (gradiente)
+    # Cores
+    background_color: str = "#ffffff"  # Cor de fundo
     primary_color: str = "#06b6d4"  # cyan-500
     secondary_color: str = "#3b82f6"  # blue-500
     accent_color: str = "#f97316"  # orange-500
+    text_color: str = "#1e293b"  # slate-800
     # Features Section
     show_features: bool = True
     features_title: str = "Por que escolher a IGVD?"
