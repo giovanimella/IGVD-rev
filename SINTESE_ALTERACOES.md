@@ -376,10 +376,11 @@ import {
 
 ---
 
-## 📁 DIRETÓRIO A CRIAR
+## 📁 DIRETÓRIOS A CRIAR
 
 ```bash
 mkdir -p /app/uploads/timeline
+mkdir -p /app/uploads/landing
 ```
 
 ---
