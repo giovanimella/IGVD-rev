@@ -401,6 +401,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/banned-words"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminBannedWords />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/favorites"
             element={
               <PrivateRoute roles={['licenciado']}>
