@@ -61,6 +61,8 @@ import AdminCompanyEvents from './pages/admin/AdminCompanyEvents';
 import Timeline from './pages/Timeline';
 import TermsAcceptanceModal from './components/TermsAcceptanceModal';
 import AdminBannedWords from './pages/admin/AdminBannedWords';
+import LandingPage from './pages/LandingPage';
+import AdminLandingPage from './pages/admin/AdminLandingPage';
 
 function App() {
   return (
@@ -73,6 +75,8 @@ function App() {
               <ChatWidget />
               <TermsAcceptanceWrapper />
               <Routes>
+              {/* Landing Page Pública */}
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/request-reset" element={<RequestReset />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
