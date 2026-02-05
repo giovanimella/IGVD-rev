@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { FileText, CheckCircle, Download, X } from 'lucide-react';
@@ -6,23 +6,33 @@ import { FileText, CheckCircle, Download, X } from 'lucide-react';
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const TermsAcceptanceModal = ({ onAccepted }) => {
-  const { user, token } = useAuth();
+  const { user, token, updateUser } = useAuth();
   const [term, setTerm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [needsAcceptance, setNeedsAcceptance] = useState(false);
+  const checkedRef = useRef(false);
 
   useEffect(() => {
-    // Só verificar termos se o usuário estiver logado
-    if (user && token) {
+    // Só verificar termos se o usuário estiver logado E ainda não verificou nesta sessão
+    if (user && token && !checkedRef.current) {
+      // Se o usuário já aceitou os termos (pelo campo do user), não precisa verificar
+      if (user.terms_accepted) {
+        setLoading(false);
+        setNeedsAcceptance(false);
+        return;
+      }
       checkTerms();
-    } else {
+    } else if (!user || !token) {
       setLoading(false);
     }
   }, [user, token]);
 
   const checkTerms = async () => {
+    // Marcar que já verificamos para não verificar novamente nesta sessão
+    checkedRef.current = true;
+    
     try {
       const response = await axios.get(`${API_URL}/api/terms/active`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -52,6 +62,8 @@ const TermsAcceptanceModal = ({ onAccepted }) => {
       await axios.post(`${API_URL}/api/terms/accept`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      // Atualizar o contexto do usuário para refletir que já aceitou
+      updateUser({ terms_accepted: true, terms_accepted_at: new Date().toISOString() });
       setNeedsAcceptance(false);
       if (onAccepted) onAccepted();
     } catch (error) {
