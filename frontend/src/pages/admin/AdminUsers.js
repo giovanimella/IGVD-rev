@@ -29,12 +29,13 @@ const AdminUsers = () => {
   });
 
   const STAGES = [
-    { value: 'registro', label: 'Registro', color: 'bg-gray-100 text-gray-700' },
-    { value: 'documentos', label: 'Documentos', color: 'bg-blue-100 text-blue-700' },
-    { value: 'pagamento', label: 'Pagamento', color: 'bg-yellow-100 text-yellow-700' },
-    { value: 'treinamento', label: 'Treinamento', color: 'bg-purple-100 text-purple-700' },
-    { value: 'acolhimento', label: 'Acolhimento', color: 'bg-cyan-100 text-cyan-700' },
-    { value: 'completo', label: 'Completo', color: 'bg-green-100 text-green-700' }
+    { value: 'registro', label: 'Registro', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
+    { value: 'documentos_pf', label: 'Docs PF', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
+    { value: 'acolhimento', label: 'Acolhimento', color: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300' },
+    { value: 'treinamento_presencial', label: 'Treinamento', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' },
+    { value: 'vendas_campo', label: 'Vendas em Campo', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' },
+    { value: 'documentos_pj', label: 'Docs PJ', color: 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300' },
+    { value: 'completo', label: 'Completo', color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' }
   ];
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
