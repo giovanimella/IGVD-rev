@@ -105,6 +105,30 @@
 user_problem_statement: "Implementar menu dropdown na foto do perfil com opções de perfil e logout + Corrigir sistema de alteração de etapas do onboarding para usar as etapas corretas (registro, documentos_pf, acolhimento, treinamento_presencial, vendas_campo, documentos_pj, completo)"
 
 frontend:
+  - task: "User Profile Dropdown Menu"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/Topbar.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ IMPLEMENTED - Added dropdown menu to user profile picture in the top right corner. Menu includes options for 'Meu Perfil' (navigate to profile page) and 'Sair' (logout). Implemented for all user roles (admin, supervisor, licenciado). Uses shadcn/ui DropdownMenu component with proper styling for light and dark modes."
+  
+  - task: "Admin Users - Stage Selection System"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/admin/AdminUsers.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ UPDATED - Corrected stage options to match the onboarding flow. Updated STAGES array to include: registro, documentos_pf, acolhimento, treinamento_presencial, vendas_campo, documentos_pj, completo. Removed outdated stages (documentos, pagamento, treinamento). Now properly reflects the actual onboarding stages in the system."
+
   - task: "Admin Badges Page"
     implemented: true
     working: true
@@ -142,6 +166,18 @@ frontend:
           comment: "⚠️ UNABLE TO TEST COMPLETELY - The gamification cards are implemented in the Dashboard.js code and visible in the component structure (Streak card, Meus Badges card, Desafio da Semana card). However, testing was blocked by authentication issues. The licensee user credentials provided (licenciado.teste@ozoxx.com / licenciado123) do not work. Found existing licensee users in system (licenciado@teste.com, bianca.araujo.vieira@gmail.com, marketing2@ozoxx.com.br) but could not determine correct passwords. Code implementation appears correct based on component analysis."
 
 backend:
+  - task: "User Stage Update Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/user_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ UPDATED - Corrected valid_stages in PUT /api/users/{user_id}/stage endpoint. Changed from old stages (registro, documentos, pagamento, treinamento, acolhimento, completo) to correct onboarding stages (registro, documentos_pf, acolhimento, treinamento_presencial, vendas_campo, documentos_pj, completo). Now properly validates stage transitions according to the onboarding flow defined in onboarding_routes.py."
+
   - task: "Timeline/Social Feed API Endpoints"
     implemented: true
     working: true
