@@ -627,3 +627,41 @@ class BannedWordsConfig(BaseModel):
     block_post: bool = True  # Bloquear post inteiro ou apenas censurar
     replacement: str = "***"  # Texto de substituição
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+# ==================== LANDING PAGE CONFIGURÁVEL ====================
+
+class LandingPageConfig(BaseModel):
+    id: str = "landing_page_config"
+    # Logo
+    logo_url: Optional[str] = None
+    logo_alt: str = "IGVD"
+    # Hero Section
+    hero_title_line1: str = "PLATAFORMA"
+    hero_title_line2: str = "IGVD"
+    hero_subtitle: str = "SEU CAMINHO PARA O SUCESSO"
+    hero_description: str = "Transforme sua carreira com nossa plataforma completa de treinamento e desenvolvimento profissional."
+    hero_image_url: Optional[str] = None
+    hero_button_text: str = "COMEÇAR AGORA"
+    hero_button_link: str = "/login"
+    # Cores (gradiente)
+    primary_color: str = "#06b6d4"  # cyan-500
+    secondary_color: str = "#3b82f6"  # blue-500
+    accent_color: str = "#f97316"  # orange-500
+    # Features Section
+    show_features: bool = True
+    features_title: str = "Por que escolher a IGVD?"
+    features: List[dict] = Field(default_factory=lambda: [
+        {"icon": "graduation-cap", "title": "Treinamento Completo", "description": "Módulos completos para sua formação"},
+        {"icon": "trophy", "title": "Gamificação", "description": "Ganhe pontos, badges e recompensas"},
+        {"icon": "users", "title": "Comunidade", "description": "Conecte-se com outros licenciados"},
+        {"icon": "certificate", "title": "Certificados", "description": "Certificados reconhecidos no mercado"}
+    ])
+    # Footer
+    footer_text: str = "© 2024 IGVD. Todos os direitos reservados."
+    footer_links: List[dict] = Field(default_factory=lambda: [])
+    # SEO
+    meta_title: str = "IGVD - Plataforma de Treinamento"
+    meta_description: str = "Plataforma completa de treinamento e desenvolvimento profissional"
+    # Controle
+    is_active: bool = True
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
