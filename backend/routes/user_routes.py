@@ -102,7 +102,8 @@ async def update_user_stage(
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
     new_stage = stage_data.get("current_stage")
-    valid_stages = ["registro", "documentos", "pagamento", "treinamento", "acolhimento", "completo"]
+    # Etapas válidas de acordo com o fluxo de onboarding
+    valid_stages = ["registro", "documentos_pf", "acolhimento", "treinamento_presencial", "vendas_campo", "documentos_pj", "completo"]
     
     if new_stage not in valid_stages:
         raise HTTPException(
