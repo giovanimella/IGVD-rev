@@ -182,18 +182,17 @@
 
 ### P0 (Crítico)
 - [ ] Deploy em produção no servidor do cliente
-- [ ] **BUG:** Pagamento - objeto `payer` enviado vazio para MercadoPago (bloqueia pagamentos)
 
 ### P1 (Importante)
-- [ ] Integração com gateway de pagamento (PagSeguro/MercadoPago) - em progresso
-- [ ] **BUG:** Upload de arquivos - caminhos hardcoded `/app/uploads/` precisam ser variáveis de ambiente
+- [ ] Implementação completa da integração WhatsApp (Evolution API)
+  - Aguardando credenciais do usuário (URL da instância e API Key)
 - [ ] Lembretes automáticos por email
+- [ ] Dashboard Avançado do Supervisor - melhorias de previsão de conclusão
 
 ### P2 (Melhorias)
 - [ ] App mobile (React Native ou PWA)
 - [ ] Dashboard analytics mais detalhado
 - [ ] Sistema de chat entre usuários
-- [ ] Integração com WhatsApp
 
 ---
 
