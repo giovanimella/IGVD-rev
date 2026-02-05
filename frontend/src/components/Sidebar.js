@@ -122,6 +122,7 @@ const Sidebar = () => {
     { path: '/admin/certificates', icon: Award, label: 'Certificados' },
     { path: '/admin/terms', icon: FileCheck, label: 'Termos de Aceite' },
     { path: '/admin/whatsapp', icon: Smartphone, label: 'WhatsApp' },
+    { path: '/admin/banned-words', icon: ShieldAlert, label: 'Filtro Palavras' },
     { path: '/admin/files', icon: FileText, label: 'Arquivos' },
     { path: '/admin/banners', icon: Image, label: 'Banners' },
     { path: '/admin/posts', icon: Megaphone, label: 'Comunicados' },
