@@ -432,6 +432,12 @@ Para funcionar, o admin precisa configurar:
 - `POST /posts/{id}/comments` - Adicionar comentário
 - `GET /posts/{id}/comments` - Listar comentários
 - `DELETE /comments/{id}` - Excluir comentário
+- `GET /admin/banned-words` - Listar palavras proibidas (admin)
+- `POST /admin/banned-words` - Adicionar palavra (admin)
+- `POST /admin/banned-words/bulk` - Adicionar múltiplas palavras (admin)
+- `DELETE /admin/banned-words/{id}` - Remover palavra (admin)
+- `PUT /admin/banned-words/config` - Atualizar config do filtro (admin)
+- `POST /admin/banned-words/test` - Testar filtro (admin)
 
 ### Termos (/api/terms)
 - `GET /admin/all` - Listar termos (admin)
