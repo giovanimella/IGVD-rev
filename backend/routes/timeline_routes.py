@@ -461,3 +461,143 @@ async def admin_get_all_posts(
         "page": page,
         "pages": (total + limit - 1) // limit
     }
+
+
+
+# ==================== FILTRO DE PALAVRAS (ADMIN) ====================
+
+@router.get("/admin/banned-words")
+async def get_banned_words(
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Lista todas as palavras proibidas"""
+    words = await db.banned_words.find({}, {"_id": 0}).sort("word", 1).to_list(1000)
+    config = await get_filter_config()
+    
+    return {
+        "words": words,
+        "config": {
+            "enabled": config.get("enabled", True),
+            "block_post": config.get("block_post", True),
+            "replacement": config.get("replacement", "***")
+        },
+        "total": len(words)
+    }
+
+
+@router.post("/admin/banned-words")
+async def add_banned_word(
+    word_data: BannedWordCreate,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Adicionar palavra proibida"""
+    word_lower = word_data.word.strip().lower()
+    
+    if not word_lower:
+        raise HTTPException(status_code=400, detail="Palavra não pode ser vazia")
+    
+    # Verificar se já existe
+    existing = await db.banned_words.find_one({"word": word_lower})
+    if existing:
+        raise HTTPException(status_code=400, detail="Esta palavra já está na lista")
+    
+    banned_word = BannedWord(
+        word=word_lower,
+        created_by=current_user["sub"]
+    )
+    
+    await db.banned_words.insert_one(banned_word.model_dump())
+    
+    return {"message": "Palavra adicionada", "word": banned_word.model_dump()}
+
+
+@router.post("/admin/banned-words/bulk")
+async def add_banned_words_bulk(
+    words: list[str],
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Adicionar múltiplas palavras proibidas"""
+    added = 0
+    skipped = 0
+    
+    for word in words:
+        word_lower = word.strip().lower()
+        if not word_lower:
+            continue
+            
+        existing = await db.banned_words.find_one({"word": word_lower})
+        if existing:
+            skipped += 1
+            continue
+        
+        banned_word = BannedWord(
+            word=word_lower,
+            created_by=current_user["sub"]
+        )
+        await db.banned_words.insert_one(banned_word.model_dump())
+        added += 1
+    
+    return {"message": f"{added} palavras adicionadas, {skipped} já existiam", "added": added, "skipped": skipped}
+
+
+@router.delete("/admin/banned-words/{word_id}")
+async def delete_banned_word(
+    word_id: str,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Remover palavra proibida"""
+    result = await db.banned_words.delete_one({"id": word_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Palavra não encontrada")
+    
+    return {"message": "Palavra removida"}
+
+
+@router.delete("/admin/banned-words/word/{word}")
+async def delete_banned_word_by_text(
+    word: str,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Remover palavra proibida pelo texto"""
+    result = await db.banned_words.delete_one({"word": word.lower()})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Palavra não encontrada")
+    
+    return {"message": "Palavra removida"}
+
+
+@router.put("/admin/banned-words/config")
+async def update_filter_config(
+    config: dict,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Atualizar configurações do filtro"""
+    allowed_fields = ["enabled", "block_post", "replacement"]
+    update_data = {k: v for k, v in config.items() if k in allowed_fields}
+    update_data["updated_at"] = datetime.now().isoformat()
+    
+    await db.banned_words_config.update_one(
+        {"id": "banned_words_config"},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    return {"message": "Configurações atualizadas"}
+
+
+@router.post("/admin/banned-words/test")
+async def test_filter(
+    text: str,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Testar o filtro com um texto"""
+    result = await check_banned_words(text)
+    return {
+        "original": text,
+        "filtered": result["text"],
+        "has_banned_words": result["has_banned"],
+        "found_words": result["found_words"],
+        "would_block": result.get("block", False)
+    }
