@@ -160,7 +160,7 @@ async def create_post(
         author_id=user_id,
         author_name=user_data.get("full_name", "Usuário") if user_data else "Usuário",
         author_avatar=user_data.get("profile_picture") if user_data else None,
-        content=post_data.content,
+        content=content,  # Usar conteúdo filtrado
         image_url=post_data.image_url
     )
     
