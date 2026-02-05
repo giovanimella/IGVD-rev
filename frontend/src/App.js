@@ -429,6 +429,14 @@ function App() {
             }
           />
           <Route
+            path="/admin/landing-page"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminLandingPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/supervisor/licensees"
             element={
               <PrivateRoute roles={['supervisor']}>
