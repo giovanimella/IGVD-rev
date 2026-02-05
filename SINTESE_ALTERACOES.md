@@ -173,6 +173,49 @@ class WhatsAppMessage(BaseModel):
 class WhatsAppCustomMessage(BaseModel):
     user_ids: List[str]
     message: str
+
+# ==================== FILTRO DE PALAVRAS PROIBIDAS ====================
+
+class BannedWord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    word: str
+    created_by: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class BannedWordCreate(BaseModel):
+    word: str
+
+class BannedWordsConfig(BaseModel):
+    id: str = "banned_words_config"
+    enabled: bool = True
+    block_post: bool = True
+    replacement: str = "***"
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+# ==================== LANDING PAGE ====================
+
+class LandingPageConfig(BaseModel):
+    id: str = "landing_page_config"
+    logo_url: Optional[str] = None
+    logo_alt: str = "IGVD"
+    hero_title_line1: str = "PLATAFORMA"
+    hero_title_line2: str = "IGVD"
+    hero_subtitle: str = "SEU CAMINHO PARA O SUCESSO"
+    hero_description: str = "Transforme sua carreira com nossa plataforma completa de treinamento."
+    hero_button_text: str = "COMEÇAR AGORA"
+    hero_image_url: Optional[str] = None
+    background_color: str = "#ffffff"
+    primary_color: str = "#06b6d4"
+    secondary_color: str = "#3b82f6"
+    accent_color: str = "#f97316"
+    text_color: str = "#1e293b"
+    show_features: bool = True
+    features_title: str = "Por que escolher a IGVD?"
+    features: List[dict] = []
+    footer_text: str = "© 2024 IGVD. Todos os direitos reservados."
+    meta_title: Optional[str] = None
+    meta_description: Optional[str] = None
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 ```
 
 **Modificação no modelo User (adicionar campos):**
