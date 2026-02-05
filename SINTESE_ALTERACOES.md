@@ -25,9 +25,12 @@ Rotas para gerenciamento de termos de aceite.
 #### 3. `/backend/routes/whatsapp_routes.py` (NOVO)
 Rotas para notificações WhatsApp via Evolution API.
 
+#### 4. `/backend/routes/landing_routes.py` (NOVO)
+Rotas para configuração e exibição da landing page pública.
+
 ### Frontend
 
-#### 4. `/frontend/src/pages/Timeline.js` (NOVO)
+#### 5. `/frontend/src/pages/Timeline.js` (NOVO)
 Página da comunidade/timeline estilo Twitter.
 
 #### 5. `/frontend/src/pages/supervisor/SupervisorAdvancedDashboard.js` (NOVO)
