@@ -1,12 +1,14 @@
-# 📋 SÍNTESE COMPLETA DAS ALTERAÇÕES - Ozoxx LMS
+# 📋 SÍNTESE COMPLETA DAS ALTERAÇÕES - IGVD LMS
 
-## 🗓️ Data: 04/02/2026 (gerado em ambiente de desenvolvimento)
+## 🗓️ Data: 05/02/2026 (atualizado)
 
-Este documento contém todas as alterações feitas para implementar as 4 novas funcionalidades:
+Este documento contém todas as alterações feitas para implementar as funcionalidades:
 1. Comunidade/Timeline (estilo Twitter)
 2. Dashboard Avançado do Supervisor
 3. Termos de Aceite Digital
 4. Notificações WhatsApp (Evolution API)
+5. **Filtro de Palavras Proibidas**
+6. **Landing Page Configurável**
 
 ---
 
