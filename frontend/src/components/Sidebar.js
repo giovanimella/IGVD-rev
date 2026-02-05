@@ -112,6 +112,7 @@ const Sidebar = () => {
   const adminLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/admin/system', icon: Settings, label: 'Painel Sistema' },
+    { path: '/admin/landing-page', icon: Globe, label: 'Landing Page' },
     { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
     { path: '/admin/chat', icon: MessageCircle, label: 'Atendimento' },
