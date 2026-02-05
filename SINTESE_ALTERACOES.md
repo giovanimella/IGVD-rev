@@ -269,6 +269,9 @@ import AdminLandingPage from './pages/admin/AdminLandingPage';
 
 **Adicionar novas rotas:**
 ```javascript
+{/* Landing Page Pública */}
+<Route path="/" element={<LandingPage />} />
+
 <Route
   path="/admin/terms"
   element={
@@ -282,6 +285,22 @@ import AdminLandingPage from './pages/admin/AdminLandingPage';
   element={
     <PrivateRoute roles={['admin']}>
       <AdminWhatsApp />
+    </PrivateRoute>
+  }
+/>
+<Route
+  path="/admin/banned-words"
+  element={
+    <PrivateRoute roles={['admin']}>
+      <AdminBannedWords />
+    </PrivateRoute>
+  }
+/>
+<Route
+  path="/admin/landing-page"
+  element={
+    <PrivateRoute roles={['admin']}>
+      <AdminLandingPage />
     </PrivateRoute>
   }
 />
