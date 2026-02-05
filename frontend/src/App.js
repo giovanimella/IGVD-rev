@@ -60,6 +60,7 @@ import AdminSales from './pages/admin/AdminSales';
 import AdminCompanyEvents from './pages/admin/AdminCompanyEvents';
 import Timeline from './pages/Timeline';
 import TermsAcceptanceModal from './components/TermsAcceptanceModal';
+import AdminBannedWords from './pages/admin/AdminBannedWords';
 
 function App() {
   return (
