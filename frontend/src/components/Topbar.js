@@ -17,7 +17,17 @@ import {
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Topbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleProfile = () => {
+    navigate('/profile');
+  };
 
   return (
     <header className="bg-white dark:bg-[#0D1117] border-b border-slate-200 dark:border-white/10 px-4 lg:px-6 py-3 lg:py-4 sticky top-0 z-30">
