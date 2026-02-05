@@ -230,7 +230,7 @@ last_access_at: Optional[str] = None  # Último acesso à plataforma
 #### 2. `/backend/server.py`
 **Adicionar nos imports:**
 ```python
-from routes import timeline_routes, terms_routes, whatsapp_routes
+from routes import timeline_routes, terms_routes, whatsapp_routes, landing_routes
 ```
 
 **Adicionar após os outros `app.include_router`:**
@@ -238,6 +238,7 @@ from routes import timeline_routes, terms_routes, whatsapp_routes
 app.include_router(timeline_routes.router, prefix="/api")
 app.include_router(terms_routes.router, prefix="/api")
 app.include_router(whatsapp_routes.router, prefix="/api")
+app.include_router(landing_routes.router, prefix="/api")
 ```
 
 #### 3. `/backend/routes/analytics_routes.py`
