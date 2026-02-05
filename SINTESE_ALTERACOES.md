@@ -254,9 +254,12 @@ app.include_router(landing_routes.router, prefix="/api")
 ```javascript
 import AdminTerms from './pages/admin/AdminTerms';
 import AdminWhatsApp from './pages/admin/AdminWhatsApp';
+import AdminBannedWords from './pages/admin/AdminBannedWords';
 import SupervisorAdvancedDashboard from './pages/supervisor/SupervisorAdvancedDashboard';
 import Timeline from './pages/Timeline';
 import TermsAcceptanceModal from './components/TermsAcceptanceModal';
+import LandingPage from './pages/LandingPage';
+import AdminLandingPage from './pages/admin/AdminLandingPage';
 ```
 
 **Adicionar componente TermsAcceptanceWrapper antes do `</Routes>`:**
