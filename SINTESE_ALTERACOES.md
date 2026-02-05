@@ -358,6 +358,8 @@ import {
 ```javascript
 { path: '/admin/terms', icon: FileCheck, label: 'Termos de Aceite' },
 { path: '/admin/whatsapp', icon: Smartphone, label: 'WhatsApp' },
+{ path: '/admin/banned-words', icon: Shield, label: 'Filtro de Palavras' },
+{ path: '/admin/landing-page', icon: Layout, label: 'Landing Page' },
 { path: '/timeline', icon: MessagesSquare, label: 'Comunidade' },
 ```
 
