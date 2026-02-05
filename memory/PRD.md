@@ -198,6 +198,33 @@
 
 ## 📝 Changelog
 
+### v1.4.0 (Fevereiro 2026)
+- **NOVO:** Comunidade (Timeline Social)
+  - Posts com texto e imagens
+  - Sistema de reações (5 tipos)
+  - Comentários
+  - Moderação (fixar, excluir)
+  - Filtro de palavras proibidas configurável
+  
+- **NOVO:** Termos de Aceite Digital
+  - Criação/edição de termos versionados pelo admin
+  - Modal obrigatório para novos usuários
+  - Registro completo de aceites (IP, timestamp, user-agent)
+  
+- **NOVO:** Landing Page Configurável
+  - Design moderno com fundo claro e formas orgânicas
+  - Admin pode personalizar textos, cores, logo e imagens
+  - Paletas de cores predefinidas
+  
+- **NOVO:** Notificações WhatsApp
+  - Integração preparada para Evolution API
+  - Interface de configuração e envio de mensagens
+  - Disparos automáticos (aniversários, lembretes)
+  
+- **FIX:** Modal de Termos de Aceite corrigido
+  - Não aparece mais repetidamente em todas as páginas
+  - Lógica de verificação otimizada
+
 ### v1.3.0 (Fevereiro 2026)
 - **NOVO:** Módulo de Aula ao Vivo
   - Novo tipo de módulo com embed YouTube/Twitch
