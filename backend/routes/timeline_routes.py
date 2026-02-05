@@ -141,6 +141,17 @@ async def create_post(
     if current_user["role"] not in ["licenciado", "admin", "supervisor"]:
         raise HTTPException(status_code=403, detail="Sem permissão")
     
+    # Verificar palavras proibidas
+    filter_result = await check_banned_words(post_data.content)
+    if filter_result["has_banned"] and filter_result.get("block", False):
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Seu post contém palavras não permitidas: {', '.join(filter_result['found_words'])}"
+        )
+    
+    # Usar texto censurado se necessário
+    content = filter_result["text"]
+    
     user_id = current_user["sub"]
     # Buscar dados completos do usuário do banco
     user_data = await get_user_data(user_id)
