@@ -323,19 +323,23 @@ backend:
           comment: "✅ VERIFIED SUCCESSFULLY - Modules have has_certificate field implemented. Found 5 total modules with 4 having certificates enabled. 'Introdução à Ozoxx' module (id: d4301253-c9df-4995-a801-d873edfaf8d5) correctly has certificate enabled (has_certificate: true). Module integration working as expected."
 
 metadata:
-  created_by: "testing_agent"
-  version: "1.3"
-  test_sequence: 4
+  created_by: "main_agent"
+  version: "1.4"
+  test_sequence: 5
   run_ui: false
 
 test_plan:
   current_focus:
-    - "New Features Testing Complete"
+    - "User Profile Dropdown Menu"
+    - "Admin Users - Stage Selection System"
+    - "User Stage Update Endpoint"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
+    - agent: "main"
+      message: "NOVAS FUNCIONALIDADES IMPLEMENTADAS - 1) Menu dropdown na foto do perfil no canto superior direito (Topbar.js) com opções 'Meu Perfil' e 'Sair'. Funciona para todos os tipos de usuários (admin, supervisor, licenciado). 2) Corrigido o sistema de alteração de etapas do onboarding dos licenciados na página AdminUsers. Anteriormente usava etapas antigas (documentos, pagamento, treinamento), agora usa as etapas corretas do fluxo de onboarding (documentos_pf, acolhimento, treinamento_presencial, vendas_campo, documentos_pj). 3) Atualizado endpoint backend PUT /api/users/{user_id}/stage para validar as etapas corretas. Arquivos modificados: Topbar.js, AdminUsers.js, user_routes.py. Por favor, testar ambas as funcionalidades."
     - agent: "testing"
       message: "GAMIFICATION SYSTEM TEST COMPLETED - Admin functionality (Badges & Challenges pages) working perfectly. Licensee dashboard gamification cards are implemented but could not be fully tested due to authentication issues. The provided licensee credentials (licenciado.teste@ozoxx.com / licenciado123) are invalid. System has existing licensee users but passwords are unknown. Main agent should either: 1) Provide correct licensee credentials, 2) Create a test licensee user with known credentials, or 3) Reset password for existing licensee user to enable complete testing of gamification cards."
     - agent: "testing"
