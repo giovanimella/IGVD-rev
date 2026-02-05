@@ -135,19 +135,47 @@ const Topbar = () => {
           )}
 
           {user?.role !== 'licenciado' && (
-            <div className="flex items-center gap-2">
-              {user?.profile_picture ? (
-                <img 
-                  src={`${API_URL}${user.profile_picture}`} 
-                  alt="" 
-                  className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-cyan-500 rounded-full flex items-center justify-center text-white font-outfit font-bold text-sm lg:text-lg">
-                  {user?.full_name?.charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 focus:outline-none hover:opacity-80 transition-opacity">
+                  {user?.profile_picture ? (
+                    <img 
+                      src={`${API_URL}${user.profile_picture}`} 
+                      alt="Perfil" 
+                      className="w-8 h-8 lg:w-10 lg:h-10 rounded-full object-cover ring-2 ring-cyan-200 dark:ring-cyan-700 hover:ring-cyan-300 dark:hover:ring-cyan-600 transition-all cursor-pointer"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 bg-cyan-500 rounded-full flex items-center justify-center text-white font-outfit font-bold text-sm lg:text-lg ring-2 ring-cyan-200 dark:ring-cyan-700 hover:ring-cyan-300 dark:hover:ring-cyan-600 transition-all cursor-pointer">
+                      {user?.full_name?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-[#1b4c51] border-slate-200 dark:border-white/10">
+                <DropdownMenuLabel className="text-slate-900 dark:text-white">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-semibold">{user?.full_name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">{user?.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-slate-200 dark:bg-white/10" />
+                <DropdownMenuItem 
+                  onClick={handleProfile}
+                  className="cursor-pointer text-slate-700 dark:text-slate-300 focus:bg-slate-100 dark:focus:bg-white/10 focus:text-slate-900 dark:focus:text-white"
+                >
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  <span>Meu Perfil</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-slate-200 dark:bg-white/10" />
+                <DropdownMenuItem 
+                  onClick={handleLogout}
+                  className="cursor-pointer text-red-600 dark:text-red-400 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sair</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
