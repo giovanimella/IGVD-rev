@@ -467,6 +467,14 @@ Para funcionar, o admin precisa configurar:
 - `GET /supervisor/advanced-dashboard` - Dashboard completo
 - `GET /supervisor/licensee-detail/{id}` - Detalhes de licenciado
 
+### Landing Page (/api/landing)
+- `GET /config` - Obter configurações (público)
+- `GET /admin/config` - Obter config completa (admin)
+- `PUT /admin/config` - Atualizar configurações (admin)
+- `POST /admin/upload-hero-image` - Upload imagem hero (admin)
+- `POST /admin/upload-logo` - Upload logo (admin)
+- `POST /admin/reset` - Resetar para padrão (admin)
+
 ---
 
 ## 🎯 PÁGINAS DO FRONTEND
