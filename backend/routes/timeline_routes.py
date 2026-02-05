@@ -348,6 +348,17 @@ async def add_comment(
     if not post:
         raise HTTPException(status_code=404, detail="Post não encontrado")
     
+    # Verificar palavras proibidas
+    filter_result = await check_banned_words(comment_data.content)
+    if filter_result["has_banned"] and filter_result.get("block", False):
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Seu comentário contém palavras não permitidas: {', '.join(filter_result['found_words'])}"
+        )
+    
+    # Usar texto censurado se necessário
+    content = filter_result["text"]
+    
     user_id = current_user["sub"]
     # Buscar dados completos do usuário do banco
     user_data = await get_user_data(user_id)
@@ -357,7 +368,7 @@ async def add_comment(
         author_id=user_id,
         author_name=user_data.get("full_name", "Usuário") if user_data else "Usuário",
         author_avatar=user_data.get("profile_picture") if user_data else None,
-        content=comment_data.content
+        content=content  # Usar conteúdo filtrado
     )
     
     await db.timeline_comments.insert_one(comment.model_dump())
