@@ -72,6 +72,38 @@
 - [x] Emails de boas-vindas
 - [x] **NOVO:** Badge de notificação no menu "Atendimento" (mensagens não lidas)
 
+### 🌐 Comunidade (Timeline)
+- [x] **NOVO:** Timeline social (estilo Twitter) para licenciados trocarem experiências
+- [x] Criar posts com texto e imagens
+- [x] Reações (curtir, amei, celebrar, apoiar, interessante)
+- [x] Comentários nos posts
+- [x] Fixar posts (admin/supervisor)
+- [x] Moderação de conteúdo (excluir posts/comentários)
+- [x] **NOVO:** Filtro de palavras proibidas (bloquear ou censurar automaticamente)
+
+### 📋 Termos de Aceite Digital
+- [x] **NOVO:** Admin pode criar e gerenciar termos de uso
+- [x] Versionamento de termos
+- [x] Modal de aceite obrigatório para novos usuários
+- [x] Registro de aceites com IP e timestamp
+- [x] Visualização de aceites por termo (admin)
+- [x] Termos podem ser ativados/desativados
+
+### 📱 Notificações WhatsApp (Evolution API)
+- [x] **NOVO:** Configuração de integração com Evolution API
+- [x] Enviar mensagens personalizadas para usuários
+- [x] Disparos automáticos: Aniversários, Lembretes de Acesso
+- [x] Histórico de mensagens enviadas
+- [x] Toggle por tipo de notificação (novos módulos, dicas, aulas ao vivo)
+
+### 🏠 Landing Page Configurável
+- [x] **NOVO:** Página inicial pública com design moderno
+- [x] Fundo claro com formas orgânicas coloridas
+- [x] Admin pode configurar: Textos, Cores, Logo, Imagem principal
+- [x] Seção de features com ícones
+- [x] CTA e rodapé personalizáveis
+- [x] Paletas de cores predefinidas
+
 ### 📁 Outros
 - [x] Repositório de arquivos
 - [x] Sistema de banners
