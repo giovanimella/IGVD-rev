@@ -45,6 +45,15 @@ Página de configuração de WhatsApp (admin).
 #### 8. `/frontend/src/components/TermsAcceptanceModal.js` (NOVO)
 Modal de aceite de termos para usuários.
 
+#### 9. `/frontend/src/pages/admin/AdminBannedWords.js` (NOVO)
+Página de gerenciamento do filtro de palavras proibidas (admin).
+
+#### 10. `/frontend/src/pages/LandingPage.js` (NOVO)
+Página inicial pública com design configurável.
+
+#### 11. `/frontend/src/pages/admin/AdminLandingPage.js` (NOVO)
+Página de configuração da landing page (admin).
+
 ---
 
 ## 📝 ARQUIVOS ALTERADOS (MODIFICADOS)
