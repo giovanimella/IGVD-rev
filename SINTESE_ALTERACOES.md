@@ -481,10 +481,13 @@ Para funcionar, o admin precisa configurar:
 
 | Rota | Acesso | Descrição |
 |------|--------|-----------|
+| `/` | Público | Landing Page |
 | `/timeline` | Todos logados | Comunidade/Timeline |
 | `/supervisor/advanced` | Supervisor/Admin | Dashboard avançado |
 | `/admin/terms` | Admin | Gerenciar termos |
 | `/admin/whatsapp` | Admin | Config WhatsApp |
+| `/admin/banned-words` | Admin | Filtro de palavras |
+| `/admin/landing-page` | Admin | Config Landing Page |
 
 ---
 
