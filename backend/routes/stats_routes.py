@@ -249,4 +249,108 @@ async def get_stage_distribution(current_user: dict = Depends(require_role(["adm
     
     return distribution
 
+
+
+@router.get("/leaderboard/assessments")
+async def get_assessment_leaderboard(current_user: dict = Depends(get_current_user)):
+    """
+    Retorna o ranking dos licenciados baseado na média das notas das avaliações.
+    Este é o ranking principal da plataforma.
+    """
+    # Buscar todos os licenciados
+    licensees = await db.users.find(
+        {"role": "licenciado"},
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "profile_picture": 1, "level_title": 1}
+    ).to_list(1000)
+    
+    leaderboard = []
+    
+    for licensee in licensees:
+        # Buscar todas as avaliações feitas pelo licenciado
+        user_assessments = await db.user_assessments.find(
+            {"user_id": licensee["id"]},
+            {"_id": 0, "score": 1, "passed": 1}
+        ).to_list(1000)
+        
+        if len(user_assessments) > 0:
+            # Calcular a média das notas
+            total_score = sum(assessment["score"] for assessment in user_assessments)
+            average_score = round(total_score / len(user_assessments), 2)
+            
+            # Contar quantas avaliações foram aprovadas
+            passed_count = sum(1 for assessment in user_assessments if assessment.get("passed", False))
+            
+            leaderboard.append({
+                "id": licensee["id"],
+                "full_name": licensee["full_name"],
+                "email": licensee["email"],
+                "profile_picture": licensee.get("profile_picture"),
+                "level_title": licensee.get("level_title", "Iniciante"),
+                "average_score": average_score,
+                "total_assessments": len(user_assessments),
+                "passed_assessments": passed_count,
+                "approval_rate": round((passed_count / len(user_assessments)) * 100, 2) if len(user_assessments) > 0 else 0
+            })
+    
+    # Ordenar por média (do maior para o menor)
+    leaderboard.sort(key=lambda x: x["average_score"], reverse=True)
+    
+    # Adicionar posição no ranking
+    for index, entry in enumerate(leaderboard):
+        entry["rank"] = index + 1
+    
+    return leaderboard
+
+
+@router.get("/leaderboard/combined")
+async def get_combined_leaderboard(current_user: dict = Depends(get_current_user)):
+    """
+    Retorna o ranking combinado: média de avaliações + pontos.
+    Prioriza média de avaliações, mas também mostra pontos.
+    """
+    # Buscar todos os licenciados
+    licensees = await db.users.find(
+        {"role": "licenciado"},
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "profile_picture": 1, "level_title": 1, "points": 1}
+    ).to_list(1000)
+    
+    leaderboard = []
+    
+    for licensee in licensees:
+        # Buscar todas as avaliações feitas pelo licenciado
+        user_assessments = await db.user_assessments.find(
+            {"user_id": licensee["id"]},
+            {"_id": 0, "score": 1, "passed": 1}
+        ).to_list(1000)
+        
+        average_score = 0
+        if len(user_assessments) > 0:
+            total_score = sum(assessment["score"] for assessment in user_assessments)
+            average_score = round(total_score / len(user_assessments), 2)
+            passed_count = sum(1 for assessment in user_assessments if assessment.get("passed", False))
+        else:
+            passed_count = 0
+        
+        leaderboard.append({
+            "id": licensee["id"],
+            "full_name": licensee["full_name"],
+            "email": licensee["email"],
+            "profile_picture": licensee.get("profile_picture"),
+            "level_title": licensee.get("level_title", "Iniciante"),
+            "average_score": average_score,
+            "points": licensee.get("points", 0),
+            "total_assessments": len(user_assessments),
+            "passed_assessments": passed_count,
+            "has_assessments": len(user_assessments) > 0
+        })
+    
+    # Ordenar por média primeiro, depois por pontos (desempate)
+    leaderboard.sort(key=lambda x: (x["average_score"], x["points"]), reverse=True)
+    
+    # Adicionar posição no ranking
+    for index, entry in enumerate(leaderboard):
+        entry["rank"] = index + 1
+    
+    return leaderboard
+
     return access_stats
