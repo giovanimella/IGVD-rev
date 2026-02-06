@@ -250,14 +250,21 @@ const AdminSystem = () => {
 
         {/* Tabs de Configuração */}
         <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
-          <Tabs defaultValue="geral" className="w-full">
-            <TabsList className="w-full justify-start border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 rounded-none p-0">
+          <Tabs defaultValue="gestao" className="w-full">
+            <TabsList className="w-full justify-start border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 rounded-none p-0 flex-wrap">
+              <TabsTrigger 
+                value="gestao" 
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Gestão
+              </TabsTrigger>
               <TabsTrigger 
                 value="geral" 
                 className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
               >
                 <Settings className="w-4 h-4 mr-2" />
-                Configurações Gerais
+                Configurações
               </TabsTrigger>
               <TabsTrigger 
                 value="conteudo" 
@@ -281,6 +288,159 @@ const AdminSystem = () => {
                 Segurança
               </TabsTrigger>
             </TabsList>
+
+            {/* ABA: Gestão (NOVA) */}
+            <TabsContent value="gestao" className="p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Ferramentas de Gestão</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Usuários */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-blue-200 dark:hover:border-blue-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/users')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Usuários</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Criar, editar e excluir usuários</p>
+                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats?.allUsers?.length || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Recompensas */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-amber-200 dark:hover:border-amber-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/rewards')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Recompensas</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Configurar e aprovar resgates</p>
+                        <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats?.allRewards?.filter(r => r.active).length || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chat de Suporte */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/chat')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <MessageCircle className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Atendimento</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Responder mensagens dos licenciados</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Eventos Empresa */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/company-events')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Calendar className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Eventos Empresa</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Gerenciar eventos e compromissos</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Conquistas */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-yellow-200 dark:hover:border-yellow-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/badges')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Trophy className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Conquistas</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Gerenciar badges e conquistas</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Desafios */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-orange-200 dark:hover:border-orange-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/challenges')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-orange-100 dark:bg-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Target className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Desafios</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Configurar desafios e metas</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Certificados */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-emerald-200 dark:hover:border-emerald-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/certificates')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Award className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Certificados</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Gerenciar templates e emissão</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Treinamentos Presenciais */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-violet-200 dark:hover:border-violet-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/training')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-violet-100 dark:bg-violet-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <UserCheck className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Treinamentos Presenciais</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Gerenciar turmas e inscrições</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Relatório de Vendas */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-green-200 dark:hover:border-green-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/sales')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Relatório de Vendas</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Acompanhar vendas e comissões</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* IGVD Cast */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-pink-200 dark:hover:border-pink-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/igvd-cast')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-pink-100 dark:bg-pink-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Radio className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">IGVD Cast</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Gerenciar vídeos de lives</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Níveis da Plataforma */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-purple-200 dark:hover:border-purple-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/levels')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <GraduationCap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Níveis da Plataforma</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Configurar níveis e progressão</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
 
             {/* ABA: Configurações Gerais */}
             <TabsContent value="geral" className="p-6 space-y-6">
