@@ -300,7 +300,7 @@ const AdminSales = () => {
                 <DollarSign className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t.admin?.totalValue || 'Valor Total'}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Valor Total</p>
                 <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                   {formatCurrency(summary?.total_value || 0)}
                 </p>
