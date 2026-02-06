@@ -288,7 +288,7 @@ const AdminSales = () => {
                 <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t.admin?.pendingSales || 'Aguardando Pgto'}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Aguardando Pgto</p>
                 <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{summary?.pending_sales || 0}</p>
               </div>
             </div>
