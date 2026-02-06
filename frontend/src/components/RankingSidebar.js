@@ -182,7 +182,11 @@ const RankingSidebar = () => {
               <p className="text-white text-[10px] font-semibold uppercase tracking-wide">
                 {top3[1]?.full_name?.split(' ')[0]}
               </p>
-              <p className="text-cyan-200 text-[10px]">{top3[1]?.points}</p>
+              <p className="text-cyan-200 text-[10px]">
+                {rankingType === 'assessments' 
+                  ? `${top3[1]?.average_score || 0}%` 
+                  : top3[1]?.points || 0}
+              </p>
             </div>
 
             {/* 1º Lugar */}
@@ -194,7 +198,11 @@ const RankingSidebar = () => {
               <p className="text-white text-xs font-bold uppercase tracking-wide">
                 {top3[0]?.full_name?.split(' ')[0]}
               </p>
-              <p className="text-amber-300 text-xs font-semibold">{top3[0]?.points}</p>
+              <p className="text-amber-300 text-xs font-semibold">
+                {rankingType === 'assessments' 
+                  ? `${top3[0]?.average_score || 0}%` 
+                  : top3[0]?.points || 0}
+              </p>
             </div>
 
             {/* 3º Lugar */}
@@ -206,7 +214,11 @@ const RankingSidebar = () => {
               <p className="text-white text-[10px] font-semibold uppercase tracking-wide">
                 {top3[2]?.full_name?.split(' ')[0]}
               </p>
-              <p className="text-cyan-200 text-[10px]">{top3[2]?.points}</p>
+              <p className="text-cyan-200 text-[10px]">
+                {rankingType === 'assessments' 
+                  ? `${top3[2]?.average_score || 0}%` 
+                  : top3[2]?.points || 0}
+              </p>
             </div>
           </div>
         </div>
