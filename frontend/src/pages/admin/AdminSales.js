@@ -607,7 +607,7 @@ const AdminSales = () => {
             {/* Tipos de Comissão */}
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                <h3 className="font-semibold text-slate-900 dark:text-white">{t.admin?.commissionTypes || 'Tipos de Comissão'}</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">Tipos de Comissão</h3>
                 <Button
                   onClick={openNewCommissionModal}
                   size="sm"
