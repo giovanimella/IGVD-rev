@@ -762,7 +762,7 @@ const AdminSales = () => {
               </Button>
               <Button type="submit" className="bg-cyan-500 hover:bg-cyan-600">
                 <Save className="w-4 h-4 mr-2" />
-                {editingCommission ? (t.common?.save || 'Salvar') : (t.common?.create || 'Criar')}
+                {editingCommission ? 'Salvar' : 'Criar'}
               </Button>
             </div>
           </form>
