@@ -49,7 +49,12 @@ const RankingSidebar = () => {
 
   if (loading) {
     return (
-      <aside className="hidden xl:flex xl:flex-col xl:w-72 h-screen sticky top-0 overflow-hidden" style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }}>
+      <aside 
+        className={`hidden xl:flex xl:flex-col h-screen sticky top-0 overflow-hidden transition-all duration-300 ease-in-out ${
+          isCollapsed ? 'xl:w-12' : 'xl:w-72'
+        }`} 
+        style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }}
+      >
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
@@ -59,21 +64,63 @@ const RankingSidebar = () => {
 
   const top3 = leaderboard.slice(0, 3);
 
+  // Versão recolhida - apenas botão de expandir
+  if (isCollapsed) {
+    return (
+      <aside 
+        className="hidden xl:flex xl:flex-col xl:w-12 h-screen sticky top-0 overflow-hidden transition-all duration-300 ease-in-out" 
+        style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }}
+        data-testid="ranking-sidebar-collapsed"
+      >
+        <button
+          onClick={toggleSidebar}
+          className="flex items-center justify-center w-full h-14 text-white hover:bg-white/10 transition-colors"
+          title="Expandir Ranking"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        
+        {/* Ícone de troféu vertical */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <Trophy className="w-6 h-6 text-amber-300" />
+            <div className="text-white text-xs font-bold transform -rotate-90 whitespace-nowrap origin-center mt-8">
+              RANKING
+            </div>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
   return (
-    <aside className="hidden xl:flex xl:flex-col xl:w-72 h-screen sticky top-0 overflow-hidden" style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }} data-testid="ranking-sidebar">
-      {/* Header */}
+    <aside 
+      className="hidden xl:flex xl:flex-col xl:w-72 h-screen sticky top-0 overflow-hidden transition-all duration-300 ease-in-out" 
+      style={{ background: 'linear-gradient(to bottom, #3a919b, #1b4c51)' }} 
+      data-testid="ranking-sidebar"
+    >
+      {/* Header com botão de recolher */}
       <div className="px-4 py-4 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center gap-2">
           <Trophy className="w-6 h-6 text-amber-300" />
           <h2 className="text-lg font-outfit font-bold text-white">Ranking</h2>
         </div>
-        <Link 
-          to="/leaderboard" 
-          className="text-xs text-white/80 hover:text-white flex items-center gap-1 transition-colors"
-          data-testid="ranking-see-all"
-        >
-          Ver todos <ChevronRight className="w-4 h-4" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link 
+            to="/leaderboard" 
+            className="text-xs text-white/80 hover:text-white flex items-center gap-1 transition-colors"
+            data-testid="ranking-see-all"
+          >
+            Ver todos <ChevronRight className="w-4 h-4" />
+          </Link>
+          <button
+            onClick={toggleSidebar}
+            className="text-white/80 hover:text-white hover:bg-white/10 p-1 rounded transition-colors"
+            title="Recolher Ranking"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Podium - Top 3 */}
