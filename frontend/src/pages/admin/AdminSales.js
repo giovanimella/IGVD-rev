@@ -276,7 +276,7 @@ const AdminSales = () => {
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t.admin?.paidSales || 'Vendas Pagas'}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Vendas Pagas</p>
                 <p className="text-xl font-bold text-green-600 dark:text-green-400">{summary?.paid_sales || 0}</p>
               </div>
             </div>
