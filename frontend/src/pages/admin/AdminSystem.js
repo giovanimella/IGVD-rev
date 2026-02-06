@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Settings, Save, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff, ClipboardCheck, Globe, DollarSign, Megaphone, ShieldAlert, FileCheck, Smartphone, Users, BookOpen, Award, TrendingUp } from 'lucide-react';
+import { Settings, Save, Upload, Trash2, Image, Webhook, Key, RefreshCw, Copy, Eye, EyeOff, ClipboardCheck, Globe, DollarSign, Megaphone, ShieldAlert, FileCheck, Smartphone, Users, BookOpen, Award, TrendingUp, FileText, MessageCircle, Calendar, Trophy, Target, GraduationCap, Radio, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
