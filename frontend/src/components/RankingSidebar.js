@@ -118,25 +118,53 @@ const RankingSidebar = () => {
       data-testid="ranking-sidebar"
     >
       {/* Header com botão de recolher */}
-      <div className="px-4 py-4 flex items-center justify-between border-b border-white/20">
-        <div className="flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-amber-300" />
-          <h2 className="text-lg font-outfit font-bold text-white">Ranking</h2>
+      <div className="px-4 py-3 border-b border-white/20">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-amber-300" />
+            <h2 className="text-lg font-outfit font-bold text-white">Ranking</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link 
+              to="/leaderboard" 
+              className="text-xs text-white/80 hover:text-white flex items-center gap-1 transition-colors"
+              data-testid="ranking-see-all"
+            >
+              Ver todos <ChevronRight className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={toggleSidebar}
+              className="text-white/80 hover:text-white hover:bg-white/10 p-1 rounded transition-colors"
+              title="Recolher Ranking"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Link 
-            to="/leaderboard" 
-            className="text-xs text-white/80 hover:text-white flex items-center gap-1 transition-colors"
-            data-testid="ranking-see-all"
-          >
-            Ver todos <ChevronRight className="w-4 h-4" />
-          </Link>
+        
+        {/* Botões de alternância de tipo de ranking */}
+        <div className="flex gap-1 bg-white/10 rounded-lg p-1">
           <button
-            onClick={toggleSidebar}
-            className="text-white/80 hover:text-white hover:bg-white/10 p-1 rounded transition-colors"
-            title="Recolher Ranking"
+            onClick={() => setRankingType('assessments')}
+            className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+              rankingType === 'assessments'
+                ? 'bg-white text-cyan-700 shadow-md'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
           >
-            <ChevronRight className="w-5 h-5" />
+            <Star className="w-3.5 h-3.5" />
+            Médias
+          </button>
+          <button
+            onClick={() => setRankingType('points')}
+            className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+              rankingType === 'points'
+                ? 'bg-white text-cyan-700 shadow-md'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Award className="w-3.5 h-3.5" />
+            Pontos
           </button>
         </div>
       </div>
