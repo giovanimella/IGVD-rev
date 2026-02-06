@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, ChevronRight, Medal } from 'lucide-react';
+import { Trophy, ChevronRight, Medal, ChevronLeft } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -8,10 +8,20 @@ const API_URL = process.env.REACT_APP_BACKEND_URL;
 const RankingSidebar = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    // Recuperar estado do localStorage
+    const saved = localStorage.getItem('rankingSidebarCollapsed');
+    return saved === 'true';
+  });
 
   useEffect(() => {
     fetchLeaderboard();
   }, []);
+
+  useEffect(() => {
+    // Salvar estado no localStorage
+    localStorage.setItem('rankingSidebarCollapsed', isCollapsed);
+  }, [isCollapsed]);
 
   const fetchLeaderboard = async () => {
     try {
@@ -22,6 +32,10 @@ const RankingSidebar = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   const getInitials = (name) => {
