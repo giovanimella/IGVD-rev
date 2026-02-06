@@ -22,7 +22,7 @@ const Topbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const handleProfile = () => {
