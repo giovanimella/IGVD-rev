@@ -650,7 +650,7 @@ const AdminSales = () => {
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           ct.active ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                         }`}>
-                          {ct.active ? (t.admin?.active || 'Ativo') : (t.admin?.inactive || 'Inativo')}
+                          {ct.active ? 'Ativo' : 'Inativo'}
                         </span>
                         <button
                           onClick={() => openEditCommissionModal(ct)}
