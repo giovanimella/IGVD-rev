@@ -473,68 +473,86 @@ const AdminSystem = () => {
             </TabsContent>
 
             {/* ABA: Conteúdo */}
-            <TabsContent value="conteudo" className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Landing Page */}
-                <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Globe className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Landing Page</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Configure textos, imagens e chamadas da página inicial pública</p>
-                      <Button onClick={() => navigate('/admin/landing-page')} className="bg-blue-500 hover:bg-blue-600">
-                        Configurar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Banners */}
-                <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-purple-200 dark:hover:border-purple-500/30 transition-all">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Image className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Banners Internos</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Crie banners rotativos para o dashboard dos licenciados</p>
-                      <Button onClick={() => navigate('/admin/banners')} className="bg-purple-500 hover:bg-purple-600">
-                        Gerenciar
-                      </Button>
+            <TabsContent value="conteudo" className="p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Gestão de Conteúdo</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Módulos */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-purple-200 dark:hover:border-purple-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/modules')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <BookOpen className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Módulos</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Criar e editar módulos de treinamento</p>
+                        <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats?.allModules?.length || 0}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Comunicados */}
-                <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-amber-200 dark:hover:border-amber-500/30 transition-all">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Megaphone className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Comunicados</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Publique comunicados e avisos importantes para todos os usuários</p>
-                      <Button onClick={() => navigate('/admin/posts')} className="bg-amber-500 hover:bg-amber-600">
-                        Gerenciar
-                      </Button>
+                  {/* Arquivos */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-green-200 dark:hover:border-green-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/files')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-6 h-6 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Repositório de Arquivos</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Gerenciar arquivos e materiais</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Termos de Aceite */}
-                <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-green-200 dark:hover:border-green-500/30 transition-all">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FileCheck className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  {/* Landing Page */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-cyan-200 dark:hover:border-cyan-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/landing-page')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Globe className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Landing Page</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Configure textos e imagens da página pública</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Termos de Aceite</h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Configure termos de uso e políticas que usuários devem aceitar</p>
-                      <Button onClick={() => navigate('/admin/terms')} className="bg-green-500 hover:bg-green-600">
-                        Configurar
-                      </Button>
+                  </div>
+
+                  {/* Banners */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-pink-200 dark:hover:border-pink-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/banners')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-pink-100 dark:bg-pink-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Image className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Banners</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Banners rotativos do dashboard</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Comunicados */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-amber-200 dark:hover:border-amber-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/posts')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Megaphone className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Comunicados</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Avisos importantes para usuários</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Termos de Aceite */}
+                  <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 hover:border-teal-200 dark:hover:border-teal-500/30 transition-all cursor-pointer" onClick={() => navigate('/admin/terms')}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-teal-100 dark:bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileCheck className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Termos de Aceite</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Termos e políticas de uso</p>
+                      </div>
                     </div>
                   </div>
                 </div>
