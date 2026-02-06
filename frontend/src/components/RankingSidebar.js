@@ -267,17 +267,33 @@ const RankingSidebar = () => {
 
             {/* User Info */}
             <div className="flex-1 pl-3 pr-4 py-3 flex items-center justify-between min-w-0">
-              <span className="text-slate-800 font-bold text-sm truncate uppercase tracking-wide">
-                {user.full_name?.split(' ')[0]}
-              </span>
-              <span className={`font-extrabold text-sm ${
-                index === 0 ? 'text-amber-500' :
-                index === 1 ? 'text-slate-500' :
-                index === 2 ? 'text-amber-700' :
-                'text-cyan-600'
-              }`}>
-                {user.points}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-slate-800 font-bold text-sm truncate uppercase tracking-wide">
+                  {user.full_name?.split(' ')[0]}
+                </span>
+                {rankingType === 'assessments' && user.total_assessments > 0 && (
+                  <span className="text-[10px] text-slate-500">
+                    {user.total_assessments} aval.
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col items-end">
+                <span className={`font-extrabold text-sm ${
+                  index === 0 ? 'text-amber-500' :
+                  index === 1 ? 'text-slate-500' :
+                  index === 2 ? 'text-amber-700' :
+                  'text-cyan-600'
+                }`}>
+                  {rankingType === 'assessments' 
+                    ? `${user.average_score || 0}%` 
+                    : user.points || 0}
+                </span>
+                {rankingType === 'assessments' && (
+                  <span className="text-[9px] text-slate-400">
+                    média
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         ))}
