@@ -8,6 +8,11 @@ const API_URL = process.env.REACT_APP_BACKEND_URL;
 const RankingSidebar = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [rankingType, setRankingType] = useState(() => {
+    // Recuperar tipo de ranking do localStorage
+    const saved = localStorage.getItem('rankingType');
+    return saved || 'assessments'; // 'assessments' (médias) ou 'points' (pontos)
+  });
   const [isCollapsed, setIsCollapsed] = useState(() => {
     // Recuperar estado do localStorage
     const saved = localStorage.getItem('rankingSidebarCollapsed');
@@ -16,16 +21,25 @@ const RankingSidebar = () => {
 
   useEffect(() => {
     fetchLeaderboard();
-  }, []);
+  }, [rankingType]);
 
   useEffect(() => {
     // Salvar estado no localStorage
     localStorage.setItem('rankingSidebarCollapsed', isCollapsed);
   }, [isCollapsed]);
 
+  useEffect(() => {
+    // Salvar tipo de ranking no localStorage
+    localStorage.setItem('rankingType', rankingType);
+  }, [rankingType]);
+
   const fetchLeaderboard = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/stats/leaderboard`);
+      const endpoint = rankingType === 'assessments' 
+        ? `${API_URL}/api/stats/leaderboard/assessments`
+        : `${API_URL}/api/stats/leaderboard`;
+      
+      const response = await axios.get(endpoint);
       setLeaderboard(response.data.slice(0, 10)); // Top 10
     } catch (error) {
       console.error('Erro ao buscar ranking:', error);
@@ -36,6 +50,10 @@ const RankingSidebar = () => {
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
+  };
+
+  const toggleRankingType = () => {
+    setRankingType(prevType => prevType === 'assessments' ? 'points' : 'assessments');
   };
 
   const getInitials = (name) => {
