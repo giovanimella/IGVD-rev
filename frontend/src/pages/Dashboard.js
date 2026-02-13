@@ -487,6 +487,95 @@ const Dashboard = () => {
           {/* Banner Rotativo */}
           <BannerCarousel />
 
+
+          {/* Cards de Lembretes */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Card: Apresentações de Hoje */}
+            {todayPresentations && (
+              <Link to="/presentations">
+                <div className={`bg-white dark:bg-[#1b4c51] rounded-xl border-2 p-6 hover:shadow-lg transition-all cursor-pointer ${
+                  todayPresentations.completed 
+                    ? 'border-green-500 dark:border-green-400' 
+                    : 'border-orange-500 dark:border-orange-400'
+                }`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                        todayPresentations.completed 
+                          ? 'bg-green-100 dark:bg-green-500/20' 
+                          : 'bg-orange-100 dark:bg-orange-500/20'
+                      }`}>
+                        <Briefcase className={`w-6 h-6 ${
+                          todayPresentations.completed 
+                            ? 'text-green-600 dark:text-green-400' 
+                            : 'text-orange-600 dark:text-orange-400'
+                        }`} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Apresentações de Hoje</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Meta: 2 apresentações por dia</p>
+                      </div>
+                    </div>
+                    {todayPresentations.completed && (
+                      <CheckCircle className="w-8 h-8 text-green-500" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-4xl font-bold text-slate-900 dark:text-white">
+                        {todayPresentations.count} / {todayPresentations.target}
+                      </p>
+                    </div>
+                    <div className={`text-right ${
+                      todayPresentations.completed 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-orange-600 dark:text-orange-400'
+                    }`}>
+                      {todayPresentations.completed ? (
+                        <p className="text-sm font-medium">✅ Meta cumprida!</p>
+                      ) : (
+                        <p className="text-sm font-medium">
+                          Falta{todayPresentations.target - todayPresentations.count > 1 ? 'm' : ''} {todayPresentations.target - todayPresentations.count}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {/* Card: Compromissos de Hoje */}
+            {todayEvents && todayEvents.length > 0 && (
+              <Link to="/agenda">
+                <div className="bg-white dark:bg-[#1b4c51] rounded-xl border-2 border-blue-500 dark:border-blue-400 p-6 hover:shadow-lg transition-all cursor-pointer">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Compromissos Hoje</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Você tem {todayEvents.length} compromisso{todayEvents.length > 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {todayEvents.slice(0, 3).map((event) => (
+                      <div key={event.id} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-white/5 rounded-lg">
+                        <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                        <p className="text-sm text-slate-900 dark:text-white truncate">{event.title}</p>
+                      </div>
+                    ))}
+                    {todayEvents.length > 3 && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+                        +{todayEvents.length - 3} mais
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
+
+
           {/* Compromissos Próximos */}
           {upcomingAppointments.length > 0 && (
             <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl border border-cyan-200 dark:border-cyan-800/50 p-6" data-testid="upcoming-appointments-widget">
