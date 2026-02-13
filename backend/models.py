@@ -667,3 +667,43 @@ class LandingPageConfig(BaseModel):
     # Controle
     is_active: bool = True
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+# ==================== CATEGORIAS DE USUÁRIOS ====================
+
+class UserCategory(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    color: str = "#3b82f6"  # Cor para identificação visual
+    icon: Optional[str] = None
+    active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+# ==================== CRM - APRESENTAÇÕES ====================
+
+class Presentation(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str  # Licenciado que fez a apresentação
+    client_name: str
+    client_email: Optional[str] = None
+    client_phone: Optional[str] = None
+    photo_url: Optional[str] = None  # Foto da apresentação
+    sold: bool = False  # Se resultou em venda
+    notes: Optional[str] = None  # Observações
+    presentation_date: str = Field(default_factory=lambda: datetime.now().isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+# ==================== FREQUÊNCIA DE APRESENTAÇÕES ====================
+
+class PresentationFrequency(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    year: int
+    month: int  # 1-12
+    total_presentations: int = 0
+    working_days_in_month: int  # Dias úteis do mês (seg-sex)
+    days_with_presentations: int = 0  # Dias que teve pelo menos 2 apresentações
+    frequency_percentage: float = 100.0  # Começa com 100%
+    calculated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
