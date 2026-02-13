@@ -69,6 +69,8 @@ app.include_router(timeline_routes.router, prefix="/api")
 app.include_router(terms_routes.router, prefix="/api")
 app.include_router(whatsapp_routes.router, prefix="/api")
 app.include_router(landing_routes.router, prefix="/api")
+app.include_router(presentation_routes.router, prefix="/api")
+app.include_router(category_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
