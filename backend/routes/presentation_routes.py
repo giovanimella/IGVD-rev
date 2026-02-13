@@ -105,7 +105,6 @@ async def calculate_presentation_frequency(user_id: str, year: int, month: int):
 
 async def create_followup_events(user_id: str, presentation: dict):
     """Cria eventos de follow-up na agenda do licenciado"""
-    from models import CompanyEvent
     
     presentation_date = datetime.fromisoformat(presentation["presentation_date"])
     client_name = presentation["client_name"]
@@ -142,19 +141,21 @@ async def create_followup_events(user_id: str, presentation: dict):
     for followup in followups:
         event_date = presentation_date + timedelta(days=followup["days"])
         
-        event = CompanyEvent(
-            title=followup["title"],
-            description=followup["description"],
-            start_date=event_date.isoformat(),
-            end_date=event_date.isoformat(),
-            location="Contato Remoto",
-            is_mandatory=False,
-            created_by=user_id,
-            attendees=[user_id],  # Apenas o licenciado
-            event_type="follow_up"
-        )
+        # Criar como appointment (compromisso pessoal do licenciado)
+        appointment = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "title": followup["title"],
+            "date": event_date.strftime("%Y-%m-%d"),
+            "time": "09:00",
+            "category": "lembrete",
+            "description": followup["description"],
+            "duration": 30,
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
         
-        await db.company_events.insert_one(event.model_dump())
+        await db.appointments.insert_one(appointment)
 
 # ==================== ENDPOINTS ====================
 
