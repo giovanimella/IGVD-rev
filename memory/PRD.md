@@ -198,6 +198,34 @@
 
 ## 📝 Changelog
 
+### v1.5.0 (Fevereiro 2026)
+- **NOVO:** Sistema de CRM para Apresentações
+  - Registro de apresentações diárias por licenciados
+  - Meta de 2 apresentações por dia (exceto fins de semana)
+  - Upload de fotos das apresentações
+  - Dashboard com cards de lembrete de meta diária
+  - Histórico completo de apresentações
+  
+- **NOVO:** Ranking de Frequência
+  - Ranking baseado na constância mensal de apresentações
+  - Calcula % de dias úteis com meta cumprida (2+ apresentações)
+  - Reset automático mensal
+  - Integrado ao sistema de rankings existente
+  
+- **NOVO:** Categorias de Usuários
+  - Admin pode criar e gerenciar categorias
+  - Atribuir categorias a usuários
+  - Link de categorias no menu do admin
+  - Preparação para filtro de conteúdo por categoria
+  
+- **NOVO:** Sistema de Follow-up Automatizado
+  - Se venda: 3 compromissos automáticos (3 dias, 2 semanas, 1 mês)
+  - Se não venda: 1 lembrete para envio de material (1 semana)
+  - Eventos criados automaticamente na agenda do licenciado
+  
+- **FIX:** Corrigido bug de sintaxe no Dashboard.js
+- **FIX:** Adicionados links de navegação faltantes no Sidebar
+
 ### v1.4.0 (Fevereiro 2026)
 - **NOVO:** Comunidade (Timeline Social)
   - Posts com texto e imagens
