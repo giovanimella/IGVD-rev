@@ -110,6 +110,38 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Erro ao buscar histórico de acessos:', error);
       setAccessHistory([]);
+
+
+  const fetchTodayPresentations = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/api/presentations/my/today`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTodayPresentations(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar apresentações de hoje:', error);
+    }
+  };
+
+  const fetchTodayEvents = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const today = new Date().toISOString().split('T')[0];
+      const response = await axios.get(`${API_URL}/api/company-events/my`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Filtrar apenas eventos de hoje
+      const eventsToday = response.data.filter(event => {
+        const eventDate = new Date(event.start_date).toISOString().split('T')[0];
+        return eventDate === today;
+      });
+      setTodayEvents(eventsToday);
+    } catch (error) {
+      console.error('Erro ao buscar eventos de hoje:', error);
+    }
+  };
+
     }
   };
 
