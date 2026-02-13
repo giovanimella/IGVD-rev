@@ -415,6 +415,22 @@ function App() {
             }
           />
           <Route
+            path="/admin/categories"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminCategories />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/presentations"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <Presentations />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/favorites"
             element={
               <PrivateRoute roles={['licenciado']}>
