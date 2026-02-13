@@ -147,23 +147,37 @@ const RankingSidebar = () => {
         {/* Botões de alternância de tipo de ranking */}
         <div className="flex gap-1 bg-white/10 rounded-lg p-1">
           <button
+            onClick={() => setRankingType('frequency')}
+            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-[10px] font-medium transition-all ${
+              rankingType === 'frequency'
+                ? 'bg-white text-cyan-700 shadow-md'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
+            title="Ranking Principal: Frequência de Apresentações"
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            Frequência
+          </button>
+          <button
             onClick={() => setRankingType('assessments')}
-            className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-[10px] font-medium transition-all ${
               rankingType === 'assessments'
                 ? 'bg-white text-cyan-700 shadow-md'
                 : 'text-white/70 hover:text-white hover:bg-white/5'
             }`}
+            title="Ranking Secundário: Média de Avaliações"
           >
             <Star className="w-3.5 h-3.5" />
             Médias
           </button>
           <button
             onClick={() => setRankingType('points')}
-            className={`flex-1 flex items-center justify-center gap-1 px-3 py-1.5 rounded text-xs font-medium transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-[10px] font-medium transition-all ${
               rankingType === 'points'
                 ? 'bg-white text-cyan-700 shadow-md'
                 : 'text-white/70 hover:text-white hover:bg-white/5'
             }`}
+            title="Ranking Secundário: Pontos Acumulados"
           >
             <Award className="w-3.5 h-3.5" />
             Pontos
