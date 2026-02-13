@@ -519,6 +519,33 @@ const AdminUsers = () => {
                 </div>
               )}
 
+              {/* Campo Categoria - só aparece se for licenciado */}
+              {formData.role === 'licenciado' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4" />
+                      Categoria
+                    </div>
+                  </label>
+                  <select
+                    value={formData.category_id}
+                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                    className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
+                  >
+                    <option value="">Sem categoria</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.icon} {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Categorias servem para organizar e segmentar licenciados
+                  </p>
+                </div>
+              )}
+
               {/* Campo Senha */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
