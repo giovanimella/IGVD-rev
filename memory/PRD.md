@@ -323,4 +323,4 @@
 
 ---
 
-**Última atualização:** Fevereiro 2026
+**Última atualização:** Fevereiro 2026 (v1.5.0)
