@@ -35,7 +35,13 @@ def get_working_days_in_month(year: int, month: int) -> int:
     return working_days
 
 async def calculate_presentation_frequency(user_id: str, year: int, month: int):
-    """Calcula a frequência de apresentações do usuário no mês"""
+    """Calcula a frequência de apresentações do usuário no mês
+    
+    Nova lógica:
+    - Meta mensal = dias úteis × 2 apresentações
+    - Cada apresentação individual conta para a porcentagem
+    - 0% no início do mês, sobe conforme faz apresentações
+    """
     
     # Buscar todas as apresentações do mês
     start_date = datetime(year, month, 1)
@@ -52,30 +58,34 @@ async def calculate_presentation_frequency(user_id: str, year: int, month: int):
         }
     }).to_list(1000)
     
-    # Agrupar por dia
-    days_count = {}
+    # Contar apresentações em dias úteis
+    presentations_in_working_days = 0
+    days_with_presentations = set()
+    
     for pres in presentations:
         date_obj = datetime.fromisoformat(pres["presentation_date"])
-        date_key = date_obj.strftime("%Y-%m-%d")
         day_of_week = date_obj.weekday()  # 0=segunda, 6=domingo
         
-        # Só conta dias úteis (seg-sex)
+        # Só conta apresentações em dias úteis (seg-sex)
         if day_of_week < 5:
-            if date_key not in days_count:
-                days_count[date_key] = 0
-            days_count[date_key] += 1
-    
-    # Contar dias que tiveram 2+ apresentações
-    days_with_target = sum(1 for count in days_count.values() if count >= 2)
+            presentations_in_working_days += 1
+            days_with_presentations.add(date_obj.strftime("%Y-%m-%d"))
     
     # Dias úteis no mês
     working_days = get_working_days_in_month(year, month)
     
-    # Calcular frequência (%)
-    if working_days > 0:
-        frequency = (days_with_target / working_days) * 100
+    # Meta mensal = dias úteis × 2 apresentações por dia
+    monthly_target = working_days * 2
+    
+    # Calcular frequência (%) - cada apresentação vale uma fração da meta
+    # Se não tem apresentações = 0%
+    # Se atingiu ou ultrapassou a meta = 100%
+    if monthly_target > 0:
+        frequency = (presentations_in_working_days / monthly_target) * 100
+        # Limitar a 100% máximo
+        frequency = min(frequency, 100.0)
     else:
-        frequency = 100.0
+        frequency = 0.0
     
     # Atualizar ou criar registro de frequência
     await db.presentation_frequency.update_one(
@@ -87,8 +97,10 @@ async def calculate_presentation_frequency(user_id: str, year: int, month: int):
         {
             "$set": {
                 "total_presentations": len(presentations),
+                "presentations_in_working_days": presentations_in_working_days,
                 "working_days_in_month": working_days,
-                "days_with_presentations": days_with_target,
+                "monthly_target": monthly_target,
+                "days_with_presentations": len(days_with_presentations),
                 "frequency_percentage": round(frequency, 2),
                 "calculated_at": datetime.now().isoformat()
             }
@@ -98,8 +110,10 @@ async def calculate_presentation_frequency(user_id: str, year: int, month: int):
     
     return {
         "total_presentations": len(presentations),
+        "presentations_in_working_days": presentations_in_working_days,
         "working_days": working_days,
-        "days_with_target": days_with_target,
+        "monthly_target": monthly_target,
+        "days_with_presentations": len(days_with_presentations),
         "frequency_percentage": round(frequency, 2)
     }
 
