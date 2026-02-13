@@ -104,6 +104,28 @@
 - [x] CTA e rodapé personalizáveis
 - [x] Paletas de cores predefinidas
 
+### 📊 CRM de Apresentações
+- [x] **NOVO:** Registro de apresentações diárias
+- [x] Meta de 2 apresentações por dia (seg-sex)
+- [x] Dashboard com cards de lembrete
+- [x] Histórico e estatísticas
+- [x] Upload de fotos
+
+### 🏆 Ranking de Frequência
+- [x] **NOVO:** Ranking baseado na constância mensal
+- [x] Cálculo de % de dias com meta cumprida
+- [x] Integrado ao sistema de rankings
+
+### 📁 Categorias de Usuários
+- [x] **NOVO:** CRUD de categorias (admin)
+- [x] Atribuição de categorias a usuários
+- [x] Menu de categorias no painel admin
+
+### 📅 Follow-up Automatizado
+- [x] **NOVO:** Eventos automáticos pós-venda
+- [x] 3 compromissos se vendeu (3d, 2sem, 1mês)
+- [x] 1 lembrete se não vendeu (1 semana)
+
 ### 📁 Outros
 - [x] Repositório de arquivos
 - [x] Sistema de banners
