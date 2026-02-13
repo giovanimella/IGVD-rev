@@ -183,7 +183,7 @@ const Presentations = () => {
             <p className="text-slate-600 dark:text-slate-400 mt-1">Registre suas apresentações diárias e acompanhe sua frequência</p>
           </div>
           <Button 
-            onClick={() => setShowModal(true)}
+            onClick={openNewModal}
             className="bg-cyan-500 hover:bg-cyan-600"
           >
             <Plus className="w-4 h-4 mr-2" />
