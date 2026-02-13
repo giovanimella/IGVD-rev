@@ -312,15 +312,19 @@ const RankingSidebar = () => {
                   index === 2 ? 'text-amber-700' :
                   'text-cyan-600'
                 }`}>
-                  {rankingType === 'assessments' 
+                  {rankingType === 'frequency' 
+                    ? `${user.frequency_percentage || 100}%`
+                    : rankingType === 'assessments'
                     ? `${user.average_score || 0}%` 
                     : user.points || 0}
                 </span>
-                {rankingType === 'assessments' && (
-                  <span className="text-[9px] text-slate-400">
-                    média
-                  </span>
-                )}
+                <span className="text-[9px] text-slate-400">
+                  {rankingType === 'frequency' 
+                    ? 'frequência'
+                    : rankingType === 'assessments'
+                    ? 'média'
+                    : ''}
+                </span>
               </div>
             </div>
           </div>
