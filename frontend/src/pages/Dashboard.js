@@ -23,6 +23,8 @@ const Dashboard = () => {
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [growthData, setGrowthData] = useState([]);
   const [stageDistribution, setStageDistribution] = useState([]);
+  const [todayPresentations, setTodayPresentations] = useState(null);
+  const [todayEvents, setTodayEvents] = useState([]);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
