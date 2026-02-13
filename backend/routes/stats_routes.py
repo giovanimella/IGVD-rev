@@ -353,4 +353,90 @@ async def get_combined_leaderboard(current_user: dict = Depends(get_current_user
     
     return leaderboard
 
+
+
+@router.get("/leaderboard/frequency")
+async def get_frequency_leaderboard(current_user: dict = Depends(get_current_user)):
+    """
+    Retorna o ranking dos licenciados baseado na frequência de apresentações.
+    Este é o RANKING PRINCIPAL da plataforma.
+    Mostra a constância mensal de fazer 2+ apresentações por dia útil.
+    """
+    from datetime import datetime
+    
+    now = datetime.now()
+    current_year = now.year
+    current_month = now.month
+    
+    # Buscar todas as frequências do mês atual
+    frequencies = await db.presentation_frequency.find(
+        {
+            "year": current_year,
+            "month": current_month
+        },
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Buscar dados dos usuários
+    leaderboard = []
+    
+    for freq in frequencies:
+        user = await db.users.find_one(
+            {"id": freq["user_id"]},
+            {"_id": 0, "id": 1, "full_name": 1, "email": 1, "profile_picture": 1, "level_title": 1}
+        )
+        
+        if user and user.get("role") == "licenciado":
+            leaderboard.append({
+                "id": user["id"],
+                "full_name": user["full_name"],
+                "email": user["email"],
+                "profile_picture": user.get("profile_picture"),
+                "level_title": user.get("level_title", "Iniciante"),
+                "frequency_percentage": freq["frequency_percentage"],
+                "total_presentations": freq["total_presentations"],
+                "working_days": freq["working_days_in_month"],
+                "days_with_target": freq["days_with_presentations"],
+                "year": freq["year"],
+                "month": freq["month"]
+            })
+    
+    # Para usuários sem registro ainda no mês, adicionar com 100%
+    all_licensees = await db.users.find(
+        {"role": "licenciado"},
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "profile_picture": 1, "level_title": 1}
+    ).to_list(1000)
+    
+    existing_user_ids = [entry["id"] for entry in leaderboard]
+    
+    for user in all_licensees:
+        if user["id"] not in existing_user_ids:
+            # Calcular dias úteis do mês
+            import calendar
+            cal = calendar.monthcalendar(current_year, current_month)
+            working_days = sum(1 for week in cal for day_idx, day in enumerate(week) if day != 0 and day_idx < 5)
+            
+            leaderboard.append({
+                "id": user["id"],
+                "full_name": user["full_name"],
+                "email": user["email"],
+                "profile_picture": user.get("profile_picture"),
+                "level_title": user.get("level_title", "Iniciante"),
+                "frequency_percentage": 100.0,
+                "total_presentations": 0,
+                "working_days": working_days,
+                "days_with_target": 0,
+                "year": current_year,
+                "month": current_month
+            })
+    
+    # Ordenar por frequência (maior para menor)
+    leaderboard.sort(key=lambda x: x["frequency_percentage"], reverse=True)
+    
+    # Adicionar posição no ranking
+    for index, entry in enumerate(leaderboard):
+        entry["rank"] = index + 1
+    
+    return leaderboard
+
     return access_stats
