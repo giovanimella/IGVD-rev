@@ -61,6 +61,7 @@ class UserResponse(BaseModel):
     supervisor_id: Optional[str] = None
     leader_id: Optional[str] = None
     leader_name: Optional[str] = None
+    category_id: Optional[str] = None
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
