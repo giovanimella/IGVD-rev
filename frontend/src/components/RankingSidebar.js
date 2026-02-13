@@ -11,7 +11,7 @@ const RankingSidebar = () => {
   const [rankingType, setRankingType] = useState(() => {
     // Recuperar tipo de ranking do localStorage
     const saved = localStorage.getItem('rankingType');
-    return saved || 'assessments'; // 'assessments' (médias) ou 'points' (pontos)
+    return saved || 'frequency'; // 'frequency' (PRINCIPAL), 'assessments' (médias) ou 'points' (pontos)
   });
   const [isCollapsed, setIsCollapsed] = useState(() => {
     // Recuperar estado do localStorage
