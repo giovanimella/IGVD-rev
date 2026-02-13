@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Plus, Calendar, TrendingUp, CheckCircle, X, Upload, Phone, Mail, User, FileText, Image as ImageIcon } from 'lucide-react';
+import { Plus, Calendar, TrendingUp, CheckCircle, X, Upload, Phone, Mail, User, FileText, Image as ImageIcon, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -14,6 +14,7 @@ const Presentations = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [editingPresentation, setEditingPresentation] = useState(null);
 
   const [formData, setFormData] = useState({
     client_name: '',
