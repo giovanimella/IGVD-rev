@@ -160,11 +160,11 @@ async def create_followup_events(user_id: str, presentation: dict):
 
 @router.post("/")
 async def create_presentation(
-    client_name: str,
-    sold: bool = False,
-    client_email: str = None,
-    client_phone: str = None,
-    notes: str = None,
+    client_name: str = Form(...),
+    sold: bool = Form(False),
+    client_email: str = Form(None),
+    client_phone: str = Form(None),
+    notes: str = Form(None),
     photo: UploadFile = File(None),
     current_user: dict = Depends(get_current_user)
 ):
