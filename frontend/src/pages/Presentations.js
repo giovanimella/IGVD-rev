@@ -469,7 +469,7 @@ const Presentations = () => {
                 </label>
               </div>
 
-              {formData.sold && (
+              {!editingPresentation && formData.sold && (
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30 rounded-lg">
                   <p className="text-sm text-green-800 dark:text-green-300">
                     <strong>Parabéns pela venda! 🎉</strong><br />
@@ -483,7 +483,7 @@ const Presentations = () => {
                 </div>
               )}
 
-              {!formData.sold && (
+              {!editingPresentation && !formData.sold && (
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/30 rounded-lg">
                   <p className="text-sm text-blue-800 dark:text-blue-300">
                     Vamos criar um lembrete na sua agenda para daqui 1 semana enviar material para nutrir este lead.
@@ -494,7 +494,10 @@ const Presentations = () => {
               <div className="flex gap-3 pt-4">
                 <Button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingPresentation(null);
+                  }}
                   variant="outline"
                   className="flex-1"
                 >
@@ -505,7 +508,7 @@ const Presentations = () => {
                   disabled={submitting}
                   className="flex-1 bg-cyan-500 hover:bg-cyan-600"
                 >
-                  {submitting ? 'Salvando...' : 'Registrar Apresentação'}
+                  {submitting ? 'Salvando...' : editingPresentation ? 'Salvar Alterações' : 'Registrar Apresentação'}
                 </Button>
               </div>
             </form>
