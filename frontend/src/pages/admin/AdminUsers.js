@@ -75,7 +75,7 @@ const AdminUsers = () => {
 
   const openCreateModal = () => {
     setEditingUser(null);
-    setFormData({ email: '', full_name: '', role: 'licenciado', phone: '', supervisor_id: '', password: '' });
+    setFormData({ email: '', full_name: '', role: 'licenciado', phone: '', supervisor_id: '', category_id: '', password: '' });
     setShowModal(true);
   };
 
@@ -87,6 +87,7 @@ const AdminUsers = () => {
       role: user.role,
       phone: user.phone || '',
       supervisor_id: user.supervisor_id || '',
+      category_id: user.category_id || '',
       password: ''
     });
     setShowModal(true);
