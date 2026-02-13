@@ -93,6 +93,7 @@ class Module(BaseModel):
     module_type: str = "standard"  # 'standard', 'live_class'
     live_stream_url: Optional[str] = None  # URL do YouTube/Twitch para aulas ao vivo
     live_stream_platform: Optional[str] = None  # 'youtube', 'twitch'
+    category_ids: List[str] = []  # Categorias que podem acessar (vazio = todos)
     live_stream_scheduled: Optional[str] = None  # Data/hora agendada da transmissão
 
 class ModuleCreate(BaseModel):
