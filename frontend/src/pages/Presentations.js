@@ -316,15 +316,31 @@ const Presentations = () => {
                       )}
                     </div>
                     
-                    {pres.photo_url && (
-                      <div className="ml-4">
+                    <div className="flex items-center gap-2 ml-4">
+                      {pres.photo_url && (
                         <img 
                           src={`${API_URL}${pres.photo_url}`} 
                           alt="Apresentação"
-                          className="w-20 h-20 object-cover rounded-lg border border-slate-200 dark:border-white/10"
+                          className="w-16 h-16 object-cover rounded-lg border border-slate-200 dark:border-white/10"
                         />
+                      )}
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={() => handleEdit(pres)}
+                          className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                          title="Editar"
+                        >
+                          <Edit2 className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(pres.id)}
+                          className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Excluir"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        </button>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))
