@@ -349,14 +349,19 @@ const Presentations = () => {
         </div>
       </div>
 
-      {/* Modal Nova Apresentação */}
+      {/* Modal Nova/Editar Apresentação */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-[#1b4c51] rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Nova Apresentação</h2>
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                {editingPresentation ? 'Editar Apresentação' : 'Nova Apresentação'}
+              </h2>
               <button 
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setEditingPresentation(null);
+                }}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
                 <X className="w-5 h-5" />
