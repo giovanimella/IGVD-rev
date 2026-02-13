@@ -61,8 +61,10 @@ import AdminCompanyEvents from './pages/admin/AdminCompanyEvents';
 import Timeline from './pages/Timeline';
 import TermsAcceptanceModal from './components/TermsAcceptanceModal';
 import AdminBannedWords from './pages/admin/AdminBannedWords';
+import AdminCategories from './pages/admin/AdminCategories';
 import LandingPage from './pages/LandingPage';
 import AdminLandingPage from './pages/admin/AdminLandingPage';
+import Presentations from './pages/Presentations';
 
 function App() {
   return (
