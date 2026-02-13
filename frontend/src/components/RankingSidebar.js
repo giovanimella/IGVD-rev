@@ -35,7 +35,9 @@ const RankingSidebar = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      const endpoint = rankingType === 'assessments' 
+      const endpoint = rankingType === 'frequency' 
+        ? `${API_URL}/api/stats/leaderboard/frequency`
+        : rankingType === 'assessments'
         ? `${API_URL}/api/stats/leaderboard/assessments`
         : `${API_URL}/api/stats/leaderboard`;
       
