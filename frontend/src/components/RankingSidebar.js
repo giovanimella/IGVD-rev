@@ -199,7 +199,9 @@ const RankingSidebar = () => {
                 {top3[1]?.full_name?.split(' ')[0]}
               </p>
               <p className="text-cyan-200 text-[10px]">
-                {rankingType === 'assessments' 
+                {rankingType === 'frequency' 
+                  ? `${top3[1]?.frequency_percentage || 100}%`
+                  : rankingType === 'assessments'
                   ? `${top3[1]?.average_score || 0}%` 
                   : top3[1]?.points || 0}
               </p>
