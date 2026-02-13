@@ -57,30 +57,48 @@ const Presentations = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const formDataToSend = new FormData();
       
-      formDataToSend.append('client_name', formData.client_name);
-      formDataToSend.append('sold', formData.sold);
-      
-      if (formData.client_email) formDataToSend.append('client_email', formData.client_email);
-      if (formData.client_phone) formDataToSend.append('client_phone', formData.client_phone);
-      if (formData.notes) formDataToSend.append('notes', formData.notes);
-      if (formData.photo) formDataToSend.append('photo', formData.photo);
+      if (editingPresentation) {
+        // Atualizar apresentação existente
+        await axios.put(`${API_URL}/api/presentations/${editingPresentation.id}`, {
+          client_name: formData.client_name,
+          client_email: formData.client_email || null,
+          client_phone: formData.client_phone || null,
+          sold: formData.sold,
+          notes: formData.notes || null
+        }, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-      await axios.post(`${API_URL}/api/presentations/`, formDataToSend, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+        toast.success('✅ Apresentação atualizada!');
+      } else {
+        // Criar nova apresentação
+        const formDataToSend = new FormData();
+        
+        formDataToSend.append('client_name', formData.client_name);
+        formDataToSend.append('sold', formData.sold);
+        
+        if (formData.client_email) formDataToSend.append('client_email', formData.client_email);
+        if (formData.client_phone) formDataToSend.append('client_phone', formData.client_phone);
+        if (formData.notes) formDataToSend.append('notes', formData.notes);
+        if (formData.photo) formDataToSend.append('photo', formData.photo);
 
-      toast.success(
-        formData.sold 
-          ? '🎉 Venda registrada! Compromissos de follow-up criados na sua agenda.'
-          : '✅ Apresentação registrada! Lembrete criado para enviar material.'
-      );
+        await axios.post(`${API_URL}/api/presentations/`, formDataToSend, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        toast.success(
+          formData.sold 
+            ? '🎉 Venda registrada! Compromissos de follow-up criados na sua agenda.'
+            : '✅ Apresentação registrada! Lembrete criado para enviar material.'
+        );
+      }
       
       setShowModal(false);
+      setEditingPresentation(null);
       setFormData({
         client_name: '',
         client_email: '',
@@ -93,10 +111,53 @@ const Presentations = () => {
       fetchData();
     } catch (error) {
       console.error('Erro ao salvar:', error);
-      toast.error('Erro ao registrar apresentação');
+      toast.error(editingPresentation ? 'Erro ao atualizar apresentação' : 'Erro ao registrar apresentação');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleEdit = (presentation) => {
+    setEditingPresentation(presentation);
+    setFormData({
+      client_name: presentation.client_name,
+      client_email: presentation.client_email || '',
+      client_phone: presentation.client_phone || '',
+      sold: presentation.sold,
+      notes: presentation.notes || '',
+      photo: null
+    });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (presentationId) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta apresentação?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_URL}/api/presentations/${presentationId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      toast.success('Apresentação excluída');
+      fetchData();
+    } catch (error) {
+      console.error('Erro ao excluir:', error);
+      toast.error('Erro ao excluir apresentação');
+    }
+  };
+
+  const openNewModal = () => {
+    setEditingPresentation(null);
+    setFormData({
+      client_name: '',
+      client_email: '',
+      client_phone: '',
+      sold: false,
+      notes: '',
+      photo: null
+    });
+    setShowModal(true);
   };
 
   if (loading) {
