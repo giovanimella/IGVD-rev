@@ -167,9 +167,9 @@
 
 | Usuário | Email | Senha |
 |---------|-------|-------|
-| Admin | admin@igvd.org | admin123 |
+| Admin | admin@ozoxx.com | admin123 |
+| Licenciado Teste | licenciado.teste@ozoxx.com | licenciado123 |
 | Supervisor | supervisor@igvd.org | supervisor123 |
-| Licenciado | (criar via sistema) | - |
 
 ---
 
