@@ -150,7 +150,7 @@ async def create_followup_events(user_id: str, presentation: dict):
             "time": "09:00",
             "category": "lembrete",
             "description": followup["description"],
-            "duration": 30,
+            "duration": "30",
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat()
         }
