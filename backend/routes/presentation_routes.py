@@ -186,7 +186,7 @@ async def create_presentation(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(photo.file, buffer)
         
-        photo_url = f"/uploads/presentations/{filename}"
+        photo_url = f"/api/uploads/presentations/{filename}"
     
     # Criar apresentação
     presentation = Presentation(
