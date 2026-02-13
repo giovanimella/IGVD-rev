@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Users, Plus, Edit, Trash2, X, Mail, User, Shield, Upload, Download, Lock, FileSpreadsheet, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, X, Mail, User, Shield, Upload, Download, Lock, FileSpreadsheet, ArrowRight, AlertTriangle, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../components/ui/dialog';
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -25,6 +26,7 @@ const AdminUsers = () => {
     role: 'licenciado',
     phone: '',
     supervisor_id: '',
+    category_id: '',
     password: ''
   });
 
