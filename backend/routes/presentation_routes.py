@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from motor.motor_asyncio import AsyncIOMotorClient
 from models import Presentation, PresentationFrequency
 from auth import get_current_user, require_role
