@@ -29,7 +29,8 @@ import {
   MessagesSquare,
   LayoutDashboard,
   ShieldAlert,
-  Globe
+  Globe,
+  Tag
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -114,6 +115,7 @@ const Sidebar = () => {
     { path: '/admin/system', icon: Settings, label: 'Painel Sistema' },
     { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
+    { path: '/admin/categories', icon: Tag, label: 'Categorias' },
     { path: '/admin/chat', icon: MessageCircle, label: 'Atendimento' },
     { path: '/admin/company-events', icon: Calendar, label: 'Eventos Empresa' },
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
@@ -140,6 +142,7 @@ const Sidebar = () => {
   const licenseeLinks = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
+    { path: '/presentations', icon: Target, label: 'Apresentações' },
     { path: '/timeline', icon: MessagesSquare, label: 'Comunidade' },
     { path: '/training', icon: Users, label: 'Treinamento' },
     { path: '/sales', icon: ShoppingCart, label: 'Minhas Vendas' },

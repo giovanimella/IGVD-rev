@@ -110,7 +110,8 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Erro ao buscar histórico de acessos:', error);
       setAccessHistory([]);
-
+    }
+  };
 
   const fetchTodayPresentations = async () => {
     try {
@@ -139,9 +140,6 @@ const Dashboard = () => {
       setTodayEvents(eventsToday);
     } catch (error) {
       console.error('Erro ao buscar eventos de hoje:', error);
-    }
-  };
-
     }
   };
 
