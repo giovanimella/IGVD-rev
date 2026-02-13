@@ -433,26 +433,28 @@ const Presentations = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Foto da Apresentação
-                </label>
-                <div className="border-2 border-dashed border-slate-300 dark:border-white/20 rounded-lg p-4 text-center hover:border-cyan-500 dark:hover:border-cyan-400 transition-colors cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setFormData({...formData, photo: e.target.files[0]})}
-                    className="hidden"
-                    id="photo-upload"
-                  />
-                  <label htmlFor="photo-upload" className="cursor-pointer">
-                    <ImageIcon className="w-12 h-12 text-slate-400 mx-auto mb-2" />
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                      {formData.photo ? formData.photo.name : 'Clique para selecionar uma foto'}
-                    </p>
+              {!editingPresentation && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Foto da Apresentação
                   </label>
+                  <div className="border-2 border-dashed border-slate-300 dark:border-white/20 rounded-lg p-4 text-center hover:border-cyan-500 dark:hover:border-cyan-400 transition-colors cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setFormData({...formData, photo: e.target.files[0]})}
+                      className="hidden"
+                      id="photo-upload"
+                    />
+                    <label htmlFor="photo-upload" className="cursor-pointer">
+                      <ImageIcon className="w-12 h-12 text-slate-400 mx-auto mb-2" />
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {formData.photo ? formData.photo.name : 'Clique para selecionar uma foto'}
+                      </p>
+                    </label>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-white/5 rounded-lg">
                 <input
