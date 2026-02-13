@@ -210,11 +210,13 @@
   - Aguardando credenciais do usuário (URL da instância e API Key)
 - [ ] Lembretes automáticos por email
 - [ ] Dashboard Avançado do Supervisor - melhorias de previsão de conclusão
+- [ ] Filtro de módulos por categoria de usuário (visibilidade controlada)
 
 ### P2 (Melhorias)
 - [ ] App mobile (React Native ou PWA)
 - [ ] Dashboard analytics mais detalhado
 - [ ] Sistema de chat entre usuários
+- [ ] Relatórios de apresentações para admin
 
 ---
 
