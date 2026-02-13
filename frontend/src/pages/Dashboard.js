@@ -36,6 +36,8 @@ const Dashboard = () => {
       fetchAccessHistory();
       fetchGamificationData();
       fetchUpcomingAppointments();
+      fetchTodayPresentations();
+      fetchTodayEvents();
     }
     if (user?.role === 'admin') {
       fetchAdminChartData();
