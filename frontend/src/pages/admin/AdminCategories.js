@@ -132,15 +132,27 @@ const AdminCategories = () => {
   const openUsersModal = async (category) => {
     setSelectedCategory(category);
     setUsersSearch('');
-    await fetchAllUsers();
-    
-    // Marcar usuários que já estão nesta categoria
-    const usersInCategory = allUsers.filter(u => 
-      u.category_ids?.includes(category.id) || u.category_id === category.id
-    );
-    setSelectedUserIds(usersInCategory.map(u => u.id));
-    
+    setSelectedUserIds([]);
     setShowUsersModal(true);
+    
+    // Buscar usuários DEPOIS de abrir o modal
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/api/categories/all-users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const users = response.data;
+      setAllUsers(users);
+      
+      // Marcar usuários que já estão nesta categoria
+      const usersInCategory = users.filter(u => 
+        u.category_ids?.includes(category.id) || u.category_id === category.id
+      );
+      setSelectedUserIds(usersInCategory.map(u => u.id));
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+      toast.error('Erro ao carregar usuários');
+    }
   };
 
   const toggleUserSelection = (userId) => {
