@@ -401,7 +401,7 @@ async def get_frequency_leaderboard(current_user: dict = Depends(get_current_use
                 "month": freq["month"]
             })
     
-    # Para usuários sem registro ainda no mês, adicionar com 100%
+    # Para usuários sem registro ainda no mês, adicionar com 0%
     all_licensees = await db.users.find(
         {"role": "licenciado"},
         {"_id": 0, "id": 1, "full_name": 1, "email": 1, "profile_picture": 1, "level_title": 1}
@@ -422,7 +422,7 @@ async def get_frequency_leaderboard(current_user: dict = Depends(get_current_use
                 "email": user["email"],
                 "profile_picture": user.get("profile_picture"),
                 "level_title": user.get("level_title", "Iniciante"),
-                "frequency_percentage": 100.0,
+                "frequency_percentage": 0.0,  # Sem apresentações = 0%
                 "total_presentations": 0,
                 "working_days": working_days,
                 "days_with_target": 0,
