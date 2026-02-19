@@ -524,6 +524,12 @@ const AdminModules = () => {
                       Ao Vivo
                     </span>
                   )}
+                  {module.category_ids && module.category_ids.length > 0 && (
+                    <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium flex items-center gap-1">
+                      <Tag className="w-3 h-3" />
+                      {module.category_ids.length} cat.
+                    </span>
+                  )}
                   {module.is_acolhimento && (
                     <span className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded text-xs font-medium">
                       Acolhimento
