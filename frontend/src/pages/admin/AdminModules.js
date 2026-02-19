@@ -103,6 +103,7 @@ const AdminModules = () => {
 
   const handleEditClick = (module) => {
     setEditingModule(module);
+    const categoryIds = module.category_ids || [];
     setFormData({
       title: module.title,
       description: module.description,
@@ -116,9 +117,22 @@ const AdminModules = () => {
       module_type: module.module_type || 'standard',
       live_stream_url: module.live_stream_url || '',
       live_stream_platform: module.live_stream_platform || 'youtube',
-      live_stream_scheduled: module.live_stream_scheduled || ''
+      live_stream_scheduled: module.live_stream_scheduled || '',
+      visibility_type: categoryIds.length > 0 ? 'categories' : 'all',
+      category_ids: categoryIds
     });
     setShowEditDialog(true);
+  };
+
+  const toggleModuleCategory = (categoryId) => {
+    setFormData(prev => {
+      const categoryIds = prev.category_ids || [];
+      if (categoryIds.includes(categoryId)) {
+        return { ...prev, category_ids: categoryIds.filter(id => id !== categoryId) };
+      } else {
+        return { ...prev, category_ids: [...categoryIds, categoryId] };
+      }
+    });
   };
 
   const handleUpdateModule = async () => {
