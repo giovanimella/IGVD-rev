@@ -42,6 +42,7 @@ const AdminModules = () => {
 
   useEffect(() => {
     fetchModules();
+    fetchCategories();
   }, []);
 
   const fetchModules = async () => {
@@ -53,6 +54,18 @@ const AdminModules = () => {
       toast.error('Erro ao carregar módulos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/api/categories/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
     }
   };
 
