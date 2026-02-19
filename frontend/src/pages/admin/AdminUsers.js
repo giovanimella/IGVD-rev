@@ -773,8 +773,10 @@ const AdminUsers = () => {
                   )}
                 </div>
               </div>
+            </form>
 
-              <div className="flex space-x-3 pt-4">
+            <div className="p-6 border-t border-slate-200 dark:border-white/10 flex-shrink-0">
+              <div className="flex space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
@@ -784,12 +786,13 @@ const AdminUsers = () => {
                 </button>
                 <button
                   type="submit"
+                  onClick={handleSubmit}
                   className="flex-1 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors"
                 >
                   {editingUser ? 'Salvar Alterações' : 'Criar Usuário'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
