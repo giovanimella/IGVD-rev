@@ -111,7 +111,7 @@ const Sidebar = () => {
   };
 
   const adminLinks = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/dashboard', icon: Home, label: 'Início' },
     { path: '/admin/system', icon: Settings, label: 'Painel Sistema' },
     { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
@@ -128,7 +128,7 @@ const Sidebar = () => {
   ];
 
   const supervisorLinks = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/dashboard', icon: Home, label: 'Início' },
     { path: '/supervisor/advanced', icon: LayoutDashboard, label: 'Painel Avançado' },
     { path: '/supervisor/licensees', icon: Users, label: 'Licenciados' },
     { path: '/supervisor/analytics', icon: BarChart3, label: 'Analytics' },
@@ -140,7 +140,7 @@ const Sidebar = () => {
   ];
 
   const licenseeLinks = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/dashboard', icon: Home, label: 'Início' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
     { path: '/presentations', icon: Target, label: 'Apresentações' },
     { path: '/timeline', icon: MessagesSquare, label: 'Comunidade' },
