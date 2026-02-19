@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { BookOpen, Plus, Edit, Trash2, GraduationCap, Award, ClipboardCheck, Clock, Video, RefreshCcw, Image, Upload, X } from 'lucide-react';
+import { BookOpen, Plus, Edit, Trash2, GraduationCap, Award, ClipboardCheck, Clock, Video, RefreshCcw, Image, Upload, X, Tag, Users } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 const AdminModules = () => {
   const navigate = useNavigate();
   const [modules, setModules] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -32,7 +33,9 @@ const AdminModules = () => {
     module_type: 'standard',
     live_stream_url: '',
     live_stream_platform: 'youtube',
-    live_stream_scheduled: ''
+    live_stream_scheduled: '',
+    visibility_type: 'all', // 'all' ou 'categories'
+    category_ids: []
   });
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
