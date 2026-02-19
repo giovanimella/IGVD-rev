@@ -21,7 +21,9 @@ from routes import live_class_routes, timeline_routes, terms_routes, whatsapp_ro
 
 app = FastAPI(title="UniOzoxx LMS API")
 
-UPLOAD_DIR = Path("/app/uploads")
+# Diretório de uploads - usar variável de ambiente para produção
+BASE_UPLOAD_DIR = os.environ.get('UPLOAD_DIR', '/app/uploads')
+UPLOAD_DIR = Path(BASE_UPLOAD_DIR)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 if UPLOAD_DIR.exists():
