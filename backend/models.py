@@ -714,3 +714,46 @@ class PresentationFrequency(BaseModel):
     days_with_presentations: int = 0  # Dias que teve pelo menos 2 apresentações
     frequency_percentage: float = 100.0  # Começa com 100%
     calculated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+# ==================== CAMPANHAS DE RANKING ====================
+
+class Campaign(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str  # Nome da campanha
+    description: str  # Descrição detalhada
+    period_type: str  # 'weekly', 'monthly', 'quarterly', 'semiannual', 'annual'
+    metric_type: str  # 'frequency', 'average_score', 'points'
+    target_value: float  # Valor alvo (ex: 80% frequência, 90 pontos média, 1000 pontos)
+    reward_description: str  # Descrição da recompensa
+    start_date: str  # Data de início
+    end_date: str  # Data de término
+    is_active: bool = True
+    icon: str = "🏆"  # Emoji do ícone
+    color: str = "#f59e0b"  # Cor da campanha
+    created_by: str
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+class CampaignCreate(BaseModel):
+    name: str
+    description: str
+    period_type: str  # 'weekly', 'monthly', 'quarterly', 'semiannual', 'annual'
+    metric_type: str  # 'frequency', 'average_score', 'points'
+    target_value: float
+    reward_description: str
+    start_date: str
+    end_date: str
+    is_active: bool = True
+    icon: str = "🏆"
+    color: str = "#f59e0b"
+
+class CampaignProgress(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    campaign_id: str
+    current_value: float = 0  # Valor atual do usuário na métrica
+    target_value: float  # Valor alvo da campanha
+    achieved: bool = False  # Se atingiu a meta
+    achieved_at: Optional[str] = None
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
