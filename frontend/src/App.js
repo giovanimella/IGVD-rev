@@ -57,6 +57,7 @@ import Sales from './pages/Sales';
 import OzoxxCast from './pages/OzoxxCast';
 import AdminOzoxxCast from './pages/admin/AdminOzoxxCast';
 import AdminSales from './pages/admin/AdminSales';
+import AdminCampaigns from './pages/admin/AdminCampaigns';
 import AdminCompanyEvents from './pages/admin/AdminCompanyEvents';
 import Timeline from './pages/Timeline';
 import TermsAcceptanceModal from './components/TermsAcceptanceModal';
