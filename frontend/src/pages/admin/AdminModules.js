@@ -83,7 +83,9 @@ const AdminModules = () => {
       module_type: 'standard',
       live_stream_url: '',
       live_stream_platform: 'youtube',
-      live_stream_scheduled: ''
+      live_stream_scheduled: '',
+      visibility_type: 'all',
+      category_ids: []
     });
   };
 
