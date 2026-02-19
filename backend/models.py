@@ -116,6 +116,7 @@ class ModuleCreate(BaseModel):
     live_stream_platform: Optional[str] = None
     live_stream_scheduled: Optional[str] = None
     cover_image: Optional[str] = None  # URL da imagem de capa do módulo
+    category_ids: List[str] = []  # Categorias que podem acessar (vazio = todos)
 
 class Chapter(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
