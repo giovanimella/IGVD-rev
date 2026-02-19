@@ -531,8 +531,8 @@ const AdminUsers = () => {
 
       {/* Modal de Criar/Editar Usuário */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-[#1b4c51] rounded-xl max-w-2xl w-full p-6 my-8">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#1b4c51] rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
