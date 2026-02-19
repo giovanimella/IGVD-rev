@@ -533,7 +533,7 @@ const AdminUsers = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-[#1b4c51] rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-white/10 flex-shrink-0">
               <h2 className="text-xl font-outfit font-bold text-slate-900 dark:text-white">
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
               </h2>
@@ -545,7 +545,7 @@ const AdminUsers = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Informações Básicas */}
               <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-lg">
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
