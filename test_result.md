@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implementar menu dropdown na foto do perfil com opções de perfil e logout + Corrigir sistema de alteração de etapas do onboarding para usar as etapas corretas (registro, documentos_pf, acolhimento, treinamento_presencial, vendas_campo, documentos_pj, completo)"
+user_problem_statement: "Implementar sistema de categorias de usuários + Permitir editar todos os dados do usuário + Múltiplas categorias por usuário + Interface para atribuir usuários em massa a categorias"
 
 frontend:
   - task: "User Profile Dropdown Menu"
