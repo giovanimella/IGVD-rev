@@ -114,7 +114,7 @@ async def assign_category_to_user(
     category_id: str,
     current_user: dict = Depends(require_role(["admin"]))
 ):
-    """Atribuir categoria a um usuário"""
+    """Atribuir categoria a um usuário (adiciona à lista de categorias)"""
     # Verificar se categoria existe
     category = await db.user_categories.find_one({"id": category_id})
     if not category:
@@ -125,24 +125,110 @@ async def assign_category_to_user(
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    # Atribuir categoria
+    # Adicionar categoria ao array (usando $addToSet para evitar duplicatas)
     await db.users.update_one(
         {"id": user_id},
-        {"$set": {"category_id": category_id}}
+        {
+            "$addToSet": {"category_ids": category_id},
+            "$set": {"category_id": category_id}  # manter compatibilidade
+        }
     )
     
     return {"message": "Categoria atribuída ao usuário"}
 
+@router.post("/assign-bulk")
+async def assign_category_to_multiple_users(
+    data: dict,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Atribuir uma categoria a múltiplos usuários de uma vez"""
+    category_id = data.get("category_id")
+    user_ids = data.get("user_ids", [])
+    
+    if not category_id:
+        raise HTTPException(status_code=400, detail="category_id é obrigatório")
+    
+    if not user_ids:
+        raise HTTPException(status_code=400, detail="user_ids é obrigatório")
+    
+    # Verificar se categoria existe
+    category = await db.user_categories.find_one({"id": category_id})
+    if not category:
+        raise HTTPException(status_code=404, detail="Categoria não encontrada")
+    
+    # Atualizar todos os usuários de uma vez
+    result = await db.users.update_many(
+        {"id": {"$in": user_ids}},
+        {
+            "$addToSet": {"category_ids": category_id},
+            "$set": {"category_id": category_id}
+        }
+    )
+    
+    return {
+        "message": f"Categoria atribuída a {result.modified_count} usuários",
+        "updated_count": result.modified_count
+    }
+
+@router.post("/remove-bulk")
+async def remove_category_from_multiple_users(
+    data: dict,
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Remover uma categoria de múltiplos usuários de uma vez"""
+    category_id = data.get("category_id")
+    user_ids = data.get("user_ids", [])
+    
+    if not category_id:
+        raise HTTPException(status_code=400, detail="category_id é obrigatório")
+    
+    if not user_ids:
+        raise HTTPException(status_code=400, detail="user_ids é obrigatório")
+    
+    # Remover categoria do array
+    result = await db.users.update_many(
+        {"id": {"$in": user_ids}},
+        {"$pull": {"category_ids": category_id}}
+    )
+    
+    # Para usuários que tinham essa como category_id principal, limpar
+    await db.users.update_many(
+        {"id": {"$in": user_ids}, "category_id": category_id},
+        {"$unset": {"category_id": ""}}
+    )
+    
+    return {
+        "message": f"Categoria removida de {result.modified_count} usuários",
+        "updated_count": result.modified_count
+    }
+
 @router.post("/remove")
 async def remove_category_from_user(
     user_id: str,
+    category_id: str = None,
     current_user: dict = Depends(require_role(["admin"]))
 ):
     """Remover categoria de um usuário"""
-    await db.users.update_one(
-        {"id": user_id},
-        {"$unset": {"category_id": ""}}
-    )
+    if category_id:
+        # Remover categoria específica do array
+        await db.users.update_one(
+            {"id": user_id},
+            {"$pull": {"category_ids": category_id}}
+        )
+        # Se era a categoria principal, limpar
+        await db.users.update_one(
+            {"id": user_id, "category_id": category_id},
+            {"$unset": {"category_id": ""}}
+        )
+    else:
+        # Remover todas as categorias
+        await db.users.update_one(
+            {"id": user_id},
+            {
+                "$set": {"category_ids": []},
+                "$unset": {"category_id": ""}
+            }
+        )
     
     return {"message": "Categoria removida do usuário"}
 
@@ -152,10 +238,34 @@ async def get_users_by_category(
     current_user: dict = Depends(require_role(["admin", "supervisor"]))
 ):
     """Listar usuários de uma categoria"""
+    # Buscar por category_ids (array) ou category_id (compatibilidade)
     users = await db.users.find(
-        {"category_id": category_id},
-        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "role": 1}
+        {"$or": [
+            {"category_ids": category_id},
+            {"category_id": category_id}
+        ]},
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "role": 1, "category_ids": 1}
     ).to_list(1000)
+    
+    return users
+
+@router.get("/all-users")
+async def get_all_users_for_categories(
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Listar todos os usuários com suas categorias (para gerenciamento)"""
+    users = await db.users.find(
+        {},
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "role": 1, "category_ids": 1, "category_id": 1}
+    ).sort("full_name", 1).to_list(1000)
+    
+    # Normalizar category_ids para todos os usuários
+    for user in users:
+        if "category_ids" not in user:
+            user["category_ids"] = []
+        # Se tem category_id mas não está em category_ids, adicionar
+        if user.get("category_id") and user["category_id"] not in user["category_ids"]:
+            user["category_ids"].append(user["category_id"])
     
     return users
 
@@ -165,14 +275,23 @@ async def get_category_stats(
     current_user: dict = Depends(require_role(["admin"]))
 ):
     """Estatísticas de uma categoria"""
-    total_users = await db.users.count_documents({"category_id": category_id})
+    # Buscar por category_ids (array) ou category_id (compatibilidade)
+    total_users = await db.users.count_documents({
+        "$or": [
+            {"category_ids": category_id},
+            {"category_id": category_id}
+        ]
+    })
     
     # Usuários ativos (acessaram nos últimos 30 dias)
     from datetime import datetime, timedelta
     thirty_days_ago = (datetime.now() - timedelta(days=30)).isoformat()
     
     active_users = await db.users.count_documents({
-        "category_id": category_id,
+        "$or": [
+            {"category_ids": category_id},
+            {"category_id": category_id}
+        ],
         "last_login": {"$gte": thirty_days_ago}
     })
     
