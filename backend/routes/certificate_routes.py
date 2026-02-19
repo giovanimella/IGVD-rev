@@ -48,11 +48,19 @@ async def upload_certificate_template(
     if not file.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Apenas arquivos PDF são aceitos")
     
+    # Obter o diretório de uploads dinamicamente (em tempo de execução)
+    base_upload_dir = os.environ.get('UPLOAD_DIR', '/app/uploads')
+    templates_dir = Path(base_upload_dir) / "certificate_templates"
+    templates_dir.mkdir(parents=True, exist_ok=True)
+    
     # Salvar o template
-    template_path = TEMPLATES_DIR / "certificate_template.pdf"
+    template_path = templates_dir / "certificate_template.pdf"
     
     with open(template_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+    
+    print(f"[Certificate] Template saved to: {template_path}")
+    print(f"[Certificate] File exists: {template_path.exists()}")
     
     # Atualizar configuração do sistema
     await db.system_config.update_one(
