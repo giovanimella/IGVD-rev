@@ -43,7 +43,8 @@ class User(BaseModel):
     terms_accepted: bool = False  # Se aceitou os termos
     terms_accepted_at: Optional[str] = None  # Data/hora de aceite
     last_access_at: Optional[str] = None  # Último acesso à plataforma
-    category_id: Optional[str] = None  # Categoria do usuário
+    category_id: Optional[str] = None  # Categoria do usuário (deprecated - usar category_ids)
+    category_ids: List[str] = []  # Categorias do usuário (múltiplas)
 
 class UserResponse(BaseModel):
     id: str
