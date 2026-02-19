@@ -116,6 +116,7 @@ const Sidebar = () => {
     { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
     { path: '/admin/categories', icon: Tag, label: 'Categorias' },
+    { path: '/admin/campaigns', icon: Trophy, label: 'Campanhas' },
     { path: '/admin/chat', icon: MessageCircle, label: 'Atendimento' },
     { path: '/admin/company-events', icon: Calendar, label: 'Eventos Empresa' },
     { path: '/admin/rewards', icon: Award, label: 'Recompensas' },
