@@ -53,6 +53,24 @@ async def get_full_system_config(current_user: dict = Depends(require_role(["adm
         await db.system_config.insert_one(default_config.model_dump())
         config = default_config.model_dump()
     
+    # Verificar se o template de certificado existe
+    # Ajustar o caminho se necessário (para compatibilidade entre ambientes)
+    if config.get("certificate_template_path"):
+        template_path = config["certificate_template_path"]
+        
+        # Se o caminho salvo não existe, tentar com o UPLOAD_DIR configurado
+        if not Path(template_path).exists():
+            base_upload_dir = os.environ.get('UPLOAD_DIR', '/app/uploads')
+            # Extrair apenas o nome do arquivo/subpastas
+            if '/uploads/' in template_path:
+                relative_path = template_path.split('/uploads/')[-1]
+                new_path = os.path.join(base_upload_dir, relative_path)
+                if Path(new_path).exists():
+                    config["certificate_template_path"] = new_path
+                else:
+                    # Arquivo não existe em nenhum caminho
+                    config["certificate_template_path"] = None
+    
     return config
 
 @router.put("/config")
