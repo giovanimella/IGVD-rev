@@ -16,8 +16,9 @@ db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/system", tags=["system"])
 
-# Diretório para logos
-LOGO_DIR = Path("/app/uploads/logos")
+# Diretório para logos - usar variável de ambiente
+BASE_UPLOAD_DIR = os.environ.get('UPLOAD_DIR', '/app/uploads')
+LOGO_DIR = Path(BASE_UPLOAD_DIR) / "logos"
 LOGO_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_LOGO_SIZE = 10 * 1024 * 1024  # 10MB
