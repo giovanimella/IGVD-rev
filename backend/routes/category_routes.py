@@ -43,6 +43,26 @@ async def list_categories(
     
     return categories
 
+@router.get("/all-users")
+async def get_all_users_for_categories(
+    current_user: dict = Depends(require_role(["admin"]))
+):
+    """Listar todos os usuários com suas categorias (para gerenciamento)"""
+    users = await db.users.find(
+        {},
+        {"_id": 0, "id": 1, "full_name": 1, "email": 1, "role": 1, "category_ids": 1, "category_id": 1}
+    ).sort("full_name", 1).to_list(1000)
+    
+    # Normalizar category_ids para todos os usuários
+    for user in users:
+        if "category_ids" not in user:
+            user["category_ids"] = []
+        # Se tem category_id mas não está em category_ids, adicionar
+        if user.get("category_id") and user["category_id"] not in user["category_ids"]:
+            user["category_ids"].append(user["category_id"])
+    
+    return users
+
 @router.get("/{category_id}")
 async def get_category(
     category_id: str,
