@@ -161,21 +161,27 @@ def generate_certificate_pdf(
     print(f"[Certificate] Template: {template_path}")
     
     # Detectar o caminho do poppler automaticamente
-    poppler_path = None
-    possible_paths = ['/usr/bin', '/usr/local/bin', '/opt/homebrew/bin']
-    for path in possible_paths:
-        if os.path.exists(os.path.join(path, 'pdfinfo')):
-            poppler_path = path
-            print(f"[Certificate] Found poppler at: {poppler_path}")
-            break
+    # Pode ser especificado via variável de ambiente POPPLER_PATH
+    poppler_path = os.environ.get('POPPLER_PATH')
+    
+    if not poppler_path:
+        possible_paths = ['/usr/bin', '/usr/local/bin', '/opt/homebrew/bin']
+        for path in possible_paths:
+            if os.path.exists(os.path.join(path, 'pdfinfo')):
+                poppler_path = path
+                break
+    
+    if poppler_path:
+        print(f"[Certificate] Using poppler at: {poppler_path}")
+    else:
+        print(f"[Certificate] Poppler path not found, using system default")
     
     # Converter o template PDF para imagem (alta resolução)
     try:
         images = convert_from_path(template_path, dpi=150, poppler_path=poppler_path)
     except Exception as e:
         print(f"[Certificate] Error converting PDF: {e}")
-        # Tentar sem especificar o path
-        images = convert_from_path(template_path, dpi=150)
+        raise Exception(f"Erro ao converter template PDF: {str(e)}. Verifique se o poppler-utils está instalado.")
     
     if not images:
         raise Exception("Não foi possível converter o template")
