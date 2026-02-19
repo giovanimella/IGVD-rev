@@ -386,6 +386,84 @@ const AdminModules = () => {
                     onCheckedChange={(checked) => setFormData({...formData, allow_rewatch: checked})}
                   />
                 </div>
+                {/* Visibilidade por Categoria */}
+                <div className="space-y-3 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-orange-600" />
+                    <Label className="font-semibold text-orange-700">Visibilidade do Módulo</Label>
+                  </div>
+                  <p className="text-sm text-orange-600 mb-3">
+                    Defina quem pode ver este módulo
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({...formData, visibility_type: 'all', category_ids: []})}
+                      className={`flex-1 p-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                        formData.visibility_type === 'all'
+                          ? 'border-orange-500 bg-orange-100 text-orange-700'
+                          : 'border-orange-200 hover:border-orange-300 text-orange-600'
+                      }`}
+                    >
+                      <Users className="w-5 h-5 mx-auto mb-1" />
+                      Todos os Usuários
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({...formData, visibility_type: 'categories'})}
+                      className={`flex-1 p-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                        formData.visibility_type === 'categories'
+                          ? 'border-orange-500 bg-orange-100 text-orange-700'
+                          : 'border-orange-200 hover:border-orange-300 text-orange-600'
+                      }`}
+                    >
+                      <Tag className="w-5 h-5 mx-auto mb-1" />
+                      Categorias Específicas
+                    </button>
+                  </div>
+                  {formData.visibility_type === 'categories' && (
+                    <div className="mt-3 space-y-2">
+                      {categories.length === 0 ? (
+                        <p className="text-sm text-orange-600 italic">Nenhuma categoria cadastrada</p>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          {categories.map((category) => {
+                            const isSelected = formData.category_ids?.includes(category.id);
+                            return (
+                              <button
+                                key={category.id}
+                                type="button"
+                                onClick={() => toggleModuleCategory(category.id)}
+                                className={`p-2 rounded-lg border-2 text-left transition-all text-sm ${
+                                  isSelected
+                                    ? 'border-orange-500 bg-white'
+                                    : 'border-orange-200 hover:border-orange-300 bg-white/50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span 
+                                    className="w-6 h-6 rounded flex items-center justify-center text-sm"
+                                    style={{ backgroundColor: `${category.color}20`, color: category.color }}
+                                  >
+                                    {category.icon}
+                                  </span>
+                                  <span className={isSelected ? 'text-orange-700 font-medium' : 'text-slate-600'}>
+                                    {category.name}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {formData.category_ids?.length > 0 && (
+                        <p className="text-xs text-orange-600 mt-2">
+                          {formData.category_ids.length} categoria(s) selecionada(s)
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <Button onClick={handleCreateModule} className="w-full" data-testid="submit-module-button">
                   Criar Módulo
                 </Button>
