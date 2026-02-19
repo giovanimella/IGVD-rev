@@ -154,6 +154,18 @@ const Dashboard = () => {
     }
   };
 
+  const fetchActiveCampaigns = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/api/campaigns/active`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActiveCampaigns(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar campanhas ativas:', error);
+    }
+  };
+
   const getCategoryInfo = (categoryKey) => {
     const categories = {
       visita_cliente: { label: 'Visita a Cliente', icon: Users, color: 'bg-blue-500' },
