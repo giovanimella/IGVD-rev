@@ -492,7 +492,7 @@ const Dashboard = () => {
           )}
 
           <div>
-            <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">Meu Dashboard</h1>
+            <h1 className="text-2xl lg:text-3xl font-outfit font-bold text-slate-900 dark:text-white">Início</h1>
             <p className="text-slate-600 dark:text-slate-400 mt-1 lg:mt-2 text-sm lg:text-base">Acompanhe seu progresso e conquistas</p>
           </div>
 
