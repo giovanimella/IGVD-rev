@@ -648,6 +648,89 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* Campanhas Ativas */}
+          {activeCampaigns.length > 0 && (
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-200 dark:border-amber-800/50 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Campanhas Ativas</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Metas e recompensas em andamento</p>
+                  </div>
+                </div>
+                <Link 
+                  to="/leaderboard" 
+                  className="text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium"
+                >
+                  Ver Rankings →
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activeCampaigns.slice(0, 6).map((campaign) => {
+                  const progress = campaign.user_progress || { current_value: 0, target_value: campaign.target_value, progress_percentage: 0, achieved: false };
+                  const MetricIcon = campaign.metric_type === 'frequency' ? Percent : campaign.metric_type === 'average_score' ? Star : Award;
+                  
+                  return (
+                    <div 
+                      key={campaign.id} 
+                      className={`bg-white dark:bg-[#1b4c51] rounded-lg p-4 border-2 transition-colors ${
+                        progress.achieved 
+                          ? 'border-green-500 dark:border-green-400' 
+                          : 'border-slate-200 dark:border-white/10'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{campaign.icon}</span>
+                          <div>
+                            <p className="font-medium text-slate-900 dark:text-white text-sm">{campaign.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                              <MetricIcon className="w-3 h-3" />
+                              {campaign.metric_type === 'frequency' ? 'Frequência' : campaign.metric_type === 'average_score' ? 'Média' : 'Pontos'}
+                            </p>
+                          </div>
+                        </div>
+                        {progress.achieved && (
+                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      
+                      {/* Barra de progresso */}
+                      <div className="mb-2">
+                        <div className="h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all ${progress.achieved ? 'bg-green-500' : 'bg-amber-500'}`}
+                            style={{ width: `${Math.min(progress.progress_percentage, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">
+                          {progress.current_value.toFixed(1)}{campaign.metric_type !== 'points' ? '%' : ''} / {campaign.target_value}{campaign.metric_type !== 'points' ? '%' : ''}
+                        </span>
+                        <span className={`font-medium ${progress.achieved ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                          {progress.progress_percentage.toFixed(0)}%
+                        </span>
+                      </div>
+                      
+                      {campaign.reward_description && (
+                        <div className="mt-2 pt-2 border-t border-slate-100 dark:border-white/10">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            🎁 {campaign.reward_description}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Novidades e Comunicados */}
           <PostsList />
 
