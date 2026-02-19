@@ -12,7 +12,9 @@ db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/upload", tags=["upload"])
 
-UPLOAD_DIR = Path("/app/uploads")
+# Usar variável de ambiente para diretório de uploads
+BASE_UPLOAD_DIR = os.environ.get('UPLOAD_DIR', '/app/uploads')
+UPLOAD_DIR = Path(BASE_UPLOAD_DIR)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 VIDEO_DIR = UPLOAD_DIR / "videos"
