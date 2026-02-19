@@ -25,8 +25,9 @@ db = client[os.environ['DB_NAME']]
 
 router = APIRouter(prefix="/certificates", tags=["certificates"])
 
-# Diretórios
-UPLOAD_DIR = Path("/app/uploads")
+# Diretórios - usar variável de ambiente ou padrão
+BASE_UPLOAD_DIR = os.environ.get('UPLOAD_DIR', '/app/uploads')
+UPLOAD_DIR = Path(BASE_UPLOAD_DIR)
 CERTIFICATES_DIR = UPLOAD_DIR / "certificates"
 TEMPLATES_DIR = UPLOAD_DIR / "certificate_templates"
 GENERATED_DIR = CERTIFICATES_DIR / "generated"
