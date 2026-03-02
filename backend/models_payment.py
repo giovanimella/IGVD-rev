@@ -66,6 +66,9 @@ class PaymentSettings(BaseModel):
     # Webhook secret para validação
     webhook_secret: Optional[str] = None
     
+    # Taxa de inscrição do treinamento presencial
+    enrollment_fee: float = 150.0
+    
     # Configurações de métodos de pagamento
     pix_enabled: bool = True
     credit_card_enabled: bool = True
@@ -283,3 +286,59 @@ class CreatePaymentLinkRequest(BaseModel):
     amount: float = Field(..., gt=0)
     max_uses: Optional[int] = None
     expires_in_days: Optional[int] = None
+
+
+# ==================== MODELO DE VENDA (5 vendas em campo) ====================
+
+class DeviceSource(str, Enum):
+    LEADER_STOCK = "leader_stock"
+    SUPERVISOR_STOCK = "supervisor_stock"
+    DIRECT_PURCHASE = "direct_purchase"
+
+
+class SaleStatus(str, Enum):
+    PENDING = "pending"  # Aguardando pagamento
+    PAID = "paid"  # Pago
+    CANCELLED = "cancelled"  # Cancelado
+
+
+class Sale(BaseModel):
+    """Modelo de venda em campo para o licenciado"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str  # ID do licenciado que fez a venda
+    sale_number: int = Field(..., ge=1, le=5)  # Número da venda (1-5)
+    
+    # Dados do cliente
+    customer_name: str
+    customer_phone: str
+    customer_email: str
+    customer_cpf: str
+    
+    # Dados do aparelho
+    device_serial: str
+    device_source: DeviceSource = DeviceSource.LEADER_STOCK
+    
+    # Dados da venda
+    sale_value: float = Field(..., gt=0)
+    status: SaleStatus = SaleStatus.PENDING
+    
+    # Link de pagamento PagSeguro
+    checkout_id: Optional[str] = None
+    checkout_url: Optional[str] = None
+    
+    # Timestamps
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+    paid_at: Optional[str] = None
+
+
+class RegisterSaleRequest(BaseModel):
+    """Requisição para registrar uma venda"""
+    sale_number: int = Field(..., ge=1, le=5)
+    customer_name: str
+    customer_phone: str
+    customer_email: str
+    customer_cpf: str
+    device_serial: str
+    device_source: str = "leader_stock"
+    sale_value: float = Field(..., gt=0)

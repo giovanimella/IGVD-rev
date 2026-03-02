@@ -114,6 +114,124 @@ async def get_public_key(current_user: dict = Depends(get_current_user)):
     }
 
 
+# ==================== PAGAMENTO DA TAXA DE INSCRIÇÃO (TREINAMENTO PRESENCIAL) ====================
+
+@router.post("/create-payment")
+async def create_enrollment_payment(current_user: dict = Depends(get_current_user)):
+    """Cria um pagamento para a taxa de inscrição do treinamento presencial"""
+    import uuid
+    
+    # Obter configurações
+    settings = await payment_gateway.get_settings()
+    
+    if not settings:
+        raise HTTPException(status_code=404, detail="Configurações não encontradas")
+    
+    # Obter dados do usuário
+    user = await payment_gateway.db.users.find_one({"id": current_user["sub"]}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    # Valor da taxa de inscrição
+    enrollment_fee = getattr(settings, 'enrollment_fee', 150.0)
+    
+    # Criar referência única
+    reference_id = str(uuid.uuid4())
+    
+    try:
+        # Obter serviço do gateway
+        gateway_service = await payment_gateway.get_gateway_service()
+        
+        # Criar checkout PagSeguro
+        checkout_result = await gateway_service.create_checkout(
+            amount=enrollment_fee,
+            description="Taxa de Inscrição - Treinamento Presencial IGVD",
+            reference_id=reference_id,
+            customer_name=user.get("full_name", ""),
+            customer_email=user.get("email", ""),
+            customer_cpf=user.get("cpf", "")
+        )
+        
+        if checkout_result.get("success"):
+            # Salvar transação pendente
+            transaction = {
+                "id": reference_id,
+                "user_id": current_user["sub"],
+                "purpose": "training_fee",
+                "amount": enrollment_fee,
+                "status": "pending",
+                "gateway": "pagseguro",
+                "checkout_id": checkout_result.get("checkout_id"),
+                "checkout_url": checkout_result.get("checkout_url"),
+                "created_at": datetime.now().isoformat()
+            }
+            await payment_gateway.db.transactions.insert_one(transaction)
+            
+            return {
+                "success": True,
+                "reference_id": reference_id,
+                "amount": enrollment_fee,
+                "checkout_url": checkout_result.get("checkout_url"),
+                "message": "Checkout criado com sucesso"
+            }
+        else:
+            # Retornar erro mas com informações para retry
+            return {
+                "success": False,
+                "reference_id": reference_id,
+                "amount": enrollment_fee,
+                "checkout_url": None,
+                "message": checkout_result.get("message", "Erro ao criar checkout")
+            }
+            
+    except Exception as e:
+        logger.error(f"Erro ao criar pagamento de inscrição: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro ao criar pagamento: {str(e)}")
+
+
+@router.post("/simulate-payment/{reference_id}")
+async def simulate_enrollment_payment(
+    reference_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Simula o pagamento da taxa de inscrição (para testes)"""
+    # Buscar transação
+    transaction = await payment_gateway.db.transactions.find_one(
+        {"id": reference_id, "user_id": current_user["sub"]},
+        {"_id": 0}
+    )
+    
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transação não encontrada")
+    
+    if transaction.get("status") == "paid":
+        raise HTTPException(status_code=400, detail="Pagamento já foi realizado")
+    
+    # Marcar como pago
+    await payment_gateway.db.transactions.update_one(
+        {"id": reference_id},
+        {"$set": {
+            "status": "paid",
+            "paid_at": datetime.now().isoformat()
+        }}
+    )
+    
+    # Avançar usuário para próxima etapa (vendas em campo)
+    await payment_gateway.db.users.update_one(
+        {"id": current_user["sub"]},
+        {"$set": {
+            "current_stage": "vendas_campo",
+            "training_fee_paid": True,
+            "updated_at": datetime.now().isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "Pagamento simulado com sucesso! Você avançou para a etapa de vendas em campo."
+    }
+
+
 # ==================== PROCESSAMENTO DE PAGAMENTOS ====================
 
 @router.post("/pix", response_model=TransactionResponse)

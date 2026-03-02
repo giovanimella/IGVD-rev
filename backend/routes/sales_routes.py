@@ -1,5 +1,5 @@
 """
-Rotas para gerenciamento de links de pagamento (5 vendas)
+Rotas para gerenciamento das 5 vendas em campo
 """
 from fastapi import APIRouter, HTTPException, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,7 +9,11 @@ import os
 import uuid
 
 from auth import get_current_user
-from models_payment import PaymentLink, CreatePaymentLinkRequest, PaymentGateway
+from models_payment import (
+    PaymentLink, CreatePaymentLinkRequest, PaymentGateway,
+    Sale, SaleStatus, DeviceSource, RegisterSaleRequest
+)
+from services.payment_gateway import PaymentGatewayService
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 
@@ -17,6 +21,243 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+payment_gateway = PaymentGatewayService()
+
+
+# ==================== ROTAS DAS 5 VENDAS EM CAMPO ====================
+
+@router.get("/my-sales")
+async def get_my_sales(current_user: dict = Depends(get_current_user)):
+    """Obtém todas as vendas do usuário logado"""
+    sales = await db.sales.find(
+        {"user_id": current_user["sub"]},
+        {"_id": 0}
+    ).sort("sale_number", 1).to_list(10)
+    
+    # Calcular estatísticas
+    total_sales = len(sales)
+    completed_sales = len([s for s in sales if s.get("status") == "paid"])
+    pending_sales = len([s for s in sales if s.get("status") == "pending"])
+    
+    return {
+        "sales": sales,
+        "total_sales": total_sales,
+        "completed_sales": completed_sales,
+        "pending_sales": pending_sales,
+        "remaining_sales": 5 - completed_sales
+    }
+
+
+@router.post("/register")
+async def register_sale(
+    request: RegisterSaleRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Registra uma nova venda e gera link de pagamento"""
+    # Verificar se já existe venda com este número para o usuário
+    existing = await db.sales.find_one({
+        "user_id": current_user["sub"],
+        "sale_number": request.sale_number
+    })
+    
+    if existing:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Já existe uma venda registrada com o número {request.sale_number}"
+        )
+    
+    # Verificar se já completou as 5 vendas
+    sales_count = await db.sales.count_documents({"user_id": current_user["sub"]})
+    if sales_count >= 5:
+        raise HTTPException(status_code=400, detail="Você já registrou as 5 vendas")
+    
+    # Criar venda
+    sale = Sale(
+        user_id=current_user["sub"],
+        sale_number=request.sale_number,
+        customer_name=request.customer_name,
+        customer_phone=request.customer_phone,
+        customer_email=request.customer_email,
+        customer_cpf=request.customer_cpf,
+        device_serial=request.device_serial,
+        device_source=DeviceSource(request.device_source),
+        sale_value=request.sale_value,
+        status=SaleStatus.PENDING
+    )
+    
+    # Gerar link de pagamento via PagSeguro
+    try:
+        gateway_service = await payment_gateway.get_gateway_service()
+        
+        # Criar checkout
+        checkout_result = await gateway_service.create_checkout(
+            amount=request.sale_value,
+            description=f"Venda {request.sale_number} - {request.customer_name}",
+            reference_id=sale.id,
+            customer_name=request.customer_name,
+            customer_email=request.customer_email,
+            customer_cpf=request.customer_cpf
+        )
+        
+        if checkout_result.get("success"):
+            sale.checkout_id = checkout_result.get("checkout_id")
+            sale.checkout_url = checkout_result.get("checkout_url")
+        else:
+            # Mesmo se falhar o checkout, salva a venda
+            print(f"Erro ao criar checkout: {checkout_result.get('message')}")
+    except Exception as e:
+        print(f"Erro ao criar checkout PagSeguro: {e}")
+    
+    # Salvar venda
+    await db.sales.insert_one(sale.model_dump())
+    
+    return {
+        "message": "Venda registrada com sucesso",
+        "sale": sale.model_dump(),
+        "checkout_url": sale.checkout_url
+    }
+
+
+@router.get("/{sale_id}")
+async def get_sale(sale_id: str, current_user: dict = Depends(get_current_user)):
+    """Obtém uma venda específica"""
+    sale = await db.sales.find_one({"id": sale_id}, {"_id": 0})
+    
+    if not sale:
+        raise HTTPException(status_code=404, detail="Venda não encontrada")
+    
+    # Verificar permissão
+    if sale["user_id"] != current_user["sub"] and current_user.get("role") not in ["admin", "supervisor"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    return sale
+
+
+@router.put("/{sale_id}")
+async def update_sale(
+    sale_id: str,
+    request: RegisterSaleRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Atualiza uma venda existente"""
+    sale = await db.sales.find_one({"id": sale_id}, {"_id": 0})
+    
+    if not sale:
+        raise HTTPException(status_code=404, detail="Venda não encontrada")
+    
+    # Verificar permissão
+    if sale["user_id"] != current_user["sub"] and current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Não permitir editar venda já paga
+    if sale.get("status") == "paid":
+        raise HTTPException(status_code=400, detail="Não é possível editar uma venda já paga")
+    
+    # Verificar se o novo número da venda já existe (se mudou)
+    if request.sale_number != sale.get("sale_number"):
+        existing = await db.sales.find_one({
+            "user_id": current_user["sub"],
+            "sale_number": request.sale_number,
+            "id": {"$ne": sale_id}
+        })
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Já existe uma venda com o número {request.sale_number}"
+            )
+    
+    # Atualizar venda
+    update_data = {
+        "sale_number": request.sale_number,
+        "customer_name": request.customer_name,
+        "customer_phone": request.customer_phone,
+        "customer_email": request.customer_email,
+        "customer_cpf": request.customer_cpf,
+        "device_serial": request.device_serial,
+        "device_source": request.device_source,
+        "sale_value": request.sale_value,
+        "updated_at": datetime.now().isoformat()
+    }
+    
+    await db.sales.update_one({"id": sale_id}, {"$set": update_data})
+    
+    return {"message": "Venda atualizada com sucesso"}
+
+
+@router.delete("/{sale_id}")
+async def delete_sale(sale_id: str, current_user: dict = Depends(get_current_user)):
+    """Exclui uma venda"""
+    sale = await db.sales.find_one({"id": sale_id}, {"_id": 0})
+    
+    if not sale:
+        raise HTTPException(status_code=404, detail="Venda não encontrada")
+    
+    # Verificar permissão
+    if sale["user_id"] != current_user["sub"] and current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Não permitir excluir venda já paga
+    if sale.get("status") == "paid":
+        raise HTTPException(status_code=400, detail="Não é possível excluir uma venda já paga")
+    
+    await db.sales.delete_one({"id": sale_id})
+    
+    return {"message": "Venda excluída com sucesso"}
+
+
+@router.post("/{sale_id}/simulate-payment")
+async def simulate_payment(sale_id: str, current_user: dict = Depends(get_current_user)):
+    """Simula o pagamento de uma venda (para testes)"""
+    sale = await db.sales.find_one({"id": sale_id}, {"_id": 0})
+    
+    if not sale:
+        raise HTTPException(status_code=404, detail="Venda não encontrada")
+    
+    # Verificar permissão
+    if sale["user_id"] != current_user["sub"] and current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    if sale.get("status") == "paid":
+        raise HTTPException(status_code=400, detail="Venda já está paga")
+    
+    # Marcar como paga
+    await db.sales.update_one(
+        {"id": sale_id},
+        {"$set": {
+            "status": "paid",
+            "paid_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }}
+    )
+    
+    # Verificar se completou as 5 vendas
+    paid_count = await db.sales.count_documents({
+        "user_id": current_user["sub"],
+        "status": "paid"
+    })
+    
+    advanced_to_next_stage = False
+    if paid_count >= 5:
+        # Avançar usuário para próxima etapa
+        await db.users.update_one(
+            {"id": current_user["sub"]},
+            {"$set": {
+                "current_stage": "documentos_pj",
+                "field_sales_count": 5,
+                "updated_at": datetime.now().isoformat()
+            }}
+        )
+        advanced_to_next_stage = True
+    
+    return {
+        "message": "Pagamento simulado com sucesso",
+        "completed_sales": paid_count,
+        "remaining_sales": 5 - paid_count,
+        "advanced_to_next_stage": advanced_to_next_stage
+    }
+
+
+# ==================== ROTAS DE LINKS DE PAGAMENTO ====================
 
 @router.get("/my-links")
 async def get_my_links(current_user: dict = Depends(get_current_user)):
@@ -32,20 +273,15 @@ async def get_my_links(current_user: dict = Depends(get_current_user)):
 @router.get("/my-progress")
 async def get_my_progress(current_user: dict = Depends(get_current_user)):
     """Obtém o progresso das 5 vendas do usuário"""
-    # Contar transações aprovadas/pagas do usuário
-    completed_sales = await db.transactions.count_documents({
+    # Contar vendas pagas
+    completed_sales = await db.sales.count_documents({
         "user_id": current_user["sub"],
-        "purpose": "sales_link",
-        "status": {"$in": ["approved", "paid"]}
+        "status": "paid"
     })
-    
-    # Obter configuração do sistema
-    config = await db.system_config.find_one({}, {"_id": 0})
-    total_required = config.get("required_sales", 5) if config else 5
     
     return {
         "completed": completed_sales,
-        "total": total_required
+        "total": 5
     }
 
 
@@ -76,7 +312,6 @@ async def create_payment_link(
     )
     
     # Gerar URL do link
-    # Em produção, você integraria com o gateway para criar um link de checkout
     link.gateway_link_url = f"{os.environ.get('FRONTEND_URL', '')}/pay/{link.id}"
     
     await db.payment_links.insert_one(link.model_dump())
@@ -150,7 +385,7 @@ async def toggle_link(link_id: str, current_user: dict = Depends(get_current_use
 
 @router.post("/links/{link_id}/use")
 async def increment_link_usage(link_id: str):
-    """Incrementa o contador de uso do link (chamado após pagamento bem-sucedido)"""
+    """Incrementa o contador de uso do link"""
     result = await db.payment_links.update_one(
         {"id": link_id},
         {
@@ -189,24 +424,19 @@ async def get_sales_leaderboard(current_user: dict = Depends(get_current_user)):
     """Obtém o ranking de vendas"""
     # Agregar vendas por usuário
     pipeline = [
-        {
-            "$match": {
-                "purpose": "sales_link",
-                "status": {"$in": ["approved", "paid"]}
-            }
-        },
+        {"$match": {"status": "paid"}},
         {
             "$group": {
                 "_id": "$user_id",
                 "total_sales": {"$sum": 1},
-                "total_amount": {"$sum": "$amount"}
+                "total_amount": {"$sum": "$sale_value"}
             }
         },
         {"$sort": {"total_sales": -1}},
         {"$limit": 10}
     ]
     
-    results = await db.transactions.aggregate(pipeline).to_list(10)
+    results = await db.sales.aggregate(pipeline).to_list(10)
     
     # Adicionar nomes dos usuários
     leaderboard = []
