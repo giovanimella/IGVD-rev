@@ -454,8 +454,8 @@ async def add_field_sale_note(note_data: FieldSaleNote, current_user: dict = Dep
     if user.get("current_stage") != "vendas_campo":
         raise HTTPException(status_code=400, detail="Você ainda não está na etapa de vendas")
     
-    if note_data.sale_number < 1 or note_data.sale_number > 10:
-        raise HTTPException(status_code=400, detail="Número de venda inválido (1-10)")
+    if note_data.sale_number < 1 or note_data.sale_number > 5:
+        raise HTTPException(status_code=400, detail="Número de venda inválido (1-5)")
     
     field_sales_notes = user.get("field_sales_notes", [])
     
@@ -512,7 +512,7 @@ async def approve_field_sales(user_id: str, current_user: dict = Depends(require
     await db.users.update_one(
         {"id": user_id},
         {"$set": {
-            "field_sales_count": 10,
+            "field_sales_count": 5,
             "current_stage": "documentos_pj"  # Agora vai para documentos PJ, não completo
         }}
     )

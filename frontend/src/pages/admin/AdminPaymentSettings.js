@@ -10,7 +10,6 @@ import {
   Eye,
   EyeOff,
   CheckCircle,
-  XCircle,
   AlertCircle,
   RefreshCw,
   Zap,
@@ -27,27 +26,19 @@ const AdminPaymentSettings = () => {
   
   // Form state
   const [formData, setFormData] = useState({
-    active_gateway: 'mercadopago',
+    active_gateway: 'pagseguro',
     environment: 'sandbox',
     pix_enabled: true,
     credit_card_enabled: true,
     split_payment_enabled: true,
     max_installments: 12,
     min_installment_value: 5.0,
-    // Sandbox credentials
-    sandbox_mercadopago_public_key: '',
-    sandbox_mercadopago_access_token: '',
-    sandbox_mercadopago_client_id: '',
-    sandbox_mercadopago_client_secret: '',
+    // Sandbox credentials - PagSeguro
     sandbox_pagseguro_email: '',
     sandbox_pagseguro_token: '',
     sandbox_pagseguro_app_id: '',
     sandbox_pagseguro_app_key: '',
-    // Production credentials
-    production_mercadopago_public_key: '',
-    production_mercadopago_access_token: '',
-    production_mercadopago_client_id: '',
-    production_mercadopago_client_secret: '',
+    // Production credentials - PagSeguro
     production_pagseguro_email: '',
     production_pagseguro_token: '',
     production_pagseguro_app_id: '',
@@ -66,27 +57,19 @@ const AdminPaymentSettings = () => {
       // Preencher form com dados existentes
       setFormData(prev => ({
         ...prev,
-        active_gateway: response.data.active_gateway || 'mercadopago',
+        active_gateway: 'pagseguro', // Sempre PagSeguro
         environment: response.data.environment || 'sandbox',
         pix_enabled: response.data.pix_enabled ?? true,
         credit_card_enabled: response.data.credit_card_enabled ?? true,
         split_payment_enabled: response.data.split_payment_enabled ?? true,
         max_installments: response.data.max_installments || 12,
         min_installment_value: response.data.min_installment_value || 5.0,
-        // Sandbox
-        sandbox_mercadopago_public_key: response.data.sandbox_credentials?.mercadopago_public_key || '',
-        sandbox_mercadopago_access_token: response.data.sandbox_credentials?.mercadopago_access_token || '',
-        sandbox_mercadopago_client_id: response.data.sandbox_credentials?.mercadopago_client_id || '',
-        sandbox_mercadopago_client_secret: response.data.sandbox_credentials?.mercadopago_client_secret || '',
+        // Sandbox - PagSeguro
         sandbox_pagseguro_email: response.data.sandbox_credentials?.pagseguro_email || '',
         sandbox_pagseguro_token: response.data.sandbox_credentials?.pagseguro_token || '',
         sandbox_pagseguro_app_id: response.data.sandbox_credentials?.pagseguro_app_id || '',
         sandbox_pagseguro_app_key: response.data.sandbox_credentials?.pagseguro_app_key || '',
-        // Production
-        production_mercadopago_public_key: response.data.production_credentials?.mercadopago_public_key || '',
-        production_mercadopago_access_token: response.data.production_credentials?.mercadopago_access_token || '',
-        production_mercadopago_client_id: response.data.production_credentials?.mercadopago_client_id || '',
-        production_mercadopago_client_secret: response.data.production_credentials?.mercadopago_client_secret || '',
+        // Production - PagSeguro
         production_pagseguro_email: response.data.production_credentials?.pagseguro_email || '',
         production_pagseguro_token: response.data.production_credentials?.pagseguro_token || '',
         production_pagseguro_app_id: response.data.production_credentials?.pagseguro_app_id || '',
@@ -104,7 +87,7 @@ const AdminPaymentSettings = () => {
     setSaving(true);
     try {
       const payload = {
-        active_gateway: formData.active_gateway,
+        active_gateway: 'pagseguro',
         environment: formData.environment,
         pix_enabled: formData.pix_enabled,
         credit_card_enabled: formData.credit_card_enabled,
@@ -112,20 +95,12 @@ const AdminPaymentSettings = () => {
         max_installments: parseInt(formData.max_installments),
         min_installment_value: parseFloat(formData.min_installment_value),
         sandbox_credentials: {
-          mercadopago_public_key: formData.sandbox_mercadopago_public_key || null,
-          mercadopago_access_token: formData.sandbox_mercadopago_access_token || null,
-          mercadopago_client_id: formData.sandbox_mercadopago_client_id || null,
-          mercadopago_client_secret: formData.sandbox_mercadopago_client_secret || null,
           pagseguro_email: formData.sandbox_pagseguro_email || null,
           pagseguro_token: formData.sandbox_pagseguro_token || null,
           pagseguro_app_id: formData.sandbox_pagseguro_app_id || null,
           pagseguro_app_key: formData.sandbox_pagseguro_app_key || null,
         },
         production_credentials: {
-          mercadopago_public_key: formData.production_mercadopago_public_key || null,
-          mercadopago_access_token: formData.production_mercadopago_access_token || null,
-          mercadopago_client_id: formData.production_mercadopago_client_id || null,
-          mercadopago_client_secret: formData.production_mercadopago_client_secret || null,
           pagseguro_email: formData.production_pagseguro_email || null,
           pagseguro_token: formData.production_pagseguro_token || null,
           pagseguro_app_id: formData.production_pagseguro_app_id || null,
@@ -195,7 +170,7 @@ const AdminPaymentSettings = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Configurações de Pagamento</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">Gerencie os gateways de pagamento e credenciais</p>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Gerencie as credenciais do PagSeguro</p>
           </div>
           <button
             onClick={handleSave}
@@ -208,69 +183,24 @@ const AdminPaymentSettings = () => {
           </button>
         </div>
 
-        {/* Gateway Selection */}
+        {/* Gateway Info */}
         <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <Wallet className="w-5 h-5 text-cyan-500" />
-            Gateway Ativo
+            Gateway de Pagamento
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              onClick={() => handleChange('active_gateway', 'mercadopago')}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                formData.active_gateway === 'mercadopago'
-                  ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-cyan-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                  formData.active_gateway === 'mercadopago' ? 'bg-cyan-500' : 'bg-slate-200 dark:bg-slate-700'
-                }`}>
-                  <CreditCard className={`w-6 h-6 ${
-                    formData.active_gateway === 'mercadopago' ? 'text-white' : 'text-slate-500'
-                  }`} />
-                </div>
-                <div className="text-left">
-                  <p className={`font-semibold ${
-                    formData.active_gateway === 'mercadopago' ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-900 dark:text-white'
-                  }`}>MercadoPago</p>
-                  <p className="text-sm text-slate-500">Líder em pagamentos no Brasil</p>
-                </div>
-                {formData.active_gateway === 'mercadopago' && (
-                  <CheckCircle className="w-6 h-6 text-cyan-500 ml-auto" />
-                )}
+          <div className="p-4 rounded-xl border-2 border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-cyan-500">
+                <Shield className="w-6 h-6 text-white" />
               </div>
-            </button>
-
-            <button
-              onClick={() => handleChange('active_gateway', 'pagseguro')}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                formData.active_gateway === 'pagseguro'
-                  ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-cyan-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                  formData.active_gateway === 'pagseguro' ? 'bg-cyan-500' : 'bg-slate-200 dark:bg-slate-700'
-                }`}>
-                  <Shield className={`w-6 h-6 ${
-                    formData.active_gateway === 'pagseguro' ? 'text-white' : 'text-slate-500'
-                  }`} />
-                </div>
-                <div className="text-left">
-                  <p className={`font-semibold ${
-                    formData.active_gateway === 'pagseguro' ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-900 dark:text-white'
-                  }`}>PagSeguro</p>
-                  <p className="text-sm text-slate-500">Soluções completas de pagamento</p>
-                </div>
-                {formData.active_gateway === 'pagseguro' && (
-                  <CheckCircle className="w-6 h-6 text-cyan-500 ml-auto" />
-                )}
+              <div className="text-left flex-1">
+                <p className="font-semibold text-cyan-600 dark:text-cyan-400">PagSeguro</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Soluções completas de pagamento</p>
               </div>
-            </button>
+              <CheckCircle className="w-6 h-6 text-cyan-500" />
+            </div>
           </div>
         </div>
 
@@ -402,30 +332,11 @@ const AdminPaymentSettings = () => {
             Credenciais Sandbox (Teste)
           </h2>
 
-          {/* MercadoPago Sandbox */}
-          <div className="mb-6">
-            <h3 className="text-md font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
-              MercadoPago
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CredentialInput label="Public Key" field="sandbox_mercadopago_public_key" placeholder="TEST-..." />
-              <CredentialInput label="Access Token" field="sandbox_mercadopago_access_token" placeholder="TEST-..." isSecret />
-              <CredentialInput label="Client ID" field="sandbox_mercadopago_client_id" placeholder="123456789" />
-              <CredentialInput label="Client Secret" field="sandbox_mercadopago_client_secret" placeholder="..." isSecret />
-            </div>
-          </div>
-
-          {/* PagSeguro Sandbox */}
-          <div>
-            <h3 className="text-md font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
-              PagSeguro
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CredentialInput label="Email" field="sandbox_pagseguro_email" placeholder="email@sandbox.pagseguro.com.br" />
-              <CredentialInput label="Token" field="sandbox_pagseguro_token" placeholder="..." isSecret />
-              <CredentialInput label="App ID" field="sandbox_pagseguro_app_id" placeholder="app123456" />
-              <CredentialInput label="App Key" field="sandbox_pagseguro_app_key" placeholder="..." isSecret />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CredentialInput label="Email" field="sandbox_pagseguro_email" placeholder="email@sandbox.pagseguro.com.br" />
+            <CredentialInput label="Token" field="sandbox_pagseguro_token" placeholder="Token de autenticação..." isSecret />
+            <CredentialInput label="App ID" field="sandbox_pagseguro_app_id" placeholder="app123456" />
+            <CredentialInput label="App Key" field="sandbox_pagseguro_app_key" placeholder="Chave da aplicação..." isSecret />
           </div>
         </div>
 
@@ -436,54 +347,38 @@ const AdminPaymentSettings = () => {
             Credenciais Produção
           </h2>
 
-          {/* MercadoPago Production */}
-          <div className="mb-6">
-            <h3 className="text-md font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
-              MercadoPago
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CredentialInput label="Public Key" field="production_mercadopago_public_key" placeholder="APP_USR-..." />
-              <CredentialInput label="Access Token" field="production_mercadopago_access_token" placeholder="APP_USR-..." isSecret />
-              <CredentialInput label="Client ID" field="production_mercadopago_client_id" placeholder="123456789" />
-              <CredentialInput label="Client Secret" field="production_mercadopago_client_secret" placeholder="..." isSecret />
-            </div>
-          </div>
-
-          {/* PagSeguro Production */}
-          <div>
-            <h3 className="text-md font-medium text-slate-700 dark:text-slate-300 mb-3 border-b border-slate-100 dark:border-slate-700 pb-2">
-              PagSeguro
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CredentialInput label="Email" field="production_pagseguro_email" placeholder="email@seudominio.com.br" />
-              <CredentialInput label="Token" field="production_pagseguro_token" placeholder="..." isSecret />
-              <CredentialInput label="App ID" field="production_pagseguro_app_id" placeholder="app123456" />
-              <CredentialInput label="App Key" field="production_pagseguro_app_key" placeholder="..." isSecret />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CredentialInput label="Email" field="production_pagseguro_email" placeholder="email@seudominio.com.br" />
+            <CredentialInput label="Token" field="production_pagseguro_token" placeholder="Token de autenticação..." isSecret />
+            <CredentialInput label="App ID" field="production_pagseguro_app_id" placeholder="app123456" />
+            <CredentialInput label="App Key" field="production_pagseguro_app_key" placeholder="Chave da aplicação..." isSecret />
           </div>
         </div>
 
-        {/* Webhook URLs */}
+        {/* Webhook URL */}
         <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">URLs de Webhook</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">URL de Webhook</h2>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-            Configure estas URLs nos painéis dos gateways para receber notificações de pagamento:
+            Configure esta URL no painel do PagSeguro para receber notificações de pagamento:
           </p>
           
-          <div className="space-y-3">
-            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">MercadoPago:</p>
-              <code className="text-sm text-cyan-600 dark:text-cyan-400 break-all">
-                {window.location.origin.replace('localhost:3000', 'igvd.org')}/api/payments/webhooks/mercadopago
-              </code>
-            </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">PagSeguro:</p>
-              <code className="text-sm text-cyan-600 dark:text-cyan-400 break-all">
-                {window.location.origin.replace('localhost:3000', 'igvd.org')}/api/payments/webhooks/pagseguro
-              </code>
-            </div>
+          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">PagSeguro:</p>
+            <code className="text-sm text-cyan-600 dark:text-cyan-400 break-all">
+              {window.location.origin.replace('localhost:3000', 'igvd.org')}/api/payments/webhooks/pagseguro
+            </code>
           </div>
+        </div>
+
+        {/* Help Section */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-500/30 p-6">
+          <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">Como obter as credenciais?</h3>
+          <ol className="text-sm text-blue-700 dark:text-blue-400 space-y-2 list-decimal list-inside">
+            <li>Acesse sua conta no <a href="https://acesso.pagseguro.uol.com.br" target="_blank" rel="noopener noreferrer" className="underline">PagSeguro</a></li>
+            <li>Vá em "Preferências" → "Integrações"</li>
+            <li>Gere ou copie seu Token de autenticação</li>
+            <li>Para ambiente sandbox, use: <a href="https://sandbox.pagseguro.uol.com.br" target="_blank" rel="noopener noreferrer" className="underline">sandbox.pagseguro.uol.com.br</a></li>
+          </ol>
         </div>
       </div>
     </Layout>

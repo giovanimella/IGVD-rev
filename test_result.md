@@ -322,6 +322,30 @@ backend:
           agent: "testing"
           comment: "✅ VERIFIED SUCCESSFULLY - Modules have has_certificate field implemented. Found 5 total modules with 4 having certificates enabled. 'Introdução à Ozoxx' module (id: d4301253-c9df-4995-a801-d873edfaf8d5) correctly has certificate enabled (has_certificate: true). Module integration working as expected."
 
+  - task: "Payment Gateway - PagSeguro Only Integration"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/payment_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - Payment gateway changes fully verified. GET /api/payments/settings returns active_gateway as 'pagseguro' with no MercadoPago references. PUT /api/payments/settings successfully updates settings while maintaining PagSeguro as active gateway. PagSeguro webhook endpoint (/api/payments/webhooks/pagseguro) is active and working. MercadoPago webhook endpoint correctly removed (404 response). All payment features (PIX, Credit Card) properly configured and enabled."
+
+  - task: "Field Sales - 5 Sales Requirement"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/sales_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - Field sales requirement correctly changed from 10 to 5 sales. GET /api/sales/my-progress returns total required sales as 5. POST /api/onboarding/field-sales/note properly validates sale_number in range 1-5 (accepts 1-5, rejects 0, 6-15). Tested with licensee user in vendas_campo stage. Old range 6-10 correctly rejected with validation error. Sales progress tracking and validation working as expected."
+
 metadata:
   created_by: "main_agent"
   version: "1.4"
@@ -330,16 +354,15 @@ metadata:
 
 test_plan:
   current_focus:
-    - "User Profile Dropdown Menu"
-    - "Admin Users - Stage Selection System"
-    - "User Stage Update Endpoint"
+    - "Payment Gateway - PagSeguro Only Integration"
+    - "Field Sales - 5 Sales Requirement"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
     - agent: "main"
-      message: "NOVAS FUNCIONALIDADES IMPLEMENTADAS - 1) Menu dropdown na foto do perfil no canto superior direito (Topbar.js) com opções 'Meu Perfil' e 'Sair'. Funciona para todos os tipos de usuários (admin, supervisor, licenciado). 2) Corrigido o sistema de alteração de etapas do onboarding dos licenciados na página AdminUsers. Anteriormente usava etapas antigas (documentos, pagamento, treinamento), agora usa as etapas corretas do fluxo de onboarding (documentos_pf, acolhimento, treinamento_presencial, vendas_campo, documentos_pj). 3) Atualizado endpoint backend PUT /api/users/{user_id}/stage para validar as etapas corretas. Arquivos modificados: Topbar.js, AdminUsers.js, user_routes.py. Por favor, testar ambas as funcionalidades."
+      message: "ALTERAÇÕES DE GATEWAY DE PAGAMENTO IMPLEMENTADAS - 1) Removido MercadoPago completamente (serviço, models, rotas, webhook, dependência npm). 2) Sistema agora usa apenas PagSeguro como gateway de pagamento. 3) Alterada etapa de vendas em campo de 10 para 5 vendas. 4) Arquivos modificados: payment_gateway.py, models_payment.py, payment_routes.py, sales_routes.py, onboarding_routes.py, AdminPaymentSettings.js, Sales.js. 5) Credenciais do PagSeguro podem ser configuradas no painel admin. Testar: GET/PUT /api/payments/settings, verificar que MercadoPago foi removido, verificar que vendas em campo agora requer apenas 5 vendas."
     - agent: "testing"
       message: "GAMIFICATION SYSTEM TEST COMPLETED - Admin functionality (Badges & Challenges pages) working perfectly. Licensee dashboard gamification cards are implemented but could not be fully tested due to authentication issues. The provided licensee credentials (licenciado.teste@ozoxx.com / licenciado123) are invalid. System has existing licensee users but passwords are unknown. Main agent should either: 1) Provide correct licensee credentials, 2) Create a test licensee user with known credentials, or 3) Reset password for existing licensee user to enable complete testing of gamification cards."
     - agent: "testing"
@@ -350,3 +373,5 @@ agent_communication:
       message: "NEW FEATURES IMPLEMENTED - 1) Timeline/Comunidade (social feed estilo Twitter), 2) Dashboard Avançado do Supervisor (quem está atrasado, inativo, previsão de conclusão), 3) Termos de Aceite Digital (configurável pelo admin), 4) Sistema de Notificações WhatsApp (Evolution API). Backend APIs criadas: /api/timeline/*, /api/terms/*, /api/whatsapp/*, /api/analytics/supervisor/advanced-dashboard. Frontend pages: Timeline.js, SupervisorAdvancedDashboard.js, AdminTerms.js, AdminWhatsApp.js, TermsAcceptanceModal.js. Novos links no sidebar para todas as novas funcionalidades. Please test the new API endpoints."
     - agent: "testing"
       message: "NEW FEATURES TESTING COMPLETED - All newly implemented backend APIs working correctly with 90% success rate (18/20 tests passed). ✅ TIMELINE/SOCIAL FEED: All endpoints functional - list posts, create posts with content, react with likes, add/get comments, delete posts (admin/author). ✅ TERMS OF ACCEPTANCE: Complete flow working - admin creates terms with title/content/version, users view active terms, check acceptance status, accept terms with proper tracking. ✅ WHATSAPP NOTIFICATIONS: Configuration management working - get/update config with notification settings, message history tracking. ✅ ADVANCED SUPERVISOR DASHBOARD: Analytics endpoint providing comprehensive user progress data. MINOR FIXES APPLIED: Fixed JWT token field access from 'id' to 'sub' in timeline and terms routes, fixed comment model validation. Only failures: franqueado/licensee login credentials invalid (users don't exist). All requested API endpoints from review request tested and working correctly."
+    - agent: "testing"
+      message: "PAYMENT GATEWAY CHANGES TESTING COMPLETED - 🎉 ALL TESTS PASSED (21/21 - 100% success rate). ✅ PAGSEGURO ONLY: GET/PUT /api/payments/settings working perfectly, active_gateway is 'pagseguro', no MercadoPago references found anywhere. ✅ FIELD SALES REDUCTION: GET /api/sales/my-progress correctly shows total required sales as 5 (was 10). ✅ FIELD SALES VALIDATION: POST /api/onboarding/field-sales/note properly validates sale_number range 1-5 (rejects 0, 6-15). Invalid numbers 6-10 (old range) correctly rejected with validation error. ✅ WEBHOOK ENDPOINTS: /api/payments/webhooks/pagseguro active and working, /api/payments/webhooks/mercadopago correctly removed (404). All requested payment gateway changes implemented and verified successfully."

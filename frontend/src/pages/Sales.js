@@ -76,7 +76,7 @@ const Sales = () => {
   const getNextAvailableSaleNumber = () => {
     if (!salesData?.sales) return 1;
     const usedNumbers = salesData.sales.map(s => s.sale_number);
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 5; i++) {
       if (!usedNumbers.includes(i)) return i;
     }
     return 1;
@@ -158,7 +158,7 @@ const Sales = () => {
       const response = await axios.post(`${API_URL}/api/sales/${saleId}/simulate-payment`);
       
       if (response.data.advanced_to_next_stage) {
-        toast.success('Parabéns! Você completou as 10 vendas!', {
+        toast.success('Parabéns! Você completou as 5 vendas!', {
           duration: 5000
         });
         // Redirecionar após um delay
@@ -209,7 +209,7 @@ const Sales = () => {
   }
 
   const completedSales = salesData?.completed_sales || 0;
-  const progressPercentage = (completedSales / 10) * 100;
+  const progressPercentage = (completedSales / 5) * 100;
 
   return (
     <Layout>
@@ -221,13 +221,13 @@ const Sales = () => {
               Vendas em Campo
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Registre suas 10 vendas para avançar no onboarding
+              Registre suas 5 vendas para avançar no onboarding
             </p>
           </div>
           <Button
             onClick={openNewSaleModal}
             className="bg-cyan-500 hover:bg-cyan-600"
-            disabled={salesData?.total_sales >= 10}
+            disabled={salesData?.total_sales >= 5}
             data-testid="new-sale-btn"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -240,7 +240,7 @@ const Sales = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-cyan-100 text-sm">Progresso das Vendas</p>
-              <p className="text-3xl font-bold">{completedSales}/10 concluídas</p>
+              <p className="text-3xl font-bold">{completedSales}/5 concluídas</p>
             </div>
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
               <ShoppingCart className="w-8 h-8" />
@@ -253,13 +253,13 @@ const Sales = () => {
             />
           </div>
           <p className="text-sm text-cyan-100 mt-2">
-            {salesData?.remaining_sales || 10} vendas restantes para completar esta etapa
+            {salesData?.remaining_sales || 5} vendas restantes para completar esta etapa
           </p>
         </div>
 
         {/* Sales Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {Array.from({ length: 10 }, (_, i) => i + 1).map((saleNum) => {
+        <div className="grid grid-cols-5 gap-4">
+          {Array.from({ length: 5 }, (_, i) => i + 1).map((saleNum) => {
             const sale = salesData?.sales?.find(s => s.sale_number === saleNum);
             const isPaid = sale?.payment_status === 'paid';
             const isPending = sale?.payment_status === 'pending';
@@ -444,7 +444,7 @@ const Sales = () => {
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 10 }, (_, i) => i + 1)
+                    {Array.from({ length: 5 }, (_, i) => i + 1)
                       .filter(n => !salesData?.sales?.find(s => s.sale_number === n))
                       .map((n) => (
                         <SelectItem key={n} value={String(n)}>Venda {n}</SelectItem>

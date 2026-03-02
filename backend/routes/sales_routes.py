@@ -1,5 +1,5 @@
 """
-Rotas para gerenciamento de links de pagamento (10 vendas)
+Rotas para gerenciamento de links de pagamento (5 vendas)
 """
 from fastapi import APIRouter, HTTPException, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -31,7 +31,7 @@ async def get_my_links(current_user: dict = Depends(get_current_user)):
 
 @router.get("/my-progress")
 async def get_my_progress(current_user: dict = Depends(get_current_user)):
-    """Obtém o progresso das 10 vendas do usuário"""
+    """Obtém o progresso das 5 vendas do usuário"""
     # Contar transações aprovadas/pagas do usuário
     completed_sales = await db.transactions.count_documents({
         "user_id": current_user["sub"],
@@ -41,7 +41,7 @@ async def get_my_progress(current_user: dict = Depends(get_current_user)):
     
     # Obter configuração do sistema
     config = await db.system_config.find_one({}, {"_id": 0})
-    total_required = config.get("required_sales", 10) if config else 10
+    total_required = config.get("required_sales", 5) if config else 5
     
     return {
         "completed": completed_sales,
@@ -57,7 +57,7 @@ async def create_payment_link(
     """Cria um novo link de pagamento"""
     # Obter configurações de pagamento
     settings = await db.payment_settings.find_one({}, {"_id": 0})
-    active_gateway = settings.get("active_gateway", "mercadopago") if settings else "mercadopago"
+    active_gateway = settings.get("active_gateway", "pagseguro") if settings else "pagseguro"
     
     # Calcular data de expiração se fornecida
     expires_at = None

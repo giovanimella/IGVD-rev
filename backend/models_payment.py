@@ -11,7 +11,6 @@ import uuid
 
 class PaymentGateway(str, Enum):
     PAGSEGURO = "pagseguro"
-    MERCADOPAGO = "mercadopago"
 
 
 class PaymentEnvironment(str, Enum):
@@ -39,30 +38,24 @@ class PaymentStatus(str, Enum):
 
 class PaymentPurpose(str, Enum):
     TRAINING_FEE = "training_fee"  # Taxa do treinamento presencial
-    SALES_LINK = "sales_link"  # Link de pagamento das 10 vendas
+    SALES_LINK = "sales_link"  # Link de pagamento das 5 vendas
 
 
 # ==================== CONFIGURAÇÕES DO GATEWAY ====================
 
 class GatewayCredentials(BaseModel):
-    """Credenciais de um gateway de pagamento"""
+    """Credenciais do gateway PagSeguro"""
     # PagSeguro
     pagseguro_email: Optional[str] = None
     pagseguro_token: Optional[str] = None
     pagseguro_app_id: Optional[str] = None
     pagseguro_app_key: Optional[str] = None
-    
-    # MercadoPago
-    mercadopago_public_key: Optional[str] = None
-    mercadopago_access_token: Optional[str] = None
-    mercadopago_client_id: Optional[str] = None
-    mercadopago_client_secret: Optional[str] = None
 
 
 class PaymentSettings(BaseModel):
-    """Configurações gerais de pagamento"""
+    """Configurações gerais de pagamento - PagSeguro"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    active_gateway: PaymentGateway = PaymentGateway.MERCADOPAGO
+    active_gateway: PaymentGateway = PaymentGateway.PAGSEGURO
     environment: PaymentEnvironment = PaymentEnvironment.SANDBOX
     
     # Credenciais Sandbox
@@ -257,7 +250,7 @@ class WebhookEvent(BaseModel):
 # ==================== LINK DE PAGAMENTO ====================
 
 class PaymentLink(BaseModel):
-    """Link de pagamento para as 10 vendas"""
+    """Link de pagamento para as 5 vendas"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str  # Licenciado que criou o link
     

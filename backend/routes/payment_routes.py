@@ -1,6 +1,6 @@
 """
 Rotas de configuração e processamento de pagamentos
-Sistema Multi-Gateway: PagSeguro e MercadoPago
+Sistema de Gateway: PagSeguro
 """
 from fastapi import APIRouter, HTTPException, Depends, Request
 from typing import Optional
@@ -100,7 +100,7 @@ async def update_credentials(
 
 @router.get("/settings/public-key")
 async def get_public_key(current_user: dict = Depends(get_current_user)):
-    """Obtém a public key do gateway ativo para uso no frontend"""
+    """Obtém a public key do PagSeguro para uso no frontend"""
     settings = await payment_gateway.get_settings()
     
     if settings.environment == PaymentEnvironment.SANDBOX:
@@ -108,16 +108,10 @@ async def get_public_key(current_user: dict = Depends(get_current_user)):
     else:
         credentials = settings.production_credentials
     
-    if settings.active_gateway == PaymentGateway.MERCADOPAGO:
-        return {
-            "gateway": "mercadopago",
-            "public_key": credentials.mercadopago_public_key
-        }
-    else:
-        return {
-            "gateway": "pagseguro",
-            "public_key": credentials.pagseguro_app_key or credentials.pagseguro_token
-        }
+    return {
+        "gateway": "pagseguro",
+        "public_key": credentials.pagseguro_app_key or credentials.pagseguro_token
+    }
 
 
 # ==================== PROCESSAMENTO DE PAGAMENTOS ====================
@@ -241,67 +235,6 @@ async def get_all_transactions(
 
 
 # ==================== WEBHOOKS ====================
-
-@router.post("/webhooks/mercadopago")
-async def handle_mercadopago_webhook(request: Request):
-    """Recebe webhooks do MercadoPago"""
-    try:
-        body = await request.body()
-        data = json.loads(body)
-        
-        # Extrair informações do webhook
-        event_type = data.get("type", "")
-        payment_id = data.get("data", {}).get("id")
-        
-        logger.info(f"MercadoPago webhook received: {event_type} for payment {payment_id}")
-        
-        # Salvar evento de webhook
-        webhook_event = WebhookEvent(
-            gateway=PaymentGateway.MERCADOPAGO,
-            event_type=event_type,
-            gateway_event_id=str(data.get("id", "")),
-            gateway_transaction_id=str(payment_id) if payment_id else None,
-            raw_payload=data
-        )
-        
-        await payment_gateway.db.webhook_events.insert_one(webhook_event.model_dump())
-        
-        # Processar atualização de status
-        if event_type == "payment" and payment_id:
-            # Buscar transação pelo gateway_transaction_id
-            transaction = await payment_gateway.db.transactions.find_one(
-                {"gateway_transaction_id": str(payment_id)},
-                {"_id": 0}
-            )
-            
-            if transaction:
-                # Verificar status atual no MercadoPago
-                service = await payment_gateway.get_gateway_service()
-                status_result = await service.check_payment_status(str(payment_id))
-                
-                if status_result.get("status"):
-                    await payment_gateway.update_transaction_status(
-                        transaction["id"],
-                        status_result.get("status"),
-                        status_result
-                    )
-                    
-                    await payment_gateway.add_webhook_notification(
-                        transaction["id"],
-                        {
-                            "timestamp": datetime.now().isoformat(),
-                            "event_type": event_type,
-                            "status": status_result.get("status"),
-                            "raw": data
-                        }
-                    )
-        
-        return {"success": True}
-        
-    except Exception as e:
-        logger.error(f"Erro ao processar webhook MercadoPago: {e}")
-        return {"success": False, "error": str(e)}
-
 
 @router.post("/webhooks/pagseguro")
 async def handle_pagseguro_webhook(request: Request):

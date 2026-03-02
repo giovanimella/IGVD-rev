@@ -15,7 +15,7 @@ from models_payment import (
 
 
 class PaymentGatewayService:
-    """Serviço principal de gateway de pagamento"""
+    """Serviço principal de gateway de pagamento - PagSeguro"""
     
     def __init__(self):
         self.mongo_url = os.environ.get('MONGO_URL')
@@ -23,7 +23,6 @@ class PaymentGatewayService:
         self._client = None
         self._db = None
         self._pagseguro_service = None
-        self._mercadopago_service = None
     
     @property
     def db(self):
@@ -67,15 +66,11 @@ class PaymentGatewayService:
         return settings.active_gateway, settings.environment, credentials
     
     async def get_gateway_service(self):
-        """Retorna o serviço do gateway ativo"""
+        """Retorna o serviço do gateway PagSeguro"""
         gateway, environment, credentials = await self.get_active_credentials()
         
-        if gateway == PaymentGateway.PAGSEGURO:
-            from services.pagseguro_service import PagSeguroService
-            return PagSeguroService(credentials, environment)
-        else:
-            from services.mercadopago_service import MercadoPagoService
-            return MercadoPagoService(credentials, environment)
+        from services.pagseguro_service import PagSeguroService
+        return PagSeguroService(credentials, environment)
     
     async def process_pix_payment(self, request: PixPaymentRequest, user_id: str) -> TransactionResponse:
         """Processa um pagamento PIX"""
