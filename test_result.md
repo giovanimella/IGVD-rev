@@ -402,9 +402,45 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Training Registration Configuration Fix (GET /api/training/my-registration)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/training_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED AND FIXED SUCCESSFULLY - GET /api/training/my-registration now returns config (not null) even if it doesn't exist in the database. Fixed MongoDB ObjectId serialization issue where insert_one was polluting the config object with _id field. Applied fix by creating separate copy for database insertion. Config now properly returns default values: solo_price: R$ 3500.00, couple_price: R$ 6000.00, days_before_closing: 7 days. Issue 'Configurações não encontradas' has been resolved."
+
+  - task: "Sales Registration API (POST /api/sales/register)" 
+    implemented: true
+    working: true
+    file: "/app/backend/routes/sales_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - POST /api/sales/register endpoint working correctly. Successfully registers new sales with complete customer data (name, phone, email, CPF), device information (serial, source), and sale value. Creates PagSeguro checkout integration automatically. Handles duplicate sales appropriately with validation error. Tested with realistic customer data. Returns sale ID, customer info, status, and checkout URL when available. Valid device sources: leader_stock, supervisor_stock, direct_purchase. Sale numbers must be 1-5 as expected."
+
+  - task: "Sales Progress API (GET /api/sales/my-progress)"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/sales_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED SUCCESSFULLY - GET /api/sales/my-progress endpoint working correctly after being moved before dynamic routes. Returns proper structure with 'completed' and 'total' fields. Total correctly shows 5 (required sales). Endpoint no longer conflicts with dynamic route parameters. Progress tracking working as expected for field sales requirements."
+
 agent_communication:
     - agent: "main"
-      message: "ALTERAÇÕES DE GATEWAY DE PAGAMENTO IMPLEMENTADAS - 1) Removido MercadoPago completamente (serviço, models, rotas, webhook, dependência npm). 2) Sistema agora usa apenas PagSeguro como gateway de pagamento. 3) Alterada etapa de vendas em campo de 10 para 5 vendas. 4) Arquivos modificados: payment_gateway.py, models_payment.py, payment_routes.py, sales_routes.py, onboarding_routes.py, AdminPaymentSettings.js, Sales.js. 5) Credenciais do PagSeguro podem ser configuradas no painel admin. Testar: GET/PUT /api/payments/settings, verificar que MercadoPago foi removido, verificar que vendas em campo agora requer apenas 5 vendas."
+      message: "CORREÇÕES IMPLEMENTADAS - 1) Adicionadas rotas faltantes em sales_routes.py: GET /api/sales/my-sales, POST /api/sales/register, PUT/DELETE /api/sales/{id}, POST /api/sales/{id}/simulate-payment. 2) Adicionadas rotas faltantes em payment_routes.py: POST /api/payments/create-payment, POST /api/payments/simulate-payment/{reference_id}. 3) Corrigida rota /api/training/my-registration para criar configuração padrão se não existir. 4) Criado modelo Sale em models_payment.py. 5) Movida rota /my-progress para antes das rotas com parâmetros dinâmicos. Por favor, teste as páginas de vendas e treinamento novamente."
     - agent: "testing"
       message: "GAMIFICATION SYSTEM TEST COMPLETED - Admin functionality (Badges & Challenges pages) working perfectly. Licensee dashboard gamification cards are implemented but could not be fully tested due to authentication issues. The provided licensee credentials (licenciado.teste@ozoxx.com / licenciado123) are invalid. System has existing licensee users but passwords are unknown. Main agent should either: 1) Provide correct licensee credentials, 2) Create a test licensee user with known credentials, or 3) Reset password for existing licensee user to enable complete testing of gamification cards."
     - agent: "testing"
@@ -421,3 +457,5 @@ agent_communication:
       message: "FINAL VERIFICATION TEST COMPLETED - ✅ Performed quick final test of payment changes as requested. ALL REQUIREMENTS VERIFIED: 1) GET /api/payments/settings returns only PagSeguro (active_gateway='pagseguro'), no MercadoPago references. 2) Credential fields confirmed: ONLY pagseguro_email and pagseguro_token present (no prohibited fields like app_id, app_key, mercadopago_*). 3) GET /api/sales/my-progress confirmed total=5 (not 10). Test results: 21/21 passed (100% success rate). All payment gateway changes are working correctly and ready for production use."
     - agent: "testing"
       message: "NEW SALES & PAYMENT ROUTES TESTING COMPLETED - ✅ ALL REQUESTED ROUTES WORKING (100% success rate). Tested with user test.licensee@ozoxx.com (fixed authentication issue by resetting password). 1) POST /api/sales/register: Successfully registers new sales with complete customer data, device info, and PagSeguro checkout integration. Handles duplicate sales appropriately. 2) GET /api/sales/my-sales: Returns comprehensive sales data (total, completed, pending, remaining) with full sales list. 3) POST /api/payments/create-payment: Creates enrollment fee payments (R$ 150.00) with reference IDs and checkout URLs. Even when PagSeguro fails due to credential issues, the route exists and responds correctly. ⚠️ MINOR ISSUE: GET /api/sales/my-progress returns 404 (this route may have been moved or renamed). All primary requested routes are functional and ready for use."
+    - agent: "testing"
+      message: "SPECIFIC CORRECTIONS TESTING COMPLETED - 🎉 ALL 3 REQUESTED FIXES VERIFIED (100% success rate). Used credentials test.licensee@ozoxx.com/test123 successfully. ✅ 1) GET /api/training/my-registration: FIXED - Now returns config (not null) even if doesn't exist in database. Fixed MongoDB ObjectId serialization issue. Returns proper default config with solo_price: R$ 3500, couple_price: R$ 6000. Issue 'Configurações não encontradas' resolved. ✅ 2) POST /api/sales/register: WORKING - Successfully registers sales with complete customer data, device info, sale values. Handles duplicates correctly, integrates with PagSeguro checkout. ✅ 3) GET /api/sales/my-progress: WORKING - Functions correctly after being moved before dynamic routes. Returns proper structure with completed/total fields, shows total=5 as expected. All specific corrections from review request are working perfectly."

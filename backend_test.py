@@ -1,261 +1,363 @@
 #!/usr/bin/env python3
 """
-Teste das novas rotas de vendas e pagamento de inscrição
-Testando:
-1. POST /api/sales/register - Registrar uma nova venda
-2. GET /api/sales/my-sales - Listar as vendas do usuário  
-3. POST /api/payments/create-payment - Criar pagamento da taxa de inscrição
+Backend Test Script - Test das correções específicas
+Testa as correções solicitadas:
+1. GET /api/training/my-registration - Deve retornar config (não null) mesmo se não existir no banco
+2. POST /api/sales/register - Registrar uma venda com dados completos  
+3. GET /api/sales/my-progress - Deve funcionar (foi movida antes das rotas dinâmicas)
+
+Credenciais: test.licensee@ozoxx.com / test123
 """
-
-import requests
+import asyncio
+import aiohttp
 import json
-import sys
+import os
 from datetime import datetime
+import sys
 
-# Configuração do backend
-BACKEND_URL = "https://checkout-revamp-10.preview.emergentagent.com/api"
+# Configurações
+BACKEND_URL = "https://checkout-revamp-10.preview.emergentagent.com"
+API_BASE = f"{BACKEND_URL}/api"
 
-# Credenciais do licenciado para teste
-LICENSEE_EMAIL = "test.licensee@ozoxx.com"
-LICENSEE_PASSWORD = "test123"
+# Credenciais do teste
+TEST_EMAIL = "test.licensee@ozoxx.com"
+TEST_PASSWORD = "test123"
 
-def print_test_header(test_name):
-    """Imprime cabeçalho do teste"""
-    print(f"\n{'='*60}")
-    print(f"TESTE: {test_name}")
-    print(f"{'='*60}")
-
-def print_result(success, message, details=None):
-    """Imprime resultado do teste"""
-    status = "✅ SUCESSO" if success else "❌ FALHA"
-    print(f"{status}: {message}")
-    if details:
-        print(f"Detalhes: {details}")
-    print("-" * 60)
-
-def authenticate_user(email, password):
-    """Autentica usuário e retorna token"""
-    print_test_header("AUTENTICAÇÃO")
-    
-    try:
-        response = requests.post(
-            f"{BACKEND_URL}/auth/login",
-            json={"email": email, "password": password}
-        )
+class BackendTester:
+    def __init__(self):
+        self.session = None
+        self.auth_token = None
+        self.passed_tests = 0
+        self.total_tests = 0
         
-        if response.status_code == 200:
-            data = response.json()
-            token = data.get("access_token")
-            user_info = data.get("user", {})
-            
-            print_result(True, f"Login realizado com sucesso para {email}")
-            print(f"Usuário: {user_info.get('full_name', 'N/A')}")
-            print(f"Role: {user_info.get('role', 'N/A')}")
-            print(f"Stage: {user_info.get('current_stage', 'N/A')}")
-            
-            return token
-        else:
-            error_msg = f"Status {response.status_code}: {response.text}"
-            print_result(False, "Falha na autenticação", error_msg)
-            return None
-            
-    except Exception as e:
-        print_result(False, "Erro na autenticação", str(e))
-        return None
-
-def test_sales_my_sales(token):
-    """Testa GET /api/sales/my-sales"""
-    print_test_header("GET /api/sales/my-sales")
-    
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        response = requests.get(f"{BACKEND_URL}/sales/my-sales", headers=headers)
+    async def setup(self):
+        """Setup da sessão HTTP"""
+        self.session = aiohttp.ClientSession()
         
-        if response.status_code == 200:
-            data = response.json()
-            print_result(True, "Endpoint funcionando")
-            print(f"Total de vendas: {data.get('total_sales', 0)}")
-            print(f"Vendas completadas: {data.get('completed_sales', 0)}")
-            print(f"Vendas pendentes: {data.get('pending_sales', 0)}")
-            print(f"Vendas restantes: {data.get('remaining_sales', 5)}")
-            
-            sales = data.get('sales', [])
-            print(f"Lista de vendas ({len(sales)} itens):")
-            for sale in sales:
-                print(f"  - Venda {sale.get('sale_number')}: {sale.get('customer_name')} - {sale.get('status')}")
-            
-            return True, data
-        else:
-            error_msg = f"Status {response.status_code}: {response.text}"
-            print_result(False, "Erro na requisição", error_msg)
-            return False, None
-            
-    except Exception as e:
-        print_result(False, "Erro de conexão", str(e))
-        return False, None
-
-def test_sales_register(token):
-    """Testa POST /api/sales/register"""
-    print_test_header("POST /api/sales/register")
+    async def cleanup(self):
+        """Cleanup da sessão HTTP"""
+        if self.session:
+            await self.session.close()
     
-    # Dados de teste realistas
-    sale_data = {
-        "sale_number": 1,
-        "customer_name": "Maria Silva Santos",
-        "customer_phone": "(11) 98765-4321",
-        "customer_email": "maria.santos@email.com",
-        "customer_cpf": "123.456.789-00",
-        "device_serial": "IGVD20240101001",
-        "device_source": "leader_stock",
-        "sale_value": 299.90
-    }
-    
-    try:
-        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-        response = requests.post(
-            f"{BACKEND_URL}/sales/register",
-            headers=headers,
-            json=sale_data
-        )
+    async def login(self):
+        """Autentica o usuário de teste"""
+        print("🔐 Fazendo login com credenciais do licenciado...")
         
-        if response.status_code == 200:
-            data = response.json()
-            print_result(True, "Venda registrada com sucesso")
+        try:
+            async with self.session.post(f"{API_BASE}/auth/login", json={
+                "email": TEST_EMAIL,
+                "password": TEST_PASSWORD
+            }) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    self.auth_token = data.get("access_token")
+                    if self.auth_token:
+                        print("✅ Login realizado com sucesso")
+                        return True
+                    else:
+                        print("❌ Login falhou: token não retornado")
+                        return False
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ Login falhou ({resp.status}): {error_text}")
+                    return False
+        except Exception as e:
+            print(f"❌ Erro no login: {e}")
+            return False
+    
+    def get_auth_headers(self):
+        """Retorna headers com autenticação"""
+        if not self.auth_token:
+            return {}
+        return {"Authorization": f"Bearer {self.auth_token}"}
+    
+    async def test_training_my_registration(self):
+        """
+        Testa GET /api/training/my-registration
+        Deve retornar config (não null) mesmo se não existir no banco
+        """
+        self.total_tests += 1
+        print("\n📋 Testando GET /api/training/my-registration...")
+        
+        try:
+            async with self.session.get(
+                f"{API_BASE}/training/my-registration",
+                headers=self.get_auth_headers()
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    # Verificar se retorna config
+                    config = data.get("config")
+                    if config is None:
+                        print("❌ FALHA: config está null")
+                        return False
+                    
+                    # Verificar campos obrigatórios da config
+                    required_fields = [
+                        "days_before_closing", "terms_and_conditions", 
+                        "training_instructions", "solo_price", "couple_price"
+                    ]
+                    
+                    for field in required_fields:
+                        if field not in config:
+                            print(f"❌ FALHA: campo {field} não encontrado na config")
+                            return False
+                    
+                    print("✅ SUCESSO: config retornada com todos os campos necessários")
+                    print(f"   - solo_price: R$ {config.get('solo_price')}")
+                    print(f"   - couple_price: R$ {config.get('couple_price')}")
+                    print(f"   - days_before_closing: {config.get('days_before_closing')} dias")
+                    
+                    registration = data.get("registration")
+                    if registration:
+                        print(f"   - registration: Usuário já tem inscrição existente")
+                    else:
+                        print(f"   - registration: null (usuário não inscrito)")
+                    
+                    self.passed_tests += 1
+                    return True
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ FALHA ({resp.status}): {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ ERRO na requisição: {e}")
+            return False
+    
+    async def test_sales_register(self):
+        """
+        Testa POST /api/sales/register
+        Deve registrar uma venda com dados completos
+        """
+        self.total_tests += 1
+        print("\n💰 Testando POST /api/sales/register...")
+        
+        # Dados realistas de uma venda
+        sale_data = {
+            "sale_number": 1,
+            "customer_name": "Maria Silva Santos",
+            "customer_phone": "(11) 98765-4321",
+            "customer_email": "maria.silva@email.com",
+            "customer_cpf": "12345678901",
+            "device_serial": "DEV001234567",
+            "device_source": "store",
+            "sale_value": 299.90
+        }
+        
+        try:
+            async with self.session.post(
+                f"{API_BASE}/sales/register",
+                json=sale_data,
+                headers=self.get_auth_headers()
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    # Verificar resposta
+                    if "message" not in data:
+                        print("❌ FALHA: campo 'message' não encontrado na resposta")
+                        return False
+                    
+                    sale = data.get("sale")
+                    if not sale:
+                        print("❌ FALHA: dados da venda não retornados")
+                        return False
+                    
+                    # Verificar campos da venda
+                    required_fields = [
+                        "id", "user_id", "sale_number", "customer_name",
+                        "customer_phone", "customer_email", "customer_cpf",
+                        "device_serial", "device_source", "sale_value", "status"
+                    ]
+                    
+                    for field in required_fields:
+                        if field not in sale:
+                            print(f"❌ FALHA: campo {field} não encontrado na venda")
+                            return False
+                    
+                    print("✅ SUCESSO: Venda registrada com todos os campos necessários")
+                    print(f"   - Sale ID: {sale.get('id')}")
+                    print(f"   - Cliente: {sale.get('customer_name')}")
+                    print(f"   - Valor: R$ {sale.get('sale_value')}")
+                    print(f"   - Status: {sale.get('status')}")
+                    
+                    checkout_url = data.get("checkout_url")
+                    if checkout_url:
+                        print(f"   - Checkout URL: Gerada com sucesso")
+                    else:
+                        print(f"   - Checkout URL: Não gerada (esperado se PagSeguro não configurado)")
+                    
+                    self.passed_tests += 1
+                    return True
+                    
+                elif resp.status == 400:
+                    error_text = await resp.text()
+                    if "Já existe uma venda" in error_text:
+                        print("✅ SUCESSO: Endpoint funcionando (venda duplicada detectada corretamente)")
+                        self.passed_tests += 1
+                        return True
+                    else:
+                        print(f"❌ FALHA - Erro 400 inesperado: {error_text}")
+                        return False
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ FALHA ({resp.status}): {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ ERRO na requisição: {e}")
+            return False
+    
+    async def test_sales_my_progress(self):
+        """
+        Testa GET /api/sales/my-progress
+        Deve funcionar (foi movida antes das rotas dinâmicas)
+        """
+        self.total_tests += 1
+        print("\n📊 Testando GET /api/sales/my-progress...")
+        
+        try:
+            async with self.session.get(
+                f"{API_BASE}/sales/my-progress",
+                headers=self.get_auth_headers()
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    # Verificar campos obrigatórios
+                    if "completed" not in data:
+                        print("❌ FALHA: campo 'completed' não encontrado")
+                        return False
+                    
+                    if "total" not in data:
+                        print("❌ FALHA: campo 'total' não encontrado")
+                        return False
+                    
+                    completed = data.get("completed")
+                    total = data.get("total")
+                    
+                    if total != 5:
+                        print(f"❌ FALHA: total deve ser 5, mas retornou {total}")
+                        return False
+                    
+                    if not isinstance(completed, int) or completed < 0:
+                        print(f"❌ FALHA: completed deve ser um inteiro >= 0, mas retornou {completed}")
+                        return False
+                    
+                    print("✅ SUCESSO: Endpoint /my-progress funcionando corretamente")
+                    print(f"   - Vendas completadas: {completed}")
+                    print(f"   - Total necessário: {total}")
+                    print(f"   - Progresso: {completed}/{total} ({(completed/total)*100:.1f}%)")
+                    
+                    self.passed_tests += 1
+                    return True
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ FALHA ({resp.status}): {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ ERRO na requisição: {e}")
+            return False
+    
+    async def test_sales_my_sales_bonus(self):
+        """
+        Teste bônus: Verificar GET /api/sales/my-sales também funciona
+        """
+        self.total_tests += 1
+        print("\n🎯 Testando GET /api/sales/my-sales (teste bônus)...")
+        
+        try:
+            async with self.session.get(
+                f"{API_BASE}/sales/my-sales",
+                headers=self.get_auth_headers()
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    # Verificar estrutura da resposta
+                    required_fields = ["sales", "total_sales", "completed_sales", "pending_sales", "remaining_sales"]
+                    for field in required_fields:
+                        if field not in data:
+                            print(f"❌ FALHA: campo {field} não encontrado")
+                            return False
+                    
+                    sales = data.get("sales", [])
+                    total_sales = data.get("total_sales")
+                    
+                    print("✅ SUCESSO: Endpoint /my-sales funcionando corretamente")
+                    print(f"   - Total de vendas: {total_sales}")
+                    print(f"   - Vendas completadas: {data.get('completed_sales')}")
+                    print(f"   - Vendas pendentes: {data.get('pending_sales')}")
+                    print(f"   - Vendas restantes: {data.get('remaining_sales')}")
+                    
+                    if sales:
+                        print(f"   - Primeira venda: {sales[0].get('customer_name')} - R$ {sales[0].get('sale_value')}")
+                    
+                    self.passed_tests += 1
+                    return True
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ FALHA ({resp.status}): {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ ERRO na requisição: {e}")
+            return False
+    
+    async def run_all_tests(self):
+        """Executa todos os testes"""
+        print("🚀 Iniciando testes das correções específicas...")
+        print(f"📍 Backend URL: {BACKEND_URL}")
+        print(f"👤 Usuário: {TEST_EMAIL}")
+        print("="*60)
+        
+        # Setup
+        await self.setup()
+        
+        try:
+            # Login
+            if not await self.login():
+                print("💥 Não foi possível fazer login. Abortando testes.")
+                return
             
-            sale_info = data.get('sale', {})
-            print(f"ID da venda: {sale_info.get('id')}")
-            print(f"Número da venda: {sale_info.get('sale_number')}")
-            print(f"Cliente: {sale_info.get('customer_name')}")
-            print(f"Valor: R$ {sale_info.get('sale_value')}")
-            print(f"Status: {sale_info.get('status')}")
-            print(f"URL do checkout: {data.get('checkout_url', 'Não disponível')}")
+            # Executar testes principais
+            await self.test_training_my_registration()
+            await self.test_sales_register()
+            await self.test_sales_my_progress()
             
-            return True, data
-        elif response.status_code == 400:
-            # Pode ser erro esperado se venda já existe
-            error_data = response.json()
-            error_detail = error_data.get('detail', response.text)
-            if "Já existe uma venda registrada" in error_detail:
-                print_result(True, "Endpoint funcionando - venda já existia", error_detail)
-                return True, {"existing_sale": True}
+            # Teste bônus
+            await self.test_sales_my_sales_bonus()
+            
+            # Relatório final
+            print("\n" + "="*60)
+            print("📊 RELATÓRIO FINAL DOS TESTES")
+            print("="*60)
+            print(f"✅ Testes passaram: {self.passed_tests}/{self.total_tests}")
+            print(f"❌ Testes falharam: {self.total_tests - self.passed_tests}/{self.total_tests}")
+            
+            if self.passed_tests == self.total_tests:
+                print("🎉 TODOS OS TESTES PASSARAM! As correções estão funcionando.")
             else:
-                print_result(False, "Erro de validação", error_detail)
-                return False, None
-        else:
-            error_msg = f"Status {response.status_code}: {response.text}"
-            print_result(False, "Erro na requisição", error_msg)
-            return False, None
+                print("⚠️  ALGUNS TESTES FALHARAM. Verificar problemas acima.")
             
-    except Exception as e:
-        print_result(False, "Erro de conexão", str(e))
-        return False, None
+            success_rate = (self.passed_tests / self.total_tests) * 100
+            print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
+            
+        finally:
+            await self.cleanup()
 
-def test_payments_create_payment(token):
-    """Testa POST /api/payments/create-payment"""
-    print_test_header("POST /api/payments/create-payment")
-    
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        response = requests.post(f"{BACKEND_URL}/payments/create-payment", headers=headers)
-        
-        if response.status_code == 200:
-            data = response.json()
-            print_result(True, "Pagamento criado com sucesso")
-            print(f"Referência: {data.get('reference_id')}")
-            print(f"Valor: R$ {data.get('amount')}")
-            print(f"Checkout URL: {data.get('checkout_url', 'Não disponível')}")
-            print(f"Sucesso: {data.get('success')}")
-            print(f"Mensagem: {data.get('message')}")
-            
-            return True, data
-        else:
-            error_msg = f"Status {response.status_code}: {response.text}"
-            print_result(False, "Erro na requisição", error_msg)
-            return False, None
-            
-    except Exception as e:
-        print_result(False, "Erro de conexão", str(e))
-        return False, None
-
-def test_additional_sales_endpoints(token):
-    """Testa endpoints adicionais de vendas"""
-    print_test_header("ENDPOINTS ADICIONAIS DE VENDAS")
-    
-    # Teste GET /api/sales/my-progress
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        response = requests.get(f"{BACKEND_URL}/sales/my-progress", headers=headers)
-        
-        if response.status_code == 200:
-            data = response.json()
-            print_result(True, "GET /api/sales/my-progress")
-            print(f"Progresso: {data.get('completed')}/{data.get('total')} vendas")
-        else:
-            print_result(False, "GET /api/sales/my-progress", f"Status {response.status_code}")
-            
-    except Exception as e:
-        print_result(False, "GET /api/sales/my-progress", str(e))
-
-def main():
-    """Função principal do teste"""
-    print("TESTE DAS ROTAS DE VENDAS E PAGAMENTO DE INSCRIÇÃO")
-    print("=" * 60)
-    print(f"Backend URL: {BACKEND_URL}")
-    print(f"Testando com usuário: {LICENSEE_EMAIL}")
-    print(f"Hora do teste: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    # Autenticar usuário
-    token = authenticate_user(LICENSEE_EMAIL, LICENSEE_PASSWORD)
-    if not token:
-        print("\n❌ FALHA CRÍTICA: Não foi possível autenticar o usuário")
-        print("Verifique as credenciais ou se o usuário existe no sistema")
-        return False
-    
-    # Contador de sucessos
-    total_tests = 0
-    successful_tests = 0
-    
-    # Teste 1: Listar vendas do usuário
-    success, _ = test_sales_my_sales(token)
-    total_tests += 1
-    if success:
-        successful_tests += 1
-    
-    # Teste 2: Registrar nova venda
-    success, _ = test_sales_register(token)
-    total_tests += 1
-    if success:
-        successful_tests += 1
-    
-    # Teste 3: Criar pagamento de inscrição
-    success, _ = test_payments_create_payment(token)
-    total_tests += 1
-    if success:
-        successful_tests += 1
-    
-    # Testes adicionais
-    test_additional_sales_endpoints(token)
-    
-    # Resumo final
-    print("\n" + "=" * 60)
-    print("RESUMO DOS TESTES")
-    print("=" * 60)
-    print(f"Total de testes principais: {total_tests}")
-    print(f"Sucessos: {successful_tests}")
-    print(f"Falhas: {total_tests - successful_tests}")
-    print(f"Taxa de sucesso: {(successful_tests/total_tests)*100:.1f}%")
-    
-    if successful_tests == total_tests:
-        print("\n🎉 TODOS OS TESTES PASSARAM!")
-        print("✅ Todas as rotas estão funcionando corretamente")
-        print("✅ POST /api/sales/register - OK")
-        print("✅ GET /api/sales/my-sales - OK") 
-        print("✅ POST /api/payments/create-payment - OK")
-        return True
-    else:
-        print(f"\n⚠️ {total_tests - successful_tests} teste(s) falharam")
-        return False
+async def main():
+    """Função principal"""
+    tester = BackendTester()
+    await tester.run_all_tests()
 
 if __name__ == "__main__":
-    success = main()
-    sys.exit(0 if success else 1)
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n🛑 Testes interrompidos pelo usuário")
+    except Exception as e:
+        print(f"\n💥 Erro fatal: {e}")

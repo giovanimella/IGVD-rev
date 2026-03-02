@@ -118,6 +118,21 @@ async def register_sale(
     }
 
 
+@router.get("/my-progress")
+async def get_my_progress(current_user: dict = Depends(get_current_user)):
+    """Obtém o progresso das 5 vendas do usuário"""
+    # Contar vendas pagas
+    completed_sales = await db.sales.count_documents({
+        "user_id": current_user["sub"],
+        "status": "paid"
+    })
+    
+    return {
+        "completed": completed_sales,
+        "total": 5
+    }
+
+
 @router.get("/{sale_id}")
 async def get_sale(sale_id: str, current_user: dict = Depends(get_current_user)):
     """Obtém uma venda específica"""
@@ -268,21 +283,6 @@ async def get_my_links(current_user: dict = Depends(get_current_user)):
     ).sort("created_at", -1).to_list(100)
     
     return links
-
-
-@router.get("/my-progress")
-async def get_my_progress(current_user: dict = Depends(get_current_user)):
-    """Obtém o progresso das 5 vendas do usuário"""
-    # Contar vendas pagas
-    completed_sales = await db.sales.count_documents({
-        "user_id": current_user["sub"],
-        "status": "paid"
-    })
-    
-    return {
-        "completed": completed_sales,
-        "total": 5
-    }
 
 
 @router.post("/create-link")

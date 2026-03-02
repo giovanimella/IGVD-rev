@@ -310,8 +310,24 @@ async def get_my_registration(current_user: dict = Depends(get_current_user)):
         )
         registration["training_class"] = cls
     
-    # Buscar configuração
+    # Buscar configuração (criar padrão se não existir)
     config = await db.training_config.find_one({"id": "training_config"}, {"_id": 0})
+    
+    if not config:
+        # Criar configuração padrão
+        config = {
+            "id": "training_config",
+            "days_before_closing": 7,
+            "terms_and_conditions": "Termos e condições do treinamento presencial. Ao se inscrever, você concorda com as políticas do Instituto Global de Vendas Diretas.",
+            "training_instructions": "Instruções para o treinamento presencial. Chegue com 30 minutos de antecedência. Traga documento de identificação.",
+            "solo_price": 3500.00,
+            "couple_price": 6000.00,
+            "default_location": "Hotel a definir",
+            "default_hotel_info": "Informações de hospedagem serão enviadas por email após confirmação do pagamento."
+        }
+        # Criar cópia para inserir no banco (evita poluir o config com _id)
+        config_to_insert = config.copy()
+        await db.training_config.insert_one(config_to_insert)
     
     return {
         "registration": registration,
@@ -344,10 +360,22 @@ async def register_for_training(
         # Se não pagou, atualizar dados
         await db.training_registrations.delete_one({"user_id": current_user["sub"]})
     
-    # Buscar configuração
+    # Buscar configuração (criar padrão se não existir)
     config = await db.training_config.find_one({"id": "training_config"}, {"_id": 0})
     if not config:
-        raise HTTPException(status_code=500, detail="Configurações não encontradas")
+        config = {
+            "id": "training_config",
+            "days_before_closing": 7,
+            "terms_and_conditions": "Termos e condições do treinamento presencial.",
+            "training_instructions": "Instruções para o treinamento presencial.",
+            "solo_price": 3500.00,
+            "couple_price": 6000.00,
+            "default_location": "",
+            "default_hotel_info": ""
+        }
+        # Criar cópia para inserir no banco (evita poluir o config com _id)
+        config_to_insert = config.copy()
+        await db.training_config.insert_one(config_to_insert)
     
     # Calcular valor
     price = config.get("couple_price", 6000.00) if data.has_spouse else config.get("solo_price", 3500.00)
