@@ -402,3 +402,151 @@ class PagSeguroService:
         except Exception as e:
             logger.error(f"PagSeguro refund error: {e}")
             return {"success": False, "message": str(e)}
+
+    async def create_checkout(
+        self, 
+        amount: float, 
+        description: str, 
+        reference_id: str,
+        customer_name: str = None,
+        customer_email: str = None,
+        customer_cpf: str = None,
+        redirect_url: str = None,
+        notification_url: str = None
+    ) -> Dict[str, Any]:
+        """
+        Cria um checkout do PagBank (link de pagamento)
+        Retorna a URL para redirecionar o cliente
+        """
+        if not self.token:
+            return {
+                "success": False,
+                "message": "PagSeguro não configurado - Token não encontrado",
+                "checkout_url": None
+            }
+        
+        try:
+            # Converter valor para centavos
+            amount_cents = int(amount * 100)
+            
+            payload = {
+                "reference_id": reference_id,
+                "items": [
+                    {
+                        "reference_id": reference_id,
+                        "name": description,
+                        "quantity": 1,
+                        "unit_amount": amount_cents
+                    }
+                ],
+                "payment_methods": [
+                    {"type": "CREDIT_CARD"},
+                    {"type": "DEBIT_CARD"},
+                    {"type": "PIX"},
+                    {"type": "BOLETO"}
+                ],
+                "payment_methods_configs": [
+                    {
+                        "type": "CREDIT_CARD",
+                        "config_options": [
+                            {"option": "INSTALLMENTS_LIMIT", "value": "12"}
+                        ]
+                    }
+                ]
+            }
+            
+            # Adicionar dados do cliente se fornecidos
+            if customer_name and customer_email and customer_cpf:
+                payload["customer"] = {
+                    "name": customer_name,
+                    "email": customer_email,
+                    "tax_id": customer_cpf.replace(".", "").replace("-", "")
+                }
+                payload["customer_modifiable"] = False
+            
+            # Adicionar URL de redirecionamento
+            if redirect_url:
+                payload["redirect_url"] = redirect_url
+            
+            # Adicionar URL de notificação (webhook)
+            if notification_url:
+                payload["notification_urls"] = [notification_url]
+                payload["payment_notification_urls"] = [notification_url]
+            
+            logger.info(f"Creating PagSeguro checkout: {payload}")
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.base_url}/checkouts",
+                    json=payload,
+                    headers={
+                        **self.headers,
+                        "x-idempotency-key": self._get_idempotency_key("checkout")
+                    },
+                    timeout=30.0
+                )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                
+                # Encontrar o link de pagamento
+                checkout_url = None
+                links = data.get("links", [])
+                for link in links:
+                    if link.get("rel") == "PAY":
+                        checkout_url = link.get("href")
+                        break
+                
+                return {
+                    "success": True,
+                    "message": "Checkout criado com sucesso",
+                    "checkout_id": data.get("id"),
+                    "checkout_url": checkout_url,
+                    "reference_id": reference_id
+                }
+            else:
+                error_data = response.json() if response.content else {}
+                error_messages = error_data.get("error_messages", [])
+                error_message = error_messages[0].get("description") if error_messages else f"Erro ao criar checkout: {response.status_code}"
+                logger.error(f"PagSeguro Checkout error: {response.status_code} - {response.text}")
+                return {
+                    "success": False,
+                    "message": error_message,
+                    "checkout_url": None
+                }
+                
+        except Exception as e:
+            logger.error(f"PagSeguro Checkout exception: {e}")
+            return {
+                "success": False,
+                "message": f"Erro ao criar checkout: {str(e)}",
+                "checkout_url": None
+            }
+
+    async def get_checkout_status(self, checkout_id: str) -> Dict[str, Any]:
+        """Verifica o status de um checkout"""
+        if not self.token:
+            return {"status": "error", "message": "API não configurada"}
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"{self.base_url}/checkouts/{checkout_id}",
+                    headers=self.headers,
+                    timeout=30.0
+                )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "success": True,
+                    "status": data.get("status"),
+                    "checkout_id": data.get("id"),
+                    "orders": data.get("orders", [])
+                }
+            else:
+                return {"success": False, "message": "Checkout não encontrado"}
+                
+        except Exception as e:
+            logger.error(f"PagSeguro get checkout error: {e}")
+            return {"success": False, "message": str(e)}

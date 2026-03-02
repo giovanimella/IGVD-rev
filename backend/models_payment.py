@@ -44,12 +44,11 @@ class PaymentPurpose(str, Enum):
 # ==================== CONFIGURAÇÕES DO GATEWAY ====================
 
 class GatewayCredentials(BaseModel):
-    """Credenciais do gateway PagSeguro"""
-    # PagSeguro
-    pagseguro_email: Optional[str] = None
+    """Credenciais do gateway PagSeguro/PagBank"""
+    # PagSeguro/PagBank - Apenas o token é necessário para autenticação
     pagseguro_token: Optional[str] = None
-    pagseguro_app_id: Optional[str] = None
-    pagseguro_app_key: Optional[str] = None
+    # Email da conta (para referência/identificação, não usado na autenticação)
+    pagseguro_email: Optional[str] = None
 
 
 class PaymentSettings(BaseModel):

@@ -3,7 +3,6 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import Layout from '../../components/Layout';
 import {
-  CreditCard,
   Wallet,
   Settings,
   Save,
@@ -13,7 +12,8 @@ import {
   AlertCircle,
   RefreshCw,
   Zap,
-  Shield
+  Shield,
+  ExternalLink
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -24,25 +24,20 @@ const AdminPaymentSettings = () => {
   const [saving, setSaving] = useState(false);
   const [showSecrets, setShowSecrets] = useState({});
   
-  // Form state
+  // Form state - Apenas campos que o PagBank disponibiliza
   const [formData, setFormData] = useState({
-    active_gateway: 'pagseguro',
     environment: 'sandbox',
     pix_enabled: true,
     credit_card_enabled: true,
     split_payment_enabled: true,
     max_installments: 12,
     min_installment_value: 5.0,
-    // Sandbox credentials - PagSeguro
+    // Sandbox credentials - PagSeguro (apenas email e token)
     sandbox_pagseguro_email: '',
     sandbox_pagseguro_token: '',
-    sandbox_pagseguro_app_id: '',
-    sandbox_pagseguro_app_key: '',
-    // Production credentials - PagSeguro
+    // Production credentials - PagSeguro (apenas email e token)
     production_pagseguro_email: '',
     production_pagseguro_token: '',
-    production_pagseguro_app_id: '',
-    production_pagseguro_app_key: '',
   });
 
   useEffect(() => {
@@ -57,7 +52,6 @@ const AdminPaymentSettings = () => {
       // Preencher form com dados existentes
       setFormData(prev => ({
         ...prev,
-        active_gateway: 'pagseguro', // Sempre PagSeguro
         environment: response.data.environment || 'sandbox',
         pix_enabled: response.data.pix_enabled ?? true,
         credit_card_enabled: response.data.credit_card_enabled ?? true,
@@ -67,13 +61,9 @@ const AdminPaymentSettings = () => {
         // Sandbox - PagSeguro
         sandbox_pagseguro_email: response.data.sandbox_credentials?.pagseguro_email || '',
         sandbox_pagseguro_token: response.data.sandbox_credentials?.pagseguro_token || '',
-        sandbox_pagseguro_app_id: response.data.sandbox_credentials?.pagseguro_app_id || '',
-        sandbox_pagseguro_app_key: response.data.sandbox_credentials?.pagseguro_app_key || '',
         // Production - PagSeguro
         production_pagseguro_email: response.data.production_credentials?.pagseguro_email || '',
         production_pagseguro_token: response.data.production_credentials?.pagseguro_token || '',
-        production_pagseguro_app_id: response.data.production_credentials?.pagseguro_app_id || '',
-        production_pagseguro_app_key: response.data.production_credentials?.pagseguro_app_key || '',
       }));
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
@@ -97,14 +87,10 @@ const AdminPaymentSettings = () => {
         sandbox_credentials: {
           pagseguro_email: formData.sandbox_pagseguro_email || null,
           pagseguro_token: formData.sandbox_pagseguro_token || null,
-          pagseguro_app_id: formData.sandbox_pagseguro_app_id || null,
-          pagseguro_app_key: formData.sandbox_pagseguro_app_key || null,
         },
         production_credentials: {
           pagseguro_email: formData.production_pagseguro_email || null,
           pagseguro_token: formData.production_pagseguro_token || null,
-          pagseguro_app_id: formData.production_pagseguro_app_id || null,
-          pagseguro_app_key: formData.production_pagseguro_app_key || null,
         }
       };
 
@@ -127,7 +113,7 @@ const AdminPaymentSettings = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const CredentialInput = ({ label, field, placeholder, isSecret = false }) => (
+  const CredentialInput = ({ label, field, placeholder, isSecret = false, helpText = null }) => (
     <div>
       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
         {label}
@@ -150,6 +136,9 @@ const AdminPaymentSettings = () => {
           </button>
         )}
       </div>
+      {helpText && (
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{helpText}</p>
+      )}
     </div>
   );
 
@@ -170,7 +159,7 @@ const AdminPaymentSettings = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">Configurações de Pagamento</h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">Gerencie as credenciais do PagSeguro</p>
+            <p className="text-slate-600 dark:text-slate-400 mt-2">Configure as credenciais do PagBank</p>
           </div>
           <button
             onClick={handleSave}
@@ -196,8 +185,8 @@ const AdminPaymentSettings = () => {
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div className="text-left flex-1">
-                <p className="font-semibold text-cyan-600 dark:text-cyan-400">PagSeguro</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Soluções completas de pagamento</p>
+                <p className="font-semibold text-cyan-600 dark:text-cyan-400">PagBank (PagSeguro)</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">PIX, Cartão de Crédito, Débito e Boleto</p>
               </div>
               <CheckCircle className="w-6 h-6 text-cyan-500" />
             </div>
@@ -291,7 +280,7 @@ const AdminPaymentSettings = () => {
                 onChange={(e) => handleChange('split_payment_enabled', e.target.checked)}
                 className="w-5 h-5 rounded border-slate-300 text-cyan-500 focus:ring-cyan-500"
               />
-              <span className="text-slate-700 dark:text-slate-300">Pagamento Dividido (PIX + Cartão ou múltiplos cartões)</span>
+              <span className="text-slate-700 dark:text-slate-300">Pagamento Dividido</span>
             </label>
           </div>
 
@@ -303,7 +292,7 @@ const AdminPaymentSettings = () => {
               <input
                 type="number"
                 min="1"
-                max="24"
+                max="18"
                 value={formData.max_installments}
                 onChange={(e) => handleChange('max_installments', e.target.value)}
                 className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
@@ -331,12 +320,34 @@ const AdminPaymentSettings = () => {
             <AlertCircle className="w-5 h-5 text-amber-500" />
             Credenciais Sandbox (Teste)
           </h2>
+          
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            Obtenha suas credenciais de teste no{' '}
+            <a 
+              href="https://portaldev.pagbank.com.br/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-cyan-600 hover:text-cyan-700 underline inline-flex items-center gap-1"
+            >
+              Portal de Desenvolvedores PagBank
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <CredentialInput label="Email" field="sandbox_pagseguro_email" placeholder="email@sandbox.pagseguro.com.br" />
-            <CredentialInput label="Token" field="sandbox_pagseguro_token" placeholder="Token de autenticação..." isSecret />
-            <CredentialInput label="App ID" field="sandbox_pagseguro_app_id" placeholder="app123456" />
-            <CredentialInput label="App Key" field="sandbox_pagseguro_app_key" placeholder="Chave da aplicação..." isSecret />
+            <CredentialInput 
+              label="Email da Conta" 
+              field="sandbox_pagseguro_email" 
+              placeholder="email@exemplo.com"
+              helpText="Email cadastrado no PagBank"
+            />
+            <CredentialInput 
+              label="Token de Autenticação" 
+              field="sandbox_pagseguro_token" 
+              placeholder="Seu token de sandbox..." 
+              isSecret
+              helpText="Encontre em: Portal Dev → Tokens"
+            />
           </div>
         </div>
 
@@ -347,38 +358,76 @@ const AdminPaymentSettings = () => {
             Credenciais Produção
           </h2>
 
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            Obtenha suas credenciais de produção no{' '}
+            <a 
+              href="https://acesso.pagseguro.uol.com.br/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-cyan-600 hover:text-cyan-700 underline inline-flex items-center gap-1"
+            >
+              PagBank
+              <ExternalLink className="w-3 h-3" />
+            </a>
+            {' '}→ Vender online → Integrações → Gerar Token
+          </p>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <CredentialInput label="Email" field="production_pagseguro_email" placeholder="email@seudominio.com.br" />
-            <CredentialInput label="Token" field="production_pagseguro_token" placeholder="Token de autenticação..." isSecret />
-            <CredentialInput label="App ID" field="production_pagseguro_app_id" placeholder="app123456" />
-            <CredentialInput label="App Key" field="production_pagseguro_app_key" placeholder="Chave da aplicação..." isSecret />
+            <CredentialInput 
+              label="Email da Conta" 
+              field="production_pagseguro_email" 
+              placeholder="email@seudominio.com.br"
+              helpText="Email cadastrado no PagBank"
+            />
+            <CredentialInput 
+              label="Token de Autenticação" 
+              field="production_pagseguro_token" 
+              placeholder="Seu token de produção..." 
+              isSecret
+              helpText="Menu: Vender online → Integrações"
+            />
           </div>
         </div>
 
         {/* Webhook URL */}
         <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">URL de Webhook</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">URL de Webhook (Notificações)</h2>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-            Configure esta URL no painel do PagSeguro para receber notificações de pagamento:
+            Configure esta URL no painel do PagBank para receber notificações automáticas de pagamento:
           </p>
           
           <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">PagSeguro:</p>
             <code className="text-sm text-cyan-600 dark:text-cyan-400 break-all">
-              {window.location.origin.replace('localhost:3000', 'igvd.org')}/api/payments/webhooks/pagseguro
+              {window.location.origin.replace('localhost:3000', 'seudominio.com')}/api/payments/webhooks/pagseguro
             </code>
           </div>
         </div>
 
         {/* Help Section */}
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-500/30 p-6">
-          <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">Como obter as credenciais?</h3>
-          <ol className="text-sm text-blue-700 dark:text-blue-400 space-y-2 list-decimal list-inside">
-            <li>Acesse sua conta no <a href="https://acesso.pagseguro.uol.com.br" target="_blank" rel="noopener noreferrer" className="underline">PagSeguro</a></li>
-            <li>Vá em "Preferências" → "Integrações"</li>
-            <li>Gere ou copie seu Token de autenticação</li>
-            <li>Para ambiente sandbox, use: <a href="https://sandbox.pagseguro.uol.com.br" target="_blank" rel="noopener noreferrer" className="underline">sandbox.pagseguro.uol.com.br</a></li>
-          </ol>
+          <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-3">Como obter suas credenciais?</h3>
+          
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-blue-700 dark:text-blue-400 mb-2">Ambiente Sandbox (Teste):</h4>
+              <ol className="text-sm text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
+                <li>Acesse o <a href="https://portaldev.pagbank.com.br/" target="_blank" rel="noopener noreferrer" className="underline">Portal de Desenvolvedores</a></li>
+                <li>Faça login com sua conta PagBank</li>
+                <li>Clique na aba "Tokens"</li>
+                <li>Copie o token de sandbox</li>
+              </ol>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-blue-700 dark:text-blue-400 mb-2">Ambiente Produção:</h4>
+              <ol className="text-sm text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
+                <li>Acesse sua conta no <a href="https://acesso.pagseguro.uol.com.br/" target="_blank" rel="noopener noreferrer" className="underline">PagBank</a></li>
+                <li>No menu lateral, clique em "Vender online"</li>
+                <li>Selecione "Integrações"</li>
+                <li>Clique em "Gerar Token" ou copie o existente</li>
+              </ol>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>

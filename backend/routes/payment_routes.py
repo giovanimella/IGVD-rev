@@ -100,7 +100,7 @@ async def update_credentials(
 
 @router.get("/settings/public-key")
 async def get_public_key(current_user: dict = Depends(get_current_user)):
-    """Obtém a public key do PagSeguro para uso no frontend"""
+    """Obtém o token do PagSeguro para uso no frontend (checkout)"""
     settings = await payment_gateway.get_settings()
     
     if settings.environment == PaymentEnvironment.SANDBOX:
@@ -110,7 +110,7 @@ async def get_public_key(current_user: dict = Depends(get_current_user)):
     
     return {
         "gateway": "pagseguro",
-        "public_key": credentials.pagseguro_app_key or credentials.pagseguro_token
+        "token": credentials.pagseguro_token
     }
 
 
