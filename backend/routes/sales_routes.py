@@ -282,11 +282,14 @@ async def get_sales_summary(current_user: dict = Depends(get_current_user)):
         "total_sales": total_sales,
         "paid_sales": paid_sales,
         "pending_sales": pending_sales,
-        "total_amount": total_amount,
-        "pending_amount": pending_amount,
+        "total_value": total_amount,
+        "total_amount": total_amount,  # Mantido para compatibilidade
+        "pending_value": pending_amount,
+        "pending_amount": pending_amount,  # Mantido para compatibilidade
         "month_sales": month_sales,
         "month_paid": month_paid,
-        "month_amount": month_amount,
+        "month_value": month_amount,
+        "month_amount": month_amount,  # Mantido para compatibilidade
         "licensees_with_sales": len(licensees_with_sales)
     }
 
@@ -339,7 +342,9 @@ async def get_all_sales(
             "email": user.get("email", "") if user else "",
             "total_sales": stat["total_sales"],
             "paid_sales": stat["paid_sales"],
+            "total_value": stat["total_amount"],
             "total_amount": stat["total_amount"],
+            "pending_value": stat["pending_amount"],
             "pending_amount": stat["pending_amount"]
         })
     
@@ -414,7 +419,9 @@ async def get_monthly_report(
         "total_sales": total_sales,
         "paid_sales": paid_sales,
         "pending_sales": pending_sales,
+        "total_value": total_amount,
         "total_amount": total_amount,
+        "pending_value": pending_amount,
         "pending_amount": pending_amount,
         "sales": sales,
         "licensee_stats": licensee_stats
