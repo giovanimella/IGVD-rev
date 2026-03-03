@@ -19,7 +19,11 @@ import {
   Loader2,
   Copy,
   ExternalLink,
-  X
+  X,
+  Share2,
+  MessageCircle,
+  Send,
+  Link2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
@@ -41,6 +45,8 @@ const Sales = () => {
   const [loading, setLoading] = useState(true);
   const [salesData, setSalesData] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareData, setShareData] = useState(null);
   const [editingSale, setEditingSale] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
@@ -113,6 +119,15 @@ const Sales = () => {
     setShowModal(true);
   };
 
+  const openShareModal = (checkoutUrl, customerName, saleValue) => {
+    setShareData({
+      url: checkoutUrl,
+      customerName,
+      saleValue
+    });
+    setShowShareModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -124,15 +139,28 @@ const Sales = () => {
           sale_value: parseFloat(formData.sale_value)
         });
         toast.success('Venda atualizada!');
+        setShowModal(false);
       } else {
-        await axios.post(`${API_URL}/api/sales/register`, {
+        const response = await axios.post(`${API_URL}/api/sales/register`, {
           ...formData,
           sale_value: parseFloat(formData.sale_value)
         });
-        toast.success('Venda registrada!');
+        
+        setShowModal(false);
+        
+        // Se retornou checkout_url, abrir popup de compartilhamento
+        if (response.data.checkout_url) {
+          openShareModal(
+            response.data.checkout_url,
+            formData.customer_name,
+            formData.sale_value
+          );
+          toast.success('Venda registrada! Compartilhe o link de pagamento.');
+        } else {
+          toast.success('Venda registrada!');
+        }
       }
       
-      setShowModal(false);
       fetchSales();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Erro ao salvar venda');
@@ -173,9 +201,41 @@ const Sales = () => {
     }
   };
 
-  const copyPaymentLink = (link) => {
-    navigator.clipboard.writeText(link);
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
     toast.success('Link copiado!');
+  };
+
+  const shareViaWhatsApp = (url, customerName, value) => {
+    const message = encodeURIComponent(
+      `Olá ${customerName}! Segue o link para pagamento da sua compra no valor de R$ ${parseFloat(value).toFixed(2)}:\n\n${url}`
+    );
+    window.open(`https://wa.me/?text=${message}`, '_blank');
+  };
+
+  const shareViaEmail = (url, customerName, value) => {
+    const subject = encodeURIComponent('Link de Pagamento - Sua Compra');
+    const body = encodeURIComponent(
+      `Olá ${customerName},\n\nSegue o link para pagamento da sua compra no valor de R$ ${parseFloat(value).toFixed(2)}:\n\n${url}\n\nAtenciosamente.`
+    );
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+  };
+
+  const shareNative = async (url, customerName, value) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Link de Pagamento',
+          text: `Olá ${customerName}! Segue o link para pagamento da sua compra no valor de R$ ${parseFloat(value).toFixed(2)}`,
+          url: url
+        });
+      } catch (err) {
+        // Usuário cancelou ou erro
+        console.log('Compartilhamento cancelado');
+      }
+    } else {
+      copyToClipboard(url);
+    }
   };
 
   const formatCurrency = (value) => {
@@ -183,11 +243,6 @@ const Sales = () => {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
-  };
-
-  const formatCPF = (value) => {
-    const numbers = value.replace(/\D/g, '');
-    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
   const formatPhone = (value) => {
@@ -261,8 +316,8 @@ const Sales = () => {
         <div className="grid grid-cols-5 gap-4">
           {Array.from({ length: 5 }, (_, i) => i + 1).map((saleNum) => {
             const sale = salesData?.sales?.find(s => s.sale_number === saleNum);
-            const isPaid = sale?.payment_status === 'paid';
-            const isPending = sale?.payment_status === 'pending';
+            const isPaid = sale?.status === 'paid';
+            const isPending = sale && sale.status !== 'paid';
             
             return (
               <div
@@ -327,7 +382,7 @@ const Sales = () => {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            sale.payment_status === 'paid' 
+                            sale.status === 'paid' 
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
                               : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
                           }`}>
@@ -350,11 +405,11 @@ const Sales = () => {
                       </div>
                       
                       <div>
-                        <p className="text-sm text-slate-500 flex items-center gap-1">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                           <Package className="w-3 h-3" />
                           {sale.device_serial}
                         </p>
-                        <p className="text-sm text-slate-500 flex items-center gap-1">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
                           {sale.device_source === 'leader_stock' ? (
                             <><Users className="w-3 h-3" /> Estoque do Líder</>
                           ) : (
@@ -364,52 +419,66 @@ const Sales = () => {
                       </div>
                       
                       <div className="text-right">
-                        <p className="text-lg font-bold text-slate-900">
+                        <p className="text-lg font-bold text-slate-900 dark:text-white">
                           {formatCurrency(sale.sale_value)}
                         </p>
                         <p className={`text-sm ${
-                          sale.payment_status === 'paid' ? 'text-green-600' : 'text-amber-600'
+                          sale.status === 'paid' ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'
                         }`}>
-                          {sale.payment_status === 'paid' ? 'Pago' : 'Aguardando'}
+                          {sale.status === 'paid' ? 'Pago' : 'Aguardando'}
                         </p>
                       </div>
                     </div>
                     
                     {/* Actions */}
                     <div className="flex items-center gap-2 ml-4">
-                      {sale.payment_status === 'pending' && (
+                      {sale.status !== 'paid' && (
                         <>
+                          {sale.checkout_url && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openShareModal(sale.checkout_url, sale.customer_name, sale.sale_value);
+                              }}
+                              className="p-2 hover:bg-cyan-100 dark:hover:bg-cyan-900/30 rounded-lg transition-colors"
+                              title="Compartilhar link de pagamento"
+                            >
+                              <Share2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                            </button>
+                          )}
                           <button
-                            onClick={() => copyPaymentLink(sale.payment_link)}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                            title="Copiar link de pagamento"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSimulatePayment(sale.id);
+                            }}
+                            className="p-2 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors"
+                            title="Simular pagamento (teste)"
                           >
-                            <Copy className="w-4 h-4 text-slate-500" />
+                            <CreditCard className="w-4 h-4 text-green-600 dark:text-green-400" />
                           </button>
                           <button
-                            onClick={() => handleSimulatePayment(sale.id)}
-                            className="p-2 hover:bg-green-100 rounded-lg transition-colors"
-                            title="Simular pagamento"
-                          >
-                            <CreditCard className="w-4 h-4 text-green-600" />
-                          </button>
-                          <button
-                            onClick={() => openEditSaleModal(sale)}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditSaleModal(sale);
+                            }}
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
                             title="Editar"
                           >
-                            <Edit className="w-4 h-4 text-slate-500" />
+                            <Edit className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                           </button>
                           <button
-                            onClick={() => handleDelete(sale.id)}
-                            className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(sale.id);
+                            }}
+                            className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                             title="Excluir"
                           >
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </button>
                         </>
                       )}
-                      {sale.payment_status === 'paid' && (
+                      {sale.status === 'paid' && (
                         <CheckCircle className="w-5 h-5 text-green-500" />
                       )}
                     </div>
@@ -433,7 +502,7 @@ const Sales = () => {
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             {!editingSale && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Número da Venda *
                 </label>
                 <Select
@@ -457,28 +526,28 @@ const Sales = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Nome Completo do Cliente *
                 </label>
                 <input
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   required
                   data-testid="input-customer-name"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Telefone *
                 </label>
                 <input
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   placeholder="(00) 00000-0000"
                   required
                   data-testid="input-customer-phone"
@@ -486,28 +555,28 @@ const Sales = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   E-mail *
                 </label>
                 <input
                   type="email"
                   value={formData.customer_email}
                   onChange={(e) => setFormData({...formData, customer_email: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   required
                   data-testid="input-customer-email"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   CPF *
                 </label>
                 <input
                   type="text"
                   value={formData.customer_cpf}
                   onChange={(e) => setFormData({...formData, customer_cpf: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   placeholder="000.000.000-00"
                   required
                   data-testid="input-customer-cpf"
@@ -515,21 +584,21 @@ const Sales = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Nº de Série do Aparelho *
                 </label>
                 <input
                   type="text"
                   value={formData.device_serial}
                   onChange={(e) => setFormData({...formData, device_serial: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   required
                   data-testid="input-device-serial"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Origem do Aparelho *
                 </label>
                 <Select
@@ -557,7 +626,7 @@ const Sales = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Valor da Venda (R$) *
                 </label>
                 <input
@@ -566,19 +635,19 @@ const Sales = () => {
                   min="0"
                   value={formData.sale_value}
                   onChange={(e) => setFormData({...formData, sale_value: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   required
                   data-testid="input-sale-value"
                 />
               </div>
             </div>
 
-            <div className="bg-amber-50 rounded-lg p-4">
+            <div className="bg-cyan-50 dark:bg-cyan-900/20 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-800">
-                  <p className="font-medium">Link de Pagamento</p>
-                  <p>Após salvar, um link de pagamento será gerado para você enviar ao cliente. O link será integrado ao gateway de pagamento em breve.</p>
+                <Link2 className="w-5 h-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-cyan-800 dark:text-cyan-300">
+                  <p className="font-medium">Link de Pagamento PagBank</p>
+                  <p className="text-cyan-700 dark:text-cyan-400">Após registrar a venda, um link de pagamento será gerado automaticamente para você compartilhar com o cliente.</p>
                 </div>
               </div>
             </div>
@@ -603,6 +672,102 @@ const Sales = () => {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Compartilhamento */}
+      <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5 text-cyan-500" />
+              Compartilhar Link de Pagamento
+            </DialogTitle>
+          </DialogHeader>
+
+          {shareData && (
+            <div className="space-y-6 mt-4">
+              {/* Info */}
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Cliente: <span className="font-medium text-slate-900 dark:text-white">{shareData.customerName}</span>
+                </p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Valor: <span className="font-medium text-slate-900 dark:text-white">{formatCurrency(shareData.saleValue)}</span>
+                </p>
+              </div>
+
+              {/* Link */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Link de Pagamento
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={shareData.url}
+                    readOnly
+                    className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                  />
+                  <Button
+                    onClick={() => copyToClipboard(shareData.url)}
+                    variant="outline"
+                    className="flex-shrink-0"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Opções de Compartilhamento */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                  Compartilhar via
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => shareViaWhatsApp(shareData.url, shareData.customerName, shareData.saleValue)}
+                    className="flex flex-col items-center gap-2 p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-600 transition-colors"
+                  >
+                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                      <MessageCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">WhatsApp</span>
+                  </button>
+
+                  <button
+                    onClick={() => shareViaEmail(shareData.url, shareData.customerName, shareData.saleValue)}
+                    className="flex flex-col items-center gap-2 p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
+                  >
+                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                      <Mail className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">E-mail</span>
+                  </button>
+
+                  <button
+                    onClick={() => shareNative(shareData.url, shareData.customerName, shareData.saleValue)}
+                    className="flex flex-col items-center gap-2 p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-300 dark:hover:border-purple-600 transition-colors"
+                  >
+                    <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                      <Send className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Outros</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Abrir no PagBank */}
+              <Button
+                onClick={() => window.open(shareData.url, '_blank')}
+                variant="outline"
+                className="w-full"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Abrir Página de Pagamento
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </Layout>

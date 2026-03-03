@@ -52,7 +52,6 @@ import Agenda from './pages/Agenda';
 import ChapterView from './pages/ChapterView';
 import LiveClassView from './pages/LiveClassView';
 import Training from './pages/Training';
-import SalesLinks from './pages/SalesLinks';
 import Sales from './pages/Sales';
 import OzoxxCast from './pages/OzoxxCast';
 import AdminOzoxxCast from './pages/admin/AdminOzoxxCast';
@@ -187,14 +186,6 @@ function App() {
             element={
               <PrivateRoute roles={['licenciado']}>
                 <Sales />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/sales-links"
-            element={
-              <PrivateRoute roles={['licenciado']}>
-                <SalesLinks />
               </PrivateRoute>
             }
           />
