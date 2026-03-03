@@ -708,13 +708,6 @@ async def simulate_payment(
     if transaction.get("status") == "paid":
         raise HTTPException(status_code=400, detail="Pagamento já confirmado")
     
-    # Simular webhook
-    fake_webhook = {
-        "reference_id": reference_id,
-        "is_paid": True,
-        "notification_type": "SIMULATED"
-    }
-    
     # Atualizar transação
     await db.payment_transactions.update_one(
         {"reference_id": reference_id},
