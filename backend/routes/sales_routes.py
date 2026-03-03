@@ -1,10 +1,11 @@
 """
 Rotas para gerenciamento das 5 vendas em campo
+Integração com PagBank - Checkout Externo
 """
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import os
 import uuid
 
@@ -13,7 +14,7 @@ from models_payment import (
     PaymentLink, CreatePaymentLinkRequest, PaymentGateway,
     Sale, SaleStatus, DeviceSource, RegisterSaleRequest
 )
-from services.payment_gateway import PaymentGatewayService
+from services.pagbank_service import PagBankService
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 
@@ -21,7 +22,25 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-payment_gateway = PaymentGatewayService()
+
+async def get_pagbank_service() -> PagBankService:
+    """Obtém o serviço PagBank configurado"""
+    settings = await db.payment_settings.find_one({}, {"_id": 0})
+    
+    if not settings:
+        return PagBankService(token=None, email=None, is_sandbox=True)
+    
+    is_sandbox = settings.get("environment") == "sandbox"
+    
+    if is_sandbox:
+        credentials = settings.get("sandbox_credentials", {})
+    else:
+        credentials = settings.get("production_credentials", {})
+    
+    token = credentials.get("pagseguro_token")
+    email = credentials.get("pagseguro_email")
+    
+    return PagBankService(token=token, email=email, is_sandbox=is_sandbox)
 
 
 # ==================== ROTAS DAS 5 VENDAS EM CAMPO ====================
@@ -51,9 +70,10 @@ async def get_my_sales(current_user: dict = Depends(get_current_user)):
 @router.post("/register")
 async def register_sale(
     request: RegisterSaleRequest,
+    req: Request,
     current_user: dict = Depends(get_current_user)
 ):
-    """Registra uma nova venda e gera link de pagamento"""
+    """Registra uma nova venda e gera link de pagamento no PagBank"""
     # Verificar se já existe venda com este número para o usuário
     existing = await db.sales.find_one({
         "user_id": current_user["sub"],
@@ -71,8 +91,13 @@ async def register_sale(
     if sales_count >= 5:
         raise HTTPException(status_code=400, detail="Você já registrou as 5 vendas")
     
+    # Criar reference_id único
+    sale_id = str(uuid.uuid4())
+    reference_id = f"sale_{sale_id[:12]}"
+    
     # Criar venda
     sale = Sale(
+        id=sale_id,
         user_id=current_user["sub"],
         sale_number=request.sale_number,
         customer_name=request.customer_name,
@@ -85,36 +110,78 @@ async def register_sale(
         status=SaleStatus.PENDING
     )
     
-    # Gerar link de pagamento via PagSeguro
+    # Gerar link de pagamento via PagBank
+    checkout_url = None
+    checkout_id = None
+    
     try:
-        gateway_service = await payment_gateway.get_gateway_service()
+        service = await get_pagbank_service()
+        
+        # Obter URL do frontend
+        frontend_url = os.environ.get('REACT_APP_BACKEND_URL', '').replace('/api', '').replace(':8001', ':3000')
+        if not frontend_url:
+            frontend_url = str(req.base_url).rstrip('/')
+        
+        redirect_url = f"{frontend_url}/sales"
+        
+        # Webhook URL
+        host = req.headers.get("host", "localhost:8001")
+        scheme = req.headers.get("x-forwarded-proto", "https")
+        webhook_url = f"{scheme}://{host}/api/payments/webhooks/pagbank"
         
         # Criar checkout
-        checkout_result = await gateway_service.create_checkout(
+        result = await service.create_checkout(
+            reference_id=reference_id,
             amount=request.sale_value,
-            description=f"Venda {request.sale_number} - {request.customer_name}",
-            reference_id=sale.id,
+            item_name=f"Venda {request.sale_number} - {request.customer_name}",
             customer_name=request.customer_name,
             customer_email=request.customer_email,
-            customer_cpf=request.customer_cpf
+            customer_cpf=request.customer_cpf,
+            redirect_url=redirect_url,
+            notification_urls=[webhook_url]
         )
         
-        if checkout_result.get("success"):
-            sale.checkout_id = checkout_result.get("checkout_id")
-            sale.checkout_url = checkout_result.get("checkout_url")
+        if result.get("success"):
+            checkout_id = result.get("checkout_id")
+            checkout_url = result.get("checkout_url")
+            
+            sale.checkout_id = checkout_id
+            sale.checkout_url = checkout_url
         else:
-            # Mesmo se falhar o checkout, salva a venda
-            print(f"Erro ao criar checkout: {checkout_result.get('message')}")
+            # Log do erro mas continua salvando a venda
+            print(f"Erro ao criar checkout: {result.get('error')}")
+            
     except Exception as e:
-        print(f"Erro ao criar checkout PagSeguro: {e}")
+        print(f"Erro ao criar checkout PagBank: {e}")
     
-    # Salvar venda
-    await db.sales.insert_one(sale.model_dump())
+    # Salvar venda com reference_id
+    sale_dict = sale.model_dump()
+    sale_dict["checkout_reference_id"] = reference_id
+    await db.sales.insert_one(sale_dict)
+    
+    # Salvar transação se checkout foi criado
+    if checkout_id:
+        transaction = {
+            "id": str(uuid.uuid4()),
+            "reference_id": reference_id,
+            "checkout_id": checkout_id,
+            "checkout_url": checkout_url,
+            "user_id": current_user["sub"],
+            "sale_id": sale_id,
+            "amount": request.sale_value,
+            "item_name": f"Venda {request.sale_number} - {request.customer_name}",
+            "purpose": "sales_link",
+            "status": "pending",
+            "customer_name": request.customer_name,
+            "customer_email": request.customer_email,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.payment_transactions.insert_one(transaction)
     
     return {
         "message": "Venda registrada com sucesso",
         "sale": sale.model_dump(),
-        "checkout_url": sale.checkout_url
+        "checkout_url": checkout_url
     }
 
 
@@ -222,7 +289,12 @@ async def delete_sale(sale_id: str, current_user: dict = Depends(get_current_use
 
 @router.post("/{sale_id}/simulate-payment")
 async def simulate_payment(sale_id: str, current_user: dict = Depends(get_current_user)):
-    """Simula o pagamento de uma venda (para testes)"""
+    """Simula o pagamento de uma venda (para testes - apenas em sandbox)"""
+    # Verificar ambiente
+    settings = await db.payment_settings.find_one({}, {"_id": 0})
+    if settings and settings.get("environment") != "sandbox":
+        raise HTTPException(status_code=400, detail="Simulação só disponível em modo sandbox")
+    
     sale = await db.sales.find_one({"id": sale_id}, {"_id": 0})
     
     if not sale:
@@ -240,8 +312,8 @@ async def simulate_payment(sale_id: str, current_user: dict = Depends(get_curren
         {"id": sale_id},
         {"$set": {
             "status": "paid",
-            "paid_at": datetime.now().isoformat(),
-            "updated_at": datetime.now().isoformat()
+            "paid_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }}
     )
     
@@ -259,7 +331,7 @@ async def simulate_payment(sale_id: str, current_user: dict = Depends(get_curren
             {"$set": {
                 "current_stage": "documentos_pj",
                 "field_sales_count": 5,
-                "updated_at": datetime.now().isoformat()
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }}
         )
         advanced_to_next_stage = True
