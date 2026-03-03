@@ -226,6 +226,221 @@ async def get_my_progress(current_user: dict = Depends(get_current_user)):
     }
 
 
+# ==================== RELATÓRIOS DE VENDAS (ADMIN) ====================
+
+@router.get("/report/summary")
+async def get_sales_summary(current_user: dict = Depends(get_current_user)):
+    """Obtém resumo geral das vendas (somente admin/supervisor)"""
+    if current_user.get("role") not in ["admin", "supervisor"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Total de vendas
+    total_sales = await db.sales.count_documents({})
+    paid_sales = await db.sales.count_documents({"status": "paid"})
+    pending_sales = await db.sales.count_documents({"status": "pending"})
+    
+    # Valor total
+    pipeline = [
+        {"$match": {"status": "paid"}},
+        {"$group": {"_id": None, "total": {"$sum": "$sale_value"}}}
+    ]
+    result = await db.sales.aggregate(pipeline).to_list(1)
+    total_amount = result[0]["total"] if result else 0
+    
+    # Vendas pendentes (valor)
+    pipeline_pending = [
+        {"$match": {"status": "pending"}},
+        {"$group": {"_id": None, "total": {"$sum": "$sale_value"}}}
+    ]
+    result_pending = await db.sales.aggregate(pipeline_pending).to_list(1)
+    pending_amount = result_pending[0]["total"] if result_pending else 0
+    
+    # Vendas do mês atual
+    now = datetime.now(timezone.utc)
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    month_sales = await db.sales.count_documents({
+        "created_at": {"$gte": start_of_month.isoformat()}
+    })
+    
+    month_paid = await db.sales.count_documents({
+        "status": "paid",
+        "paid_at": {"$gte": start_of_month.isoformat()}
+    })
+    
+    pipeline_month = [
+        {"$match": {"status": "paid", "paid_at": {"$gte": start_of_month.isoformat()}}},
+        {"$group": {"_id": None, "total": {"$sum": "$sale_value"}}}
+    ]
+    result_month = await db.sales.aggregate(pipeline_month).to_list(1)
+    month_amount = result_month[0]["total"] if result_month else 0
+    
+    # Número de licenciados com vendas
+    licensees_with_sales = await db.sales.distinct("user_id")
+    
+    return {
+        "total_sales": total_sales,
+        "paid_sales": paid_sales,
+        "pending_sales": pending_sales,
+        "total_amount": total_amount,
+        "pending_amount": pending_amount,
+        "month_sales": month_sales,
+        "month_paid": month_paid,
+        "month_amount": month_amount,
+        "licensees_with_sales": len(licensees_with_sales)
+    }
+
+
+@router.get("/report/all")
+async def get_all_sales(
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtém todas as vendas (somente admin/supervisor)"""
+    if current_user.get("role") not in ["admin", "supervisor"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    query = {}
+    if status and status != "all":
+        query["status"] = status
+    
+    sales = await db.sales.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    
+    # Adicionar nome do licenciado
+    for sale in sales:
+        user = await db.users.find_one({"id": sale["user_id"]}, {"_id": 0, "full_name": 1, "email": 1})
+        if user:
+            sale["licensee_name"] = user.get("full_name", "Desconhecido")
+            sale["licensee_email"] = user.get("email", "")
+        else:
+            sale["licensee_name"] = "Desconhecido"
+            sale["licensee_email"] = ""
+    
+    # Estatísticas por licenciado
+    pipeline = [
+        {"$group": {
+            "_id": "$user_id",
+            "total_sales": {"$sum": 1},
+            "paid_sales": {"$sum": {"$cond": [{"$eq": ["$status", "paid"]}, 1, 0]}},
+            "total_amount": {"$sum": {"$cond": [{"$eq": ["$status", "paid"]}, "$sale_value", 0]}},
+            "pending_amount": {"$sum": {"$cond": [{"$eq": ["$status", "pending"]}, "$sale_value", 0]}}
+        }},
+        {"$sort": {"paid_sales": -1}}
+    ]
+    
+    stats_result = await db.sales.aggregate(pipeline).to_list(100)
+    
+    licensee_stats = []
+    for stat in stats_result:
+        user = await db.users.find_one({"id": stat["_id"]}, {"_id": 0, "full_name": 1, "email": 1})
+        licensee_stats.append({
+            "user_id": stat["_id"],
+            "name": user.get("full_name", "Desconhecido") if user else "Desconhecido",
+            "email": user.get("email", "") if user else "",
+            "total_sales": stat["total_sales"],
+            "paid_sales": stat["paid_sales"],
+            "total_amount": stat["total_amount"],
+            "pending_amount": stat["pending_amount"]
+        })
+    
+    return {
+        "sales": sales,
+        "licensee_stats": licensee_stats
+    }
+
+
+@router.get("/report/by-month")
+async def get_monthly_report(
+    year: int,
+    month: int,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtém relatório mensal de vendas"""
+    if current_user.get("role") not in ["admin", "supervisor"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Calcular início e fim do mês
+    start_date = datetime(year, month, 1, tzinfo=timezone.utc)
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+    else:
+        end_date = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+    
+    # Buscar vendas do período
+    query = {
+        "created_at": {
+            "$gte": start_date.isoformat(),
+            "$lt": end_date.isoformat()
+        }
+    }
+    
+    sales = await db.sales.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Calcular totais
+    total_sales = len(sales)
+    paid_sales = len([s for s in sales if s.get("status") == "paid"])
+    pending_sales = len([s for s in sales if s.get("status") == "pending"])
+    
+    total_amount = sum(s.get("sale_value", 0) for s in sales if s.get("status") == "paid")
+    pending_amount = sum(s.get("sale_value", 0) for s in sales if s.get("status") == "pending")
+    
+    # Adicionar info do licenciado
+    for sale in sales:
+        user = await db.users.find_one({"id": sale["user_id"]}, {"_id": 0, "full_name": 1})
+        sale["licensee_name"] = user.get("full_name", "Desconhecido") if user else "Desconhecido"
+    
+    # Estatísticas por licenciado no mês
+    licensee_map = {}
+    for sale in sales:
+        uid = sale["user_id"]
+        if uid not in licensee_map:
+            licensee_map[uid] = {
+                "user_id": uid,
+                "name": sale.get("licensee_name", "Desconhecido"),
+                "total_sales": 0,
+                "paid_sales": 0,
+                "total_amount": 0
+            }
+        licensee_map[uid]["total_sales"] += 1
+        if sale.get("status") == "paid":
+            licensee_map[uid]["paid_sales"] += 1
+            licensee_map[uid]["total_amount"] += sale.get("sale_value", 0)
+    
+    licensee_stats = sorted(licensee_map.values(), key=lambda x: x["paid_sales"], reverse=True)
+    
+    return {
+        "year": year,
+        "month": month,
+        "total_sales": total_sales,
+        "paid_sales": paid_sales,
+        "pending_sales": pending_sales,
+        "total_amount": total_amount,
+        "pending_amount": pending_amount,
+        "sales": sales,
+        "licensee_stats": licensee_stats
+    }
+
+
+@router.get("/commission-types")
+async def get_commission_types(current_user: dict = Depends(get_current_user)):
+    """Obtém os tipos de comissão configurados"""
+    if current_user.get("role") not in ["admin", "supervisor"]:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    commission_types = await db.commission_types.find({}, {"_id": 0}).to_list(100)
+    
+    if not commission_types:
+        # Criar tipos padrão
+        default_types = [
+            {"id": str(uuid.uuid4()), "description": "Comissão Padrão", "percentage": 10, "active": True},
+            {"id": str(uuid.uuid4()), "description": "Comissão Premium", "percentage": 15, "active": True}
+        ]
+        await db.commission_types.insert_many(default_types)
+        return default_types
+    
+    return commission_types
+
+
 @router.get("/{sale_id}")
 async def get_sale(sale_id: str, current_user: dict = Depends(get_current_user)):
     """Obtém uma venda específica"""

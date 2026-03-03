@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-Backend Test Script - Test das correções específicas
-Testa as correções solicitadas:
-1. GET /api/training/my-registration - Deve retornar config (não null) mesmo se não existir no banco
-2. POST /api/sales/register - Registrar uma venda com dados completos  
-3. GET /api/sales/my-progress - Deve funcionar (foi movida antes das rotas dinâmicas)
+Backend Test Script - Sales Report Endpoints Testing
+Testa os novos endpoints de relatório de vendas:
 
-Credenciais: test.licensee@ozoxx.com / test123
+1. GET /api/sales/report/summary - Resumo geral das vendas (admin)
+2. GET /api/sales/report/all - Todas as vendas (admin)
+3. GET /api/sales/report/by-month?year=2026&month=3 - Relatório mensal (admin)
+4. GET /api/sales/commission-types - Tipos de comissão (admin)
+
+Credenciais: admin@igvd.com.br / admin123
 """
 import asyncio
 import aiohttp
@@ -19,16 +21,17 @@ import sys
 BACKEND_URL = "https://pagbank-checkout.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-# Credenciais do teste
-TEST_EMAIL = "test.licensee@ozoxx.com"
-TEST_PASSWORD = "test123"
+# Credenciais do admin
+ADMIN_EMAIL = "admin@ozoxx.com"
+ADMIN_PASSWORD = "admin123"
 
-class BackendTester:
+class SalesReportTester:
     def __init__(self):
         self.session = None
         self.auth_token = None
         self.passed_tests = 0
         self.total_tests = 0
+        self.test_results = []
         
     async def setup(self):
         """Setup da sessão HTTP"""
@@ -39,20 +42,20 @@ class BackendTester:
         if self.session:
             await self.session.close()
     
-    async def login(self):
-        """Autentica o usuário de teste"""
-        print("🔐 Fazendo login com credenciais do licenciado...")
+    async def login_admin(self):
+        """Autentica o usuário admin"""
+        print("🔐 Fazendo login como admin...")
         
         try:
             async with self.session.post(f"{API_BASE}/auth/login", json={
-                "email": TEST_EMAIL,
-                "password": TEST_PASSWORD
+                "email": ADMIN_EMAIL,
+                "password": ADMIN_PASSWORD
             }) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     self.auth_token = data.get("access_token")
                     if self.auth_token:
-                        print("✅ Login realizado com sucesso")
+                        print("✅ Login admin realizado com sucesso")
                         return True
                     else:
                         print("❌ Login falhou: token não retornado")
@@ -71,287 +74,453 @@ class BackendTester:
             return {}
         return {"Authorization": f"Bearer {self.auth_token}"}
     
-    async def test_training_my_registration(self):
+    async def test_sales_report_summary(self):
         """
-        Testa GET /api/training/my-registration
-        Deve retornar config (não null) mesmo se não existir no banco
+        Testa GET /api/sales/report/summary
+        Deve retornar resumo geral das vendas
         """
         self.total_tests += 1
-        print("\n📋 Testando GET /api/training/my-registration...")
+        test_name = "Sales Report Summary"
+        print(f"\n📊 Testando GET /api/sales/report/summary...")
         
         try:
             async with self.session.get(
-                f"{API_BASE}/training/my-registration",
+                f"{API_BASE}/sales/report/summary",
                 headers=self.get_auth_headers()
             ) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     
-                    # Verificar se retorna config
-                    config = data.get("config")
-                    if config is None:
-                        print("❌ FALHA: config está null")
-                        return False
-                    
-                    # Verificar campos obrigatórios da config
+                    # Verificar campos obrigatórios do resumo
                     required_fields = [
-                        "days_before_closing", "terms_and_conditions", 
-                        "training_instructions", "solo_price", "couple_price"
+                        "total_sales", "paid_sales", "pending_sales", 
+                        "total_amount", "pending_amount", "month_sales",
+                        "month_paid", "month_amount", "licensees_with_sales"
                     ]
                     
+                    missing_fields = []
                     for field in required_fields:
-                        if field not in config:
-                            print(f"❌ FALHA: campo {field} não encontrado na config")
-                            return False
+                        if field not in data:
+                            missing_fields.append(field)
                     
-                    print("✅ SUCESSO: config retornada com todos os campos necessários")
-                    print(f"   - solo_price: R$ {config.get('solo_price')}")
-                    print(f"   - couple_price: R$ {config.get('couple_price')}")
-                    print(f"   - days_before_closing: {config.get('days_before_closing')} dias")
-                    
-                    registration = data.get("registration")
-                    if registration:
-                        print(f"   - registration: Usuário já tem inscrição existente")
-                    else:
-                        print(f"   - registration: null (usuário não inscrito)")
-                    
-                    self.passed_tests += 1
-                    return True
-                else:
-                    error_text = await resp.text()
-                    print(f"❌ FALHA ({resp.status}): {error_text}")
-                    return False
-                    
-        except Exception as e:
-            print(f"❌ ERRO na requisição: {e}")
-            return False
-    
-    async def test_sales_register(self):
-        """
-        Testa POST /api/sales/register
-        Deve registrar uma venda com dados completos
-        """
-        self.total_tests += 1
-        print("\n💰 Testando POST /api/sales/register...")
-        
-        # Dados realistas de uma venda
-        sale_data = {
-            "sale_number": 1,
-            "customer_name": "Maria Silva Santos",
-            "customer_phone": "(11) 98765-4321",
-            "customer_email": "maria.silva@email.com",
-            "customer_cpf": "12345678901",
-            "device_serial": "DEV001234567",
-            "device_source": "store",
-            "sale_value": 299.90
-        }
-        
-        try:
-            async with self.session.post(
-                f"{API_BASE}/sales/register",
-                json=sale_data,
-                headers=self.get_auth_headers()
-            ) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    
-                    # Verificar resposta
-                    if "message" not in data:
-                        print("❌ FALHA: campo 'message' não encontrado na resposta")
+                    if missing_fields:
+                        print(f"❌ FALHA: Campos obrigatórios não encontrados: {missing_fields}")
+                        self.test_results.append({
+                            "test": test_name,
+                            "status": "FAILED",
+                            "error": f"Missing required fields: {missing_fields}"
+                        })
                         return False
                     
-                    sale = data.get("sale")
-                    if not sale:
-                        print("❌ FALHA: dados da venda não retornados")
-                        return False
-                    
-                    # Verificar campos da venda
-                    required_fields = [
-                        "id", "user_id", "sale_number", "customer_name",
-                        "customer_phone", "customer_email", "customer_cpf",
-                        "device_serial", "device_source", "sale_value", "status"
+                    # Verificar tipos de dados
+                    numeric_fields = [
+                        "total_sales", "paid_sales", "pending_sales", 
+                        "total_amount", "pending_amount", "month_sales",
+                        "month_paid", "month_amount", "licensees_with_sales"
                     ]
                     
-                    for field in required_fields:
-                        if field not in sale:
-                            print(f"❌ FALHA: campo {field} não encontrado na venda")
+                    for field in numeric_fields:
+                        if not isinstance(data.get(field), (int, float)):
+                            print(f"❌ FALHA: Campo {field} deve ser numérico, recebido: {type(data.get(field))}")
+                            self.test_results.append({
+                                "test": test_name,
+                                "status": "FAILED",
+                                "error": f"Field {field} is not numeric"
+                            })
                             return False
                     
-                    print("✅ SUCESSO: Venda registrada com todos os campos necessários")
-                    print(f"   - Sale ID: {sale.get('id')}")
-                    print(f"   - Cliente: {sale.get('customer_name')}")
-                    print(f"   - Valor: R$ {sale.get('sale_value')}")
-                    print(f"   - Status: {sale.get('status')}")
-                    
-                    checkout_url = data.get("checkout_url")
-                    if checkout_url:
-                        print(f"   - Checkout URL: Gerada com sucesso")
-                    else:
-                        print(f"   - Checkout URL: Não gerada (esperado se PagSeguro não configurado)")
+                    print("✅ SUCESSO: Resumo de vendas retornado corretamente")
+                    print(f"   - Total de vendas: {data.get('total_sales')}")
+                    print(f"   - Vendas pagas: {data.get('paid_sales')}")
+                    print(f"   - Vendas pendentes: {data.get('pending_sales')}")
+                    print(f"   - Valor total: R$ {data.get('total_amount'):.2f}")
+                    print(f"   - Vendas do mês: {data.get('month_sales')}")
+                    print(f"   - Licenciados com vendas: {data.get('licensees_with_sales')}")
                     
                     self.passed_tests += 1
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "PASSED",
+                        "data": data
+                    })
                     return True
                     
-                elif resp.status == 400:
-                    error_text = await resp.text()
-                    if "Já existe uma venda" in error_text:
-                        print("✅ SUCESSO: Endpoint funcionando (venda duplicada detectada corretamente)")
-                        self.passed_tests += 1
-                        return True
-                    else:
-                        print(f"❌ FALHA - Erro 400 inesperado: {error_text}")
-                        return False
+                elif resp.status == 403:
+                    print("❌ FALHA: Acesso negado - verificar permissões admin")
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "FAILED",
+                        "error": "Access denied - admin permissions required"
+                    })
+                    return False
                 else:
                     error_text = await resp.text()
                     print(f"❌ FALHA ({resp.status}): {error_text}")
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "FAILED",
+                        "error": f"HTTP {resp.status}: {error_text}"
+                    })
                     return False
                     
         except Exception as e:
             print(f"❌ ERRO na requisição: {e}")
+            self.test_results.append({
+                "test": test_name,
+                "status": "FAILED",
+                "error": f"Request exception: {e}"
+            })
             return False
     
-    async def test_sales_my_progress(self):
+    async def test_sales_report_all(self):
         """
-        Testa GET /api/sales/my-progress
-        Deve funcionar (foi movida antes das rotas dinâmicas)
+        Testa GET /api/sales/report/all
+        Deve retornar lista de vendas e estatísticas
         """
         self.total_tests += 1
-        print("\n📊 Testando GET /api/sales/my-progress...")
+        test_name = "All Sales Report"
+        print(f"\n📋 Testando GET /api/sales/report/all...")
         
         try:
             async with self.session.get(
-                f"{API_BASE}/sales/my-progress",
-                headers=self.get_auth_headers()
-            ) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    
-                    # Verificar campos obrigatórios
-                    if "completed" not in data:
-                        print("❌ FALHA: campo 'completed' não encontrado")
-                        return False
-                    
-                    if "total" not in data:
-                        print("❌ FALHA: campo 'total' não encontrado")
-                        return False
-                    
-                    completed = data.get("completed")
-                    total = data.get("total")
-                    
-                    if total != 5:
-                        print(f"❌ FALHA: total deve ser 5, mas retornou {total}")
-                        return False
-                    
-                    if not isinstance(completed, int) or completed < 0:
-                        print(f"❌ FALHA: completed deve ser um inteiro >= 0, mas retornou {completed}")
-                        return False
-                    
-                    print("✅ SUCESSO: Endpoint /my-progress funcionando corretamente")
-                    print(f"   - Vendas completadas: {completed}")
-                    print(f"   - Total necessário: {total}")
-                    print(f"   - Progresso: {completed}/{total} ({(completed/total)*100:.1f}%)")
-                    
-                    self.passed_tests += 1
-                    return True
-                else:
-                    error_text = await resp.text()
-                    print(f"❌ FALHA ({resp.status}): {error_text}")
-                    return False
-                    
-        except Exception as e:
-            print(f"❌ ERRO na requisição: {e}")
-            return False
-    
-    async def test_sales_my_sales_bonus(self):
-        """
-        Teste bônus: Verificar GET /api/sales/my-sales também funciona
-        """
-        self.total_tests += 1
-        print("\n🎯 Testando GET /api/sales/my-sales (teste bônus)...")
-        
-        try:
-            async with self.session.get(
-                f"{API_BASE}/sales/my-sales",
+                f"{API_BASE}/sales/report/all",
                 headers=self.get_auth_headers()
             ) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     
                     # Verificar estrutura da resposta
-                    required_fields = ["sales", "total_sales", "completed_sales", "pending_sales", "remaining_sales"]
-                    for field in required_fields:
-                        if field not in data:
-                            print(f"❌ FALHA: campo {field} não encontrado")
-                            return False
+                    if "sales" not in data:
+                        print("❌ FALHA: Campo 'sales' não encontrado")
+                        self.test_results.append({
+                            "test": test_name,
+                            "status": "FAILED",
+                            "error": "Missing 'sales' field in response"
+                        })
+                        return False
+                    
+                    if "licensee_stats" not in data:
+                        print("❌ FALHA: Campo 'licensee_stats' não encontrado")
+                        self.test_results.append({
+                            "test": test_name,
+                            "status": "FAILED",
+                            "error": "Missing 'licensee_stats' field in response"
+                        })
+                        return False
                     
                     sales = data.get("sales", [])
-                    total_sales = data.get("total_sales")
+                    licensee_stats = data.get("licensee_stats", [])
                     
-                    print("✅ SUCESSO: Endpoint /my-sales funcionando corretamente")
-                    print(f"   - Total de vendas: {total_sales}")
-                    print(f"   - Vendas completadas: {data.get('completed_sales')}")
-                    print(f"   - Vendas pendentes: {data.get('pending_sales')}")
-                    print(f"   - Vendas restantes: {data.get('remaining_sales')}")
+                    print("✅ SUCESSO: Relatório de todas as vendas retornado")
+                    print(f"   - Total de vendas encontradas: {len(sales)}")
+                    print(f"   - Estatísticas de licenciados: {len(licensee_stats)}")
                     
+                    # Verificar estrutura das vendas se existirem
                     if sales:
-                        print(f"   - Primeira venda: {sales[0].get('customer_name')} - R$ {sales[0].get('sale_value')}")
+                        first_sale = sales[0]
+                        required_sale_fields = [
+                            "id", "user_id", "sale_number", "customer_name", 
+                            "customer_email", "sale_value", "status"
+                        ]
+                        
+                        missing_sale_fields = []
+                        for field in required_sale_fields:
+                            if field not in first_sale:
+                                missing_sale_fields.append(field)
+                        
+                        if missing_sale_fields:
+                            print(f"⚠️  Aviso: Campos ausentes na primeira venda: {missing_sale_fields}")
+                        else:
+                            print(f"   - Primeira venda: {first_sale.get('customer_name')} - R$ {first_sale.get('sale_value')}")
+                    
+                    # Verificar estrutura das estatísticas se existirem
+                    if licensee_stats:
+                        first_stat = licensee_stats[0]
+                        required_stat_fields = [
+                            "user_id", "name", "total_sales", "paid_sales", "total_amount"
+                        ]
+                        
+                        missing_stat_fields = []
+                        for field in required_stat_fields:
+                            if field not in first_stat:
+                                missing_stat_fields.append(field)
+                        
+                        if missing_stat_fields:
+                            print(f"⚠️  Aviso: Campos ausentes na primeira estatística: {missing_stat_fields}")
+                        else:
+                            print(f"   - Top licenciado: {first_stat.get('name')} - {first_stat.get('paid_sales')} vendas")
                     
                     self.passed_tests += 1
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "PASSED",
+                        "sales_count": len(sales),
+                        "stats_count": len(licensee_stats)
+                    })
                     return True
+                    
+                elif resp.status == 403:
+                    print("❌ FALHA: Acesso negado - verificar permissões admin")
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "FAILED",
+                        "error": "Access denied - admin permissions required"
+                    })
+                    return False
                 else:
                     error_text = await resp.text()
                     print(f"❌ FALHA ({resp.status}): {error_text}")
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "FAILED",
+                        "error": f"HTTP {resp.status}: {error_text}"
+                    })
                     return False
                     
         except Exception as e:
             print(f"❌ ERRO na requisição: {e}")
+            self.test_results.append({
+                "test": test_name,
+                "status": "FAILED",
+                "error": f"Request exception: {e}"
+            })
+            return False
+    
+    async def test_monthly_sales_report(self):
+        """
+        Testa GET /api/sales/report/by-month?year=2026&month=3
+        Deve retornar relatório mensal
+        """
+        self.total_tests += 1
+        test_name = "Monthly Sales Report"
+        print(f"\n📅 Testando GET /api/sales/report/by-month?year=2026&month=3...")
+        
+        try:
+            async with self.session.get(
+                f"{API_BASE}/sales/report/by-month?year=2026&month=3",
+                headers=self.get_auth_headers()
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    # Verificar campos obrigatórios
+                    required_fields = [
+                        "year", "month", "total_sales", "paid_sales", 
+                        "pending_sales", "total_amount", "pending_amount",
+                        "sales", "licensee_stats"
+                    ]
+                    
+                    missing_fields = []
+                    for field in required_fields:
+                        if field not in data:
+                            missing_fields.append(field)
+                    
+                    if missing_fields:
+                        print(f"❌ FALHA: Campos obrigatórios não encontrados: {missing_fields}")
+                        self.test_results.append({
+                            "test": test_name,
+                            "status": "FAILED",
+                            "error": f"Missing required fields: {missing_fields}"
+                        })
+                        return False
+                    
+                    # Verificar se ano e mês estão corretos
+                    if data.get("year") != 2026 or data.get("month") != 3:
+                        print(f"❌ FALHA: Ano/mês incorretos. Esperado: 2026/3, Recebido: {data.get('year')}/{data.get('month')}")
+                        self.test_results.append({
+                            "test": test_name,
+                            "status": "FAILED",
+                            "error": f"Incorrect year/month in response"
+                        })
+                        return False
+                    
+                    print("✅ SUCESSO: Relatório mensal retornado corretamente")
+                    print(f"   - Período: {data.get('month')}/{data.get('year')}")
+                    print(f"   - Total de vendas: {data.get('total_sales')}")
+                    print(f"   - Vendas pagas: {data.get('paid_sales')}")
+                    print(f"   - Valor total: R$ {data.get('total_amount'):.2f}")
+                    
+                    sales = data.get("sales", [])
+                    licensee_stats = data.get("licensee_stats", [])
+                    
+                    print(f"   - Vendas no período: {len(sales)}")
+                    print(f"   - Licenciados ativos: {len(licensee_stats)}")
+                    
+                    self.passed_tests += 1
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "PASSED",
+                        "period": f"{data.get('month')}/{data.get('year')}",
+                        "sales_in_period": len(sales)
+                    })
+                    return True
+                    
+                elif resp.status == 403:
+                    print("❌ FALHA: Acesso negado - verificar permissões admin")
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "FAILED",
+                        "error": "Access denied - admin permissions required"
+                    })
+                    return False
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ FALHA ({resp.status}): {error_text}")
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "FAILED",
+                        "error": f"HTTP {resp.status}: {error_text}"
+                    })
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ ERRO na requisição: {e}")
+            self.test_results.append({
+                "test": test_name,
+                "status": "FAILED",
+                "error": f"Request exception: {e}"
+            })
+            return False
+    
+    async def test_commission_types(self):
+        """
+        Testa GET /api/sales/commission-types
+        Deve retornar tipos de comissão
+        """
+        self.total_tests += 1
+        test_name = "Commission Types"
+        print(f"\n💼 Testando GET /api/sales/commission-types...")
+        
+        try:
+            async with self.session.get(
+                f"{API_BASE}/sales/commission-types",
+                headers=self.get_auth_headers()
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    # Deve retornar uma lista
+                    if not isinstance(data, list):
+                        print(f"❌ FALHA: Esperado lista, recebido: {type(data)}")
+                        self.test_results.append({
+                            "test": test_name,
+                            "status": "FAILED",
+                            "error": f"Expected list, got {type(data)}"
+                        })
+                        return False
+                    
+                    print("✅ SUCESSO: Tipos de comissão retornados")
+                    print(f"   - Total de tipos: {len(data)}")
+                    
+                    # Verificar estrutura dos tipos se existirem
+                    if data:
+                        first_type = data[0]
+                        expected_fields = ["id", "description", "percentage", "active"]
+                        
+                        missing_fields = []
+                        for field in expected_fields:
+                            if field not in first_type:
+                                missing_fields.append(field)
+                        
+                        if missing_fields:
+                            print(f"⚠️  Aviso: Campos ausentes no primeiro tipo: {missing_fields}")
+                        else:
+                            print(f"   - Primeiro tipo: {first_type.get('description')} - {first_type.get('percentage')}%")
+                            
+                        for i, commission_type in enumerate(data):
+                            desc = commission_type.get('description', 'N/A')
+                            perc = commission_type.get('percentage', 0)
+                            active = commission_type.get('active', False)
+                            print(f"   - Tipo {i+1}: {desc} ({perc}%) - {'Ativo' if active else 'Inativo'}")
+                    else:
+                        print("   - Nenhum tipo de comissão encontrado (tipos padrão serão criados)")
+                    
+                    self.passed_tests += 1
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "PASSED",
+                        "types_count": len(data)
+                    })
+                    return True
+                    
+                elif resp.status == 403:
+                    print("❌ FALHA: Acesso negado - verificar permissões admin")
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "FAILED",
+                        "error": "Access denied - admin permissions required"
+                    })
+                    return False
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ FALHA ({resp.status}): {error_text}")
+                    self.test_results.append({
+                        "test": test_name,
+                        "status": "FAILED",
+                        "error": f"HTTP {resp.status}: {error_text}"
+                    })
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ ERRO na requisição: {e}")
+            self.test_results.append({
+                "test": test_name,
+                "status": "FAILED",
+                "error": f"Request exception: {e}"
+            })
             return False
     
     async def run_all_tests(self):
-        """Executa todos os testes"""
-        print("🚀 Iniciando testes das correções específicas...")
+        """Executa todos os testes dos endpoints de relatório"""
+        print("🚀 Iniciando testes dos endpoints de relatório de vendas...")
         print(f"📍 Backend URL: {BACKEND_URL}")
-        print(f"👤 Usuário: {TEST_EMAIL}")
-        print("="*60)
+        print(f"👤 Admin: {ADMIN_EMAIL}")
+        print("="*70)
         
         # Setup
         await self.setup()
         
         try:
-            # Login
-            if not await self.login():
-                print("💥 Não foi possível fazer login. Abortando testes.")
+            # Login admin
+            if not await self.login_admin():
+                print("💥 Não foi possível fazer login como admin. Abortando testes.")
                 return
             
-            # Executar testes principais
-            await self.test_training_my_registration()
-            await self.test_sales_register()
-            await self.test_sales_my_progress()
-            
-            # Teste bônus
-            await self.test_sales_my_sales_bonus()
+            # Executar todos os testes
+            await self.test_sales_report_summary()
+            await self.test_sales_report_all()
+            await self.test_monthly_sales_report()
+            await self.test_commission_types()
             
             # Relatório final
-            print("\n" + "="*60)
-            print("📊 RELATÓRIO FINAL DOS TESTES")
-            print("="*60)
+            print("\n" + "="*70)
+            print("📊 RELATÓRIO FINAL DOS TESTES DE RELATÓRIO DE VENDAS")
+            print("="*70)
             print(f"✅ Testes passaram: {self.passed_tests}/{self.total_tests}")
             print(f"❌ Testes falharam: {self.total_tests - self.passed_tests}/{self.total_tests}")
             
             if self.passed_tests == self.total_tests:
-                print("🎉 TODOS OS TESTES PASSARAM! As correções estão funcionando.")
+                print("🎉 TODOS OS TESTES PASSARAM! Os endpoints de relatório estão funcionando.")
             else:
                 print("⚠️  ALGUNS TESTES FALHARAM. Verificar problemas acima.")
             
             success_rate = (self.passed_tests / self.total_tests) * 100
             print(f"📈 Taxa de sucesso: {success_rate:.1f}%")
             
+            # Resumo detalhado dos resultados
+            print(f"\n📋 DETALHES DOS TESTES:")
+            for result in self.test_results:
+                status_icon = "✅" if result["status"] == "PASSED" else "❌"
+                print(f"{status_icon} {result['test']}: {result['status']}")
+                if result["status"] == "FAILED":
+                    print(f"   Erro: {result.get('error', 'Erro desconhecido')}")
+            
         finally:
             await self.cleanup()
 
 async def main():
     """Função principal"""
-    tester = BackendTester()
+    tester = SalesReportTester()
     await tester.run_all_tests()
 
 if __name__ == "__main__":

@@ -1,56 +1,94 @@
-#==================== Testing Protocol ====================
-# IMPORTANT: This file contains instructions for testing the application.
-# The testing agent will update this file with results.
-#
-# Testing Steps:
-# 1. Backend Testing - Use deep_testing_backend_v2 agent
-# 2. Frontend Testing - Only test if user explicitly requests
-#
-# Communication Protocol:
-# - Main agent reads this file before calling testing agents
-# - Testing agents update this file with their findings
-# - Main agent reviews results and implements fixes
-#==========================================================
+backend:
+  - task: "Sales Report Summary Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/sales_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Sales report endpoints added - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "GET /api/sales/report/summary tested successfully - returns correct sales summary with all required fields (total_sales, paid_sales, pending_sales, total_amount, etc.)"
 
-## User Problem Statement
-Refazer sistema de pagamentos com integração PagBank usando checkout externo.
-O checkout deve ser feito no ambiente do PagBank (cliente sai do sistema e após confirmação, o PagBank retorna).
+  - task: "All Sales Report Endpoint" 
+    implemented: true
+    working: true
+    file: "/app/backend/routes/sales_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "All sales report endpoint added - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "GET /api/sales/report/all tested successfully - returns sales list and licensee statistics correctly"
 
-## Implementation Summary
+  - task: "Monthly Sales Report Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/sales_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Monthly sales report endpoint added - needs testing"
+      - working: true
+        agent: "testing"
+        comment: "GET /api/sales/report/by-month tested successfully - returns monthly report for year=2026&month=3 with correct structure and data"
 
-### Backend Changes
-1. **Criado novo serviço PagBank** (`/app/backend/services/pagbank_service.py`)
-   - Método `create_checkout()` para criar checkout externo
-   - Método `get_checkout_status()` para consultar status
-   - Método `test_connection()` para testar API
-   - Método `parse_webhook_notification()` para processar webhooks
+  - task: "Commission Types Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/routes/sales_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Commission types endpoint added - needs testing"
+      - working: false
+        agent: "testing"
+        comment: "Initial test failed - routing conflict with /{sale_id} dynamic route"
+      - working: true
+        agent: "testing"
+        comment: "FIXED routing issue by moving specific routes before dynamic routes. GET /api/sales/commission-types now works correctly and returns default commission types (10% and 15%)"
 
-2. **Refeito payment_routes.py** (`/app/backend/routes/payment_routes.py`)
-   - GET/PUT `/api/payments/settings` - Configurações
-   - POST `/api/payments/test-connection` - Testar conexão
-   - POST `/api/payments/test-checkout` - Criar checkout de teste
-   - GET `/api/payments/logs` - Ver logs
-   - GET `/api/payments/transactions` - Ver transações
-   - POST `/api/payments/training/checkout` - Checkout para treinamento
-   - POST `/api/payments/webhooks/pagbank` - Webhook PagBank
-   - POST `/api/payments/simulate-payment/{reference_id}` - Simular pagamento
+frontend:
+  - task: "Frontend Sales Reports UI"
+    implemented: false
+    working: "NA"
+    file: "N/A"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Frontend UI for sales reports not yet implemented"
 
-3. **Atualizado sales_routes.py** - Agora gera checkout PagBank para vendas
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
 
-### Frontend Changes
-1. **Refeito Training.js** - Fluxo de inscrição com redirecionamento para PagBank
-2. **Atualizado AdminPaymentSettings.js** - Adicionado abas de teste, logs e transações
-3. **Removido PaymentCheckout.js** - Não mais necessário (checkout é externo)
+test_plan:
+  current_focus: []
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
 
-## Backend Testing Results
-✅ **100% Success Rate (7/7 endpoints)**
-- GET /api/payments/settings - OK
-- PUT /api/payments/settings - OK
-- POST /api/payments/test-connection - OK
-- POST /api/payments/training/checkout - OK
-- POST /api/payments/webhooks/pagbank - OK
-- GET /api/payments/logs - OK
-- GET /api/payments/transactions - OK
-
-## Incorporate User Feedback
-If user reports any issues, document them here and fix accordingly.
+agent_communication:
+  - agent: "testing"
+    message: "Starting backend testing of sales report endpoints with admin credentials"
+  - agent: "testing"
+    message: "All sales report endpoints tested successfully! Found and fixed routing issue with commission-types endpoint. All endpoints working correctly with admin@ozoxx.com credentials. System shows 1 existing sale (pending, R$6850) from previous tests."
