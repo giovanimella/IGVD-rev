@@ -99,15 +99,42 @@ async def get_pagbank_service() -> PagBankService:
 
 def get_webhook_url(request: Request) -> str:
     """Gera a URL do webhook baseada na requisição"""
-    # Obter URL base do frontend (configurada no .env)
+    # Obter URL base do backend (configurada no .env)
     backend_url = os.environ.get('REACT_APP_BACKEND_URL', '')
     if backend_url:
+        # REACT_APP_BACKEND_URL já aponta para o backend
         return f"{backend_url}/api/payments/webhooks/pagbank"
     
     # Fallback: usar a URL da requisição
     host = request.headers.get("host", "localhost:8001")
     scheme = request.headers.get("x-forwarded-proto", "https")
     return f"{scheme}://{host}/api/payments/webhooks/pagbank"
+
+
+def get_frontend_url(request: Request) -> str:
+    """Gera a URL base do frontend para redirecionamento"""
+    # O REACT_APP_BACKEND_URL aponta para o backend
+    # Para o frontend, removemos /api se existir e usamos a mesma base
+    backend_url = os.environ.get('REACT_APP_BACKEND_URL', '')
+    
+    if backend_url:
+        # A URL do frontend é a mesma base do backend (sem /api)
+        # Em produção, ambos ficam no mesmo domínio
+        frontend_url = backend_url.rstrip('/')
+        # Remover /api se existir
+        if frontend_url.endswith('/api'):
+            frontend_url = frontend_url[:-4]
+        return frontend_url
+    
+    # Fallback: construir a partir da requisição
+    host = request.headers.get("host", "localhost:3000")
+    scheme = request.headers.get("x-forwarded-proto", "https")
+    
+    # Se host contém porta 8001, mudar para 3000
+    if ":8001" in host:
+        host = host.replace(":8001", ":3000")
+    
+    return f"{scheme}://{host}"
 
 
 # ==================== CONFIGURAÇÕES (ADMIN) ====================
@@ -323,9 +350,7 @@ async def create_checkout(
     reference_id = data.reference_id or f"{data.purpose}_{uuid.uuid4().hex[:12]}"
     
     # Obter URL do frontend para redirecionamento
-    frontend_url = os.environ.get('REACT_APP_BACKEND_URL', '').replace('/api', '').replace(':8001', ':3000')
-    if not frontend_url:
-        frontend_url = str(request.base_url).rstrip('/')
+    frontend_url = get_frontend_url(request)
     
     # Definir URL de retorno baseado no propósito
     if data.purpose == "training_fee":
@@ -426,9 +451,7 @@ async def create_training_checkout(
     reference_id = f"training_{registration.get('id', uuid.uuid4().hex[:12])}"
     
     # Obter URL do frontend
-    frontend_url = os.environ.get('REACT_APP_BACKEND_URL', '').replace('/api', '').replace(':8001', ':3000')
-    if not frontend_url:
-        frontend_url = str(request.base_url).rstrip('/')
+    frontend_url = get_frontend_url(request)
     
     redirect_url = f"{frontend_url}/training"
     webhook_url = get_webhook_url(request)

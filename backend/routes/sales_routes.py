@@ -43,6 +43,36 @@ async def get_pagbank_service() -> PagBankService:
     return PagBankService(token=token, email=email, is_sandbox=is_sandbox)
 
 
+def get_frontend_url(request) -> str:
+    """Gera a URL base do frontend para redirecionamento"""
+    backend_url = os.environ.get('REACT_APP_BACKEND_URL', '')
+    
+    if backend_url:
+        frontend_url = backend_url.rstrip('/')
+        if frontend_url.endswith('/api'):
+            frontend_url = frontend_url[:-4]
+        return frontend_url
+    
+    host = request.headers.get("host", "localhost:3000")
+    scheme = request.headers.get("x-forwarded-proto", "https")
+    
+    if ":8001" in host:
+        host = host.replace(":8001", ":3000")
+    
+    return f"{scheme}://{host}"
+
+
+def get_webhook_url(request) -> str:
+    """Gera a URL do webhook"""
+    backend_url = os.environ.get('REACT_APP_BACKEND_URL', '')
+    if backend_url:
+        return f"{backend_url}/api/payments/webhooks/pagbank"
+    
+    host = request.headers.get("host", "localhost:8001")
+    scheme = request.headers.get("x-forwarded-proto", "https")
+    return f"{scheme}://{host}/api/payments/webhooks/pagbank"
+
+
 # ==================== ROTAS DAS 5 VENDAS EM CAMPO ====================
 
 @router.get("/my-sales")
@@ -118,16 +148,12 @@ async def register_sale(
         service = await get_pagbank_service()
         
         # Obter URL do frontend
-        frontend_url = os.environ.get('REACT_APP_BACKEND_URL', '').replace('/api', '').replace(':8001', ':3000')
-        if not frontend_url:
-            frontend_url = str(req.base_url).rstrip('/')
+        frontend_url = get_frontend_url(req)
         
         redirect_url = f"{frontend_url}/sales"
         
         # Webhook URL
-        host = req.headers.get("host", "localhost:8001")
-        scheme = req.headers.get("x-forwarded-proto", "https")
-        webhook_url = f"{scheme}://{host}/api/payments/webhooks/pagbank"
+        webhook_url = get_webhook_url(req)
         
         # Criar checkout
         result = await service.create_checkout(

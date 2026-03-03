@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import Layout from '../../components/Layout';
@@ -24,6 +24,36 @@ import {
 import { Button } from '../../components/ui/button';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+// Componente CredentialInput definido FORA do componente principal
+const CredentialInput = ({ label, field, value, onChange, placeholder, isSecret = false, showSecret, onToggleSecret, helpText = null }) => (
+  <div>
+    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+      {label}
+    </label>
+    <div className="relative">
+      <input
+        type={isSecret && !showSecret ? 'password' : 'text'}
+        value={value || ''}
+        onChange={(e) => onChange(field, e.target.value)}
+        placeholder={placeholder}
+        className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent pr-10"
+      />
+      {isSecret && (
+        <button
+          type="button"
+          onClick={() => onToggleSecret(field)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+        >
+          {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      )}
+    </div>
+    {helpText && (
+      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{helpText}</p>
+    )}
+  </div>
+);
 
 const AdminPaymentSettings = () => {
   const [settings, setSettings] = useState(null);
@@ -203,47 +233,18 @@ const AdminPaymentSettings = () => {
     }
   };
 
-  const toggleSecret = (field) => {
+  const toggleSecret = useCallback((field) => {
     setShowSecrets(prev => ({ ...prev, [field]: !prev[field] }));
-  };
+  }, []);
 
-  const handleChange = (field, value) => {
+  const handleChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleString('pt-BR');
   };
-
-  const CredentialInput = ({ label, field, placeholder, isSecret = false, helpText = null }) => (
-    <div>
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          type={isSecret && !showSecrets[field] ? 'password' : 'text'}
-          value={formData[field] || ''}
-          onChange={(e) => handleChange(field, e.target.value)}
-          placeholder={placeholder}
-          className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent pr-10"
-        />
-        {isSecret && (
-          <button
-            type="button"
-            onClick={() => toggleSecret(field)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-          >
-            {showSecrets[field] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
-        )}
-      </div>
-      {helpText && (
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{helpText}</p>
-      )}
-    </div>
-  );
 
   if (loading) {
     return (
@@ -430,14 +431,20 @@ const AdminPaymentSettings = () => {
                 <CredentialInput 
                   label="Email da Conta" 
                   field="sandbox_pagseguro_email" 
+                  value={formData.sandbox_pagseguro_email}
+                  onChange={handleChange}
                   placeholder="email@exemplo.com"
                   helpText="Email cadastrado no PagBank"
                 />
                 <CredentialInput 
                   label="Token de Autenticação" 
                   field="sandbox_pagseguro_token" 
+                  value={formData.sandbox_pagseguro_token}
+                  onChange={handleChange}
                   placeholder="Seu token de sandbox..." 
                   isSecret
+                  showSecret={showSecrets.sandbox_pagseguro_token}
+                  onToggleSecret={toggleSecret}
                   helpText="Encontre em: Portal Dev → Tokens"
                 />
               </div>
@@ -468,14 +475,20 @@ const AdminPaymentSettings = () => {
                 <CredentialInput 
                   label="Email da Conta" 
                   field="production_pagseguro_email" 
+                  value={formData.production_pagseguro_email}
+                  onChange={handleChange}
                   placeholder="email@seudominio.com.br"
                   helpText="Email cadastrado no PagBank"
                 />
                 <CredentialInput 
                   label="Token de Autenticação" 
                   field="production_pagseguro_token" 
+                  value={formData.production_pagseguro_token}
+                  onChange={handleChange}
                   placeholder="Seu token de produção..." 
                   isSecret
+                  showSecret={showSecrets.production_pagseguro_token}
+                  onToggleSecret={toggleSecret}
                   helpText="Menu: Vender online → Integrações"
                 />
               </div>
