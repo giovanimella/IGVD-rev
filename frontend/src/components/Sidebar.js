@@ -242,6 +242,18 @@ const Sidebar = () => {
             <p className="text-xs text-white/60 capitalize">{user?.role}</p>
           </div>
         </div>
+        
+        {/* Botão Financeiro (apenas para licenciados) */}
+        {user?.role === 'licenciado' && (
+          <Link
+            to="/profile?tab=financial"
+            className="flex items-center gap-3 px-4 py-3 w-full text-white/80 hover:bg-white/10 hover:text-white rounded-lg transition-colors mb-2"
+          >
+            <CreditCard className="w-5 h-5 flex-shrink-0" />
+            <span>Financeiro</span>
+          </Link>
+        )}
+        
         <button
           onClick={handleLogout}
           data-testid="sidebar-logout-button"

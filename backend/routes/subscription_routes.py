@@ -357,6 +357,20 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
     return SubscriptionStatusResponse(**status_info)
 
 
+@router.get("/my-payments")
+async def get_my_payments(current_user: dict = Depends(get_current_user)):
+    """Obtém o histórico de pagamentos do usuário"""
+    user_id = current_user["sub"]
+    
+    # Buscar pagamentos do usuário
+    payments = await db.subscription_payments.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).sort("billing_date", -1).limit(12).to_list(12)  # Últimos 12 meses
+    
+    return payments
+
+
 @router.put("/my-subscription/payment-method")
 async def update_my_payment_method(
     update_request: UpdatePaymentMethodRequest,
