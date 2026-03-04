@@ -8,7 +8,7 @@ import json
 import random
 
 # Configurações
-BACKEND_URL = "https://pagbank-checkout.preview.emergentagent.com"
+BACKEND_URL = "https://subscription-billing-1.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Credenciais do teste
