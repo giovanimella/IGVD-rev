@@ -180,7 +180,37 @@ const SubscriptionOnboarding = () => {
 
     } catch (error) {
       console.error('Erro ao criar assinatura:', error);
-      const errorMsg = error.response?.data?.detail || 'Erro ao processar assinatura';
+      
+      // Extrair mensagem de erro corretamente
+      let errorMsg = 'Erro ao processar assinatura';
+      
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        
+        // Se detail é um objeto (erro de validação do Pydantic)
+        if (typeof detail === 'object' && !Array.isArray(detail)) {
+          if (detail.message) {
+            errorMsg = detail.message;
+          } else if (Array.isArray(detail)) {
+            // Array de erros de validação
+            errorMsg = detail.map(err => err.msg || err.message).join(', ');
+          } else {
+            errorMsg = JSON.stringify(detail);
+          }
+        } 
+        // Se detail é um array
+        else if (Array.isArray(detail)) {
+          errorMsg = detail.map(err => {
+            if (typeof err === 'string') return err;
+            return err.msg || err.message || JSON.stringify(err);
+          }).join(', ');
+        }
+        // Se detail é uma string
+        else if (typeof detail === 'string') {
+          errorMsg = detail;
+        }
+      }
+      
       toast.error(errorMsg);
     } finally {
       setSubscribing(false);
