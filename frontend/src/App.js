@@ -65,6 +65,10 @@ import AdminCategories from './pages/admin/AdminCategories';
 import LandingPage from './pages/LandingPage';
 import AdminLandingPage from './pages/admin/AdminLandingPage';
 import Presentations from './pages/Presentations';
+import SubscriptionOnboarding from './pages/SubscriptionOnboarding';
+import Meetings from './pages/Meetings';
+import AdminSubscriptions from './pages/admin/AdminSubscriptions';
+import AdminMeetings from './pages/admin/AdminMeetings';
 
 function App() {
   return (
@@ -226,6 +230,22 @@ function App() {
             element={
               <PrivateRoute roles={['licenciado']}>
                 <OnboardingPayment />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/onboarding/subscription"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <SubscriptionOnboarding />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/meetings"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <Meetings />
               </PrivateRoute>
             }
           />
@@ -419,6 +439,22 @@ function App() {
             element={
               <PrivateRoute roles={['admin']}>
                 <AdminCampaigns />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/subscriptions"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminSubscriptions />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/meetings"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminMeetings />
               </PrivateRoute>
             }
           />

@@ -29,7 +29,8 @@ import {
   LayoutDashboard,
   ShieldAlert,
   Globe,
-  Tag
+  Tag,
+  CreditCard
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -115,6 +116,8 @@ const Sidebar = () => {
     { path: '/admin/modules', icon: BookOpen, label: 'Módulos' },
     { path: '/admin/users', icon: Users, label: 'Usuários' },
     { path: '/admin/categories', icon: Tag, label: 'Categorias' },
+    { path: '/admin/subscriptions', icon: CreditCard, label: 'Assinaturas' },
+    { path: '/admin/meetings', icon: Users, label: 'Reuniões' },
     { path: '/admin/campaigns', icon: Trophy, label: 'Campanhas' },
     { path: '/admin/chat', icon: MessageCircle, label: 'Atendimento' },
     { path: '/admin/company-events', icon: Calendar, label: 'Eventos Empresa' },
@@ -143,6 +146,7 @@ const Sidebar = () => {
     { path: '/dashboard', icon: Home, label: 'Início' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
     { path: '/presentations', icon: Target, label: 'Apresentações' },
+    { path: '/meetings', icon: Users, label: 'Reuniões' },
     { path: '/timeline', icon: MessagesSquare, label: 'Comunidade' },
     { path: '/training', icon: Users, label: 'Treinamento' },
     { path: '/sales', icon: ShoppingCart, label: 'Minhas Vendas' },
