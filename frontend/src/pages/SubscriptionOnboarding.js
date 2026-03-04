@@ -97,6 +97,7 @@ const SubscriptionOnboarding = () => {
   };
 
   const formatCPF = (value) => {
+    if (!value) return '';
     return value
       .replace(/\D/g, '')
       .replace(/(\d{3})(\d)/, '$1.$2')
@@ -106,6 +107,7 @@ const SubscriptionOnboarding = () => {
   };
 
   const formatPhone = (value) => {
+    if (!value) return '';
     return value
       .replace(/\D/g, '')
       .replace(/(\d{2})(\d)/, '($1) $2')
@@ -114,6 +116,7 @@ const SubscriptionOnboarding = () => {
   };
 
   const formatCardNumber = (value) => {
+    if (!value) return '';
     return value
       .replace(/\D/g, '')
       .replace(/(\d{4})(?=\d)/g, '$1 ')
@@ -121,6 +124,7 @@ const SubscriptionOnboarding = () => {
   };
 
   const formatExpiry = (value) => {
+    if (!value) return '';
     return value
       .replace(/\D/g, '')
       .replace(/(\d{2})(\d)/, '$1/$2')
@@ -128,6 +132,7 @@ const SubscriptionOnboarding = () => {
   };
 
   const formatCEP = (value) => {
+    if (!value) return '';
     return value
       .replace(/\D/g, '')
       .replace(/(\d{5})(\d)/, '$1-$2')
@@ -311,7 +316,7 @@ const SubscriptionOnboarding = () => {
                   type="text"
                   name="customer_cpf"
                   value={formData.customer_cpf}
-                  onChange={(e) => handleInputChange({...e, target: {...e.target, value: formatCPF(e.target.value)}})}
+                  onChange={(e) => setFormData({...formData, customer_cpf: formatCPF(e.target.value)})}
                   placeholder="000.000.000-00"
                   maxLength={14}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -327,7 +332,7 @@ const SubscriptionOnboarding = () => {
                   type="text"
                   name="customer_phone"
                   value={formData.customer_phone}
-                  onChange={(e) => handleInputChange({...e, target: {...e.target, value: formatPhone(e.target.value)}})}
+                  onChange={(e) => setFormData({...formData, customer_phone: formatPhone(e.target.value)})}
                   placeholder="(00) 00000-0000"
                   maxLength={15}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -349,7 +354,10 @@ const SubscriptionOnboarding = () => {
                   type="text"
                   name="address_zipcode"
                   value={formData.billing_address.zipcode}
-                  onChange={(e) => handleInputChange({...e, target: {...e.target, value: formatCEP(e.target.value)}})}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    billing_address: {...formData.billing_address, zipcode: formatCEP(e.target.value)}
+                  })}
                   placeholder="00000-000"
                   maxLength={9}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -447,7 +455,7 @@ const SubscriptionOnboarding = () => {
                   type="text"
                   name="card_number"
                   value={formData.card_number}
-                  onChange={(e) => handleInputChange({...e, target: {...e.target, value: formatCardNumber(e.target.value)}})}
+                  onChange={(e) => setFormData({...formData, card_number: formatCardNumber(e.target.value)})}
                   placeholder="0000 0000 0000 0000"
                   maxLength={19}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -478,7 +486,7 @@ const SubscriptionOnboarding = () => {
                   type="text"
                   name="card_holder_cpf"
                   value={formData.card_holder_cpf}
-                  onChange={(e) => handleInputChange({...e, target: {...e.target, value: formatCPF(e.target.value)}})}
+                  onChange={(e) => setFormData({...formData, card_holder_cpf: formatCPF(e.target.value)})}
                   placeholder="000.000.000-00"
                   maxLength={14}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -508,7 +516,7 @@ const SubscriptionOnboarding = () => {
                   type="text"
                   name="card_expiry"
                   value={formData.card_expiry}
-                  onChange={(e) => handleInputChange({...e, target: {...e.target, value: formatExpiry(e.target.value)}})}
+                  onChange={(e) => setFormData({...formData, card_expiry: formatExpiry(e.target.value)})}
                   placeholder="MM/AA"
                   maxLength={5}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
