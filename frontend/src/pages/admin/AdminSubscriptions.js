@@ -224,35 +224,33 @@ const AdminSubscriptions = () => {
               Credenciais PagBank API de Assinaturas
             </h3>
 
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Token de Acesso
-                </label>
-                <input
-                  type="password"
-                  value={settings?.pagbank_subscription_token || ''}
-                  onChange={(e) => setSettings({...settings, pagbank_subscription_token: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 font-mono text-sm"
-                  placeholder="Cole aqui o token da API de Assinaturas"
-                />
-                <p className="text-xs text-slate-500 mt-1">
-                  Token específico para API de Assinaturas (diferente do checkout)
-                </p>
-              </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-900">
+                <strong>Como obter a Chave Pública:</strong>
+              </p>
+              <ol className="text-sm text-blue-800 mt-2 space-y-1 list-decimal list-inside">
+                <li>Acesse o painel do PagBank</li>
+                <li>Vá em <strong>Integrações</strong> → <strong>Chaves</strong></li>
+                <li>Clique em <strong>Gerar Nova Chave</strong></li>
+                <li>Selecione <strong>Pagamento Recorrente</strong></li>
+                <li>Copie a chave pública gerada</li>
+              </ol>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Email da Conta (Referência)
-                </label>
-                <input
-                  type="email"
-                  value={settings?.pagbank_subscription_email || ''}
-                  onChange={(e) => setSettings({...settings, pagbank_subscription_email: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
-                  placeholder="Email da conta PagBank"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Chave Pública (Public Key)
+              </label>
+              <input
+                type="password"
+                value={settings?.pagbank_public_key || ''}
+                onChange={(e) => setSettings({...settings, pagbank_public_key: e.target.value})}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 font-mono text-sm"
+                placeholder="Cole aqui a chave pública da API de Assinaturas"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Chave pública para autenticação (Bearer token). Esta chave substitui o sistema de token+email antigo.
+              </p>
             </div>
           </div>
 

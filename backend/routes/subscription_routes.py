@@ -26,7 +26,7 @@ from models_subscription import (
     CreatePlanRequest,
     SubscriptionPlan
 )
-from services.pagbank_subscription_service import PagBankSubscriptionService
+from services.pagbank_subscription_service_v2 import PagBankSubscriptionService
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +54,9 @@ async def get_pagbank_subscription_service() -> PagBankSubscriptionService:
     settings = await get_subscription_settings()
     
     is_sandbox = settings.get("pagbank_environment") == "sandbox"
-    token = settings.get("pagbank_subscription_token")
-    email = settings.get("pagbank_subscription_email")
+    public_key = settings.get("pagbank_public_key")
     
-    return PagBankSubscriptionService(token=token, email=email, is_sandbox=is_sandbox)
+    return PagBankSubscriptionService(public_key=public_key, is_sandbox=is_sandbox)
 
 
 async def check_user_subscription_status(user_id: str) -> dict:
@@ -172,11 +171,11 @@ async def get_settings(current_user: dict = Depends(get_current_user)):
     
     settings = await get_subscription_settings()
     
-    # Mascarar token sensível
-    if settings.get("pagbank_subscription_token"):
-        token = settings["pagbank_subscription_token"]
-        if len(token) > 10:
-            settings["pagbank_subscription_token"] = token[:6] + "*" * (len(token) - 10) + token[-4:]
+    # Mascarar chave pública sensível
+    if settings.get("pagbank_public_key"):
+        key = settings["pagbank_public_key"]
+        if len(key) > 20:
+            settings["pagbank_public_key"] = key[:10] + "*" * (len(key) - 20) + key[-10:]
     
     return settings
 
@@ -228,12 +227,17 @@ async def create_plan(
     settings = await get_subscription_settings()
     service = await get_pagbank_subscription_service()
     
-    # Criar plano no PagBank
+    # Converter para centavos
+    amount_cents = int(plan_request.amount * 100)
+    
+    # Criar plano no PagBank com estrutura correta
     result = await service.create_plan(
+        reference_id=f"plan_{uuid.uuid4().hex[:12]}",
         name=plan_request.name,
         description=plan_request.description,
-        amount=plan_request.amount,
-        trial_days=settings.get("trial_days", 0)
+        amount=amount_cents,  # Em centavos
+        interval="MONTH",
+        interval_count=1
     )
     
     if not result.get("success"):
@@ -291,18 +295,41 @@ async def create_subscription(
     # Criar assinatura no PagBank
     service = await get_pagbank_subscription_service()
     
+    # Limpar e formatar telefone
+    phone_clean = ''.join(filter(str.isdigit, subscription_request.customer_phone))
+    area_code = phone_clean[:2] if len(phone_clean) >= 10 else "11"
+    phone_number = phone_clean[2:] if len(phone_clean) >= 10 else phone_clean
+    
+    # Preparar dados do cliente conforme documentação PagBank
+    customer_data = {
+        "name": subscription_request.customer_name[:50],
+        "email": subscription_request.customer_email,
+        "tax_id": ''.join(filter(str.isdigit, subscription_request.customer_cpf)),
+        "phone": {
+            "area_code": area_code,
+            "number": phone_number
+        },
+        "billing_info": [{
+            "type": "BILLING",
+            "address": {
+                "street": subscription_request.billing_address.get("street", "")[:80],
+                "number": subscription_request.billing_address.get("number", "")[:20],
+                "complement": subscription_request.billing_address.get("complement", "")[:40],
+                "district": subscription_request.billing_address.get("district", "")[:60],
+                "city": subscription_request.billing_address.get("city", "")[:60],
+                "state": subscription_request.billing_address.get("state", "")[:2],
+                "postal_code": ''.join(filter(str.isdigit, subscription_request.billing_address.get("zipcode", "")))
+            }
+        }]
+    }
+    
     result = await service.create_subscription(
+        reference_id=f"user_{user_id}_{uuid.uuid4().hex[:8]}",
         plan_id=plan["pagbank_plan_id"],
-        customer_name=subscription_request.customer_name,
-        customer_email=subscription_request.customer_email,
-        customer_cpf=subscription_request.customer_cpf,
-        customer_phone=subscription_request.customer_phone,
-        billing_address=subscription_request.billing_address,
-        card_token=subscription_request.card_token,
+        customer_data=customer_data,
+        encrypted_card=subscription_request.encrypted_card,
         card_holder_name=subscription_request.card_holder_name,
-        card_holder_cpf=subscription_request.card_holder_cpf,
-        card_holder_birth_date=subscription_request.card_holder_birth_date,
-        reference_id=f"user_{user_id}"
+        pro_rata=False
     )
     
     if not result.get("success"):
@@ -376,7 +403,13 @@ async def update_my_payment_method(
     update_request: UpdatePaymentMethodRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    """Atualiza o método de pagamento da assinatura"""
+    """
+    Atualiza o método de pagamento da assinatura
+    
+    NOTA: A API do PagBank não permite atualizar cartão diretamente.
+    É necessário criar uma nova assinatura ou usar o portal do cliente.
+    Este endpoint está preparado para quando a funcionalidade estiver disponível.
+    """
     user_id = current_user["sub"]
     
     # Buscar assinatura
@@ -387,21 +420,8 @@ async def update_my_payment_method(
     if subscription["status"] == SubscriptionStatus.CANCELLED:
         raise HTTPException(status_code=400, detail="Assinatura cancelada")
     
-    # Atualizar no PagBank
-    service = await get_pagbank_subscription_service()
-    
-    result = await service.update_payment_method(
-        subscription_id=subscription["pagbank_subscription_id"],
-        card_token=update_request.card_token,
-        card_holder_name=update_request.card_holder_name,
-        card_holder_cpf=update_request.card_holder_cpf,
-        card_holder_birth_date=update_request.card_holder_birth_date
-    )
-    
-    if not result.get("success"):
-        raise HTTPException(status_code=400, detail=result.get("error"))
-    
-    # Atualizar registro local
+    # Por enquanto, apenas salvamos localmente
+    # A atualização real deve ser feita através do portal do cliente do PagBank
     await db.user_subscriptions.update_one(
         {"user_id": user_id},
         {"$set": {
@@ -409,7 +429,10 @@ async def update_my_payment_method(
         }}
     )
     
-    return {"message": "Método de pagamento atualizado com sucesso"}
+    return {
+        "message": "Para atualizar seu cartão, entre em contato com o suporte",
+        "note": "A API do PagBank atualmente requer que a atualização de cartão seja feita através do portal do cliente"
+    }
 
 
 # ==================== WEBHOOKS ====================

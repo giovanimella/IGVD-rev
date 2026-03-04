@@ -42,9 +42,8 @@ class SubscriptionSettings(BaseModel):
     trial_days: int = 0  # Dias de teste gratuito (0 = sem teste)
     grace_period_days: int = 5  # Dias de tolerância após vencimento
     
-    # PagBank Assinaturas - Credenciais
-    pagbank_subscription_token: Optional[str] = None  # Token específico para API de Assinaturas
-    pagbank_subscription_email: Optional[str] = None  # Email da conta
+    # PagBank Assinaturas - Autenticação via Chave Pública
+    pagbank_public_key: Optional[str] = None  # Chave pública para autenticação (Bearer token)
     pagbank_environment: str = "sandbox"  # sandbox ou production
     
     # Configurações de suspensão
@@ -65,8 +64,7 @@ class SubscriptionSettingsUpdate(BaseModel):
     monthly_fee: Optional[float] = None
     trial_days: Optional[int] = None
     grace_period_days: Optional[int] = None
-    pagbank_subscription_token: Optional[str] = None
-    pagbank_subscription_email: Optional[str] = None
+    pagbank_public_key: Optional[str] = None
     pagbank_environment: Optional[str] = None
     suspend_after_months: Optional[int] = None
     send_payment_failed_email: Optional[bool] = None
@@ -169,19 +167,15 @@ class CreateSubscriptionRequest(BaseModel):
     # Endereço de cobrança
     billing_address: Dict[str, str]  # street, number, complement, district, city, state, zipcode
     
-    # Dados do cartão (tokenizado pelo frontend)
-    card_token: str  # Token gerado pelo PagBank no frontend
+    # Dados do cartão CRIPTOGRAFADO
+    encrypted_card: str  # Cartão criptografado pelo SDK do PagBank no frontend
     card_holder_name: str
-    card_holder_cpf: str
-    card_holder_birth_date: str  # YYYY-MM-DD
 
 
 class UpdatePaymentMethodRequest(BaseModel):
     """Atualização do método de pagamento"""
-    card_token: str
+    encrypted_card: str  # Cartão criptografado pelo SDK
     card_holder_name: str
-    card_holder_cpf: str
-    card_holder_birth_date: str
 
 
 # ==================== HISTÓRICO DE PAGAMENTOS ====================
