@@ -1,0 +1,570 @@
+"""
+Rotas de API para Sistema de Assinatura e Mensalidade Recorrente
+Integração com PagBank API de Assinaturas
+"""
+from fastapi import APIRouter, HTTPException, Depends, Request, BackgroundTasks
+from motor.motor_asyncio import AsyncIOMotorClient
+from datetime import datetime, timezone, timedelta
+from typing import Optional
+import logging
+import os
+import uuid
+
+from auth import get_current_user, require_role
+from models_subscription import (
+    SubscriptionSettings,
+    SubscriptionSettingsUpdate,
+    CreateSubscriptionRequest,
+    UpdatePaymentMethodRequest,
+    UserSubscription,
+    SubscriptionStatus,
+    SubscriptionPayment,
+    PaymentStatus,
+    SubscriptionResponse,
+    SubscriptionStatusResponse,
+    SubscriptionWebhookEvent,
+    CreatePlanRequest,
+    SubscriptionPlan
+)
+from services.pagbank_subscription_service import PagBankSubscriptionService
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
+
+mongo_url = os.environ['MONGO_URL']
+client = AsyncIOMotorClient(mongo_url)
+db = client[os.environ['DB_NAME']]
+
+
+# ==================== HELPERS ====================
+
+async def get_subscription_settings():
+    """Obtém as configurações de assinatura"""
+    settings = await db.subscription_settings.find_one({}, {"_id": 0})
+    if not settings:
+        # Criar configuração padrão
+        settings = SubscriptionSettings().model_dump()
+        await db.subscription_settings.insert_one(settings.copy())
+    return settings
+
+
+async def get_pagbank_subscription_service() -> PagBankSubscriptionService:
+    """Obtém o serviço PagBank Subscriptions configurado"""
+    settings = await get_subscription_settings()
+    
+    is_sandbox = settings.get("pagbank_environment") == "sandbox"
+    token = settings.get("pagbank_subscription_token")
+    email = settings.get("pagbank_subscription_email")
+    
+    return PagBankSubscriptionService(token=token, email=email, is_sandbox=is_sandbox)
+
+
+async def check_user_subscription_status(user_id: str) -> dict:
+    """
+    Verifica o status da assinatura do usuário
+    
+    Returns:
+        dict com has_active_subscription, is_blocked, status, etc
+    """
+    subscription = await db.user_subscriptions.find_one(
+        {"user_id": user_id},
+        {"_id": 0}
+    )
+    
+    if not subscription:
+        return {
+            "has_active_subscription": False,
+            "is_blocked": True,
+            "status": None,
+            "overdue_months": 0,
+            "subscription": None
+        }
+    
+    status = subscription.get("status")
+    
+    # Bloqueado se: SUSPENDED, CANCELLED, ou OVERDUE
+    is_blocked = status in [
+        SubscriptionStatus.SUSPENDED,
+        SubscriptionStatus.CANCELLED,
+        SubscriptionStatus.OVERDUE
+    ]
+    
+    # Ativo se: ACTIVE ou TRIAL
+    has_active = status in [
+        SubscriptionStatus.ACTIVE,
+        SubscriptionStatus.TRIAL
+    ]
+    
+    return {
+        "has_active_subscription": has_active,
+        "is_blocked": is_blocked,
+        "status": status,
+        "overdue_months": subscription.get("overdue_months", 0),
+        "next_billing_date": subscription.get("next_billing_date"),
+        "monthly_amount": subscription.get("monthly_amount"),
+        "subscription": subscription
+    }
+
+
+async def send_payment_failed_email(user: dict, subscription: dict):
+    """Envia email notificando falha no pagamento"""
+    try:
+        # Buscar serviço de email (Resend)
+        from services.email_service import send_email
+        
+        html_content = f"""
+        <h2>Falha no Pagamento da Mensalidade</h2>
+        <p>Olá, {user['full_name']}!</p>
+        <p>Infelizmente, não conseguimos processar o pagamento da sua mensalidade.</p>
+        <p><strong>Valor:</strong> R$ {subscription['monthly_amount']:.2f}</p>
+        <p>Para regularizar sua situação e continuar com acesso aos conteúdos, 
+        acesse sua conta e atualize seus dados de pagamento.</p>
+        <p><a href="{os.environ.get('APP_URL', '')}/subscription">Atualizar Pagamento</a></p>
+        <p>Caso não regularize o pagamento por 2 meses consecutivos, sua conta será suspensa.</p>
+        <p>Atenciosamente,<br>Equipe UniOzoxx</p>
+        """
+        
+        await send_email(
+            to_email=user['email'],
+            subject="⚠️ Falha no Pagamento - UniOzoxx",
+            html_content=html_content
+        )
+        
+        logger.info(f"Email de falha de pagamento enviado para {user['email']}")
+    except Exception as e:
+        logger.error(f"Erro ao enviar email de falha: {e}")
+
+
+async def send_suspension_email(user: dict):
+    """Envia email notificando suspensão da conta"""
+    try:
+        from services.email_service import send_email
+        
+        html_content = f"""
+        <h2>Conta Suspensa por Inadimplência</h2>
+        <p>Olá, {user['full_name']}!</p>
+        <p>Sua conta foi suspensa devido a 2 meses consecutivos de inadimplência.</p>
+        <p>Para reativar sua conta, entre em contato conosco através do email 
+        <strong>contato@ozoxx.com.br</strong> ou telefone <strong>(00) 0000-0000</strong>.</p>
+        <p>Nossa equipe irá ajudá-lo a regularizar a situação.</p>
+        <p>Atenciosamente,<br>Equipe UniOzoxx</p>
+        """
+        
+        await send_email(
+            to_email=user['email'],
+            subject="🔒 Conta Suspensa - UniOzoxx",
+            html_content=html_content
+        )
+        
+        logger.info(f"Email de suspensão enviado para {user['email']}")
+    except Exception as e:
+        logger.error(f"Erro ao enviar email de suspensão: {e}")
+
+
+# ==================== CONFIGURAÇÕES (ADMIN) ====================
+
+@router.get("/settings")
+async def get_settings(current_user: dict = Depends(get_current_user)):
+    """Obtém as configurações de assinatura (somente admin)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    settings = await get_subscription_settings()
+    
+    # Mascarar token sensível
+    if settings.get("pagbank_subscription_token"):
+        token = settings["pagbank_subscription_token"]
+        if len(token) > 10:
+            settings["pagbank_subscription_token"] = token[:6] + "*" * (len(token) - 10) + token[-4:]
+    
+    return settings
+
+
+@router.put("/settings")
+async def update_settings(
+    updates: SubscriptionSettingsUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Atualiza as configurações de assinatura (somente admin)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    update_dict = {k: v for k, v in updates.model_dump().items() if v is not None}
+    update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.subscription_settings.update_one(
+        {},
+        {"$set": update_dict},
+        upsert=True
+    )
+    
+    return {"message": "Configurações atualizadas com sucesso"}
+
+
+@router.post("/test-connection")
+async def test_connection(current_user: dict = Depends(get_current_user)):
+    """Testa a conexão com PagBank Subscriptions API"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    service = await get_pagbank_subscription_service()
+    result = await service.test_connection()
+    
+    return result
+
+
+# ==================== PLANOS ====================
+
+@router.post("/plans")
+async def create_plan(
+    plan_request: CreatePlanRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cria um plano de assinatura no PagBank (Admin)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    settings = await get_subscription_settings()
+    service = await get_pagbank_subscription_service()
+    
+    # Criar plano no PagBank
+    result = await service.create_plan(
+        name=plan_request.name,
+        description=plan_request.description,
+        amount=plan_request.amount,
+        trial_days=settings.get("trial_days", 0)
+    )
+    
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error"))
+    
+    # Salvar plano no banco
+    plan = SubscriptionPlan(
+        name=plan_request.name,
+        description=plan_request.description,
+        amount=plan_request.amount,
+        pagbank_plan_id=result.get("plan_id"),
+        pagbank_plan_code=result.get("plan_code")
+    )
+    
+    await db.subscription_plans.insert_one(plan.model_dump())
+    
+    return {
+        "message": "Plano criado com sucesso",
+        "plan": plan.model_dump()
+    }
+
+
+@router.get("/plans")
+async def list_plans(current_user: dict = Depends(get_current_user)):
+    """Lista todos os planos de assinatura"""
+    plans = await db.subscription_plans.find(
+        {"is_active": True},
+        {"_id": 0}
+    ).to_list(100)
+    
+    return plans
+
+
+# ==================== ASSINATURAS (USUÁRIO) ====================
+
+@router.post("/subscribe")
+async def create_subscription(
+    subscription_request: CreateSubscriptionRequest,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cria uma assinatura para o usuário atual"""
+    user_id = current_user["sub"]
+    
+    # Verificar se já tem assinatura ativa
+    existing = await db.user_subscriptions.find_one({"user_id": user_id})
+    if existing and existing.get("status") in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]:
+        raise HTTPException(status_code=400, detail="Você já possui uma assinatura ativa")
+    
+    # Buscar plano ativo
+    plan = await db.subscription_plans.find_one({"is_active": True}, {"_id": 0})
+    if not plan:
+        raise HTTPException(status_code=404, detail="Nenhum plano disponível")
+    
+    # Criar assinatura no PagBank
+    service = await get_pagbank_subscription_service()
+    
+    result = await service.create_subscription(
+        plan_id=plan["pagbank_plan_id"],
+        customer_name=subscription_request.customer_name,
+        customer_email=subscription_request.customer_email,
+        customer_cpf=subscription_request.customer_cpf,
+        customer_phone=subscription_request.customer_phone,
+        billing_address=subscription_request.billing_address,
+        card_token=subscription_request.card_token,
+        card_holder_name=subscription_request.card_holder_name,
+        card_holder_cpf=subscription_request.card_holder_cpf,
+        card_holder_birth_date=subscription_request.card_holder_birth_date,
+        reference_id=f"user_{user_id}"
+    )
+    
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error"))
+    
+    # Criar registro de assinatura
+    subscription = UserSubscription(
+        user_id=user_id,
+        user_email=current_user["email"],
+        user_name=current_user["full_name"],
+        plan_id=plan["id"],
+        monthly_amount=plan["amount"],
+        pagbank_subscription_id=result.get("subscription_id"),
+        pagbank_subscription_code=result.get("subscription_code"),
+        status=SubscriptionStatus.ACTIVE if result.get("status") == "ACTIVE" else SubscriptionStatus.PENDING,
+        started_at=datetime.now(timezone.utc).isoformat(),
+        next_billing_date=result.get("next_billing_date"),
+        card_last_digits=result.get("card_last_digits"),
+        card_brand=result.get("card_brand")
+    )
+    
+    # Salvar ou atualizar
+    if existing:
+        await db.user_subscriptions.update_one(
+            {"user_id": user_id},
+            {"$set": subscription.model_dump()}
+        )
+    else:
+        await db.user_subscriptions.insert_one(subscription.model_dump())
+    
+    # Atualizar onboarding do usuário - avançar para etapa "acolhimento"
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"current_stage": "acolhimento"}}
+    )
+    
+    return SubscriptionResponse(
+        success=True,
+        message="Assinatura criada com sucesso! Você agora tem acesso total à plataforma.",
+        subscription=subscription.model_dump(),
+        pagbank_subscription_id=result.get("subscription_id")
+    )
+
+
+@router.get("/my-subscription")
+async def get_my_subscription(current_user: dict = Depends(get_current_user)):
+    """Obtém a assinatura do usuário atual"""
+    user_id = current_user["sub"]
+    
+    status_info = await check_user_subscription_status(user_id)
+    
+    return SubscriptionStatusResponse(**status_info)
+
+
+@router.put("/my-subscription/payment-method")
+async def update_my_payment_method(
+    update_request: UpdatePaymentMethodRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Atualiza o método de pagamento da assinatura"""
+    user_id = current_user["sub"]
+    
+    # Buscar assinatura
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Assinatura não encontrada")
+    
+    if subscription["status"] == SubscriptionStatus.CANCELLED:
+        raise HTTPException(status_code=400, detail="Assinatura cancelada")
+    
+    # Atualizar no PagBank
+    service = await get_pagbank_subscription_service()
+    
+    result = await service.update_payment_method(
+        subscription_id=subscription["pagbank_subscription_id"],
+        card_token=update_request.card_token,
+        card_holder_name=update_request.card_holder_name,
+        card_holder_cpf=update_request.card_holder_cpf,
+        card_holder_birth_date=update_request.card_holder_birth_date
+    )
+    
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error"))
+    
+    # Atualizar registro local
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Método de pagamento atualizado com sucesso"}
+
+
+# ==================== WEBHOOKS ====================
+
+@router.post("/webhooks/pagbank")
+async def pagbank_webhook(request: Request, background_tasks: BackgroundTasks):
+    """
+    Recebe notificações do PagBank sobre pagamentos de assinaturas
+    """
+    try:
+        payload = await request.json()
+        
+        # Salvar webhook recebido
+        webhook_event = SubscriptionWebhookEvent(
+            event_type=payload.get("event_type", "unknown"),
+            pagbank_subscription_id=payload.get("subscription_id"),
+            pagbank_charge_id=payload.get("charge_id"),
+            status=payload.get("status"),
+            raw_payload=payload
+        )
+        
+        await db.subscription_webhook_events.insert_one(webhook_event.model_dump())
+        
+        # Processar evento em background
+        background_tasks.add_task(process_subscription_webhook, webhook_event.model_dump())
+        
+        return {"received": True}
+        
+    except Exception as e:
+        logger.error(f"Erro ao processar webhook: {e}")
+        return {"received": False, "error": str(e)}
+
+
+async def process_subscription_webhook(webhook_event: dict):
+    """Processa evento de webhook em background"""
+    try:
+        event_type = webhook_event.get("event_type")
+        payload = webhook_event.get("raw_payload", {})
+        subscription_id = webhook_event.get("pagbank_subscription_id")
+        
+        # Buscar assinatura
+        subscription = await db.user_subscriptions.find_one({
+            "pagbank_subscription_id": subscription_id
+        })
+        
+        if not subscription:
+            logger.warning(f"Assinatura não encontrada: {subscription_id}")
+            return
+        
+        user_id = subscription["user_id"]
+        
+        # Processar eventos
+        if event_type == "subscription.charged":
+            # Pagamento realizado com sucesso
+            await db.user_subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {
+                    "status": SubscriptionStatus.ACTIVE,
+                    "last_payment_date": datetime.now(timezone.utc).isoformat(),
+                    "failed_payments_count": 0,
+                    "overdue_months": 0,
+                    "payment_failed_email_sent": False,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            logger.info(f"Pagamento confirmado para usuário {user_id}")
+            
+        elif event_type == "subscription.payment_failed":
+            # Falha no pagamento
+            failed_count = subscription.get("failed_payments_count", 0) + 1
+            overdue_months = subscription.get("overdue_months", 0) + 1
+            
+            settings = await get_subscription_settings()
+            suspend_threshold = settings.get("suspend_after_months", 2)
+            
+            # Determinar novo status
+            if overdue_months >= suspend_threshold:
+                new_status = SubscriptionStatus.SUSPENDED
+            else:
+                new_status = SubscriptionStatus.OVERDUE
+            
+            await db.user_subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {
+                    "status": new_status,
+                    "failed_payments_count": failed_count,
+                    "overdue_months": overdue_months,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            # Enviar emails
+            user = await db.users.find_one({"id": user_id}, {"_id": 0})
+            
+            if new_status == SubscriptionStatus.OVERDUE and not subscription.get("payment_failed_email_sent"):
+                await send_payment_failed_email(user, subscription)
+                await db.user_subscriptions.update_one(
+                    {"user_id": user_id},
+                    {"$set": {"payment_failed_email_sent": True}}
+                )
+            elif new_status == SubscriptionStatus.SUSPENDED and not subscription.get("suspension_email_sent"):
+                await send_suspension_email(user)
+                await db.user_subscriptions.update_one(
+                    {"user_id": user_id},
+                    {"$set": {"suspension_email_sent": True, "suspended_at": datetime.now(timezone.utc).isoformat()}}
+                )
+            
+            logger.warning(f"Falha de pagamento para usuário {user_id}, status={new_status}")
+        
+        # Marcar webhook como processado
+        await db.subscription_webhook_events.update_one(
+            {"id": webhook_event["id"]},
+            {"$set": {
+                "processed": True,
+                "processed_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+    except Exception as e:
+        logger.error(f"Erro ao processar webhook: {e}")
+        await db.subscription_webhook_events.update_one(
+            {"id": webhook_event["id"]},
+            {"$set": {"processing_error": str(e)}}
+        )
+
+
+# ==================== ADMIN - GESTÃO ====================
+
+@router.get("/all")
+async def list_all_subscriptions(
+    status: Optional[str] = None,
+    current_user: dict = Depends(require_role(["admin", "supervisor"]))
+):
+    """Lista todas as assinaturas (Admin/Supervisor)"""
+    query = {}
+    if status:
+        query["status"] = status
+    
+    subscriptions = await db.user_subscriptions.find(
+        query,
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    return subscriptions
+
+
+@router.get("/stats")
+async def get_subscription_stats(current_user: dict = Depends(get_current_user)):
+    """Estatísticas de assinaturas (Admin)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    total = await db.user_subscriptions.count_documents({})
+    active = await db.user_subscriptions.count_documents({"status": SubscriptionStatus.ACTIVE})
+    overdue = await db.user_subscriptions.count_documents({"status": SubscriptionStatus.OVERDUE})
+    suspended = await db.user_subscriptions.count_documents({"status": SubscriptionStatus.SUSPENDED})
+    
+    settings = await get_subscription_settings()
+    monthly_fee = settings.get("monthly_fee", 0)
+    
+    # Receita mensal estimada (assinaturas ativas)
+    monthly_revenue = active * monthly_fee
+    
+    return {
+        "total_subscriptions": total,
+        "active_subscriptions": active,
+        "overdue_subscriptions": overdue,
+        "suspended_subscriptions": suspended,
+        "monthly_fee": monthly_fee,
+        "estimated_monthly_revenue": monthly_revenue
+    }
