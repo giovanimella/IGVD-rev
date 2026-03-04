@@ -45,7 +45,7 @@ const Meetings = () => {
 
   const handleCreateMeeting = async (formData) => {
     try {
-      await axios.post(`${API_URL}/api/meetings`, formData);
+      await axios.post(`${API_URL}/api/meetings/`, formData);
       toast.success('Reunião criada com sucesso!');
       setShowCreateModal(false);
       fetchData();

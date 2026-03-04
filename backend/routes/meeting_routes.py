@@ -50,8 +50,9 @@ async def check_subscription_status(user_id: str) -> bool:
     """Verifica se usuário tem assinatura ativa (não está bloqueado)"""
     subscription = await db.user_subscriptions.find_one({"user_id": user_id})
     
+    # Se não tem assinatura ainda (onboarding), permitir acesso
     if not subscription:
-        return False
+        return True
     
     # Status que bloqueiam acesso
     blocked_statuses = ["overdue", "suspended", "cancelled"]
@@ -110,10 +111,14 @@ async def create_meeting(
             detail="Acesso bloqueado. Regularize sua mensalidade para continuar usando o sistema."
         )
     
+    # Buscar nome do usuário
+    user = await db.users.find_one({"id": user_id}, {"full_name": 1, "_id": 0})
+    user_name = user.get("full_name", current_user.get("email", "Usuário")) if user else current_user.get("email", "Usuário")
+    
     # Criar reunião
     meeting = Meeting(
         user_id=user_id,
-        user_name=current_user["full_name"],
+        user_name=user_name,
         title=meeting_request.title,
         description=meeting_request.description,
         location=meeting_request.location,
