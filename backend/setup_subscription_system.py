@@ -23,7 +23,8 @@ async def setup_subscription_settings():
             "monthly_fee": 49.90,
             "trial_days": 0,
             "grace_period_days": 5,
-            "pagbank_public_key": None,
+            "pagbank_token": "2e612a91-9457-4087-82a7-eaec13da02f91e06e1e44559af96ce205e03862a06bf4b39-9ae4-4659-bb25-4da21732297a",  # Token sandbox padrão
+            "pagbank_public_key": None,  # Será gerada via API
             "pagbank_environment": "sandbox",
             "suspend_after_months": 2,
             "send_payment_failed_email": True,

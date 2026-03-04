@@ -42,8 +42,9 @@ class SubscriptionSettings(BaseModel):
     trial_days: int = 0  # Dias de teste gratuito (0 = sem teste)
     grace_period_days: int = 5  # Dias de tolerância após vencimento
     
-    # PagBank Assinaturas - Autenticação via Chave Pública
-    pagbank_public_key: Optional[str] = None  # Chave pública para autenticação (Bearer token)
+    # PagBank Assinaturas - Autenticação
+    pagbank_token: Optional[str] = None  # Token Bearer para autenticação
+    pagbank_public_key: Optional[str] = None  # Chave pública gerada via API (para criptografia de cartões)
     pagbank_environment: str = "sandbox"  # sandbox ou production
     
     # Configurações de suspensão
@@ -64,6 +65,7 @@ class SubscriptionSettingsUpdate(BaseModel):
     monthly_fee: Optional[float] = None
     trial_days: Optional[int] = None
     grace_period_days: Optional[int] = None
+    pagbank_token: Optional[str] = None
     pagbank_public_key: Optional[str] = None
     pagbank_environment: Optional[str] = None
     suspend_after_months: Optional[int] = None

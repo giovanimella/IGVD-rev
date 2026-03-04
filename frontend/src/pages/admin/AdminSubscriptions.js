@@ -12,6 +12,7 @@ const AdminSubscriptions = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [generatingKey, setGeneratingKey] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -64,6 +65,29 @@ const AdminSubscriptions = () => {
       toast.error('Erro ao testar conexão');
     } finally {
       setTesting(false);
+    }
+  };
+
+  const handleGeneratePublicKey = async () => {
+    if (!settings?.pagbank_token) {
+      toast.error('Configure o Token Bearer primeiro');
+      return;
+    }
+
+    setGeneratingKey(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/subscriptions/generate-public-key`);
+      if (response.data.success) {
+        toast.success('Chave pública gerada com sucesso!');
+        fetchData(); // Recarregar dados
+      } else {
+        toast.error(response.data.error || 'Erro ao gerar chave pública');
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao gerar chave pública';
+      toast.error(errorMsg);
+    } finally {
+      setGeneratingKey(false);
     }
   };
 
@@ -221,35 +245,67 @@ const AdminSubscriptions = () => {
           <div className="space-y-4 pt-4 border-t border-slate-200">
             <h3 className="text-lg font-outfit font-semibold text-slate-900 flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-cyan-500" />
-              Credenciais PagBank API de Assinaturas
+              Credenciais PagBank API
             </h3>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-blue-900">
-                <strong>Como obter a Chave Pública:</strong>
+              <p className="text-sm text-blue-900 font-semibold mb-2">
+                📝 Configuração em 2 Passos:
               </p>
-              <ol className="text-sm text-blue-800 mt-2 space-y-1 list-decimal list-inside">
-                <li>Acesse o painel do PagBank</li>
-                <li>Vá em <strong>Integrações</strong> → <strong>Chaves</strong></li>
-                <li>Clique em <strong>Gerar Nova Chave</strong></li>
-                <li>Selecione <strong>Pagamento Recorrente</strong></li>
-                <li>Copie a chave pública gerada</li>
+              <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                <li><strong>Passo 1:</strong> Cole o Token Bearer abaixo e clique em "Salvar"</li>
+                <li><strong>Passo 2:</strong> Clique em "Gerar Chave Pública" para criar a chave de criptografia</li>
               </ol>
+              <p className="text-xs text-blue-700 mt-3">
+                💡 <strong>Token Sandbox:</strong> 2e612a91-9457-4087-82a7-eaec13da02f91e06e1e44559af96ce205e03862a06bf4b39-9ae4-4659-bb25-4da21732297a
+              </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Chave Pública (Public Key)
+                Token Bearer (Obrigatório)
               </label>
               <input
                 type="password"
-                value={settings?.pagbank_public_key || ''}
-                onChange={(e) => setSettings({...settings, pagbank_public_key: e.target.value})}
+                value={settings?.pagbank_token || ''}
+                onChange={(e) => setSettings({...settings, pagbank_token: e.target.value})}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 font-mono text-sm"
-                placeholder="Cole aqui a chave pública da API de Assinaturas"
+                placeholder="Cole aqui o Token Bearer"
               />
               <p className="text-xs text-slate-500 mt-1">
-                Chave pública para autenticação (Bearer token). Esta chave substitui o sistema de token+email antigo.
+                Token de autenticação para fazer requisições à API do PagBank
+              </p>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Chave Pública (Gerada automaticamente)
+                </label>
+                <Button
+                  size="sm"
+                  onClick={handleGeneratePublicKey}
+                  disabled={generatingKey || !settings?.pagbank_token}
+                  className="bg-green-500 hover:bg-green-600"
+                >
+                  {generatingKey ? (
+                    <>
+                      <Loader className="animate-spin w-4 h-4 mr-2" />
+                      Gerando...
+                    </>
+                  ) : (
+                    'Gerar Chave Pública'
+                  )}
+                </Button>
+              </div>
+              <input
+                type="text"
+                value={settings?.pagbank_public_key || 'Clique em "Gerar Chave Pública"'}
+                readOnly
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 font-mono text-xs"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Chave pública gerada via API para criptografar cartões no frontend
               </p>
             </div>
           </div>

@@ -22,116 +22,121 @@ class PagBankSubscriptionService:
     """Serviço de integração com PagBank - API de Assinaturas"""
     
     # URLs das APIs
-    SANDBOX_URL = "https://sandbox.api.assinaturas.pagseguro.com"
-    PRODUCTION_URL = "https://api.assinaturas.pagseguro.com"
+    SANDBOX_URL = "https://sandbox.api.pagseguro.com"
+    PRODUCTION_URL = "https://api.pagseguro.com"
     
-    def __init__(self, public_key: str = None, is_sandbox: bool = True):
+    def __init__(self, bearer_token: str = None, is_sandbox: bool = True):
         """
         Inicializa o serviço PagBank Subscriptions
         
         Args:
-            public_key: Chave pública de autenticação (Bearer token)
+            bearer_token: Token Bearer para autenticação
             is_sandbox: Se True, usa ambiente de teste
         """
-        self.public_key = public_key
+        self.bearer_token = bearer_token
         self.is_sandbox = is_sandbox
         self.base_url = self.SANDBOX_URL if is_sandbox else self.PRODUCTION_URL
         
-        # Headers para requisições (autenticação via Bearer token)
+        # Headers para requisições
         self.headers = {
-            "Authorization": f"Bearer {public_key}" if public_key else "",
+            "Authorization": f"Bearer {bearer_token}" if bearer_token else "",
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
     
-    async def create_public_key(self, token: str) -> Dict[str, Any]:
+    async def generate_public_key(self) -> Dict[str, Any]:
         """
-        Cria uma chave pública para autenticação
-        Este método deve ser chamado uma única vez para gerar a chave pública
+        Gera uma chave pública para criptografia de cartões
+        Esta chave é usada no frontend para criptografar dados de cartão antes de enviar ao backend
         
-        Args:
-            token: Token de autenticação inicial
+        Endpoint: POST /public-keys
+        Body: {"type": "card"}
         
         Returns:
             Dict com a chave pública gerada
         """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
         try:
-            headers = {
-                "Authorization": f"Bearer {token}",
-                "Accept": "application/json"
-            }
+            payload = {"type": "card"}
+            
+            logger.info(f"[PagBank] Gerando chave pública para criptografia de cartões")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.put(
+                response = await client.post(
                     f"{self.base_url}/public-keys",
-                    headers=headers
+                    json=payload,
+                    headers=self.headers
                 )
             
-            if response.status_code == 200:
+            if response.status_code in [200, 201]:
                 data = response.json()
-                logger.info(f"[PagBank] Chave pública criada com sucesso")
+                public_key = data.get("public_key")
+                
+                logger.info(f"[PagBank] Chave pública gerada com sucesso: {public_key[:20]}...")
+                
                 return {
                     "success": True,
-                    "public_key": data.get("public_key"),
+                    "public_key": public_key,
+                    "created_at": data.get("created_at"),
                     "raw_response": data
                 }
             else:
-                logger.error(f"[PagBank] Erro ao criar chave pública: {response.status_code}")
+                error_data = response.json() if response.content else {}
+                error_messages = error_data.get("error_messages", [])
+                error_msg = error_messages[0].get("description", f"HTTP {response.status_code}") if error_messages else f"HTTP {response.status_code}"
+                
+                logger.error(f"[PagBank] Erro ao gerar chave pública: {response.status_code} - {response.text}")
+                
                 return {
                     "success": False,
-                    "error": f"HTTP {response.status_code}",
-                    "raw_response": response.json() if response.content else {}
+                    "error": error_msg,
+                    "error_code": response.status_code,
+                    "raw_response": error_data
                 }
                 
         except Exception as e:
-            logger.error(f"[PagBank] Exceção ao criar chave pública: {e}")
+            logger.error(f"[PagBank] Exceção ao gerar chave pública: {e}")
             return {"success": False, "error": str(e)}
+    
+    async def create_public_key(self, token: str) -> Dict[str, Any]:
+        """
+        DEPRECATED: Use generate_public_key() instead
+        Mantido para compatibilidade
+        """
+        return await self.generate_public_key()
     
     async def test_connection(self) -> Dict[str, Any]:
         """
-        Testa a conexão com a API de Assinaturas
+        Testa a conexão com a API
         
         Returns:
             Dict com success e detalhes do teste
         """
-        if not self.public_key:
+        if not self.bearer_token:
             return {
                 "success": False,
-                "error": "Chave pública não configurada",
+                "error": "Token Bearer não configurado",
                 "environment": "sandbox" if self.is_sandbox else "production"
             }
         
         try:
-            # Tentar listar planos para testar autenticação
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                response = await client.get(
-                    f"{self.base_url}/plans",
-                    headers=self.headers
-                )
+            # Tentar gerar uma chave pública para testar autenticação
+            result = await self.generate_public_key()
             
-            if response.status_code == 200:
+            if result.get("success"):
                 return {
                     "success": True,
                     "message": "Conexão estabelecida com sucesso",
                     "environment": "sandbox" if self.is_sandbox else "production",
-                    "api_url": self.base_url
-                }
-            elif response.status_code == 401:
-                return {
-                    "success": False,
-                    "error": "Chave pública inválida ou expirada",
-                    "environment": "sandbox" if self.is_sandbox else "production"
-                }
-            elif response.status_code == 403:
-                return {
-                    "success": False,
-                    "error": "Chave pública sem permissão para API de Assinaturas",
-                    "environment": "sandbox" if self.is_sandbox else "production"
+                    "api_url": self.base_url,
+                    "public_key_generated": True
                 }
             else:
                 return {
                     "success": False,
-                    "error": f"HTTP {response.status_code}",
+                    "error": result.get("error", "Erro ao testar conexão"),
                     "environment": "sandbox" if self.is_sandbox else "production"
                 }
                 
@@ -141,7 +146,7 @@ class PagBankSubscriptionService:
                 "error": "Timeout na comunicação com PagBank"
             }
         except Exception as e:
-            logger.error(f"[PagBank Subscriptions] Erro ao testar conexão: {e}")
+            logger.error(f"[PagBank] Erro ao testar conexão: {e}")
             return {
                 "success": False,
                 "error": str(e)
@@ -170,8 +175,8 @@ class PagBankSubscriptionService:
         Returns:
             Dict com success, plan_id, etc
         """
-        if not self.public_key:
-            return {"success": False, "error": "Chave pública não configurada"}
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
             # Payload do plano conforme documentação oficial
@@ -249,8 +254,8 @@ class PagBankSubscriptionService:
         Returns:
             Dict com success, subscription_id, etc
         """
-        if not self.public_key:
-            return {"success": False, "error": "Chave pública não configurada"}
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
             # Payload da assinatura conforme documentação oficial
@@ -330,8 +335,8 @@ class PagBankSubscriptionService:
         Returns:
             Dict com dados da assinatura
         """
-        if not self.public_key:
-            return {"success": False, "error": "Chave pública não configurada"}
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -370,8 +375,8 @@ class PagBankSubscriptionService:
         Returns:
             Dict com success
         """
-        if not self.public_key:
-            return {"success": False, "error": "Chave pública não configurada"}
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -402,8 +407,8 @@ class PagBankSubscriptionService:
         """
         Suspende uma assinatura
         """
-        if not self.public_key:
-            return {"success": False, "error": "Chave pública não configurada"}
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -425,8 +430,8 @@ class PagBankSubscriptionService:
         """
         Ativa uma assinatura suspensa
         """
-        if not self.public_key:
-            return {"success": False, "error": "Chave pública não configurada"}
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -454,8 +459,8 @@ class PagBankSubscriptionService:
         Returns:
             Dict com lista de faturas
         """
-        if not self.public_key:
-            return {"success": False, "error": "Chave pública não configurada"}
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:

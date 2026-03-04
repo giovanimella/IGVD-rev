@@ -54,9 +54,9 @@ async def get_pagbank_subscription_service() -> PagBankSubscriptionService:
     settings = await get_subscription_settings()
     
     is_sandbox = settings.get("pagbank_environment") == "sandbox"
-    public_key = settings.get("pagbank_public_key")
+    bearer_token = settings.get("pagbank_token")
     
-    return PagBankSubscriptionService(public_key=public_key, is_sandbox=is_sandbox)
+    return PagBankSubscriptionService(bearer_token=bearer_token, is_sandbox=is_sandbox)
 
 
 async def check_user_subscription_status(user_id: str) -> dict:
@@ -171,11 +171,17 @@ async def get_settings(current_user: dict = Depends(get_current_user)):
     
     settings = await get_subscription_settings()
     
-    # Mascarar chave pública sensível
+    # Mascarar token sensível
+    if settings.get("pagbank_token"):
+        token = settings["pagbank_token"]
+        if len(token) > 20:
+            settings["pagbank_token"] = token[:10] + "*" * (len(token) - 20) + token[-10:]
+    
+    # Mascarar chave pública se existir
     if settings.get("pagbank_public_key"):
         key = settings["pagbank_public_key"]
-        if len(key) > 20:
-            settings["pagbank_public_key"] = key[:10] + "*" * (len(key) - 20) + key[-10:]
+        if len(key) > 40:
+            settings["pagbank_public_key"] = key[:20] + "..." + key[-20:]
     
     return settings
 
@@ -203,7 +209,7 @@ async def update_settings(
 
 @router.post("/test-connection")
 async def test_connection(current_user: dict = Depends(get_current_user)):
-    """Testa a conexão com PagBank Subscriptions API"""
+    """Testa a conexão com PagBank API"""
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Acesso negado")
     
@@ -211,6 +217,39 @@ async def test_connection(current_user: dict = Depends(get_current_user)):
     result = await service.test_connection()
     
     return result
+
+
+@router.post("/generate-public-key")
+async def generate_public_key(current_user: dict = Depends(get_current_user)):
+    """
+    Gera uma chave pública para criptografia de cartões
+    Esta chave é usada no frontend para criptografar dados de cartão
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    service = await get_pagbank_subscription_service()
+    result = await service.generate_public_key()
+    
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error"))
+    
+    # Salvar a chave pública nas configurações
+    await db.subscription_settings.update_one(
+        {},
+        {"$set": {
+            "pagbank_public_key": result.get("public_key"),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    return {
+        "success": True,
+        "message": "Chave pública gerada e salva com sucesso",
+        "public_key": result.get("public_key"),
+        "created_at": result.get("created_at")
+    }
 
 
 # ==================== PLANOS ====================
