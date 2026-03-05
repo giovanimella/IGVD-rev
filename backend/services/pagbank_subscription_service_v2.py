@@ -87,6 +87,22 @@ class PagBankSubscriptionService:
                 error_messages = error_data.get("error_messages", [])
                 error_msg = error_messages[0].get("description", f"HTTP {response.status_code}") if error_messages else f"HTTP {response.status_code}"
                 
+                # Log detalhado do erro 401
+                if response.status_code == 401:
+                    logger.error(f"[PagBank] ❌ ERRO 401 UNAUTHORIZED - Token inválido/expirado")
+                    logger.error(f"[PagBank] Token usado: {self.bearer_token[:20]}...{self.bearer_token[-10:]}")
+                    logger.error(f"[PagBank] Ambiente: {'SANDBOX' if self.is_sandbox else 'PRODUÇÃO'}")
+                    logger.error(f"[PagBank] URL: {self.base_url}/public-keys")
+                    logger.error(f"[PagBank] Resposta completa: {response.text}")
+                    
+                    return {
+                        "success": False,
+                        "error": "Token Bearer inválido ou expirado. Obtenha um novo token no dashboard do PagBank.",
+                        "error_code": response.status_code,
+                        "error_detail": "O token de autenticação não é válido. Verifique se você está usando o token correto do ambiente Sandbox.",
+                        "raw_response": error_data
+                    }
+                
                 logger.error(f"[PagBank] Erro ao gerar chave pública: {response.status_code} - {response.text}")
                 
                 return {
