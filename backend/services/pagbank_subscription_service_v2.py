@@ -321,10 +321,15 @@ class PagBankSubscriptionService:
             logger.info(f"[PagBank] Criando assinatura: customer={customer_data.get('email')}, plan={plan_id}")
             logger.info(f"[PagBank] Payload enviado: {payload}")
             
+            # Converter para JSON válido explicitamente
+            import json
+            payload_json = json.dumps(payload, ensure_ascii=False)
+            logger.info(f"[PagBank] JSON válido: {payload_json}")
+            
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     f"{self.base_url}/subscriptions",
-                    json=payload,
+                    content=payload_json,  # ✅ Enviar como string JSON
                     headers=self.headers
                 )
             
