@@ -225,6 +225,14 @@ async def update_settings(
             del update_dict["pagbank_token"]
             logger.info("[Settings] Token mascarado ignorado - mantendo token original")
     
+    # IMPORTANTE: Não salvar chave pública se estiver mascarada (contém ...)
+    if "pagbank_public_key" in update_dict:
+        key = update_dict["pagbank_public_key"]
+        if "..." in key:
+            # Chave está mascarada, não atualizar
+            del update_dict["pagbank_public_key"]
+            logger.info("[Settings] Chave pública mascarada ignorada - mantendo chave original")
+    
     await db.subscription_settings.update_one(
         {},
         {"$set": update_dict},
