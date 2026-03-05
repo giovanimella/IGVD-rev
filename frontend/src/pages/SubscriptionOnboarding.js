@@ -43,18 +43,18 @@ const SubscriptionOnboarding = () => {
 
   const fetchData = async () => {
     try {
-      const [stageRes, statusRes, settingsRes] = await Promise.all([
+      const [stageRes, statusRes, publicKeyRes] = await Promise.all([
         axios.get(`${API_URL}/api/onboarding/my-stage`),
         axios.get(`${API_URL}/api/subscriptions/my-subscription`),
-        axios.get(`${API_URL}/api/subscriptions/settings`)
+        axios.get(`${API_URL}/api/subscriptions/public-key`) // Endpoint público
       ]);
 
       setStageInfo(stageRes.data);
       setSubscriptionStatus(statusRes.data);
-      setSettings(settingsRes.data);
       
-      // Obter chave pública para criptografia
-      setPublicKey(settingsRes.data.pagbank_public_key);
+      // Obter chave pública e valor da mensalidade
+      setPublicKey(publicKeyRes.data.public_key);
+      setSettings({ monthly_fee: publicKeyRes.data.monthly_fee });
       
       // Pré-preencher com dados do usuário
       const user = JSON.parse(localStorage.getItem('user'));

@@ -186,6 +186,24 @@ async def get_settings(current_user: dict = Depends(get_current_user)):
     return settings
 
 
+@router.get("/public-key")
+async def get_public_key():
+    """
+    Obtém apenas a chave pública para criptografia de cartões
+    Endpoint público acessível por qualquer usuário autenticado
+    """
+    settings = await get_subscription_settings()
+    
+    public_key = settings.get("pagbank_public_key")
+    monthly_fee = settings.get("monthly_fee", 49.90)
+    
+    return {
+        "public_key": public_key,
+        "monthly_fee": monthly_fee,
+        "has_public_key": bool(public_key)
+    }
+
+
 @router.put("/settings")
 async def update_settings(
     updates: SubscriptionSettingsUpdate,
