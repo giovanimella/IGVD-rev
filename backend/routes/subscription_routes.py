@@ -358,26 +358,28 @@ async def create_subscription(
     phone_number = phone_clean[2:] if len(phone_clean) >= 10 else phone_clean
     
     # Preparar dados do cliente conforme documentação PagBank
+    # Estrutura corrigida baseada na API oficial 2025
     customer_data = {
         "name": subscription_request.customer_name[:50],
         "email": subscription_request.customer_email,
         "tax_id": ''.join(filter(str.isdigit, subscription_request.customer_cpf)),
-        "phone": {
+        "phones": [{  # ✅ Corrigido: "phones" (plural) como array
+            "country_code": "55",  # ✅ Brasil
             "area_code": area_code,
-            "number": phone_number
-        },
-        "billing_info": [{
-            "type": "BILLING",
+            "number": phone_number,
+            "type": "MOBILE"  # ✅ Tipo do telefone
+        }],
+        "billing_info": {  # ✅ Corrigido: objeto (não array), sem "type"
             "address": {
                 "street": subscription_request.billing_address.get("street", "")[:80],
                 "number": subscription_request.billing_address.get("number", "")[:20],
                 "complement": subscription_request.billing_address.get("complement", "")[:40],
-                "district": subscription_request.billing_address.get("district", "")[:60],
+                "neighborhood": subscription_request.billing_address.get("district", "")[:60],  # ✅ "neighborhood"
                 "city": subscription_request.billing_address.get("city", "")[:60],
-                "state": subscription_request.billing_address.get("state", "")[:2],
-                "postal_code": ''.join(filter(str.isdigit, subscription_request.billing_address.get("zipcode", "")))
+                "state": subscription_request.billing_address.get("state", "")[:2].upper(),
+                "zip_code": ''.join(filter(str.isdigit, subscription_request.billing_address.get("zipcode", "")))  # ✅ "zip_code"
             }
-        }]
+        }
     }
     
     result = await service.create_subscription(

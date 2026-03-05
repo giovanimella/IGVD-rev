@@ -280,6 +280,7 @@ class PagBankSubscriptionService:
             }
             
             logger.info(f"[PagBank] Criando assinatura: customer={customer_data.get('email')}, plan={plan_id}")
+            logger.info(f"[PagBank] Payload enviado: {payload}")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
@@ -287,6 +288,9 @@ class PagBankSubscriptionService:
                     json=payload,
                     headers=self.headers
                 )
+            
+            logger.info(f"[PagBank] Status Code: {response.status_code}")
+            logger.info(f"[PagBank] Response: {response.text}")
             
             if response.status_code in [200, 201]:
                 data = response.json()
