@@ -313,19 +313,8 @@ class PagBankSubscriptionService:
                 "plan": {
                     "id": plan_id
                 },
-                "customer": customer_data,  # Já formatado conforme documentação
-                "payment_method": [
-                    {
-                        "type": "CREDIT_CARD",
-                        "card": {
-                            "encrypted": encrypted_card,  # Cartão criptografado
-                            "security_code": card_security_code,  # ✅ CVV obrigatório
-                            "holder": {
-                                "name": card_holder_name
-                            }
-                        }
-                    }
-                ],
+                "customer": customer_data,  # Já formatado conforme documentação (com billing_info contendo o cartão)
+                "payment_method": ["CREDIT_CARD"],  # ✅ Apenas o tipo, cartão está em billing_info
                 "pro_rata": pro_rata
             }
             

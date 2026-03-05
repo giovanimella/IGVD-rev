@@ -370,7 +370,14 @@ async def create_subscription(
             "type": "MOBILE"  # ✅ Tipo do telefone
         }],
         "billing_info": [{  # ✅ Array de endereços de cobrança
-            "type": "BILLING",  # Tipo do endereço
+            "type": "CREDIT_CARD",  # ✅ Tipo para pagamento com cartão
+            "card": {
+                "encrypted": subscription_request.encrypted_card,
+                "security_code": subscription_request.card_security_code,
+                "holder": {
+                    "name": subscription_request.card_holder_name
+                }
+            },
             "address": {
                 "street": subscription_request.billing_address.get("street", "")[:80],
                 "number": subscription_request.billing_address.get("number", "")[:20],
