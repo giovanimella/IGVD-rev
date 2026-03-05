@@ -12,6 +12,7 @@ const SubscriptionOnboarding = () => {
   const [subscribing, setSubscribing] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [settings, setSettings] = useState(null);
+  const [publicKey, setPublicKey] = useState(null); // Chave pública para criptografia
 
   // Form data
   const [formData, setFormData] = useState({
@@ -30,8 +31,6 @@ const SubscriptionOnboarding = () => {
     },
     card_number: '',
     card_holder_name: '',
-    card_holder_cpf: '',
-    card_holder_birth_date: '',
     card_expiry: '',
     card_cvv: ''
   });
@@ -47,11 +46,15 @@ const SubscriptionOnboarding = () => {
       const [stageRes, statusRes, settingsRes] = await Promise.all([
         axios.get(`${API_URL}/api/onboarding/my-stage`),
         axios.get(`${API_URL}/api/subscriptions/my-subscription`),
-        axios.get(`${API_URL}/api/subscriptions/plans`)
+        axios.get(`${API_URL}/api/subscriptions/settings`)
       ]);
 
       setStageInfo(stageRes.data);
       setSubscriptionStatus(statusRes.data);
+      setSettings(settingsRes.data);
+      
+      // Obter chave pública para criptografia
+      setPublicKey(settingsRes.data.pagbank_public_key);
       
       // Pré-preencher com dados do usuário
       const user = JSON.parse(localStorage.getItem('user'));
@@ -63,10 +66,6 @@ const SubscriptionOnboarding = () => {
           customer_phone: user.phone || ''
         }));
       }
-
-      // Buscar valor da mensalidade
-      const configRes = await axios.get(`${API_URL}/api/subscriptions/settings`).catch(() => null);
-      setSettings(configRes?.data);
 
     } catch (error) {
       console.error('Erro ao buscar informações:', error);
@@ -151,22 +150,77 @@ const SubscriptionOnboarding = () => {
         return;
       }
 
-      // Em produção, aqui você usaria a biblioteca do PagBank para gerar o card_token
-      // Por enquanto, vamos simular para ambiente de desenvolvimento
-      
-      toast.info('🚧 Modo de desenvolvimento: Esta é uma simulação');
-      
-      // Simular criação de assinatura
+      if (!formData.card_number || !formData.card_holder_name || !formData.card_expiry || !formData.card_cvv) {
+        toast.error('Preencha todos os dados do cartão');
+        setSubscribing(false);
+        return;
+      }
+
+      // Verificar se a chave pública está disponível
+      if (!publicKey) {
+        toast.error('Chave pública não configurada. Entre em contato com o suporte.');
+        setSubscribing(false);
+        return;
+      }
+
+      // Verificar se o SDK do PagBank está carregado
+      if (typeof window.PagSeguro === 'undefined') {
+        toast.error('SDK do PagBank não carregado. Recarregue a página e tente novamente.');
+        setSubscribing(false);
+        return;
+      }
+
+      toast.info('Criptografando dados do cartão...');
+
+      // Extrair mês e ano da validade
+      const [expMonth, expYear] = formData.card_expiry.split('/');
+      const fullYear = '20' + expYear; // Converter AA para AAAA
+
+      // Criptografar cartão usando SDK do PagBank
+      const cardEncryption = window.PagSeguro.encryptCard({
+        publicKey: publicKey,
+        holder: formData.card_holder_name,
+        number: formData.card_number.replace(/\s/g, ''), // Remover espaços
+        expMonth: expMonth,
+        expYear: fullYear,
+        securityCode: formData.card_cvv
+      });
+
+      // Verificar se houve erro na criptografia
+      if (cardEncryption.hasErrors) {
+        const errorMessages = cardEncryption.errors.map(err => err.message).join(', ');
+        toast.error(`Erro ao validar cartão: ${errorMessages}`);
+        setSubscribing(false);
+        return;
+      }
+
+      const encryptedCard = cardEncryption.encryptedCard;
+
+      if (!encryptedCard) {
+        toast.error('Erro ao criptografar cartão. Tente novamente.');
+        setSubscribing(false);
+        return;
+      }
+
+      toast.info('Processando assinatura...');
+
+      // Preparar dados para enviar ao backend
       const subscriptionData = {
         customer_name: formData.customer_name,
         customer_email: formData.customer_email,
         customer_cpf: formData.customer_cpf.replace(/\D/g, ''),
         customer_phone: formData.customer_phone.replace(/\D/g, ''),
-        billing_address: formData.billing_address,
-        card_token: 'TOKEN_SIMULADO_' + Date.now(), // Em produção, usar PagBank SDK
-        card_holder_name: formData.card_holder_name,
-        card_holder_cpf: formData.card_holder_cpf.replace(/\D/g, ''),
-        card_holder_birth_date: formData.card_holder_birth_date
+        billing_address: {
+          street: formData.billing_address.street,
+          number: formData.billing_address.number,
+          complement: formData.billing_address.complement || '',
+          district: formData.billing_address.district,
+          city: formData.billing_address.city,
+          state: formData.billing_address.state,
+          zipcode: formData.billing_address.zipcode.replace(/\D/g, '')
+        },
+        encrypted_card: encryptedCard, // Cartão criptografado
+        card_holder_name: formData.card_holder_name
       };
 
       const response = await axios.post(`${API_URL}/api/subscriptions/subscribe`, subscriptionData);
@@ -476,6 +530,17 @@ const SubscriptionOnboarding = () => {
               <CreditCard className="w-5 h-5 text-cyan-500" />
               Dados do Cartão de Crédito
             </h3>
+            
+            {/* Aviso se não tiver chave pública */}
+            {!publicKey && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-red-900 font-semibold">⚠️ Chave pública não configurada</p>
+                <p className="text-sm text-red-800 mt-1">
+                  O administrador precisa configurar a chave pública do PagBank nas configurações do sistema.
+                </p>
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -503,36 +568,6 @@ const SubscriptionOnboarding = () => {
                   value={formData.card_holder_name}
                   onChange={handleInputChange}
                   placeholder="Como está impresso no cartão"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  CPF do Titular *
-                </label>
-                <input
-                  type="text"
-                  name="card_holder_cpf"
-                  value={formData.card_holder_cpf}
-                  onChange={(e) => setFormData({...formData, card_holder_cpf: formatCPF(e.target.value)})}
-                  placeholder="000.000.000-00"
-                  maxLength={14}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Data de Nascimento do Titular *
-                </label>
-                <input
-                  type="date"
-                  name="card_holder_birth_date"
-                  value={formData.card_holder_birth_date}
-                  onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                   required
                 />
