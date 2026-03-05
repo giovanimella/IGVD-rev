@@ -5,6 +5,7 @@ import StageProgressBar from '../components/StageProgressBar';
 import BannerCarousel from '../components/BannerCarousel';
 import PostsList from '../components/PostsList';
 import SubscriptionStatus from '../components/SubscriptionStatus';
+import LiveCard from '../components/LiveCard';
 import axios from 'axios';
 import { BookOpen, Users, Award, Clock, TrendingUp, Trophy, CheckCircle, Activity, Flame, Target, Calendar, Briefcase, GraduationCap, Bell, MoreHorizontal, Percent, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -587,6 +588,10 @@ const Dashboard = () => {
               </Link>
             )}
           </div>
+
+          {/* Status da Assinatura */}
+          {/* Live Card */}
+          <LiveCard />
 
           {/* Status da Assinatura */}
           <SubscriptionStatus />

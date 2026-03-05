@@ -15,7 +15,7 @@ from routes import auth_routes, user_routes, module_routes, chapter_routes
 from routes import progress_routes, reward_routes, file_routes, upload_routes, stats_routes
 from routes import assessment_routes, onboarding_routes, payment_routes, notification_routes, chat_routes
 from routes import banner_routes, post_routes, gamification_routes, system_routes, certificate_routes, presentation_routes, category_routes
-from routes import analytics_routes, profile_routes, favorites_routes, webhook_routes, appointment_routes
+from routes import analytics_routes, profile_routes, favorites_routes, webhook_routes, appointment_routes, live_routes
 from routes import level_routes, training_routes, sales_routes, ozoxx_cast_routes, translate_routes
 from routes import live_class_routes, timeline_routes, terms_routes, whatsapp_routes, landing_routes, campaign_routes
 from routes import subscription_routes, meeting_routes
@@ -77,6 +77,7 @@ app.include_router(category_routes.router, prefix="/api")
 app.include_router(campaign_routes.router, prefix="/api")
 app.include_router(subscription_routes.router, prefix="/api")
 app.include_router(meeting_routes.router, prefix="/api")
+app.include_router(live_routes.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():

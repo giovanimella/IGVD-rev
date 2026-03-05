@@ -69,6 +69,7 @@ import SubscriptionOnboarding from './pages/SubscriptionOnboarding';
 import Meetings from './pages/Meetings';
 import AdminSubscriptions from './pages/admin/AdminSubscriptions';
 import AdminMeetings from './pages/admin/AdminMeetings';
+import AdminLive from './pages/admin/AdminLive';
 
 function App() {
   return (
@@ -456,6 +457,14 @@ function App() {
               <PrivateRoute roles={['admin']}>
                 <AdminMeetings />
               </PrivateRoute>
+          />
+          <Route
+            path="/admin/live"
+            element={
+              <PrivateRoute roles={['admin']}>
+                <AdminLive />
+              </PrivateRoute>
+            }
             }
           />
           <Route

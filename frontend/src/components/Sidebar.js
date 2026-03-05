@@ -30,7 +30,8 @@ import {
   ShieldAlert,
   Globe,
   Tag,
-  CreditCard
+  CreditCard,
+  Video
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -118,6 +119,7 @@ const Sidebar = () => {
     { path: '/admin/categories', icon: Tag, label: 'Categorias' },
     { path: '/admin/subscriptions', icon: CreditCard, label: 'Assinaturas' },
     { path: '/admin/meetings', icon: Users, label: 'Reuniões' },
+    { path: '/admin/live', icon: Video, label: 'Live Semanal' },
     { path: '/admin/campaigns', icon: Trophy, label: 'Campanhas' },
     { path: '/admin/chat', icon: MessageCircle, label: 'Atendimento' },
     { path: '/admin/company-events', icon: Calendar, label: 'Eventos Empresa' },
