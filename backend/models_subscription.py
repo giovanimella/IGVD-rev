@@ -170,9 +170,12 @@ class CreateSubscriptionRequest(BaseModel):
     billing_address: Dict[str, str]  # street, number, complement, district, city, state, zipcode
     
     # Dados do cartão CRIPTOGRAFADO
+    # IMPORTANTE: O encrypted_card do SDK PagBank já contém: número, validade, CVV e nome do titular
+    # NÃO enviar card_holder_name e card_security_code separadamente quando usar encrypted_card!
     encrypted_card: str  # Cartão criptografado pelo SDK do PagBank no frontend
-    card_holder_name: str
-    card_security_code: str  # CVV - enviado separadamente (não criptografado)
+    
+    # ID do plano (opcional - se não informado, usa o plano ativo padrão)
+    plan_id: Optional[str] = None
 
 
 class UpdatePaymentMethodRequest(BaseModel):

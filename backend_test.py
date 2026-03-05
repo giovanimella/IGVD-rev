@@ -514,6 +514,268 @@ class SubscriptionMeetingTester:
             self.log_test_result(test_name, False, f"Request exception: {e}")
             return False
 
+    # ==================== NEW PAGBANK PLANS TESTS ====================
+
+    async def test_pagbank_settings_configure(self):
+        """Configura o token PagBank nos settings se necessário"""
+        test_name = "PagBank Settings - Configure Token"
+        print(f"\n🔑 Configurando token PagBank...")
+        
+        try:
+            # Token PagBank Sandbox fornecido no review request
+            pagbank_token = "2e612a91-9457-4087-82a7-eaec13da02f91e06e1e44559af96ce205e03862a06bf4b39-9ae4-4659-bb25-4da21732297a"
+            
+            update_data = {
+                "pagbank_token": pagbank_token,
+                "pagbank_environment": "sandbox"
+            }
+            
+            async with self.session.put(
+                f"{API_BASE}/subscriptions/settings",
+                json=update_data,
+                headers=self.get_auth_headers(use_admin=True)
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    print("✅ Token PagBank configurado com sucesso")
+                    print(f"   - Mensagem: {data.get('message', 'N/A')}")
+                    
+                    self.log_test_result(test_name, True, data=data)
+                    return True
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ Falha ao configurar token ({resp.status}): {error_text}")
+                    self.log_test_result(test_name, False, f"HTTP {resp.status}: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ Erro na configuração: {e}")
+            self.log_test_result(test_name, False, f"Request exception: {e}")
+            return False
+
+    async def test_pagbank_plans_list(self):
+        """Testa GET /api/subscriptions/pagbank-plans (admin only)"""
+        test_name = "PagBank Plans - List from API"
+        print(f"\n📋 Testando GET /api/subscriptions/pagbank-plans...")
+        
+        try:
+            async with self.session.get(
+                f"{API_BASE}/subscriptions/pagbank-plans",
+                headers=self.get_auth_headers(use_admin=True)
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    # Verificar estrutura da resposta
+                    if data.get("success"):
+                        plans = data.get("plans", [])
+                        total = data.get("total", 0)
+                        
+                        print("✅ Planos do PagBank obtidos com sucesso")
+                        print(f"   - Total de planos: {total}")
+                        print(f"   - Planos na resposta: {len(plans)}")
+                        
+                        if plans:
+                            first_plan = plans[0]
+                            print(f"   - Primeiro plano: {first_plan.get('name', 'N/A')}")
+                            print(f"   - ID: {first_plan.get('id', 'N/A')}")
+                            print(f"   - Status: {first_plan.get('status', 'N/A')}")
+                        
+                        self.log_test_result(test_name, True, data={"plans_count": len(plans), "total": total})
+                        return True
+                    else:
+                        print(f"❌ Resposta indica falha: {data.get('error', 'N/A')}")
+                        self.log_test_result(test_name, False, f"API returned success=False: {data.get('error')}")
+                        return False
+                        
+                elif resp.status == 400:
+                    # Erro esperado se token não configurado
+                    error_text = await resp.text()
+                    if "token" in error_text.lower() or "configurado" in error_text.lower():
+                        print(f"⚠️ Erro esperado (token não configurado): {error_text}")
+                        self.log_test_result(test_name, True, data={"expected_error": "Token not configured"})
+                        return True
+                    else:
+                        print(f"❌ Erro inesperado: {error_text}")
+                        self.log_test_result(test_name, False, f"Unexpected 400 error: {error_text}")
+                        return False
+                        
+                elif resp.status == 403:
+                    print("❌ Acesso negado - verificar permissões admin")
+                    self.log_test_result(test_name, False, "Access denied - admin required")
+                    return False
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ Falha ({resp.status}): {error_text}")
+                    self.log_test_result(test_name, False, f"HTTP {resp.status}: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ Erro na requisição: {e}")
+            self.log_test_result(test_name, False, f"Request exception: {e}")
+            return False
+
+    async def test_pagbank_sync_plans(self):
+        """Testa POST /api/subscriptions/sync-plans (admin only)"""
+        test_name = "PagBank Plans - Sync to Local DB"
+        print(f"\n🔄 Testando POST /api/subscriptions/sync-plans...")
+        
+        try:
+            async with self.session.post(
+                f"{API_BASE}/subscriptions/sync-plans",
+                headers=self.get_auth_headers(use_admin=True)
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    if data.get("success"):
+                        synced_count = data.get("synced_count", 0)
+                        message = data.get("message", "")
+                        pagbank_plans = data.get("pagbank_plans", [])
+                        
+                        print("✅ Sincronização de planos realizada com sucesso")
+                        print(f"   - Mensagem: {message}")
+                        print(f"   - Planos sincronizados: {synced_count}")
+                        print(f"   - Planos do PagBank: {len(pagbank_plans)}")
+                        
+                        self.log_test_result(test_name, True, data={"synced_count": synced_count})
+                        return True
+                    else:
+                        print(f"❌ Sincronização falhou: {data.get('error', 'N/A')}")
+                        self.log_test_result(test_name, False, f"Sync failed: {data.get('error')}")
+                        return False
+                        
+                elif resp.status == 400:
+                    # Erro esperado se token não configurado
+                    error_text = await resp.text()
+                    if "token" in error_text.lower() or "configurado" in error_text.lower() or "pagbank" in error_text.lower():
+                        print(f"⚠️ Erro esperado (PagBank não configurado): {error_text}")
+                        self.log_test_result(test_name, True, data={"expected_error": "PagBank not configured"})
+                        return True
+                    else:
+                        print(f"❌ Erro inesperado: {error_text}")
+                        self.log_test_result(test_name, False, f"Unexpected 400 error: {error_text}")
+                        return False
+                        
+                elif resp.status == 403:
+                    print("❌ Acesso negado - verificar permissões admin")
+                    self.log_test_result(test_name, False, "Access denied - admin required")
+                    return False
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ Falha ({resp.status}): {error_text}")
+                    self.log_test_result(test_name, False, f"HTTP {resp.status}: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ Erro na requisição: {e}")
+            self.log_test_result(test_name, False, f"Request exception: {e}")
+            return False
+
+    async def test_local_plans_list_after_sync(self):
+        """Testa GET /api/subscriptions/plans após sincronização"""
+        test_name = "Local Plans - List After Sync"
+        print(f"\n📋 Testando GET /api/subscriptions/plans (após sync)...")
+        
+        try:
+            async with self.session.get(
+                f"{API_BASE}/subscriptions/plans",
+                headers=self.get_auth_headers(use_admin=True)
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    if isinstance(data, list):
+                        print("✅ Lista de planos locais obtida")
+                        print(f"   - Total de planos no DB local: {len(data)}")
+                        
+                        if data:
+                            first_plan = data[0]
+                            print(f"   - Primeiro plano: {first_plan.get('name', 'N/A')}")
+                            print(f"   - Valor: R$ {first_plan.get('amount', 0)}")
+                            print(f"   - PagBank ID: {first_plan.get('pagbank_plan_id', 'N/A')}")
+                        
+                        self.log_test_result(test_name, True, data={"local_plans_count": len(data)})
+                        return True
+                    else:
+                        print(f"❌ Resposta não é uma lista: {type(data)}")
+                        self.log_test_result(test_name, False, f"Expected list, got {type(data)}")
+                        return False
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ Falha ({resp.status}): {error_text}")
+                    self.log_test_result(test_name, False, f"HTTP {resp.status}: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ Erro na requisição: {e}")
+            self.log_test_result(test_name, False, f"Request exception: {e}")
+            return False
+
+    async def test_create_new_pagbank_plan(self):
+        """Testa POST /api/subscriptions/plans - criar novo plano no PagBank"""
+        test_name = "PagBank Plans - Create New Plan"
+        print(f"\n➕ Testando POST /api/subscriptions/plans (criar no PagBank)...")
+        
+        try:
+            plan_data = {
+                "name": "Teste UniOzoxx Plan",
+                "description": "Plano de teste criado automaticamente pelo sistema de testes",
+                "amount": 59.90
+            }
+            
+            async with self.session.post(
+                f"{API_BASE}/subscriptions/plans",
+                json=plan_data,
+                headers=self.get_auth_headers(use_admin=True)
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    
+                    if data.get("message") and "plan" in data:
+                        plan = data["plan"]
+                        pagbank_plan_id = plan.get("pagbank_plan_id")
+                        
+                        print("✅ Plano criado no PagBank com sucesso")
+                        print(f"   - Mensagem: {data.get('message', 'N/A')}")
+                        print(f"   - Nome: {plan.get('name', 'N/A')}")
+                        print(f"   - Valor: R$ {plan.get('amount', 0)}")
+                        print(f"   - PagBank Plan ID: {pagbank_plan_id}")
+                        
+                        self.log_test_result(test_name, True, data={"pagbank_plan_id": pagbank_plan_id})
+                        return True
+                    else:
+                        print(f"❌ Estrutura de resposta inválida: {data}")
+                        self.log_test_result(test_name, False, "Invalid response structure")
+                        return False
+                        
+                elif resp.status == 400:
+                    # Erro esperado se token PagBank não configurado corretamente
+                    error_text = await resp.text()
+                    if "token" in error_text.lower() or "configurado" in error_text.lower() or "pagbank" in error_text.lower():
+                        print(f"⚠️ Erro esperado (PagBank não configurado): {error_text}")
+                        self.log_test_result(test_name, True, data={"expected_error": "PagBank not configured"})
+                        return True
+                    else:
+                        print(f"❌ Erro inesperado ao criar plano: {error_text}")
+                        self.log_test_result(test_name, False, f"Unexpected 400 error: {error_text}")
+                        return False
+                        
+                elif resp.status == 403:
+                    print("❌ Acesso negado - verificar permissões admin")
+                    self.log_test_result(test_name, False, "Access denied - admin required")
+                    return False
+                else:
+                    error_text = await resp.text()
+                    print(f"❌ Falha ({resp.status}): {error_text}")
+                    self.log_test_result(test_name, False, f"HTTP {resp.status}: {error_text}")
+                    return False
+                    
+        except Exception as e:
+            print(f"❌ Erro na requisição: {e}")
+            self.log_test_result(test_name, False, f"Request exception: {e}")
+            return False
+
     # ==================== MEETING TESTS ====================
 
     async def test_meeting_settings_get(self):
@@ -1024,6 +1286,19 @@ class SubscriptionMeetingTester:
             
             if self.licensee_token:
                 await self.test_subscription_my_subscription()
+
+            print("\n" + "="*50)
+            print("🏦 TESTANDO INTEGRAÇÃO PAGBANK")
+            print("="*50)
+            
+            # Configurar token PagBank primeiro
+            await self.test_pagbank_settings_configure()
+            
+            # Testes PagBank Plans API
+            await self.test_pagbank_plans_list()
+            await self.test_pagbank_sync_plans()
+            await self.test_local_plans_list_after_sync()
+            await self.test_create_new_pagbank_plan()
             
             print("\n" + "="*50)
             print("🤝 TESTANDO SISTEMA DE REUNIÕES")

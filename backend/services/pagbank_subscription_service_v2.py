@@ -526,3 +526,114 @@ class PagBankSubscriptionService:
         except Exception as e:
             logger.error(f"[PagBank] Erro ao listar faturas: {e}")
             return {"success": False, "error": str(e)}
+    
+    async def list_plans(self, offset: int = 0, limit: int = 100) -> Dict[str, Any]:
+        """
+        Lista todos os planos criados no PagBank
+        
+        Endpoint: GET /plans
+        Docs: https://developer.pagbank.com.br/reference/listar-planos
+        
+        Args:
+            offset: Página (offset)
+            limit: Quantidade por página
+        
+        Returns:
+            Dict com lista de planos do PagBank
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            params = {
+                "offset": offset,
+                "limit": limit
+            }
+            
+            logger.info(f"[PagBank] Listando planos: offset={offset}, limit={limit}")
+            logger.info(f"[PagBank] URL: {self.base_url}/plans")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(
+                    f"{self.base_url}/plans",
+                    params=params,
+                    headers=self.headers
+                )
+            
+            logger.info(f"[PagBank] Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                plans = data.get("plans", [])
+                
+                logger.info(f"[PagBank] Encontrados {len(plans)} planos")
+                
+                return {
+                    "success": True,
+                    "plans": plans,
+                    "total": len(plans),
+                    "raw_response": data
+                }
+            else:
+                error_data = response.json() if response.content else {}
+                error_msg = "Erro ao listar planos"
+                
+                if "error_messages" in error_data:
+                    error_msg = error_data["error_messages"][0].get("description", error_msg)
+                
+                logger.error(f"[PagBank] Erro ao listar planos: {response.status_code} - {response.text}")
+                
+                return {
+                    "success": False,
+                    "error": error_msg,
+                    "error_code": response.status_code,
+                    "raw_response": error_data
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Exceção ao listar planos: {e}")
+            return {"success": False, "error": str(e)}
+    
+    async def get_plan(self, plan_id: str) -> Dict[str, Any]:
+        """
+        Consulta um plano específico pelo ID
+        
+        Endpoint: GET /plans/{plan_id}
+        Docs: https://developer.pagbank.com.br/reference/consultar-por-id
+        
+        Args:
+            plan_id: ID do plano no PagBank (formato PLAN_XXXXXXXX-...)
+        
+        Returns:
+            Dict com dados do plano
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            logger.info(f"[PagBank] Consultando plano: {plan_id}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(
+                    f"{self.base_url}/plans/{plan_id}",
+                    headers=self.headers
+                )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                return {
+                    "success": True,
+                    "plan": data,
+                    "raw_response": data
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"HTTP {response.status_code}",
+                    "raw_response": response.json() if response.content else {}
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Erro ao consultar plano: {e}")
+            return {"success": False, "error": str(e)}

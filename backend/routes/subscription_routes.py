@@ -319,13 +319,104 @@ async def create_plan(
 
 @router.get("/plans")
 async def list_plans(current_user: dict = Depends(get_current_user)):
-    """Lista todos os planos de assinatura"""
+    """Lista todos os planos de assinatura (banco local)"""
     plans = await db.subscription_plans.find(
         {"is_active": True},
         {"_id": 0}
     ).to_list(100)
     
     return plans
+
+
+@router.get("/pagbank-plans")
+async def list_pagbank_plans(current_user: dict = Depends(get_current_user)):
+    """
+    Lista todos os planos diretamente do PagBank API
+    Isso permite ver os planos reais criados no sandbox/produção
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    service = await get_pagbank_subscription_service()
+    result = await service.list_plans()
+    
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=400, 
+            detail=result.get("error", "Erro ao listar planos do PagBank")
+        )
+    
+    return {
+        "success": True,
+        "plans": result.get("plans", []),
+        "total": result.get("total", 0)
+    }
+
+
+@router.post("/sync-plans")
+async def sync_pagbank_plans(current_user: dict = Depends(get_current_user)):
+    """
+    Sincroniza os planos do PagBank com o banco local
+    Busca planos do PagBank e salva/atualiza no MongoDB
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    service = await get_pagbank_subscription_service()
+    result = await service.list_plans()
+    
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=400,
+            detail=result.get("error", "Erro ao buscar planos do PagBank")
+        )
+    
+    pagbank_plans = result.get("plans", [])
+    synced_count = 0
+    
+    for pb_plan in pagbank_plans:
+        plan_id = pb_plan.get("id")
+        
+        # Verificar se já existe no banco local
+        existing = await db.subscription_plans.find_one({"pagbank_plan_id": plan_id})
+        
+        # Extrair valor (vem em centavos)
+        amount_cents = pb_plan.get("amount", {}).get("value", 0)
+        amount_reais = amount_cents / 100
+        
+        plan_data = {
+            "pagbank_plan_id": plan_id,
+            "name": pb_plan.get("name", "Plano PagBank"),
+            "description": pb_plan.get("description", ""),
+            "amount": amount_reais,
+            "currency": pb_plan.get("amount", {}).get("currency", "BRL"),
+            "pagbank_reference_id": pb_plan.get("reference_id"),
+            "pagbank_status": pb_plan.get("status"),
+            "is_active": pb_plan.get("status") == "ACTIVE",
+            "billing_cycle": pb_plan.get("interval", {}).get("unit", "MONTH"),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        if existing:
+            # Atualizar
+            await db.subscription_plans.update_one(
+                {"pagbank_plan_id": plan_id},
+                {"$set": plan_data}
+            )
+        else:
+            # Inserir novo
+            plan_data["id"] = str(uuid.uuid4())
+            plan_data["created_at"] = datetime.now(timezone.utc).isoformat()
+            await db.subscription_plans.insert_one(plan_data)
+        
+        synced_count += 1
+    
+    return {
+        "success": True,
+        "message": f"{synced_count} plano(s) sincronizado(s) com sucesso",
+        "synced_count": synced_count,
+        "pagbank_plans": pagbank_plans
+    }
 
 
 # ==================== ASSINATURAS (USUÁRIO) ====================
@@ -344,10 +435,34 @@ async def create_subscription(
     if existing and existing.get("status") in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]:
         raise HTTPException(status_code=400, detail="Você já possui uma assinatura ativa")
     
-    # Buscar plano ativo
-    plan = await db.subscription_plans.find_one({"is_active": True}, {"_id": 0})
+    # Buscar plano - pode ser por ID específico ou o plano ativo padrão
+    if subscription_request.plan_id:
+        plan = await db.subscription_plans.find_one(
+            {"pagbank_plan_id": subscription_request.plan_id},
+            {"_id": 0}
+        )
+        if not plan:
+            # Tentar buscar pelo ID local
+            plan = await db.subscription_plans.find_one(
+                {"id": subscription_request.plan_id, "is_active": True},
+                {"_id": 0}
+            )
+    else:
+        # Buscar plano ativo padrão
+        plan = await db.subscription_plans.find_one({"is_active": True}, {"_id": 0})
+    
     if not plan:
-        raise HTTPException(status_code=404, detail="Nenhum plano disponível")
+        raise HTTPException(status_code=404, detail="Nenhum plano disponível. Configure um plano primeiro.")
+    
+    # Verificar se tem o ID do PagBank
+    pagbank_plan_id = plan.get("pagbank_plan_id")
+    if not pagbank_plan_id:
+        raise HTTPException(
+            status_code=400, 
+            detail="Plano não possui ID do PagBank. Sincronize os planos primeiro."
+        )
+    
+    logger.info(f"[Subscription] Criando assinatura para user={user_id}, plan={pagbank_plan_id}")
     
     # Criar assinatura no PagBank
     service = await get_pagbank_subscription_service()
@@ -358,7 +473,8 @@ async def create_subscription(
     phone_number = phone_clean[2:] if len(phone_clean) >= 10 else phone_clean
     
     # Preparar dados do cliente conforme documentação PagBank
-    # Com encrypted_card, NÃO enviar security_code nem holder separadamente!
+    # IMPORTANTE: Com encrypted_card, NÃO enviar security_code nem holder separadamente!
+    # O encrypted_card já contém: número, validade, CVV e nome do titular
     customer_data = {
         "name": subscription_request.customer_name[:50],
         "email": subscription_request.customer_email,
@@ -372,8 +488,8 @@ async def create_subscription(
         "billing_info": [{
             "type": "CREDIT_CARD",
             "card": {
-                "encrypted": subscription_request.encrypted_card  # ✅ Apenas o cartão criptografado!
-                # ❌ NÃO enviar security_code nem holder quando usar encrypted!
+                "encrypted": subscription_request.encrypted_card  # ✅ APENAS o cartão criptografado!
+                # ❌ NÃO adicionar security_code, holder, etc - já estão no encrypted!
             },
             "address": {
                 "street": subscription_request.billing_address.get("street", "")[:80],
@@ -389,19 +505,22 @@ async def create_subscription(
     }
     
     # Remover complement se for None/vazio
-    if not customer_data["billing_info"][0]["address"]["complement"]:
-        del customer_data["billing_info"][0]["address"]["complement"]
+    if not customer_data["billing_info"][0]["address"].get("complement"):
+        customer_data["billing_info"][0]["address"].pop("complement", None)
     
     result = await service.create_subscription(
         reference_id=f"user_{user_id}_{uuid.uuid4().hex[:8]}",
-        plan_id=plan["pagbank_plan_id"],
+        plan_id=pagbank_plan_id,
         customer_data=customer_data,
         encrypted_card=subscription_request.encrypted_card,  # Apenas para log/referência
         pro_rata=False
     )
     
     if not result.get("success"):
-        raise HTTPException(status_code=400, detail=result.get("error"))
+        error_msg = result.get("error", "Erro ao criar assinatura")
+        error_detail = result.get("raw_response", {})
+        logger.error(f"[Subscription] Erro PagBank: {error_msg} - {error_detail}")
+        raise HTTPException(status_code=400, detail=error_msg)
     
     # Criar registro de assinatura
     subscription = UserSubscription(
