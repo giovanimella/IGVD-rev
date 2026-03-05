@@ -33,7 +33,8 @@ const AdminUsers = () => {
     birthday: '',
     current_stage: 'registro',
     points: 0,
-    level_title: 'Iniciante'
+    level_title: 'Iniciante',
+    external_id: ''  // ID externo para associação via webhook (usado em supervisores)
   });
 
   const STAGES = [
@@ -101,7 +102,8 @@ const AdminUsers = () => {
       birthday: '',
       current_stage: 'registro',
       points: 0,
-      level_title: 'Iniciante'
+      level_title: 'Iniciante',
+      external_id: ''
     });
     setShowModal(true);
   };
@@ -125,7 +127,8 @@ const AdminUsers = () => {
       birthday: user.birthday || '',
       current_stage: user.current_stage || 'registro',
       points: user.points || 0,
-      level_title: user.level_title || 'Iniciante'
+      level_title: user.level_title || 'Iniciante',
+      external_id: user.external_id || ''
     });
     setShowModal(true);
   };
@@ -639,6 +642,26 @@ const AdminUsers = () => {
                           </option>
                         ))}
                       </select>
+                    </div>
+                  )}
+
+                  {formData.role === 'supervisor' && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <div className="flex items-center gap-2">
+                          🔗 ID Externo (para Webhook)
+                        </div>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.external_id}
+                        onChange={(e) => setFormData({ ...formData, external_id: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white"
+                        placeholder="Ex: 12345"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        ID usado para associar licenciados via webhook (campo responsible_id)
+                      </p>
                     </div>
                   )}
 

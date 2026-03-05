@@ -129,25 +129,42 @@ const AdminMeetings = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            {/* Nova Regra de Pontuação */}
+            <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 rounded-lg border border-cyan-200">
+              <label className="block text-sm font-medium text-cyan-800 mb-2">
                 <Trophy className="w-4 h-4 inline mr-1" />
-                Pontos por Participante
+                Pontos por Reunião
               </label>
               <input
                 type="number"
-                value={settings?.points_per_participant || ''}
-                onChange={(e) => setSettings({...settings, points_per_participant: parseInt(e.target.value)})}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                value={settings?.points_per_meeting || ''}
+                onChange={(e) => setSettings({...settings, points_per_meeting: parseInt(e.target.value) || 0})}
+                className="w-full px-4 py-2 border border-cyan-300 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white"
               />
-              <p className="text-xs text-slate-500 mt-1">
-                Quantos pontos o licenciado ganha por participante cadastrado
+              <p className="text-xs text-cyan-700 mt-1">
+                Pontos que o licenciado ganha ao fechar uma reunião qualificada
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 rounded-lg border border-cyan-200">
+              <label className="block text-sm font-medium text-cyan-800 mb-2">
+                <Users className="w-4 h-4 inline mr-1" />
+                Mínimo de Cadastros para Pontuação
+              </label>
+              <input
+                type="number"
+                value={settings?.min_participants_for_points || ''}
+                onChange={(e) => setSettings({...settings, min_participants_for_points: parseInt(e.target.value) || 0})}
+                className="w-full px-4 py-2 border border-cyan-300 rounded-lg focus:ring-2 focus:ring-cyan-500 bg-white"
+              />
+              <p className="text-xs text-cyan-700 mt-1">
+                Número mínimo de participantes para ganhar os pontos da reunião
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Mínimo de Participantes
+                Mínimo para Fechar Lista
               </label>
               <input
                 type="number"
@@ -174,6 +191,17 @@ const AdminMeetings = () => {
                 Número máximo de participantes por reunião
               </p>
             </div>
+          </div>
+
+          {/* Explicação da regra */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+            <h4 className="text-sm font-semibold text-blue-800 mb-2">ℹ️ Como funciona a pontuação:</h4>
+            <p className="text-sm text-blue-700">
+              O licenciado ganha <strong>{settings?.points_per_meeting || 10} pontos</strong> ao fechar uma reunião 
+              com <strong>{settings?.min_participants_for_points || 20} ou mais</strong> participantes cadastrados.
+              <br />
+              Se não atingir o mínimo, a reunião é fechada mas nenhum ponto é creditado.
+            </p>
           </div>
 
           <div className="space-y-3 pt-4 border-t border-slate-200">
@@ -262,7 +290,11 @@ const AdminMeetings = () => {
                     </td>
                     <td className="px-6 py-4">
                       {meeting.status === 'closed' ? (
-                        <span className="text-green-600 font-medium">+{meeting.points_awarded}</span>
+                        meeting.qualified_for_points ? (
+                          <span className="text-green-600 font-medium">+{meeting.points_awarded} ✓</span>
+                        ) : (
+                          <span className="text-slate-400">0 (não qualificou)</span>
+                        )
                       ) : (
                         <span className="text-slate-400">-</span>
                       )}

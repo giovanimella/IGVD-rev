@@ -36,9 +36,11 @@ class WebhookLicenseeCreate(BaseModel):
     full_name: str
     email: EmailStr
     phone: Optional[str] = None
+    birthday: Optional[str] = None  # Data de nascimento (YYYY-MM-DD)
     leader_id: Optional[str] = None  # ID do líder que indicou
     leader_name: Optional[str] = None  # Nome do líder que indicou
     kit_type: Optional[str] = None  # "master" ou "senior" - define fluxo de onboarding
+    responsible_id: Optional[str] = None  # ID do Responsável - usado para associar ao Supervisor
 
 
 class WebhookConfigUpdate(BaseModel):
@@ -201,6 +203,17 @@ async def webhook_create_licensee(
     """
     Webhook para cadastrar novo licenciado.
     Requer header X-API-Key com a chave configurada no sistema.
+    
+    Campos recebidos:
+    - id: ID externo do licenciado
+    - full_name: Nome completo
+    - email: Email
+    - phone: Telefone
+    - birthday: Data de nascimento (YYYY-MM-DD)
+    - leader_id: ID do líder que cadastrou
+    - leader_name: Nome do líder
+    - kit_type: Kit adquirido (master ou senior)
+    - responsible_id: ID do Responsável (para associar ao Supervisor via external_id)
     """
     
     # Verificar se email já existe
@@ -221,6 +234,27 @@ async def webhook_create_licensee(
         if leader:
             leader_name_to_save = leader.get("full_name")
     
+    # Processar associação de supervisor via responsible_id
+    supervisor_id = None
+    supervisor_name = None
+    
+    if data.responsible_id:
+        # Buscar supervisor pelo external_id (ID externo cadastrado no supervisor)
+        supervisor = await db.users.find_one(
+            {
+                "role": "supervisor",
+                "external_id": data.responsible_id
+            },
+            {"_id": 0, "id": 1, "full_name": 1}
+        )
+        
+        if supervisor:
+            supervisor_id = supervisor.get("id")
+            supervisor_name = supervisor.get("full_name")
+            print(f"Supervisor encontrado para responsible_id {data.responsible_id}: {supervisor_name} (ID: {supervisor_id})")
+        else:
+            print(f"Nenhum supervisor encontrado com external_id: {data.responsible_id}")
+    
     # Gerar token para definir senha (válido por 48h)
     password_token = secrets.token_urlsafe(32)
     token_expires = datetime.now().timestamp() + (48 * 3600)  # 48 horas
@@ -237,11 +271,15 @@ async def webhook_create_licensee(
         "email": data.email,
         "full_name": data.full_name,
         "phone": data.phone,
+        "birthday": data.birthday,  # Data de nascimento
         "role": "licenciado",
         "points": 0,
         "level_title": "Iniciante",
         "leader_id": data.leader_id,
         "leader_name": leader_name_to_save,
+        "supervisor_id": supervisor_id,  # Associação com supervisor via responsible_id
+        "supervisor_name": supervisor_name,
+        "responsible_id": data.responsible_id,  # Guardar o ID original do responsável
         "password_hash": None,  # Sem senha até o usuário definir
         "password_token": password_token,
         "password_token_expires": token_expires,
@@ -261,6 +299,8 @@ async def webhook_create_licensee(
         "event": "licensee_created",
         "user_id": data.id,
         "payload": data.model_dump(),
+        "supervisor_matched": supervisor_id is not None,
+        "supervisor_id": supervisor_id,
         "success": True,
         "created_at": datetime.now().isoformat()
     })
@@ -275,8 +315,12 @@ async def webhook_create_licensee(
             "id": data.id,
             "email": data.email,
             "full_name": data.full_name,
+            "birthday": data.birthday,
             "kit_type": kit_type,
             "initial_stage": initial_stage,
+            "supervisor_id": supervisor_id,
+            "supervisor_name": supervisor_name,
+            "supervisor_matched": supervisor_id is not None,
             "email_sent": email_sent
         }
     }

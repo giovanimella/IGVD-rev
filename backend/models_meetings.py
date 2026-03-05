@@ -24,8 +24,12 @@ class MeetingSettings(BaseModel):
     """Configurações globais do sistema de reuniões (Admin)"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     
-    # Pontuação
-    points_per_participant: int = 1  # Pontos por participante cadastrado
+    # Pontuação - Nova Regra
+    points_per_meeting: int = 10  # Pontos ganhos por reunião (se atingir mínimo)
+    min_participants_for_points: int = 20  # Mínimo de participantes para ganhar pontos
+    
+    # Legado (mantido para compatibilidade)
+    points_per_participant: int = 0  # Descontinuado - usar points_per_meeting
     
     # Limites
     min_participants: int = 1  # Mínimo de participantes para fechar lista
@@ -43,9 +47,18 @@ class MeetingSettings(BaseModel):
 
 class MeetingSettingsUpdate(BaseModel):
     """Atualização de configurações (Admin)"""
-    points_per_participant: Optional[int] = None
+    # Nova regra de pontuação
+    points_per_meeting: Optional[int] = None  # Pontos por reunião
+    min_participants_for_points: Optional[int] = None  # Mínimo para ganhar pontos
+    
+    # Legado
+    points_per_participant: Optional[int] = None  # Descontinuado
+    
+    # Limites
     min_participants: Optional[int] = None
     max_participants_per_meeting: Optional[int] = None
+    
+    # Configurações
     require_email: Optional[bool] = None
     require_phone: Optional[bool] = None
     allow_duplicate_participants: Optional[bool] = None
@@ -74,9 +87,14 @@ class Meeting(BaseModel):
     # Participantes
     participants_count: int = 0  # Quantidade de participantes
     
-    # Pontuação
+    # Pontuação - Nova Regra
     points_awarded: int = 0  # Pontos creditados ao fechar lista
-    points_per_participant: int = 1  # Pontos configurados no momento do fechamento
+    points_per_meeting: int = 0  # Pontos configurados no momento do fechamento
+    min_participants_for_points: int = 0  # Mínimo necessário no momento do fechamento
+    qualified_for_points: bool = False  # Se atingiu o mínimo para ganhar pontos
+    
+    # Legado
+    points_per_participant: int = 0  # Descontinuado
     
     # Datas importantes
     closed_at: Optional[str] = None  # Quando a lista foi fechada

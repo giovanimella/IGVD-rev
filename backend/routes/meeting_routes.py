@@ -487,7 +487,7 @@ async def close_meeting(
     meeting_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """Fecha a lista de participantes e credita pontos ao licenciado"""
+    """Fecha a lista de participantes e credita pontos ao licenciado (nova regra)"""
     user_id = current_user["sub"]
     
     # Verificar assinatura
@@ -510,7 +510,7 @@ async def close_meeting(
     if meeting["status"] != MeetingStatus.DRAFT:
         raise HTTPException(status_code=400, detail="Esta reunião já foi fechada")
     
-    # Verificar mínimo de participantes
+    # Verificar mínimo de participantes para fechar lista
     settings = await get_meeting_settings()
     min_participants = settings.get("min_participants", 1)
     participants_count = meeting.get("participants_count", 0)
@@ -521,9 +521,14 @@ async def close_meeting(
             detail=f"É necessário ter no mínimo {min_participants} participante(s) para fechar a lista"
         )
     
-    # Calcular pontos
-    points_per_participant = settings.get("points_per_participant", 1)
-    points_awarded = participants_count * points_per_participant
+    # Nova regra de pontuação:
+    # Ganha pontos apenas se atingir o mínimo de participantes configurado
+    points_per_meeting = settings.get("points_per_meeting", 10)
+    min_participants_for_points = settings.get("min_participants_for_points", 20)
+    
+    # Verificar se qualifica para ganhar pontos
+    qualified_for_points = participants_count >= min_participants_for_points
+    points_awarded = points_per_meeting if qualified_for_points else 0
     
     # Atualizar reunião
     await db.meetings.update_one(
@@ -531,27 +536,36 @@ async def close_meeting(
         {"$set": {
             "status": MeetingStatus.CLOSED,
             "points_awarded": points_awarded,
-            "points_per_participant": points_per_participant,
+            "points_per_meeting": points_per_meeting,
+            "min_participants_for_points": min_participants_for_points,
+            "qualified_for_points": qualified_for_points,
             "closed_at": datetime.now(timezone.utc).isoformat(),
             "updated_at": datetime.now(timezone.utc).isoformat()
         }}
     )
     
-    # Creditar pontos ao usuário
-    await db.users.update_one(
-        {"id": user_id},
-        {"$inc": {"points": points_awarded}}
-    )
+    # Creditar pontos ao usuário (apenas se qualificou)
+    if points_awarded > 0:
+        await db.users.update_one(
+            {"id": user_id},
+            {"$inc": {"points": points_awarded}}
+        )
     
     # Buscar novo total de pontos
     user = await db.users.find_one({"id": user_id}, {"points": 1, "_id": 0})
     new_total_points = user.get("points", 0)
     
-    logger.info(f"Reunião {meeting_id} fechada. {points_awarded} pontos creditados ao usuário {user_id}")
+    # Mensagem apropriada
+    if qualified_for_points:
+        message = f"Lista fechada! Você atingiu {participants_count} participantes e ganhou {points_awarded} pontos!"
+        logger.info(f"Reunião {meeting_id} fechada. {points_awarded} pontos creditados ao usuário {user_id} (qualificado com {participants_count} participantes)")
+    else:
+        message = f"Lista fechada com {participants_count} participantes. Para ganhar pontos, é necessário cadastrar {min_participants_for_points} ou mais participantes."
+        logger.info(f"Reunião {meeting_id} fechada. 0 pontos - usuário {user_id} não atingiu mínimo de {min_participants_for_points} participantes (cadastrou {participants_count})")
     
     return CloseMeetingResponse(
         success=True,
-        message=f"Lista fechada! Você ganhou {points_awarded} pontos!",
+        message=message,
         meeting_id=meeting_id,
         participants_count=participants_count,
         points_awarded=points_awarded,
