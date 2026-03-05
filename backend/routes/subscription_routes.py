@@ -369,18 +369,24 @@ async def create_subscription(
             "number": phone_number,
             "type": "MOBILE"  # ✅ Tipo do telefone
         }],
-        "billing_info": {  # ✅ Corrigido: objeto (não array), sem "type"
+        "billing_info": [{  # ✅ Array de endereços de cobrança
+            "type": "BILLING",  # Tipo do endereço
             "address": {
                 "street": subscription_request.billing_address.get("street", "")[:80],
                 "number": subscription_request.billing_address.get("number", "")[:20],
-                "complement": subscription_request.billing_address.get("complement", "")[:40],
-                "neighborhood": subscription_request.billing_address.get("district", "")[:60],  # ✅ "neighborhood"
+                "complement": subscription_request.billing_address.get("complement", "")[:40] or None,
+                "locality": subscription_request.billing_address.get("district", "")[:60],  # ✅ "locality"
                 "city": subscription_request.billing_address.get("city", "")[:60],
-                "state": subscription_request.billing_address.get("state", "")[:2].upper(),
-                "zip_code": ''.join(filter(str.isdigit, subscription_request.billing_address.get("zipcode", "")))  # ✅ "zip_code"
+                "region_code": subscription_request.billing_address.get("state", "")[:2].upper(),  # ✅ "region_code"
+                "country": "BRA",  # ✅ Código do país
+                "postal_code": ''.join(filter(str.isdigit, subscription_request.billing_address.get("zipcode", "")))  # ✅ "postal_code"
             }
-        }
+        }]
     }
+    
+    # Remover complement se for None/vazio
+    if not customer_data["billing_info"][0]["address"]["complement"]:
+        del customer_data["billing_info"][0]["address"]["complement"]
     
     result = await service.create_subscription(
         reference_id=f"user_{user_id}_{uuid.uuid4().hex[:8]}",
