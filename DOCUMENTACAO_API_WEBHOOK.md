@@ -2,44 +2,57 @@
 
 ## Visão Geral
 
-Esta documentação descreve os endpoints de integração via webhooks da plataforma. A API permite:
+Esta documentação descreve os endpoints de integração via webhooks da plataforma. A API oferece:
 
-1. **Webhook de Entrada (Incoming)**: Cadastrar licenciados automaticamente no sistema
-2. **Webhook de Saída (Outgoing)**: Receber notificações quando um licenciado completa o onboarding
+1. **Ambiente SANDBOX** 🧪: Para testes de integração (não cria dados reais)
+2. **Ambiente PRODUÇÃO** 🚀: Para cadastros reais de licenciados
+3. **Webhook de Saída**: Notificações quando licenciados completam o onboarding
 
 ---
 
 ## 🔐 Autenticação
 
-Todas as requisições de entrada devem incluir o header de autenticação:
+Todas as requisições devem incluir o header de autenticação:
 
 ```
 X-API-Key: sua_chave_api_aqui
 ```
 
-A chave de API é configurada pelo administrador no painel do sistema em:
-**Configurações do Sistema > Webhook > API Key**
+**IMPORTANTE:** O sistema possui duas API Keys separadas:
+- **API Key de Sandbox**: Para testes (não cria usuários reais)
+- **API Key de Produção**: Para cadastros reais
+
+As chaves são configuradas pelo administrador no painel do sistema em:
+**Configurações do Sistema > Webhooks de Integração**
 
 ---
 
-## 📥 WEBHOOKS DE ENTRADA (Incoming)
+## 🧪 AMBIENTE SANDBOX (Testes)
 
-### 1. Cadastrar Novo Licenciado
+O ambiente sandbox permite que você teste a integração **sem criar dados reais** no sistema.
 
-Cria um novo licenciado no sistema automaticamente.
+### Características do Sandbox:
+- ✅ Valida todos os dados (formato, duplicidade, etc)
+- ✅ Verifica associação de supervisor
+- ✅ Retorna exatamente o que aconteceria em produção
+- ❌ **NÃO** cria usuários
+- ❌ **NÃO** envia emails
+- 📝 Registra todos os testes nos logs
+
+### 1. Testar Cadastro de Licenciado (Sandbox)
 
 **Endpoint:**
 ```
-POST /api/webhook/licensee
+POST /api/webhook/sandbox/licensee
 ```
 
 **Headers:**
 ```
 Content-Type: application/json
-X-API-Key: sua_chave_api_aqui
+X-API-Key: sua_chave_sandbox_aqui
 ```
 
-**Body (JSON):**
+**Body (JSON):** (mesmo formato da produção)
 
 | Campo | Tipo | Obrigatório | Descrição |
 |-------|------|-------------|-----------|
@@ -53,12 +66,139 @@ X-API-Key: sua_chave_api_aqui
 | `kit_type` | string | ❌ Não | Tipo de kit: `"master"` ou `"senior"` |
 | `responsible_id` | string | ❌ Não | ID do Responsável/Supervisor externo |
 
+**Exemplo de Requisição (Sandbox):**
+
+```bash
+curl -X POST "https://sua-plataforma.com/api/webhook/sandbox/licensee" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sua_chave_sandbox_aqui" \
+  -d '{
+    "id": "LIC-TESTE-001",
+    "full_name": "Teste da Silva",
+    "email": "teste@email.com",
+    "phone": "11999998888",
+    "birthday": "1990-05-15",
+    "kit_type": "senior",
+    "responsible_id": "SUP-001"
+  }'
+```
+
+**Resposta de Sucesso (Sandbox):**
+
+```json
+{
+  "sandbox": true,
+  "success": true,
+  "message": "SANDBOX: Validação OK - Este cadastro SERIA aceito em produção",
+  "warnings": [],
+  "data": {
+    "id": "LIC-TESTE-001",
+    "email": "teste@email.com",
+    "full_name": "Teste da Silva",
+    "birthday": "1990-05-15",
+    "kit_type": "senior",
+    "initial_stage": "registro",
+    "supervisor_id": "uuid-do-supervisor",
+    "supervisor_name": "Carlos Supervisor",
+    "supervisor_matched": true,
+    "email_sent": true
+  },
+  "log_id": "uuid-do-log",
+  "notes": [
+    "✅ Dados validados com sucesso",
+    "✅ Usuário seria criado no sistema",
+    "✅ Supervisor seria associado",
+    "✅ Email de boas-vindas seria enviado",
+    "ℹ️ Nenhum dado foi criado - este é apenas um teste"
+  ]
+}
+```
+
+**Resposta de Erro de Validação (Sandbox):**
+
+```json
+{
+  "sandbox": true,
+  "success": false,
+  "message": "SANDBOX: Validação falhou - Este cadastro NÃO seria aceito em produção",
+  "validation_errors": [
+    "Email 'teste@email.com' já cadastrado no sistema"
+  ],
+  "warnings": [
+    "Nenhum supervisor encontrado com external_id 'SUP-999'"
+  ],
+  "data": {...},
+  "log_id": "uuid-do-log"
+}
+```
+
+### 2. Validar Configuração (Sandbox)
+
+Verifica se a API Key está correta e o sistema está configurado.
+
+**Endpoint:**
+```
+GET /api/webhook/sandbox/validate
+```
+
+**Exemplo:**
+```bash
+curl "https://sua-plataforma.com/api/webhook/sandbox/validate" \
+  -H "X-API-Key: sua_chave_sandbox_aqui"
+```
+
+**Resposta:**
+```json
+{
+  "sandbox": true,
+  "success": true,
+  "message": "Configuração de sandbox válida!",
+  "config": {
+    "sandbox_configured": true,
+    "production_configured": true,
+    "receive_enabled": false,
+    "outgoing_webhook_enabled": false
+  }
+}
+```
+
+---
+
+## 🚀 AMBIENTE PRODUÇÃO
+
+O ambiente de produção cria usuários reais no sistema.
+
+### ⚠️ IMPORTANTE: Controle de Recebimento
+
+O administrador pode **desativar** o recebimento de cadastros via API mesmo com a API Key correta.
+Quando desativado, todas as requisições de produção retornarão erro 403.
+
+Isso permite:
+- Integrar o sistema antecipadamente
+- Testar via sandbox
+- Ativar a produção apenas quando estiver pronto
+
+### 1. Cadastrar Novo Licenciado (Produção)
+
+**Endpoint:**
+```
+POST /api/webhook/licensee
+```
+
+**Headers:**
+```
+Content-Type: application/json
+X-API-Key: sua_chave_producao_aqui
+```
+
+**Body (JSON):** (mesmo formato do sandbox)
+
 **Exemplo de Requisição:**
 
 ```bash
 curl -X POST "https://sua-plataforma.com/api/webhook/licensee" \
   -H "Content-Type: application/json" \
-  -H "X-API-Key: sua_chave_api_aqui" \
+  -H "X-API-Key: sua_chave_producao_aqui" \
   -d '{
     "id": "LIC-12345",
     "full_name": "João da Silva",
@@ -99,8 +239,9 @@ curl -X POST "https://sua-plataforma.com/api/webhook/licensee" \
 |--------|----------|-----------|
 | 400 | `Email já cadastrado no sistema` | O email já está em uso |
 | 400 | `ID já existe no sistema` | O ID informado já está cadastrado |
-| 401 | `Webhook não configurado` | A API Key não foi configurada no sistema |
-| 401 | `API Key inválida` | A API Key informada está incorreta |
+| 401 | `Webhook de produção não configurado` | A API Key não foi configurada |
+| 401 | `API Key de produção inválida` | A API Key informada está incorreta |
+| 403 | `Recebimento de cadastros via API está desabilitado` | O admin desativou o recebimento |
 
 ---
 
@@ -167,9 +308,47 @@ Content-Type: application/json
 
 ---
 
-## 📋 Endpoint de Logs
+## 📋 Endpoints de Logs e Status
 
-### Consultar Logs de Webhooks
+### 1. Verificar Status do Sistema
+
+Endpoint público para verificar a disponibilidade do sistema.
+
+**Endpoint:**
+```
+GET /api/webhook/status
+```
+
+**Exemplo:**
+```bash
+curl "https://sua-plataforma.com/api/webhook/status"
+```
+
+**Resposta:**
+```json
+{
+  "status": "online",
+  "timestamp": "2024-01-15T14:30:00.000000",
+  "endpoints": {
+    "production": {
+      "url": "/api/webhook/licensee",
+      "configured": true,
+      "receive_enabled": false
+    },
+    "sandbox": {
+      "url": "/api/webhook/sandbox/licensee",
+      "configured": true,
+      "always_available": true
+    }
+  },
+  "outgoing_webhook": {
+    "enabled": false,
+    "url_configured": false
+  }
+}
+```
+
+### 2. Consultar Logs de Webhooks
 
 Retorna o histórico de webhooks processados (entrada e saída).
 
@@ -182,41 +361,100 @@ GET /api/webhook/logs
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
-| `limit` | integer | Quantidade máxima de registros (default: 50) |
+| `limit` | integer | Quantidade máxima de registros (default: 50, max: 500) |
 | `type` | string | Filtrar por tipo: `"incoming"` ou `"outgoing"` |
+| `environment` | string | Filtrar por ambiente: `"sandbox"` ou `"production"` |
+| `event` | string | Filtrar por tipo de evento |
 
 **Exemplo:**
 ```bash
-GET /api/webhook/logs?limit=100&type=incoming
+GET /api/webhook/logs?limit=100&environment=sandbox
+```
+
+### 3. Estatísticas de Webhooks
+
+**Endpoint:**
+```
+GET /api/webhook/logs/stats
 ```
 
 **Resposta:**
 ```json
-[
-  {
-    "id": "uuid-do-log",
-    "type": "incoming",
-    "event": "licensee_created",
-    "user_id": "LIC-12345",
-    "payload": { ... },
-    "supervisor_matched": true,
-    "supervisor_id": "uuid-supervisor",
-    "success": true,
-    "created_at": "2024-01-15T14:30:00.000000"
-  }
-]
+{
+  "total": 150,
+  "by_environment": {
+    "sandbox": 120,
+    "production": 30
+  },
+  "by_type": {
+    "incoming": 140,
+    "outgoing": 10
+  },
+  "by_status": {
+    "success": 145,
+    "failed": 5
+  },
+  "last_7_days": 50
+}
 ```
 
 ---
 
 ## 🔄 Fluxo de Integração Completo
 
+### Fase 1: Configuração
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         PAINEL ADMIN                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. Gerar API Key de SANDBOX                                        │
+│  2. Gerar API Key de PRODUÇÃO                                       │
+│  3. Cadastrar external_id nos SUPERVISORES                          │
+│  4. Manter "Recebimento" DESATIVADO (para testes seguros)           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Fase 2: Testes no Sandbox
+
+```
+┌─────────────────┐        ┌──────────────────┐
+│  Seu Sistema    │        │   Plataforma     │
+└────────┬────────┘        └────────┬─────────┘
+         │                          │
+         │  1. POST /sandbox/licensee (testes)
+         │─────────────────────────>│
+         │                          │  Valida dados
+         │                          │  Verifica supervisor
+         │  2. Resposta simulada    │  NÃO cria usuário
+         │<─────────────────────────│
+         │                          │
+         │  3. Verificar logs no painel admin
+         │                          │
+         │  4. Corrigir erros se necessário
+         │                          │
+         │  5. Repetir até sucesso ✅
+         │                          │
+```
+
+### Fase 3: Ativar Produção
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         PAINEL ADMIN                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│  ✅ Ativar "Recebimento de cadastros via API"                       │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Fase 4: Produção
+
 ```
 ┌─────────────────┐        ┌──────────────────┐        ┌─────────────────┐
 │  Seu Sistema    │        │   Plataforma     │        │   Licenciado    │
 └────────┬────────┘        └────────┬─────────┘        └────────┬────────┘
          │                          │                           │
-         │  1. POST /webhook/licensee                          │
+         │  1. POST /licensee       │                           │
          │─────────────────────────>│                           │
          │                          │                           │
          │  2. Resposta de sucesso  │                           │

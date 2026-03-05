@@ -16,14 +16,20 @@ const AdminSystem = () => {
     minimum_passing_score: 70,
     webhook_url: '',
     webhook_enabled: false,
-    webhook_api_key: ''
+    webhook_api_key: '',
+    webhook_production_api_key: '',
+    webhook_sandbox_api_key: '',
+    webhook_receive_enabled: false
   });
   const [savingConfig, setSavingConfig] = useState(false);
   const [savingWebhook, setSavingWebhook] = useState(false);
   const [logoUrl, setLogoUrl] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
+  const [showProductionKey, setShowProductionKey] = useState(false);
+  const [showSandboxKey, setShowSandboxKey] = useState(false);
   const [webhookLogs, setWebhookLogs] = useState([]);
+  const [webhookStats, setWebhookStats] = useState(null);
+  const [logFilter, setLogFilter] = useState('all'); // 'all', 'sandbox', 'production'
   const logoInputRef = useRef(null);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -32,6 +38,7 @@ const AdminSystem = () => {
     fetchSystemStats();
     fetchSystemConfig();
     fetchWebhookLogs();
+    fetchWebhookStats();
   }, []);
 
   const fetchSystemStats = async () => {
@@ -65,7 +72,10 @@ const AdminSystem = () => {
         minimum_passing_score: response.data.minimum_passing_score || 70,
         webhook_url: response.data.webhook_url || '',
         webhook_enabled: response.data.webhook_enabled || false,
-        webhook_api_key: response.data.webhook_api_key || ''
+        webhook_api_key: response.data.webhook_api_key || '',
+        webhook_production_api_key: response.data.webhook_production_api_key || response.data.webhook_api_key || '',
+        webhook_sandbox_api_key: response.data.webhook_sandbox_api_key || '',
+        webhook_receive_enabled: response.data.webhook_receive_enabled || false
       });
       if (response.data.platform_logo) {
         setLogoUrl(`${API_URL}${response.data.platform_logo}`);
@@ -75,12 +85,39 @@ const AdminSystem = () => {
     }
   };
 
-  const fetchWebhookLogs = async () => {
+  const fetchWebhookLogs = async (filter = logFilter) => {
     try {
-      const response = await axios.get(`${API_URL}/api/webhook/logs?limit=10`);
+      let url = `${API_URL}/api/webhook/logs?limit=20`;
+      if (filter === 'sandbox') {
+        url += '&environment=sandbox';
+      } else if (filter === 'production') {
+        url += '&environment=production';
+      }
+      const response = await axios.get(url);
       setWebhookLogs(response.data);
     } catch (error) {
       console.error('Erro ao buscar logs de webhook:', error);
+    }
+  };
+
+  const fetchWebhookStats = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/webhook/logs/stats`);
+      setWebhookStats(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas de webhook:', error);
+    }
+  };
+
+  const clearSandboxLogs = async () => {
+    if (!window.confirm('Limpar todos os logs do ambiente SANDBOX?')) return;
+    try {
+      await axios.delete(`${API_URL}/api/webhook/logs/sandbox`);
+      toast.success('Logs de sandbox limpos!');
+      fetchWebhookLogs();
+      fetchWebhookStats();
+    } catch (error) {
+      toast.error('Erro ao limpar logs');
     }
   };
 
@@ -107,7 +144,9 @@ const AdminSystem = () => {
       await axios.put(`${API_URL}/api/system/config`, {
         webhook_url: systemConfig.webhook_url,
         webhook_enabled: systemConfig.webhook_enabled,
-        webhook_api_key: systemConfig.webhook_api_key
+        webhook_production_api_key: systemConfig.webhook_production_api_key,
+        webhook_sandbox_api_key: systemConfig.webhook_sandbox_api_key,
+        webhook_receive_enabled: systemConfig.webhook_receive_enabled
       });
       toast.success('Configurações de webhook salvas!');
     } catch (error) {
@@ -118,14 +157,24 @@ const AdminSystem = () => {
     }
   };
 
-  const generateApiKey = () => {
+  const generateProductionKey = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let key = 'igvd_';
+    let key = 'igvd_prod_';
     for (let i = 0; i < 32; i++) {
       key += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    setSystemConfig({ ...systemConfig, webhook_api_key: key });
-    toast.success('Nova API Key gerada! Clique em Salvar para confirmar.');
+    setSystemConfig({ ...systemConfig, webhook_production_api_key: key });
+    toast.success('Nova API Key de PRODUÇÃO gerada! Clique em Salvar para confirmar.');
+  };
+
+  const generateSandboxKey = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let key = 'igvd_sandbox_';
+    for (let i = 0; i < 32; i++) {
+      key += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setSystemConfig({ ...systemConfig, webhook_sandbox_api_key: key });
+    toast.success('Nova API Key de SANDBOX gerada! Clique em Salvar para confirmar.');
   };
 
   const copyToClipboard = (text) => {
@@ -764,59 +813,137 @@ const AdminSystem = () => {
                     <Webhook className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Webhooks</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Configure integrações com sistemas externos</p>
+                    <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white">Webhooks de Integração</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Ambiente Sandbox para testes e Produção para cadastros reais</p>
                   </div>
                 </div>
 
-                {/* Webhook de Entrada */}
-                <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-4">
-                  <h4 className="font-medium text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Key className="w-4 h-4" />
-                    Webhook de Entrada (Receber Licenciados)
+                {/* Toggle de Recebimento */}
+                <div className={`rounded-lg p-4 border-2 ${systemConfig.webhook_receive_enabled ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700'}`}>
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${systemConfig.webhook_receive_enabled ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`}></div>
+                      <div>
+                        <h4 className="font-medium text-slate-900 dark:text-white">
+                          {systemConfig.webhook_receive_enabled ? '🟢 Recebimento ATIVO' : '🟡 Recebimento DESATIVADO'}
+                        </h4>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          {systemConfig.webhook_receive_enabled 
+                            ? 'Cadastros via API de produção estão sendo aceitos' 
+                            : 'Cadastros via produção bloqueados (sandbox continua funcionando)'}
+                        </p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={systemConfig.webhook_receive_enabled || false}
+                        onChange={(e) => setSystemConfig({ ...systemConfig, webhook_receive_enabled: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-14 h-7 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600"></div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Ambiente SANDBOX */}
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-700/50">
+                  <h4 className="font-medium text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-2">
+                    🧪 Ambiente SANDBOX (Testes)
                   </h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                    Endpoint: <code className="bg-slate-200 dark:bg-white/10 px-2 py-1 rounded text-xs">{API_URL}/api/webhook/licensee</code>
-                    <button 
-                      onClick={() => copyToClipboard(`${API_URL}/api/webhook/licensee`)}
-                      className="ml-2 text-cyan-600 dark:text-cyan-400 hover:text-cyan-700"
-                    >
-                      <Copy className="w-4 h-4 inline" />
-                    </button>
+                  <p className="text-sm text-amber-700 dark:text-amber-400 mb-4">
+                    Use para testar a integração. Dados são validados mas NÃO são criados no sistema.
                   </p>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">API Key (Header: X-API-Key)</label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type={showApiKey ? 'text' : 'password'}
-                          value={systemConfig.webhook_api_key || ''}
-                          onChange={(e) => setSystemConfig({ ...systemConfig, webhook_api_key: e.target.value })}
-                          className="w-full px-4 py-2 pr-20 border border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm bg-white dark:bg-white/5 text-slate-900 dark:text-white"
-                          placeholder="Clique em Gerar para criar uma chave"
-                        />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                          <button 
-                            onClick={() => setShowApiKey(!showApiKey)}
-                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                          >
-                            {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                          {systemConfig.webhook_api_key && (
-                            <button 
-                              onClick={() => copyToClipboard(systemConfig.webhook_api_key)}
-                              className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                            >
-                              <Copy className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">Endpoint Sandbox</label>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 bg-white dark:bg-white/10 px-3 py-2 rounded text-xs font-mono text-amber-900 dark:text-amber-200 overflow-x-auto">
+                          {API_URL}/api/webhook/sandbox/licensee
+                        </code>
+                        <button onClick={() => copyToClipboard(`${API_URL}/api/webhook/sandbox/licensee`)} className="p-2 text-amber-600 hover:text-amber-700 bg-white dark:bg-white/10 rounded">
+                          <Copy className="w-4 h-4" />
+                        </button>
                       </div>
-                      <Button onClick={generateApiKey} variant="outline" size="sm">
-                        <RefreshCw className="w-4 h-4 mr-1" />
-                        Gerar
-                      </Button>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">API Key Sandbox</label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type={showSandboxKey ? 'text' : 'password'}
+                            value={systemConfig.webhook_sandbox_api_key || ''}
+                            onChange={(e) => setSystemConfig({ ...systemConfig, webhook_sandbox_api_key: e.target.value })}
+                            className="w-full px-4 py-2 pr-16 border border-amber-300 dark:border-amber-600 rounded-lg focus:ring-2 focus:ring-amber-500 font-mono text-sm bg-white dark:bg-white/5 text-slate-900 dark:text-white"
+                            placeholder="Clique em Gerar"
+                          />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                            <button onClick={() => setShowSandboxKey(!showSandboxKey)} className="p-1 text-amber-500 hover:text-amber-700">
+                              {showSandboxKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                            {systemConfig.webhook_sandbox_api_key && (
+                              <button onClick={() => copyToClipboard(systemConfig.webhook_sandbox_api_key)} className="p-1 text-amber-500 hover:text-amber-700">
+                                <Copy className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <Button onClick={generateSandboxKey} variant="outline" size="sm" className="border-amber-400 text-amber-700 hover:bg-amber-100">
+                          <RefreshCw className="w-4 h-4 mr-1" /> Gerar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ambiente PRODUÇÃO */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700/50">
+                  <h4 className="font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
+                    🚀 Ambiente PRODUÇÃO
+                  </h4>
+                  <p className="text-sm text-green-700 dark:text-green-400 mb-4">
+                    Cria licenciados de verdade. {!systemConfig.webhook_receive_enabled && <strong className="text-amber-600">⚠️ Atualmente DESATIVADO</strong>}
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-green-800 dark:text-green-300 mb-1">Endpoint Produção</label>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 bg-white dark:bg-white/10 px-3 py-2 rounded text-xs font-mono text-green-900 dark:text-green-200 overflow-x-auto">
+                          {API_URL}/api/webhook/licensee
+                        </code>
+                        <button onClick={() => copyToClipboard(`${API_URL}/api/webhook/licensee`)} className="p-2 text-green-600 hover:text-green-700 bg-white dark:bg-white/10 rounded">
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-green-800 dark:text-green-300 mb-1">API Key Produção</label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type={showProductionKey ? 'text' : 'password'}
+                            value={systemConfig.webhook_production_api_key || ''}
+                            onChange={(e) => setSystemConfig({ ...systemConfig, webhook_production_api_key: e.target.value })}
+                            className="w-full px-4 py-2 pr-16 border border-green-300 dark:border-green-600 rounded-lg focus:ring-2 focus:ring-green-500 font-mono text-sm bg-white dark:bg-white/5 text-slate-900 dark:text-white"
+                            placeholder="Clique em Gerar"
+                          />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                            <button onClick={() => setShowProductionKey(!showProductionKey)} className="p-1 text-green-500 hover:text-green-700">
+                              {showProductionKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                            {systemConfig.webhook_production_api_key && (
+                              <button onClick={() => copyToClipboard(systemConfig.webhook_production_api_key)} className="p-1 text-green-500 hover:text-green-700">
+                                <Copy className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <Button onClick={generateProductionKey} variant="outline" size="sm" className="border-green-400 text-green-700 hover:bg-green-100">
+                          <RefreshCw className="w-4 h-4 mr-1" /> Gerar
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -830,97 +957,68 @@ const AdminSystem = () => {
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                     Envia notificação quando um licenciado atinge "Completo - Acesso Total"
                   </p>
-                  
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">URL de Destino</label>
-                      <input
-                        type="url"
-                        value={systemConfig.webhook_url || ''}
-                        onChange={(e) => setSystemConfig({ ...systemConfig, webhook_url: e.target.value })}
-                        className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-white/5 text-slate-900 dark:text-white"
-                        placeholder="https://seu-sistema.com/webhook/onboarding"
-                      />
+                      <input type="url" value={systemConfig.webhook_url || ''} onChange={(e) => setSystemConfig({ ...systemConfig, webhook_url: e.target.value })} className="w-full px-4 py-2 border border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-white/5 text-slate-900 dark:text-white" placeholder="https://seu-sistema.com/webhook" />
                     </div>
-                    
                     <div className="flex items-center gap-3">
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={systemConfig.webhook_enabled || false}
-                          onChange={(e) => setSystemConfig({ ...systemConfig, webhook_enabled: e.target.checked })}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        <input type="checkbox" checked={systemConfig.webhook_enabled || false} onChange={(e) => setSystemConfig({ ...systemConfig, webhook_enabled: e.target.checked })} className="sr-only peer" />
+                        <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                       </label>
-                      <span className="text-sm text-slate-700 dark:text-slate-300">
-                        {systemConfig.webhook_enabled ? 'Webhook habilitado' : 'Webhook desabilitado'}
-                      </span>
+                      <span className="text-sm text-slate-700 dark:text-slate-300">{systemConfig.webhook_enabled ? 'Habilitado' : 'Desabilitado'}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Exemplo Payload */}
-                <div className="bg-slate-800 rounded-lg p-4 text-white">
-                  <h4 className="font-medium mb-2 text-slate-200">Payload de Exemplo (Saída)</h4>
-                  <pre className="text-xs text-slate-300 overflow-x-auto">
-{`{
-  "event": "onboarding_completed",
-  "timestamp": "2026-01-16T12:00:00.000Z",
-  "data": {
-    "id": "123-abc-456",
-    "full_name": "Nome do Licenciado"
-  }
-}`}
-                  </pre>
-                </div>
-
                 <div className="flex justify-end">
-                  <Button
-                    onClick={saveWebhookConfig}
-                    disabled={savingWebhook}
-                    className="bg-purple-600 hover:bg-purple-700"
-                  >
+                  <Button onClick={saveWebhookConfig} disabled={savingWebhook} className="bg-purple-600 hover:bg-purple-700">
                     <Save className="w-4 h-4 mr-2" />
-                    {savingWebhook ? 'Salvando...' : 'Salvar Webhooks'}
+                    {savingWebhook ? 'Salvando...' : 'Salvar Configurações'}
                   </Button>
                 </div>
 
                 {/* Logs de Webhook */}
-                {webhookLogs.length > 0 && (
-                  <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-white/10">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-slate-900 dark:text-white">Últimos Webhooks</h4>
-                      <Button variant="outline" size="sm" onClick={fetchWebhookLogs}>
-                        <RefreshCw className="w-4 h-4 mr-1" />
-                        Atualizar
-                      </Button>
+                <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h4 className="font-semibold text-slate-900 dark:text-white">Logs de Webhook</h4>
+                    <div className="flex items-center gap-2">
+                      <select value={logFilter} onChange={(e) => { setLogFilter(e.target.value); fetchWebhookLogs(e.target.value); }} className="text-sm border border-slate-200 dark:border-white/10 rounded px-2 py-1 bg-white dark:bg-white/5 text-slate-900 dark:text-white">
+                        <option value="all">Todos</option>
+                        <option value="sandbox">Sandbox</option>
+                        <option value="production">Produção</option>
+                      </select>
+                      <Button variant="outline" size="sm" onClick={() => fetchWebhookLogs()}><RefreshCw className="w-4 h-4" /></Button>
+                      <Button variant="outline" size="sm" onClick={clearSandboxLogs} className="text-amber-600 border-amber-300 hover:bg-amber-50"><Trash2 className="w-4 h-4" /></Button>
                     </div>
+                  </div>
+                  {webhookLogs.length > 0 ? (
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {webhookLogs.map((log, idx) => (
-                        <div 
-                          key={idx} 
-                          className={`flex items-center justify-between p-3 rounded-lg text-sm ${
-                            log.success ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/30'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              log.type === 'incoming' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
-                            }`}>
-                              {log.type === 'incoming' ? 'Entrada' : 'Saída'}
-                            </span>
-                            <span className="text-slate-600 dark:text-slate-300">{log.event}</span>
-                          </div>
-                          <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
-                            <span>{new Date(log.created_at).toLocaleString('pt-BR')}</span>
-                            <span className={`w-2 h-2 rounded-full ${log.success ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                        <div key={idx} className={`p-3 rounded-lg text-sm border ${log.environment === 'sandbox' ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200' : log.success ? 'bg-green-50 dark:bg-green-900/20 border-green-200' : 'bg-red-50 dark:bg-red-900/20 border-red-200'}`}>
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${log.environment === 'sandbox' ? 'bg-amber-200 text-amber-800' : 'bg-green-200 text-green-800'}`}>
+                                {log.environment === 'sandbox' ? '🧪 Sandbox' : '🚀 Prod'}
+                              </span>
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${log.type === 'incoming' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
+                                {log.type === 'incoming' ? '📥' : '📤'}
+                              </span>
+                              <span className="text-slate-600 dark:text-slate-300">{log.event}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-500 text-xs">
+                              <span>{new Date(log.created_at).toLocaleString('pt-BR')}</span>
+                              <span className={`w-2 h-2 rounded-full ${log.success ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-center py-6 text-slate-400">Nenhum log encontrado</div>
+                  )}
+                </div>
               </div>
             </TabsContent>
 

@@ -473,10 +473,17 @@ class SystemConfig(BaseModel):
     certificate_module_y_position: int = 360  # Posição Y do nome do módulo no certificado
     certificate_date_y_position: int = 320  # Posição Y da data no certificado
     platform_logo: Optional[str] = None  # URL da logo da plataforma
-    # Configurações de Webhook
+    
+    # Configurações de Webhook de Saída
     webhook_url: Optional[str] = None  # URL de destino para webhook de saída
-    webhook_enabled: bool = False  # Habilitar envio de webhooks
-    webhook_api_key: Optional[str] = None  # API Key para autenticar webhooks de entrada
+    webhook_enabled: bool = False  # Habilitar envio de webhooks de saída
+    
+    # Configurações de Webhook de Entrada (API)
+    webhook_api_key: Optional[str] = None  # DEPRECATED - usar os campos abaixo
+    webhook_production_api_key: Optional[str] = None  # API Key para produção
+    webhook_sandbox_api_key: Optional[str] = None  # API Key para sandbox/testes
+    webhook_receive_enabled: bool = False  # Habilitar recebimento de cadastros via API
+    
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 # ==================== CHAT DE AULA AO VIVO ====================
