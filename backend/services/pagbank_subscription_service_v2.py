@@ -824,3 +824,104 @@ class PagBankSubscriptionService:
         except Exception as e:
             logger.error(f"[PagBank] Erro ao consultar plano: {e}")
             return {"success": False, "error": str(e)}
+
+    async def inactivate_plan(self, plan_id: str) -> Dict[str, Any]:
+        """
+        Inativa um plano no PagBank
+        
+        Endpoint: PUT /plans/{plan_id}/inactivate
+        Docs: https://developer.pagbank.com.br/reference/inativar-plano
+        
+        NOTA: No PagBank não é possível EXCLUIR um plano, apenas INATIVAR.
+        Planos inativos não podem ser usados para novas assinaturas.
+        
+        Args:
+            plan_id: ID do plano no PagBank (formato PLAN_XXXXXXXX-...)
+        
+        Returns:
+            Dict com success
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            logger.info(f"[PagBank] Inativando plano: {plan_id}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.put(
+                    f"{self.base_url}/plans/{plan_id}/inactivate",
+                    headers=self.headers
+                )
+            
+            logger.info(f"[PagBank] Status inativação: {response.status_code}")
+            
+            if response.status_code in [200, 204]:
+                logger.info(f"[PagBank] Plano inativado com sucesso: {plan_id}")
+                return {
+                    "success": True,
+                    "message": "Plano inativado com sucesso",
+                    "plan_id": plan_id
+                }
+            else:
+                error_data = response.json() if response.content else {}
+                error_msg = "Erro ao inativar plano"
+                
+                if "error_messages" in error_data:
+                    error_msg = error_data["error_messages"][0].get("description", error_msg)
+                
+                logger.error(f"[PagBank] Erro ao inativar plano: {response.status_code} - {response.text}")
+                
+                return {
+                    "success": False,
+                    "error": error_msg,
+                    "error_code": response.status_code,
+                    "raw_response": error_data
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Exceção ao inativar plano: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def activate_plan(self, plan_id: str) -> Dict[str, Any]:
+        """
+        Ativa um plano no PagBank
+        
+        Endpoint: PUT /plans/{plan_id}/activate
+        Docs: https://developer.pagbank.com.br/reference/ativar-plano
+        
+        Args:
+            plan_id: ID do plano no PagBank (formato PLAN_XXXXXXXX-...)
+        
+        Returns:
+            Dict com success
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            logger.info(f"[PagBank] Ativando plano: {plan_id}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.put(
+                    f"{self.base_url}/plans/{plan_id}/activate",
+                    headers=self.headers
+                )
+            
+            if response.status_code in [200, 204]:
+                logger.info(f"[PagBank] Plano ativado com sucesso: {plan_id}")
+                return {
+                    "success": True,
+                    "message": "Plano ativado com sucesso",
+                    "plan_id": plan_id
+                }
+            else:
+                error_data = response.json() if response.content else {}
+                return {
+                    "success": False,
+                    "error": f"HTTP {response.status_code}",
+                    "raw_response": error_data
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Exceção ao ativar plano: {e}")
+            return {"success": False, "error": str(e)}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Save, CreditCard, Shield, DollarSign, Calendar, Bell, Loader, Plus, Package, Trash2, RefreshCw, ExternalLink } from 'lucide-react';
+import { Save, CreditCard, Shield, DollarSign, Calendar, Bell, Loader, Plus, Package, Trash2, RefreshCw, ExternalLink, XCircle, CheckCircle, AlertTriangle, Power } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { toast } from 'sonner';
 
@@ -19,6 +19,8 @@ const AdminSubscriptions = () => {
   const [syncingPlans, setSyncingPlans] = useState(false);
   const [loadingPagbankPlans, setLoadingPagbankPlans] = useState(false);
   const [showPlanForm, setShowPlanForm] = useState(false);
+  const [cancellingUser, setCancellingUser] = useState(null);
+  const [inactivatingPlan, setInactivatingPlan] = useState(null);
   const [newPlan, setNewPlan] = useState({
     name: 'Mensalidade UniOzoxx',
     description: 'Acesso mensal à plataforma de treinamento',
@@ -185,6 +187,67 @@ const AdminSubscriptions = () => {
       fetchPagbankPlans();
     }
   }, [settings?.pagbank_token]);
+
+  // Cancelar assinatura de um usuário
+  const handleCancelUserSubscription = async (userId, userName) => {
+    if (!window.confirm(`Tem certeza que deseja cancelar a assinatura de ${userName}?`)) {
+      return;
+    }
+
+    setCancellingUser(userId);
+    try {
+      const response = await axios.post(`${API_URL}/api/subscriptions/admin/cancel-subscription/${userId}`);
+      if (response.data.success) {
+        toast.success('Assinatura cancelada com sucesso!');
+        fetchData(); // Recarregar dados
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao cancelar assinatura';
+      toast.error(errorMsg);
+    } finally {
+      setCancellingUser(null);
+    }
+  };
+
+  // Inativar plano no PagBank
+  const handleInactivatePlan = async (planId) => {
+    if (!window.confirm('Tem certeza que deseja INATIVAR este plano? Ele não poderá ser usado para novas assinaturas.')) {
+      return;
+    }
+
+    setInactivatingPlan(planId);
+    try {
+      const response = await axios.put(`${API_URL}/api/subscriptions/plans/${planId}/inactivate`);
+      if (response.data.success) {
+        toast.success('Plano inativado com sucesso!');
+        fetchPagbankPlans(); // Recarregar planos do PagBank
+        fetchData(); // Recarregar dados locais
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao inativar plano';
+      toast.error(errorMsg);
+    } finally {
+      setInactivatingPlan(null);
+    }
+  };
+
+  // Ativar plano no PagBank
+  const handleActivatePlan = async (planId) => {
+    setInactivatingPlan(planId);
+    try {
+      const response = await axios.put(`${API_URL}/api/subscriptions/plans/${planId}/activate`);
+      if (response.data.success) {
+        toast.success('Plano ativado com sucesso!');
+        fetchPagbankPlans();
+        fetchData();
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao ativar plano';
+      toast.error(errorMsg);
+    } finally {
+      setInactivatingPlan(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -601,11 +664,15 @@ const AdminSubscriptions = () => {
                 {pagbankPlans.map((plan) => (
                   <div
                     key={plan.id}
-                    className="flex items-center justify-between p-4 border border-blue-200 bg-blue-50 rounded-lg"
+                    className={`flex items-center justify-between p-4 border rounded-lg ${
+                      plan.status === 'ACTIVE' 
+                        ? 'border-blue-200 bg-blue-50' 
+                        : 'border-slate-200 bg-slate-50'
+                    }`}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <Package className="w-5 h-5 text-blue-500" />
+                        <Package className={`w-5 h-5 ${plan.status === 'ACTIVE' ? 'text-blue-500' : 'text-slate-400'}`} />
                         <div>
                           <h4 className="font-semibold text-slate-900">{plan.name}</h4>
                           <p className="text-sm text-slate-600">{plan.description}</p>
@@ -613,19 +680,58 @@ const AdminSubscriptions = () => {
                       </div>
                       <div className="mt-2 flex items-center gap-4 text-sm flex-wrap">
                         <span className="text-slate-600">
-                          <strong className="text-lg text-blue-600">
+                          <strong className={`text-lg ${plan.status === 'ACTIVE' ? 'text-blue-600' : 'text-slate-500'}`}>
                             R$ {(plan.amount?.value / 100)?.toFixed(2)}
                           </strong>/{plan.interval?.unit === 'MONTH' ? 'mês' : plan.interval?.unit}
                         </span>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          plan.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
+                          plan.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'
                         }`}>
-                          {plan.status === 'ACTIVE' ? 'Ativo' : plan.status}
+                          {plan.status === 'ACTIVE' ? 'Ativo' : plan.status === 'INACTIVE' ? 'Inativo' : plan.status}
                         </span>
                         <span className="text-xs text-slate-500 font-mono bg-white px-2 py-1 rounded">
                           ID: {plan.id}
                         </span>
                       </div>
+                    </div>
+                    
+                    {/* Ações do Plano */}
+                    <div className="flex items-center gap-2 ml-4">
+                      {plan.status === 'ACTIVE' ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                          onClick={() => handleInactivatePlan(plan.id)}
+                          disabled={inactivatingPlan === plan.id}
+                        >
+                          {inactivatingPlan === plan.id ? (
+                            <Loader className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Power className="w-4 h-4 mr-1" />
+                              Inativar
+                            </>
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-green-600 border-green-200 hover:bg-green-50"
+                          onClick={() => handleActivatePlan(plan.id)}
+                          disabled={inactivatingPlan === plan.id}
+                        >
+                          {inactivatingPlan === plan.id ? (
+                            <Loader className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Ativar
+                            </>
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -730,6 +836,7 @@ const AdminSubscriptions = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Valor</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Próxima Cobrança</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Meses Atrasado</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -746,11 +853,13 @@ const AdminSubscriptions = () => {
                         sub.status === 'active' ? 'bg-green-100 text-green-700' :
                         sub.status === 'overdue' ? 'bg-yellow-100 text-yellow-700' :
                         sub.status === 'suspended' ? 'bg-red-100 text-red-700' :
+                        sub.status === 'cancelled' ? 'bg-slate-100 text-slate-500' :
                         'bg-slate-100 text-slate-700'
                       }`}>
                         {sub.status === 'active' ? 'Ativa' :
                          sub.status === 'overdue' ? 'Atrasada' :
                          sub.status === 'suspended' ? 'Suspensa' :
+                         sub.status === 'cancelled' ? 'Cancelada' :
                          sub.status === 'pending' ? 'Pendente' : sub.status}
                       </span>
                     </td>
@@ -765,6 +874,28 @@ const AdminSubscriptions = () => {
                         <span className="text-red-600 font-medium">{sub.overdue_months} meses</span>
                       ) : (
                         <span className="text-slate-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {sub.status !== 'cancelled' ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={() => handleCancelUserSubscription(sub.user_id, sub.user_name)}
+                          disabled={cancellingUser === sub.user_id}
+                        >
+                          {cancellingUser === sub.user_id ? (
+                            <Loader className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Cancelar
+                            </>
+                          )}
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-slate-400">Cancelada</span>
                       )}
                     </td>
                   </tr>

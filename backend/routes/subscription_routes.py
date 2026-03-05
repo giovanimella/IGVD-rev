@@ -744,6 +744,257 @@ async def check_my_subscription(current_user: dict = Depends(get_current_user)):
     }
 
 
+# ==================== CANCELAMENTO DE ASSINATURA ====================
+
+@router.post("/my-subscription/cancel")
+async def cancel_my_subscription(current_user: dict = Depends(get_current_user)):
+    """
+    Cancela a assinatura do usuário logado
+    O usuário pode cancelar sua própria assinatura a qualquer momento
+    """
+    user_id = current_user["sub"]
+    
+    # Buscar assinatura local
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada")
+    
+    if subscription.get("status") == SubscriptionStatus.CANCELLED:
+        raise HTTPException(status_code=400, detail="Assinatura já está cancelada")
+    
+    pagbank_subscription_id = subscription.get("pagbank_subscription_id")
+    
+    if not pagbank_subscription_id:
+        # Se não tem ID do PagBank, apenas atualiza localmente
+        await db.user_subscriptions.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "status": SubscriptionStatus.CANCELLED,
+                "cancelled_at": datetime.now(timezone.utc).isoformat(),
+                "cancelled_by": "user"
+            }}
+        )
+        return {
+            "success": True,
+            "message": "Assinatura cancelada localmente"
+        }
+    
+    # Cancelar no PagBank
+    service = await get_pagbank_subscription_service()
+    result = await service.cancel_subscription(pagbank_subscription_id)
+    
+    if not result.get("success"):
+        logger.error(f"[Subscription] Erro ao cancelar no PagBank: {result.get('error')}")
+        # Mesmo com erro no PagBank, cancelar localmente
+        await db.user_subscriptions.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "status": SubscriptionStatus.CANCELLED,
+                "cancelled_at": datetime.now(timezone.utc).isoformat(),
+                "cancelled_by": "user",
+                "cancel_error": result.get("error")
+            }}
+        )
+        return {
+            "success": True,
+            "message": "Assinatura cancelada localmente (erro ao cancelar no PagBank)",
+            "pagbank_error": result.get("error")
+        }
+    
+    # Atualizar no banco local
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "status": SubscriptionStatus.CANCELLED,
+            "pagbank_status": "CANCELED",
+            "cancelled_at": datetime.now(timezone.utc).isoformat(),
+            "cancelled_by": "user"
+        }}
+    )
+    
+    logger.info(f"[Subscription] Assinatura cancelada: user={user_id}, pagbank_id={pagbank_subscription_id}")
+    
+    return {
+        "success": True,
+        "message": "Assinatura cancelada com sucesso"
+    }
+
+
+@router.post("/admin/cancel-subscription/{user_id}")
+async def admin_cancel_subscription(
+    user_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Cancela a assinatura de um usuário específico (somente admin)
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Buscar assinatura do usuário
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada para este usuário")
+    
+    if subscription.get("status") == SubscriptionStatus.CANCELLED:
+        raise HTTPException(status_code=400, detail="Assinatura já está cancelada")
+    
+    pagbank_subscription_id = subscription.get("pagbank_subscription_id")
+    
+    if pagbank_subscription_id:
+        # Cancelar no PagBank
+        service = await get_pagbank_subscription_service()
+        result = await service.cancel_subscription(pagbank_subscription_id)
+        
+        if not result.get("success"):
+            logger.warning(f"[Admin] Erro ao cancelar no PagBank: {result.get('error')}")
+    
+    # Atualizar no banco local
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "status": SubscriptionStatus.CANCELLED,
+            "pagbank_status": "CANCELED",
+            "cancelled_at": datetime.now(timezone.utc).isoformat(),
+            "cancelled_by": f"admin:{current_user['sub']}"
+        }}
+    )
+    
+    logger.info(f"[Admin] Assinatura cancelada pelo admin: user={user_id}, admin={current_user['sub']}")
+    
+    return {
+        "success": True,
+        "message": f"Assinatura do usuário cancelada com sucesso",
+        "user_id": user_id
+    }
+
+
+# ==================== GERENCIAMENTO DE PLANOS ====================
+
+@router.put("/plans/{plan_id}/inactivate")
+async def inactivate_plan(
+    plan_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Inativa um plano no PagBank (somente admin)
+    
+    NOTA: No PagBank não é possível EXCLUIR um plano, apenas INATIVAR.
+    Planos inativos não podem ser usados para novas assinaturas.
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    service = await get_pagbank_subscription_service()
+    result = await service.inactivate_plan(plan_id)
+    
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=400,
+            detail=result.get("error", "Erro ao inativar plano")
+        )
+    
+    # Atualizar no banco local também
+    await db.subscription_plans.update_one(
+        {"pagbank_plan_id": plan_id},
+        {"$set": {
+            "is_active": False,
+            "pagbank_status": "INACTIVE",
+            "inactivated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "Plano inativado com sucesso",
+        "plan_id": plan_id
+    }
+
+
+@router.put("/plans/{plan_id}/activate")
+async def activate_plan(
+    plan_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Ativa um plano no PagBank (somente admin)
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    service = await get_pagbank_subscription_service()
+    result = await service.activate_plan(plan_id)
+    
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=400,
+            detail=result.get("error", "Erro ao ativar plano")
+        )
+    
+    # Atualizar no banco local também
+    await db.subscription_plans.update_one(
+        {"pagbank_plan_id": plan_id},
+        {"$set": {
+            "is_active": True,
+            "pagbank_status": "ACTIVE",
+            "activated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "Plano ativado com sucesso",
+        "plan_id": plan_id
+    }
+
+
+@router.delete("/plans/{plan_id}")
+async def delete_plan_local(
+    plan_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Remove um plano do banco local (somente admin)
+    
+    NOTA: Isso NÃO exclui o plano do PagBank (não é possível).
+    Use o endpoint /inactivate para inativar o plano no PagBank.
+    Este endpoint apenas remove o plano do banco local.
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Verificar se existe
+    plan = await db.subscription_plans.find_one({"pagbank_plan_id": plan_id})
+    if not plan:
+        plan = await db.subscription_plans.find_one({"id": plan_id})
+    
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+    
+    # Verificar se há assinaturas usando este plano
+    active_subs = await db.user_subscriptions.count_documents({
+        "plan_id": plan.get("id"),
+        "status": {"$in": [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]}
+    })
+    
+    if active_subs > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Não é possível remover: {active_subs} assinatura(s) ativa(s) usando este plano"
+        )
+    
+    # Remover do banco local
+    await db.subscription_plans.delete_one({"_id": plan["_id"]})
+    
+    return {
+        "success": True,
+        "message": "Plano removido do banco local",
+        "note": "O plano ainda existe no PagBank. Use /inactivate para inativá-lo lá."
+    }
+
+
 @router.put("/my-subscription/payment-method")
 async def update_my_payment_method(
     update_request: UpdatePaymentMethodRequest,

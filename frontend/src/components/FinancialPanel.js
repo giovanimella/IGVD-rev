@@ -13,6 +13,8 @@ const FinancialPanel = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showUpdateCard, setShowUpdateCard] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -60,6 +62,27 @@ const FinancialPanel = () => {
       }
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setCancelling(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/subscriptions/my-subscription/cancel`);
+      if (response.data.success) {
+        toast.success('Assinatura cancelada com sucesso');
+        setShowCancelConfirm(false);
+        // Recarregar dados
+        fetchFinancialData();
+      } else {
+        toast.error(response.data.message || 'Erro ao cancelar assinatura');
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao cancelar assinatura';
+      toast.error(errorMsg);
+      console.error('Erro ao cancelar:', error);
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -301,7 +324,82 @@ const FinancialPanel = () => {
             </div>
           </div>
         )}
+
+        {/* Ações da Assinatura */}
+        {subscription?.status !== 'cancelled' && (
+          <div className="px-6 pb-6">
+            <div className="border-t border-slate-200 pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-outfit font-semibold text-slate-900">Gerenciar Assinatura</h4>
+                  <p className="text-sm text-slate-600">Cancele sua assinatura a qualquer momento</p>
+                </div>
+                <Button
+                  variant="outline"
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                  onClick={() => setShowCancelConfirm(true)}
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Cancelar Assinatura
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Modal de Confirmação de Cancelamento */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md mx-4 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Cancelar Assinatura</h3>
+                <p className="text-sm text-slate-600">Esta ação não pode ser desfeita</p>
+              </div>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-red-800">
+                <strong>Atenção:</strong> Ao cancelar sua assinatura, você perderá acesso a todos os benefícios da plataforma:
+              </p>
+              <ul className="text-sm text-red-700 mt-2 space-y-1 list-disc list-inside">
+                <li>Acesso aos treinamentos</li>
+                <li>Participação em reuniões</li>
+                <li>Suporte exclusivo</li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowCancelConfirm(false)}
+                disabled={cancelling}
+              >
+                Manter Assinatura
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                onClick={handleCancelSubscription}
+                disabled={cancelling}
+              >
+                {cancelling ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Cancelando...
+                  </>
+                ) : (
+                  'Confirmar Cancelamento'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Histórico de Pagamentos */}
       <div className="bg-white rounded-xl border border-slate-200">
