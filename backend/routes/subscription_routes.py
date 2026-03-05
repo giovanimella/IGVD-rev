@@ -216,6 +216,15 @@ async def update_settings(
     update_dict = {k: v for k, v in updates.model_dump().items() if v is not None}
     update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
     
+    # IMPORTANTE: Não salvar token se estiver mascarado (contém asteriscos)
+    # Isso evita sobrescrever o token real com o valor mascarado
+    if "pagbank_token" in update_dict:
+        token = update_dict["pagbank_token"]
+        if "*" in token:
+            # Token está mascarado, não atualizar
+            del update_dict["pagbank_token"]
+            logger.info("[Settings] Token mascarado ignorado - mantendo token original")
+    
     await db.subscription_settings.update_one(
         {},
         {"$set": update_dict},
