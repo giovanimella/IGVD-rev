@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Save, CreditCard, Shield, DollarSign, Calendar, Bell, Loader } from 'lucide-react';
+import { Save, CreditCard, Shield, DollarSign, Calendar, Bell, Loader, Plus, Package, Trash2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { toast } from 'sonner';
 
@@ -9,10 +9,18 @@ const AdminSubscriptions = () => {
   const [settings, setSettings] = useState(null);
   const [stats, setStats] = useState(null);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [generatingKey, setGeneratingKey] = useState(false);
+  const [creatingPlan, setCreatingPlan] = useState(false);
+  const [showPlanForm, setShowPlanForm] = useState(false);
+  const [newPlan, setNewPlan] = useState({
+    name: 'Mensalidade UniOzoxx',
+    description: 'Acesso mensal à plataforma de treinamento',
+    amount: 49.90
+  });
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -22,15 +30,17 @@ const AdminSubscriptions = () => {
 
   const fetchData = async () => {
     try {
-      const [settingsRes, statsRes, subsRes] = await Promise.all([
+      const [settingsRes, statsRes, subsRes, plansRes] = await Promise.all([
         axios.get(`${API_URL}/api/subscriptions/settings`),
         axios.get(`${API_URL}/api/subscriptions/stats`),
-        axios.get(`${API_URL}/api/subscriptions/all`)
+        axios.get(`${API_URL}/api/subscriptions/all`),
+        axios.get(`${API_URL}/api/subscriptions/plans`)
       ]);
 
       setSettings(settingsRes.data);
       setStats(statsRes.data);
       setSubscriptions(subsRes.data);
+      setPlans(plansRes.data);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       toast.error('Erro ao carregar configurações');
@@ -88,6 +98,37 @@ const AdminSubscriptions = () => {
       toast.error(errorMsg);
     } finally {
       setGeneratingKey(false);
+    }
+  };
+
+  const handleCreatePlan = async () => {
+    if (!settings?.pagbank_token || !settings?.pagbank_public_key) {
+      toast.error('Configure o Token e gere a Chave Pública primeiro');
+      return;
+    }
+
+    if (!newPlan.name || !newPlan.amount) {
+      toast.error('Preencha o nome e o valor do plano');
+      return;
+    }
+
+    setCreatingPlan(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/subscriptions/plans`, newPlan);
+      toast.success('Plano criado com sucesso no PagBank!');
+      setShowPlanForm(false);
+      setNewPlan({
+        name: 'Mensalidade UniOzoxx',
+        description: 'Acesso mensal à plataforma de treinamento',
+        amount: 49.90
+      });
+      fetchData(); // Recarregar dados
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao criar plano';
+      toast.error(errorMsg);
+      console.error('Erro ao criar plano:', error);
+    } finally {
+      setCreatingPlan(false);
     }
   };
 
@@ -349,6 +390,164 @@ const AdminSubscriptions = () => {
               </label>
             </div>
           </div>
+        </div>
+
+        {/* Gerenciamento de Planos */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <div>
+              <h2 className="text-xl font-outfit font-semibold text-slate-900 flex items-center gap-2">
+                <Package className="w-5 h-5 text-cyan-500" />
+                Planos de Assinatura no Sandbox
+              </h2>
+              <p className="text-sm text-slate-600 mt-1">
+                Crie e gerencie os planos de cobrança recorrente no PagBank
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowPlanForm(!showPlanForm)}
+              className="bg-cyan-500 hover:bg-cyan-600"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Plano
+            </Button>
+          </div>
+
+          {/* Formulário de Criação de Plano */}
+          {showPlanForm && (
+            <div className="bg-slate-50 rounded-lg p-6 border border-slate-200 space-y-4">
+              <h3 className="font-semibold text-slate-900 mb-4">Criar Novo Plano no PagBank</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Nome do Plano
+                  </label>
+                  <input
+                    type="text"
+                    value={newPlan.name}
+                    onChange={(e) => setNewPlan({...newPlan, name: e.target.value})}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                    placeholder="Ex: Mensalidade UniOzoxx"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Valor Mensal (R$)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={newPlan.amount}
+                    onChange={(e) => setNewPlan({...newPlan, amount: parseFloat(e.target.value)})}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                    placeholder="49.90"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Descrição
+                </label>
+                <textarea
+                  value={newPlan.description}
+                  onChange={(e) => setNewPlan({...newPlan, description: e.target.value})}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  rows="2"
+                  placeholder="Descrição do plano"
+                />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-900">
+                  <strong>📋 Resumo:</strong> Será criado um plano de <strong>R$ {newPlan.amount?.toFixed(2)}</strong> com cobrança <strong>MENSAL</strong> automática no ambiente <strong>{settings?.pagbank_environment === 'sandbox' ? 'SANDBOX (Teste)' : 'PRODUÇÃO'}</strong>
+                </p>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPlanForm(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleCreatePlan}
+                  disabled={creatingPlan}
+                  className="bg-green-500 hover:bg-green-600"
+                >
+                  {creatingPlan ? (
+                    <>
+                      <Loader className="animate-spin w-4 h-4 mr-2" />
+                      Criando no PagBank...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Criar Plano
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Lista de Planos */}
+          <div className="space-y-3">
+            {plans.length > 0 ? (
+              plans.map((plan) => (
+                <div
+                  key={plan.id}
+                  className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:border-cyan-300 transition-colors"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <Package className="w-5 h-5 text-cyan-500" />
+                      <div>
+                        <h4 className="font-semibold text-slate-900">{plan.name}</h4>
+                        <p className="text-sm text-slate-600">{plan.description}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center gap-4 text-sm">
+                      <span className="text-slate-600">
+                        <strong className="text-lg text-cyan-600">R$ {plan.amount?.toFixed(2)}</strong>/mês
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        plan.is_active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {plan.is_active ? 'Ativo' : 'Inativo'}
+                      </span>
+                      {plan.pagbank_plan_id && (
+                        <span className="text-xs text-slate-500 font-mono">
+                          ID: {plan.pagbank_plan_id}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {/* Aqui você pode adicionar botões de ação futuramente */}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-slate-600">
+                <Package className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                <p className="font-medium">Nenhum plano criado ainda</p>
+                <p className="text-sm mt-1">Clique em "Novo Plano" para criar seu primeiro plano no PagBank</p>
+              </div>
+            )}
+          </div>
+
+          {plans.length > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-900">
+                <strong>⚠️ Importante:</strong> Você tem <strong>{plans.length} plano(s)</strong> cadastrado(s) no PagBank. Novos usuários usarão o plano ativo mais recente durante o onboarding.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Lista de Assinaturas */}
