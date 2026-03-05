@@ -773,6 +773,124 @@ async def update_my_payment_method(
     }
 
 
+@router.post("/sync-from-pagbank")
+async def sync_subscriptions_from_pagbank(current_user: dict = Depends(get_current_user)):
+    """
+    Sincroniza assinaturas existentes no PagBank para o banco local
+    Útil quando a assinatura foi criada mas não salvou localmente
+    """
+    user_id = current_user["sub"]
+    user_email = current_user.get("email", "")
+    
+    service = await get_pagbank_subscription_service()
+    
+    # Listar todas as assinaturas do PagBank
+    result = await service.list_subscriptions()
+    
+    if not result.get("success"):
+        logger.warning(f"[Sync] Erro ao listar assinaturas: {result.get('error')}")
+        raise HTTPException(status_code=400, detail=result.get("error", "Erro ao buscar assinaturas"))
+    
+    pagbank_subscriptions = result.get("subscriptions", [])
+    found_subscription = None
+    
+    # Procurar assinatura do usuário
+    for sub in pagbank_subscriptions:
+        reference_id = sub.get("reference_id", "")
+        customer_email = sub.get("customer", {}).get("email", "")
+        
+        # Verificar se pertence ao usuário (por reference_id ou email)
+        if user_id in reference_id or customer_email.lower() == user_email.lower():
+            found_subscription = sub
+            logger.info(f"[Sync] Assinatura encontrada para user {user_id}: {sub.get('id')}")
+            break
+    
+    if not found_subscription:
+        return {
+            "success": False,
+            "message": "Nenhuma assinatura encontrada no PagBank para este usuário",
+            "has_subscription": False
+        }
+    
+    # Mapear status
+    pagbank_status = found_subscription.get("status")
+    status_mapping = {
+        "ACTIVE": SubscriptionStatus.ACTIVE,
+        "PENDING": SubscriptionStatus.PENDING,
+        "SUSPENDED": SubscriptionStatus.SUSPENDED,
+        "OVERDUE": SubscriptionStatus.OVERDUE,
+        "CANCELED": SubscriptionStatus.CANCELLED,
+        "TRIAL": SubscriptionStatus.TRIAL
+    }
+    local_status = status_mapping.get(pagbank_status, SubscriptionStatus.PENDING)
+    
+    # Extrair info do cartão
+    payment_methods = found_subscription.get("payment_method", [])
+    card_info = {}
+    if payment_methods:
+        card = payment_methods[0].get("card", {})
+        card_info = {
+            "card_last_digits": card.get("last_digits"),
+            "card_brand": card.get("brand")
+        }
+    
+    # Buscar plano
+    plan_data = found_subscription.get("plan", {})
+    plan_id = plan_data.get("id")
+    plan_name = plan_data.get("name", "Mensalidade")
+    
+    # Buscar valor do plano no banco local
+    local_plan = await db.subscription_plans.find_one({"pagbank_plan_id": plan_id})
+    monthly_amount = local_plan.get("amount", 49.90) if local_plan else 49.90
+    
+    # Criar ou atualizar assinatura local
+    subscription_data = {
+        "user_id": user_id,
+        "user_email": user_email,
+        "user_name": current_user.get("full_name", ""),
+        "plan_id": local_plan.get("id") if local_plan else None,
+        "monthly_amount": monthly_amount,
+        "pagbank_subscription_id": found_subscription.get("id"),
+        "pagbank_status": pagbank_status,
+        "status": local_status,
+        "started_at": found_subscription.get("created_at"),
+        "next_billing_date": found_subscription.get("next_invoice_at"),
+        "card_last_digits": card_info.get("card_last_digits"),
+        "card_brand": card_info.get("card_brand"),
+        "synced_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Verificar se já existe
+    existing = await db.user_subscriptions.find_one({"user_id": user_id})
+    
+    if existing:
+        await db.user_subscriptions.update_one(
+            {"user_id": user_id},
+            {"$set": subscription_data}
+        )
+        logger.info(f"[Sync] Assinatura atualizada para user {user_id}")
+    else:
+        await db.user_subscriptions.insert_one(subscription_data)
+        logger.info(f"[Sync] Assinatura criada para user {user_id}")
+    
+    return {
+        "success": True,
+        "message": "Assinatura sincronizada com sucesso!",
+        "has_subscription": True,
+        "subscription": {
+            "status": local_status,
+            "pagbank_status": pagbank_status,
+            "pagbank_subscription_id": found_subscription.get("id"),
+            "plan_name": plan_name,
+            "monthly_amount": monthly_amount,
+            "next_billing_date": found_subscription.get("next_invoice_at"),
+            "card_last_digits": card_info.get("card_last_digits"),
+            "card_brand": card_info.get("card_brand")
+        }
+    }
+
+
 # ==================== WEBHOOKS ====================
 
 @router.post("/webhooks/pagbank")

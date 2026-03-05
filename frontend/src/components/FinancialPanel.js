@@ -12,6 +12,7 @@ const FinancialPanel = () => {
   const [subscription, setSubscription] = useState(null);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [showUpdateCard, setShowUpdateCard] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -29,10 +30,36 @@ const FinancialPanel = () => {
 
       setSubscription(subRes.data);
       setPayments(paymentsRes.data || []);
+      
+      // Se não tem assinatura local, tentar sincronizar do PagBank automaticamente
+      if (!subRes.data?.has_active_subscription && !subRes.data?.subscription) {
+        await syncFromPagBank(false); // false = não mostrar toast de erro
+      }
     } catch (error) {
       console.error('Erro ao buscar dados financeiros:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncFromPagBank = async (showError = true) => {
+    setSyncing(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/subscriptions/sync-from-pagbank`);
+      if (response.data.success) {
+        toast.success('Assinatura sincronizada com sucesso!');
+        // Recarregar dados
+        const subRes = await axios.get(`${API_URL}/api/subscriptions/my-subscription`);
+        setSubscription(subRes.data);
+      } else if (showError) {
+        toast.info(response.data.message || 'Nenhuma assinatura encontrada no PagBank');
+      }
+    } catch (error) {
+      if (showError) {
+        console.error('Erro ao sincronizar:', error);
+      }
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -115,12 +142,34 @@ const FinancialPanel = () => {
           <p className="text-slate-600 mb-6">
             Você ainda não possui uma assinatura ativa. Complete o processo de onboarding para ativar sua conta.
           </p>
-          <Button
-            onClick={() => window.location.href = '/onboarding/subscription'}
-            className="bg-gradient-to-r from-cyan-500 to-blue-600"
-          >
-            Assinar Agora
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              onClick={() => window.location.href = '/onboarding/subscription'}
+              className="bg-gradient-to-r from-cyan-500 to-blue-600"
+            >
+              Assinar Agora
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => syncFromPagBank(true)}
+              disabled={syncing}
+            >
+              {syncing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Verificando...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Já tenho assinatura
+                </>
+              )}
+            </Button>
+          </div>
+          <p className="text-xs text-slate-500 mt-4">
+            Se você já realizou a assinatura, clique em "Já tenho assinatura" para sincronizar.
+          </p>
         </div>
       </div>
     );
