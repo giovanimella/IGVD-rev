@@ -542,6 +542,144 @@ class PagBankSubscriptionService:
             logger.error(f"[PagBank] Erro ao ativar assinatura: {e}")
             return {"success": False, "error": str(e)}
     
+    async def get_subscription(self, subscription_id: str) -> Dict[str, Any]:
+        """
+        Consulta uma assinatura específica no PagBank
+        
+        Endpoint: GET /subscriptions/{subscription_id}
+        Docs: https://developer.pagbank.com.br/reference/consultar-assinatura
+        
+        Args:
+            subscription_id: ID da assinatura no PagBank
+        
+        Returns:
+            Dict com dados da assinatura
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            logger.info(f"[PagBank] Consultando assinatura: {subscription_id}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(
+                    f"{self.base_url}/subscriptions/{subscription_id}",
+                    headers=self.headers
+                )
+            
+            logger.info(f"[PagBank] Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Extrair informações importantes
+                status = data.get("status")
+                next_invoice_at = data.get("next_invoice_at")
+                
+                # Informações do pagamento
+                payment_method = data.get("payment_method", [])
+                card_info = {}
+                if payment_method and len(payment_method) > 0:
+                    card = payment_method[0].get("card", {})
+                    card_info = {
+                        "last_digits": card.get("last_digits"),
+                        "brand": card.get("brand"),
+                        "exp_month": card.get("exp_month"),
+                        "exp_year": card.get("exp_year")
+                    }
+                
+                logger.info(f"[PagBank] Assinatura {subscription_id}: status={status}")
+                
+                return {
+                    "success": True,
+                    "subscription_id": data.get("id"),
+                    "status": status,
+                    "plan_id": data.get("plan", {}).get("id"),
+                    "plan_name": data.get("plan", {}).get("name"),
+                    "next_invoice_at": next_invoice_at,
+                    "created_at": data.get("created_at"),
+                    "updated_at": data.get("updated_at"),
+                    "card_info": card_info,
+                    "customer": data.get("customer", {}),
+                    "raw_response": data
+                }
+            elif response.status_code == 404:
+                return {
+                    "success": False,
+                    "error": "Assinatura não encontrada",
+                    "error_code": 404
+                }
+            else:
+                error_data = response.json() if response.content else {}
+                return {
+                    "success": False,
+                    "error": f"Erro ao consultar assinatura: HTTP {response.status_code}",
+                    "error_code": response.status_code,
+                    "raw_response": error_data
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Erro ao consultar assinatura: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def list_subscriptions(self, offset: int = 0, limit: int = 100, status: str = None) -> Dict[str, Any]:
+        """
+        Lista todas as assinaturas no PagBank
+        
+        Endpoint: GET /subscriptions
+        Docs: https://developer.pagbank.com.br/reference/listar-assinaturas
+        
+        Args:
+            offset: Paginação
+            limit: Quantidade por página
+            status: Filtro de status (ACTIVE, SUSPENDED, CANCELED, etc)
+        
+        Returns:
+            Dict com lista de assinaturas
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            params = {
+                "offset": offset,
+                "limit": limit
+            }
+            if status:
+                params["status"] = status
+            
+            logger.info(f"[PagBank] Listando assinaturas: offset={offset}, limit={limit}, status={status}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(
+                    f"{self.base_url}/subscriptions",
+                    params=params,
+                    headers=self.headers
+                )
+            
+            if response.status_code == 200:
+                data = response.json()
+                subscriptions = data.get("subscriptions", [])
+                
+                logger.info(f"[PagBank] Encontradas {len(subscriptions)} assinaturas")
+                
+                return {
+                    "success": True,
+                    "subscriptions": subscriptions,
+                    "total": len(subscriptions),
+                    "raw_response": data
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"HTTP {response.status_code}",
+                    "raw_response": response.json() if response.content else {}
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Erro ao listar assinaturas: {e}")
+            return {"success": False, "error": str(e)}
+
     async def list_invoices(self, subscription_id: str) -> Dict[str, Any]:
         """
         Lista as faturas de uma assinatura

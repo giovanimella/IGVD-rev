@@ -590,6 +590,152 @@ async def get_my_payments(current_user: dict = Depends(get_current_user)):
     return payments
 
 
+@router.post("/my-subscription/sync-status")
+async def sync_my_subscription_status(current_user: dict = Depends(get_current_user)):
+    """
+    Sincroniza o status da assinatura com o PagBank
+    Consulta a API do PagBank e atualiza o status local
+    """
+    user_id = current_user["sub"]
+    
+    # Buscar assinatura local
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    if not subscription:
+        return {
+            "success": False,
+            "has_subscription": False,
+            "message": "Nenhuma assinatura encontrada"
+        }
+    
+    pagbank_subscription_id = subscription.get("pagbank_subscription_id")
+    if not pagbank_subscription_id:
+        return {
+            "success": False,
+            "has_subscription": True,
+            "status": subscription.get("status"),
+            "message": "Assinatura sem ID do PagBank"
+        }
+    
+    # Consultar status no PagBank
+    service = await get_pagbank_subscription_service()
+    result = await service.get_subscription(pagbank_subscription_id)
+    
+    if not result.get("success"):
+        logger.warning(f"[Subscription] Erro ao consultar PagBank: {result.get('error')}")
+        # Retornar status local mesmo sem conseguir consultar
+        return {
+            "success": False,
+            "has_subscription": True,
+            "status": subscription.get("status"),
+            "subscription": {
+                "status": subscription.get("status"),
+                "plan_name": subscription.get("plan_name", "Mensalidade"),
+                "monthly_amount": subscription.get("monthly_amount"),
+                "next_billing_date": subscription.get("next_billing_date"),
+                "card_last_digits": subscription.get("card_last_digits"),
+                "card_brand": subscription.get("card_brand")
+            },
+            "message": f"Não foi possível consultar PagBank: {result.get('error')}"
+        }
+    
+    # Mapear status do PagBank para status local
+    pagbank_status = result.get("status")
+    status_mapping = {
+        "ACTIVE": SubscriptionStatus.ACTIVE,
+        "PENDING": SubscriptionStatus.PENDING,
+        "SUSPENDED": SubscriptionStatus.SUSPENDED,
+        "OVERDUE": SubscriptionStatus.OVERDUE,
+        "CANCELED": SubscriptionStatus.CANCELLED,
+        "TRIAL": SubscriptionStatus.TRIAL
+    }
+    
+    new_status = status_mapping.get(pagbank_status, subscription.get("status"))
+    
+    # Atualizar no banco local se mudou
+    update_data = {
+        "status": new_status,
+        "pagbank_status": pagbank_status,
+        "next_billing_date": result.get("next_invoice_at"),
+        "synced_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Atualizar info do cartão se disponível
+    card_info = result.get("card_info", {})
+    if card_info.get("last_digits"):
+        update_data["card_last_digits"] = card_info["last_digits"]
+    if card_info.get("brand"):
+        update_data["card_brand"] = card_info["brand"]
+    
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": update_data}
+    )
+    
+    logger.info(f"[Subscription] Status sincronizado: user={user_id}, status={pagbank_status}")
+    
+    return {
+        "success": True,
+        "has_subscription": True,
+        "status": new_status,
+        "pagbank_status": pagbank_status,
+        "subscription": {
+            "status": new_status,
+            "pagbank_status": pagbank_status,
+            "plan_name": result.get("plan_name", "Mensalidade"),
+            "monthly_amount": subscription.get("monthly_amount"),
+            "next_billing_date": result.get("next_invoice_at"),
+            "card_last_digits": card_info.get("last_digits") or subscription.get("card_last_digits"),
+            "card_brand": card_info.get("brand") or subscription.get("card_brand"),
+            "created_at": subscription.get("created_at"),
+            "synced_at": update_data["synced_at"]
+        },
+        "message": "Status sincronizado com sucesso"
+    }
+
+
+@router.get("/my-subscription/check")
+async def check_my_subscription(current_user: dict = Depends(get_current_user)):
+    """
+    Verifica se o usuário tem assinatura ativa
+    Retorna status e informações da assinatura
+    """
+    user_id = current_user["sub"]
+    
+    # Buscar assinatura local
+    subscription = await db.user_subscriptions.find_one(
+        {"user_id": user_id},
+        {"_id": 0}
+    )
+    
+    if not subscription:
+        return {
+            "has_subscription": False,
+            "is_active": False,
+            "status": None,
+            "subscription": None
+        }
+    
+    status = subscription.get("status")
+    is_active = status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]
+    
+    return {
+        "has_subscription": True,
+        "is_active": is_active,
+        "status": status,
+        "subscription": {
+            "status": status,
+            "pagbank_status": subscription.get("pagbank_status"),
+            "plan_id": subscription.get("plan_id"),
+            "monthly_amount": subscription.get("monthly_amount"),
+            "next_billing_date": subscription.get("next_billing_date"),
+            "started_at": subscription.get("started_at"),
+            "card_last_digits": subscription.get("card_last_digits"),
+            "card_brand": subscription.get("card_brand"),
+            "synced_at": subscription.get("synced_at")
+        }
+    }
+
+
 @router.put("/my-subscription/payment-method")
 async def update_my_payment_method(
     update_request: UpdatePaymentMethodRequest,
