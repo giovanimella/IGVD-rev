@@ -192,26 +192,33 @@ class PagBankSubscriptionService:
             return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
-            # Payload do plano conforme documentação oficial
+            # Payload do plano conforme endpoint /pre-approvals/request
+            # Convertendo centavos para formato decimal string
+            amount_decimal = f"{amount / 100:.2f}"
+            
             payload = {
-                "reference_id": reference_id,
-                "name": name[:50],
-                "description": description[:255],
-                "amount": {
-                    "value": amount,
-                    "currency": "BRL"
+                "reference": reference_id,
+                "pre_approval": {
+                    "name": name[:50],
+                    "charge": "AUTO",  # Cobrança automática
+                    "period": interval,  # MONTHLY, YEARLY, etc
+                    "amount_per_payment": amount_decimal  # Valor em formato decimal
                 },
-                "interval": {
-                    "unit": interval,
-                    "length": interval_count
+                "payment_method": {
+                    "type": "CREDITCARD"
                 }
             }
             
-            logger.info(f"[PagBank] Criando plano: {name}, valor={amount/100:.2f}")
+            # Adicionar descrição se fornecida
+            if description:
+                payload["pre_approval"]["details"] = description[:255]
+            
+            logger.info(f"[PagBank] Criando plano: {name}, valor=R$ {amount_decimal}")
+            logger.info(f"[PagBank] Payload: {payload}")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
-                    f"{self.base_url}/plans",
+                    f"{self.base_url}/pre-approvals/request",  # ✅ Corrigido: endpoint correto
                     json=payload,
                     headers=self.headers
                 )
@@ -219,17 +226,27 @@ class PagBankSubscriptionService:
             if response.status_code in [200, 201]:
                 data = response.json()
                 
-                logger.info(f"[PagBank] Plano criado: id={data.get('id')}")
+                # Resposta da API /pre-approvals/request retorna "code" e "date"
+                plan_code = data.get("code")
+                
+                logger.info(f"[PagBank] Plano criado: code={plan_code}")
                 
                 return {
                     "success": True,
-                    "plan_id": data.get("id"),
-                    "reference_id": data.get("reference_id"),
+                    "plan_id": plan_code,  # O "code" é o ID do plano
+                    "plan_code": plan_code,
+                    "reference_id": reference_id,
+                    "created_at": data.get("date"),
                     "raw_response": data
                 }
             else:
-                error_data = response.json() if response.content else {}
-                error_msg = error_data.get("error_messages", [{}])[0].get("description", f"HTTP {response.status_code}")
+                # Tentar parsear JSON da resposta de erro
+                try:
+                    error_data = response.json() if response.content else {}
+                    error_msg = error_data.get("error", {}).get("message", f"HTTP {response.status_code}")
+                except:
+                    error_data = {"raw": response.text}
+                    error_msg = f"HTTP {response.status_code}"
                 
                 logger.error(f"[PagBank] Erro ao criar plano: {response.status_code} - {response.text}")
                 
