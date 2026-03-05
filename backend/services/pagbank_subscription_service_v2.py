@@ -46,11 +46,14 @@ class PagBankSubscriptionService:
     
     async def generate_public_key(self) -> Dict[str, Any]:
         """
-        Gera uma chave pública para criptografia de cartões
-        Esta chave é usada no frontend para criptografar dados de cartão antes de enviar ao backend
+        Gera/Obtém uma chave pública para criptografia de cartões em pagamentos recorrentes
         
-        Endpoint: GET /public-keys/card
-        NOTA: Este endpoint usa a API principal do PagBank, não a de assinaturas
+        Primeiro tenta consultar a chave existente (GET /public-keys)
+        Se não existir, cria uma nova (PUT /public-keys)
+        
+        Docs: 
+        - GET: https://developer.pagbank.com.br/reference/consultar-chave-publica-pagamento-recorrente
+        - PUT: https://developer.pagbank.com.br/reference/criar-chave-publica-pagamento-recorrente
         
         Returns:
             Dict com a chave pública gerada
@@ -59,23 +62,47 @@ class PagBankSubscriptionService:
             return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
-            # URL para chave pública (API principal, não a de assinaturas)
-            base_url_public_key = "https://sandbox.api.pagseguro.com" if self.is_sandbox else "https://api.pagseguro.com"
+            url = f"{self.base_url}/public-keys"
             
-            logger.info(f"[PagBank] Gerando chave pública para criptografia de cartões")
-            logger.info(f"[PagBank] URL: {base_url_public_key}/public-keys/card")
+            # Primeiro, tentar CONSULTAR a chave existente (GET)
+            logger.info(f"[PagBank] Consultando chave pública existente...")
+            logger.info(f"[PagBank] URL: {url}")
+            logger.info(f"[PagBank] Método: GET")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.get(
-                    f"{base_url_public_key}/public-keys/card",
-                    headers=self.headers
-                )
+                response = await client.get(url, headers=self.headers)
+            
+            logger.info(f"[PagBank] GET Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                public_key = data.get("public_key")
+                
+                if public_key:
+                    logger.info(f"[PagBank] ✅ Chave pública existente encontrada: {public_key[:30]}...")
+                    return {
+                        "success": True,
+                        "public_key": public_key,
+                        "created_at": data.get("created_at"),
+                        "raw_response": data
+                    }
+            
+            # Se GET falhou ou não tem chave, tentar CRIAR (PUT)
+            logger.info(f"[PagBank] Chave não encontrada, criando nova...")
+            logger.info(f"[PagBank] URL: {url}")
+            logger.info(f"[PagBank] Método: PUT")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.put(url, headers=self.headers)
+            
+            logger.info(f"[PagBank] PUT Status: {response.status_code}")
+            logger.info(f"[PagBank] Response: {response.text[:300]}..." if response.text else "[PagBank] Response vazia")
             
             if response.status_code in [200, 201]:
                 data = response.json()
                 public_key = data.get("public_key")
                 
-                logger.info(f"[PagBank] Chave pública gerada com sucesso: {public_key[:20]}...")
+                logger.info(f"[PagBank] ✅ Chave pública criada com sucesso: {public_key[:30] if public_key else 'N/A'}...")
                 
                 return {
                     "success": True,
@@ -86,25 +113,33 @@ class PagBankSubscriptionService:
             else:
                 error_data = response.json() if response.content else {}
                 error_messages = error_data.get("error_messages", [])
-                error_msg = error_messages[0].get("description", f"HTTP {response.status_code}") if error_messages else f"HTTP {response.status_code}"
+                error_msg = error_messages[0].get("description", f"HTTP {response.status_code}") if error_messages else error_data.get("message", f"HTTP {response.status_code}")
                 
-                # Log detalhado do erro 401
+                # Log detalhado do erro
+                logger.error(f"[PagBank] ❌ ERRO {response.status_code} ao gerar chave pública")
+                logger.error(f"[PagBank] Token usado: {self.bearer_token[:15]}...{self.bearer_token[-10:]}")
+                logger.error(f"[PagBank] Ambiente: {'SANDBOX' if self.is_sandbox else 'PRODUÇÃO'}")
+                logger.error(f"[PagBank] URL: {url}")
+                logger.error(f"[PagBank] Resposta completa: {response.text}")
+                
+                # Mensagem específica para erro 401
                 if response.status_code == 401:
-                    logger.error(f"[PagBank] ❌ ERRO 401 UNAUTHORIZED - Token inválido/expirado")
-                    logger.error(f"[PagBank] Token usado: {self.bearer_token[:20]}...{self.bearer_token[-10:]}")
-                    logger.error(f"[PagBank] Ambiente: {'SANDBOX' if self.is_sandbox else 'PRODUÇÃO'}")
-                    logger.error(f"[PagBank] URL: {self.base_url}/public-keys")
-                    logger.error(f"[PagBank] Resposta completa: {response.text}")
-                    
                     return {
                         "success": False,
-                        "error": "Token Bearer inválido ou expirado. Obtenha um novo token no dashboard do PagBank.",
+                        "error": "Token Bearer inválido ou expirado. Verifique se o token está correto para o ambiente Sandbox.",
                         "error_code": response.status_code,
-                        "error_detail": "O token de autenticação não é válido. Verifique se você está usando o token correto do ambiente Sandbox.",
                         "raw_response": error_data
                     }
                 
-                logger.error(f"[PagBank] Erro ao gerar chave pública: {response.status_code} - {response.text}")
+                # Mensagem específica para erro 403
+                if response.status_code == 403:
+                    return {
+                        "success": False,
+                        "error": "Conta não autorizada para pagamentos recorrentes. A aprovação pode estar pendente no PagBank. Entre em contato com o suporte do PagBank.",
+                        "error_code": response.status_code,
+                        "error_detail": error_data.get("message", "merchant_unauthorized"),
+                        "raw_response": error_data
+                    }
                 
                 return {
                     "success": False,
