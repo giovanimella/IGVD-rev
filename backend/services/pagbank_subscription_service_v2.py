@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 class PagBankSubscriptionService:
     """Serviço de integração com PagBank - API de Assinaturas"""
     
-    # URLs das APIs
-    SANDBOX_URL = "https://sandbox.api.pagseguro.com"
-    PRODUCTION_URL = "https://api.pagseguro.com"
+    # URLs das APIs (base URL correta para API de Assinaturas)
+    SANDBOX_URL = "https://sandbox.api.assinaturas.pagseguro.com"
+    PRODUCTION_URL = "https://api.assinaturas.pagseguro.com"
     
     def __init__(self, bearer_token: str = None, is_sandbox: bool = True):
         """
@@ -49,7 +49,8 @@ class PagBankSubscriptionService:
         Gera uma chave pública para criptografia de cartões
         Esta chave é usada no frontend para criptografar dados de cartão antes de enviar ao backend
         
-        Endpoint: GET /public-keys/card (NÃO É POST!)
+        Endpoint: GET /public-keys/card
+        NOTA: Este endpoint usa a API principal do PagBank, não a de assinaturas
         
         Returns:
             Dict com a chave pública gerada
@@ -58,12 +59,15 @@ class PagBankSubscriptionService:
             return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
+            # URL para chave pública (API principal, não a de assinaturas)
+            base_url_public_key = "https://sandbox.api.pagseguro.com" if self.is_sandbox else "https://api.pagseguro.com"
+            
             logger.info(f"[PagBank] Gerando chave pública para criptografia de cartões")
-            logger.info(f"[PagBank] URL: {self.base_url}/public-keys/card")
+            logger.info(f"[PagBank] URL: {base_url_public_key}/public-keys/card")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.get(  # ✅ Corrigido: GET ao invés de POST
-                    f"{self.base_url}/public-keys/card",
+                response = await client.get(
+                    f"{base_url_public_key}/public-keys/card",
                     headers=self.headers
                 )
             
@@ -192,33 +196,38 @@ class PagBankSubscriptionService:
             return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
-            # Payload do plano conforme endpoint /pre-approvals/request
-            # Convertendo centavos para formato decimal string
-            amount_decimal = f"{amount / 100:.2f}"
-            
+            # Payload conforme documentação oficial PagBank
+            # https://developer.pagbank.com.br/reference/criar-plano
             payload = {
-                "reference": reference_id,
-                "pre_approval": {
-                    "name": name[:50],
-                    "charge": "AUTO",  # Cobrança automática
-                    "period": interval,  # MONTHLY, YEARLY, etc
-                    "amount_per_payment": amount_decimal  # Valor em formato decimal
+                "reference_id": reference_id,
+                "name": name[:65],  # Max 65 caracteres
+                "description": description[:250] if description else None,  # Max 250 caracteres
+                "amount": {
+                    "value": amount,  # Valor em centavos (ex: 4990 para R$ 49,90)
+                    "currency": "BRL"  # Obrigatório
                 },
-                "payment_method": {
-                    "type": "CREDITCARD"
-                }
+                "interval": {
+                    "unit": interval,  # MONTH, YEAR, DAY
+                    "length": interval_count  # Default: 1
+                },
+                "trial": {
+                    "enabled": False,  # Sem período de teste
+                    "hold_setup_fee": False
+                },
+                "payment_method": ["CREDIT_CARD"],  # Métodos aceitos
+                "editable": True  # Plano pode ser editado após criação
             }
             
-            # Adicionar descrição se fornecida
-            if description:
-                payload["pre_approval"]["details"] = description[:255]
+            # Remover description se for None
+            if not description:
+                del payload["description"]
             
-            logger.info(f"[PagBank] Criando plano: {name}, valor=R$ {amount_decimal}")
+            logger.info(f"[PagBank] Criando plano: {name}, valor=R$ {amount/100:.2f}")
             logger.info(f"[PagBank] Payload: {payload}")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
-                    f"{self.base_url}/pre-approvals/request",  # ✅ Corrigido: endpoint correto
+                    f"{self.base_url}/plans",  # ✅ Endpoint correto: /plans
                     json=payload,
                     headers=self.headers
                 )
@@ -226,29 +235,37 @@ class PagBankSubscriptionService:
             if response.status_code in [200, 201]:
                 data = response.json()
                 
-                # Resposta da API /pre-approvals/request retorna "code" e "date"
-                plan_code = data.get("code")
+                # Resposta da API /plans retorna "id", "reference_id", etc
+                plan_id = data.get("id")
                 
-                logger.info(f"[PagBank] Plano criado: code={plan_code}")
+                logger.info(f"[PagBank] Plano criado com sucesso: id={plan_id}")
                 
                 return {
                     "success": True,
-                    "plan_id": plan_code,  # O "code" é o ID do plano
-                    "plan_code": plan_code,
-                    "reference_id": reference_id,
-                    "created_at": data.get("date"),
+                    "plan_id": plan_id,
+                    "plan_code": plan_id,  # Para compatibilidade
+                    "reference_id": data.get("reference_id"),
+                    "created_at": data.get("created_at"),
                     "raw_response": data
                 }
             else:
                 # Tentar parsear JSON da resposta de erro
                 try:
                     error_data = response.json() if response.content else {}
-                    error_msg = error_data.get("error", {}).get("message", f"HTTP {response.status_code}")
+                    
+                    # Estrutura de erro do PagBank pode variar
+                    if "error_messages" in error_data:
+                        error_msg = error_data["error_messages"][0].get("description", f"HTTP {response.status_code}")
+                    elif "message" in error_data:
+                        error_msg = error_data["message"]
+                    else:
+                        error_msg = f"HTTP {response.status_code}"
                 except:
                     error_data = {"raw": response.text}
                     error_msg = f"HTTP {response.status_code}"
                 
-                logger.error(f"[PagBank] Erro ao criar plano: {response.status_code} - {response.text}")
+                logger.error(f"[PagBank] Erro ao criar plano: {response.status_code}")
+                logger.error(f"[PagBank] Response: {response.text}")
                 
                 return {
                     "success": False,
