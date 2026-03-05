@@ -205,8 +205,9 @@ const SubscriptionOnboarding = () => {
       toast.info('Processando assinatura...');
 
       // Preparar dados para enviar ao backend
-      // IMPORTANTE: Não enviamos card_holder_name nem card_security_code separadamente
-      // pois o encrypted_card já contém tudo (número, validade, CVV e nome)
+      // ESTRUTURA CORRETA PAGBANK:
+      // - encrypted_card: cartão criptografado pelo SDK (contém número, validade, nome)
+      // - security_code: CVV vai SEPARADO (não dentro do encrypted)
       const subscriptionData = {
         customer_name: formData.customer_name,
         customer_email: formData.customer_email,
@@ -221,8 +222,8 @@ const SubscriptionOnboarding = () => {
           state: formData.billing_address.state,
           zipcode: formData.billing_address.zipcode.replace(/\D/g, '')
         },
-        encrypted_card: encryptedCard // Cartão criptografado (contém tudo!)
-        // ❌ REMOVIDO: card_holder_name e card_security_code - já estão no encrypted_card
+        encrypted_card: encryptedCard,      // Cartão criptografado
+        security_code: formData.card_cvv    // CVV vai separado!
       };
 
       const response = await axios.post(`${API_URL}/api/subscriptions/subscribe`, subscriptionData);

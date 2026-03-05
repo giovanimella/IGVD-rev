@@ -489,47 +489,35 @@ async def create_subscription(
     area_code = phone_clean[:2] if len(phone_clean) >= 10 else "11"
     phone_number = phone_clean[2:] if len(phone_clean) >= 10 else phone_clean
     
-    # Preparar dados do cliente conforme documentação PagBank
-    # IMPORTANTE: Com encrypted_card, NÃO enviar security_code nem holder separadamente!
-    # O encrypted_card já contém: número, validade, CVV e nome do titular
+    # Preparar dados do cliente conforme documentação PagBank (2024/2025)
+    # ESTRUTURA CORRETA:
+    # - phones usa "country" e "area" (não "country_code" e "area_code")
+    # - billing_info vai no CUSTOMER com o cartão criptografado
+    # - security_code vai separado no PAYMENT_METHOD
     customer_data = {
         "name": subscription_request.customer_name[:50],
         "email": subscription_request.customer_email,
         "tax_id": ''.join(filter(str.isdigit, subscription_request.customer_cpf)),
         "phones": [{
-            "country_code": "55",
-            "area_code": area_code,
+            "country": "55",   # country, não country_code!
+            "area": area_code, # area, não area_code!
             "number": phone_number,
             "type": "MOBILE"
         }],
         "billing_info": [{
             "type": "CREDIT_CARD",
             "card": {
-                "encrypted": subscription_request.encrypted_card  # ✅ APENAS o cartão criptografado!
-                # ❌ NÃO adicionar security_code, holder, etc - já estão no encrypted!
-            },
-            "address": {
-                "street": subscription_request.billing_address.get("street", "")[:80],
-                "number": subscription_request.billing_address.get("number", "")[:20],
-                "complement": subscription_request.billing_address.get("complement", "")[:40] or None,
-                "locality": subscription_request.billing_address.get("district", "")[:60],
-                "city": subscription_request.billing_address.get("city", "")[:60],
-                "region_code": subscription_request.billing_address.get("state", "")[:2].upper(),
-                "country": "BRA",
-                "postal_code": ''.join(filter(str.isdigit, subscription_request.billing_address.get("zipcode", "")))
+                "encrypted": subscription_request.encrypted_card  # Cartão criptografado
             }
         }]
     }
-    
-    # Remover complement se for None/vazio
-    if not customer_data["billing_info"][0]["address"].get("complement"):
-        customer_data["billing_info"][0]["address"].pop("complement", None)
     
     result = await service.create_subscription(
         reference_id=f"user_{user_id}_{uuid.uuid4().hex[:8]}",
         plan_id=pagbank_plan_id,
         customer_data=customer_data,
-        encrypted_card=subscription_request.encrypted_card,  # Apenas para log/referência
+        encrypted_card=subscription_request.encrypted_card,
+        security_code=subscription_request.security_code,  # CVV vai separado!
         pro_rata=False
     )
     

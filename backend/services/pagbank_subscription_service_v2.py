@@ -318,17 +318,23 @@ class PagBankSubscriptionService:
         reference_id: str,
         plan_id: str,
         customer_data: Dict[str, Any],
-        encrypted_card: str,  # Apenas para log, já está no customer_data
+        encrypted_card: str,
+        security_code: str,  # CVV separado!
         pro_rata: bool = False
     ) -> Dict[str, Any]:
         """
         Cria uma assinatura para um cliente
         
+        ESTRUTURA CORRETA PAGBANK (2024/2025):
+        - customer.billing_info: contém o cartão criptografado
+        - payment_method: array de objetos com type e card.security_code
+        
         Args:
             reference_id: Identificador externo da assinatura
             plan_id: ID do plano no PagBank
             customer_data: Dados do cliente (com billing_info contendo encrypted_card)
-            encrypted_card: Cartão criptografado (apenas para referência)
+            encrypted_card: Cartão criptografado (já deve estar em customer_data.billing_info)
+            security_code: CVV do cartão (vai em payment_method.card.security_code)
             pro_rata: Se deve aplicar proporcionalidade
         
         Returns:
@@ -338,14 +344,22 @@ class PagBankSubscriptionService:
             return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
-            # Payload da assinatura conforme documentação oficial
+            # Payload da assinatura conforme documentação oficial PagBank
+            # ESTRUTURA CORRETA:
+            # - billing_info com encrypted vai em CUSTOMER
+            # - security_code vai em PAYMENT_METHOD
             payload = {
                 "reference_id": reference_id,
                 "plan": {
                     "id": plan_id
                 },
-                "customer": customer_data,  # ✅ billing_info já contém encrypted_card (e nada mais!)
-                "payment_method": ["CREDIT_CARD"],
+                "customer": customer_data,  # Contém billing_info com encrypted card
+                "payment_method": [{
+                    "type": "CREDIT_CARD",
+                    "card": {
+                        "security_code": security_code  # CVV separado!
+                    }
+                }],
                 "pro_rata": pro_rata
             }
             
@@ -360,7 +374,7 @@ class PagBankSubscriptionService:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     f"{self.base_url}/subscriptions",
-                    content=payload_json,  # ✅ Enviar como string JSON
+                    content=payload_json,
                     headers=self.headers
                 )
             
