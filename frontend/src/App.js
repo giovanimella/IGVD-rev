@@ -457,6 +457,7 @@ function App() {
               <PrivateRoute roles={['admin']}>
                 <AdminMeetings />
               </PrivateRoute>
+            }
           />
           <Route
             path="/admin/live"
@@ -464,7 +465,6 @@ function App() {
               <PrivateRoute roles={['admin']}>
                 <AdminLive />
               </PrivateRoute>
-            }
             }
           />
           <Route
