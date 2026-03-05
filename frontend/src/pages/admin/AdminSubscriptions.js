@@ -319,41 +319,64 @@ const AdminSubscriptions = () => {
               />
               <p className="text-xs text-slate-500 mt-1">Meses de inadimplência até suspender conta</p>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Ambiente PagBank
-              </label>
-              <select
-                value={settings?.pagbank_environment || 'sandbox'}
-                onChange={(e) => setSettings({...settings, pagbank_environment: e.target.value})}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="sandbox">Sandbox (Teste)</option>
-                <option value="production">Produção</option>
-              </select>
-              <p className="text-xs text-slate-500 mt-1">Use Sandbox para testes</p>
-            </div>
           </div>
 
           {/* Credenciais PagBank */}
           <div className="space-y-4 pt-4 border-t border-slate-200">
             <h3 className="text-lg font-outfit font-semibold text-slate-900 flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-cyan-500" />
-              Credenciais PagBank API
+              Credenciais PagBank API (Unificado)
             </h3>
+            <p className="text-sm text-slate-600">
+              Estas credenciais são usadas para <strong>ambos os tipos de pagamento</strong>: 
+              checkout (taxa/vendas) e assinaturas recorrentes (mensalidade).
+            </p>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <p className="text-sm text-blue-900 font-semibold mb-2">
-                📝 Configuração em 2 Passos:
+                📝 Configuração em 3 Passos:
               </p>
               <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-                <li><strong>Passo 1:</strong> Cole o Token Bearer abaixo e clique em "Salvar"</li>
-                <li><strong>Passo 2:</strong> Clique em "Gerar Chave Pública" para criar a chave de criptografia</li>
+                <li><strong>Passo 1:</strong> Informe o Email da conta PagBank</li>
+                <li><strong>Passo 2:</strong> Cole o Token Bearer e clique em "Salvar"</li>
+                <li><strong>Passo 3:</strong> Clique em "Gerar Chave Pública" para criar a chave de criptografia</li>
               </ol>
               <p className="text-xs text-blue-700 mt-3">
-                💡 <strong>Token Sandbox:</strong> 2e612a91-9457-4087-82a7-eaec13da02f91e06e1e44559af96ce205e03862a06bf4b39-9ae4-4659-bb25-4da21732297a
+                💡 <strong>Nota:</strong> Email + Token são usados para pagamentos únicos (checkout). Token + Chave Pública são usados para assinaturas recorrentes.
               </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Email da Conta PagBank
+                </label>
+                <input
+                  type="email"
+                  value={settings?.pagbank_email || ''}
+                  onChange={(e) => setSettings({...settings, pagbank_email: e.target.value})}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  placeholder="seu@email.com"
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Email cadastrado na conta PagBank
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Ambiente PagBank
+                </label>
+                <select
+                  value={settings?.pagbank_environment || 'sandbox'}
+                  onChange={(e) => setSettings({...settings, pagbank_environment: e.target.value})}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                >
+                  <option value="sandbox">Sandbox (Teste)</option>
+                  <option value="production">Produção</option>
+                </select>
+                <p className="text-xs text-slate-500 mt-1">Use Sandbox para testes</p>
+              </div>
             </div>
 
             <div>

@@ -174,13 +174,21 @@ async def get_settings(current_user: dict = Depends(get_current_user)):
     # Mascarar token sensível
     if settings.get("pagbank_token"):
         token = settings["pagbank_token"]
-        if len(token) > 20:
+        if len(token) > 20 and "*" not in token:
             settings["pagbank_token"] = token[:10] + "*" * (len(token) - 20) + token[-10:]
+    
+    # Mascarar email (mostrar parcialmente)
+    if settings.get("pagbank_email"):
+        email = settings["pagbank_email"]
+        if "@" in email:
+            parts = email.split("@")
+            if len(parts[0]) > 3:
+                settings["pagbank_email"] = parts[0][:3] + "***@" + parts[1]
     
     # Mascarar chave pública se existir
     if settings.get("pagbank_public_key"):
         key = settings["pagbank_public_key"]
-        if len(key) > 40:
+        if len(key) > 40 and "..." not in key:
             settings["pagbank_public_key"] = key[:20] + "..." + key[-20:]
     
     return settings

@@ -81,18 +81,28 @@ async def get_payment_settings():
 
 
 async def get_pagbank_service() -> PagBankService:
-    """Obtém o serviço PagBank configurado"""
-    settings = await get_payment_settings()
+    """
+    Obtém o serviço PagBank configurado para Checkout
+    USA AS MESMAS CREDENCIAIS DO SISTEMA DE ASSINATURAS (unificado)
+    """
+    # Usar collection de subscription_settings (credenciais unificadas)
+    settings = await db.subscription_settings.find_one({}, {"_id": 0})
     
-    is_sandbox = settings.get("environment") == "sandbox"
-    
-    if is_sandbox:
-        credentials = settings.get("sandbox_credentials", {})
+    if not settings:
+        # Fallback para payment_settings (legado)
+        settings = await get_payment_settings()
+        is_sandbox = settings.get("environment") == "sandbox"
+        if is_sandbox:
+            credentials = settings.get("sandbox_credentials", {})
+        else:
+            credentials = settings.get("production_credentials", {})
+        token = credentials.get("pagseguro_token")
+        email = credentials.get("pagseguro_email")
     else:
-        credentials = settings.get("production_credentials", {})
-    
-    token = credentials.get("pagseguro_token")
-    email = credentials.get("pagseguro_email")
+        # Usar credenciais unificadas de subscription_settings
+        is_sandbox = settings.get("pagbank_environment") == "sandbox"
+        token = settings.get("pagbank_token")
+        email = settings.get("pagbank_email")
     
     return PagBankService(token=token, email=email, is_sandbox=is_sandbox)
 
