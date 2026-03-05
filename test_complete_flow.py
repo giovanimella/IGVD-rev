@@ -8,7 +8,7 @@ import aiohttp
 import json
 from datetime import datetime, timezone
 
-BACKEND_URL = "https://subscription-billing-1.preview.emergentagent.com"
+BACKEND_URL = "https://subs-payment-1.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 async def test_complete_meeting_flow():
