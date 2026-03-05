@@ -49,8 +49,7 @@ class PagBankSubscriptionService:
         Gera uma chave pública para criptografia de cartões
         Esta chave é usada no frontend para criptografar dados de cartão antes de enviar ao backend
         
-        Endpoint: POST /public-keys
-        Body: {"type": "card"}
+        Endpoint: GET /public-keys/card (NÃO É POST!)
         
         Returns:
             Dict com a chave pública gerada
@@ -59,14 +58,12 @@ class PagBankSubscriptionService:
             return {"success": False, "error": "Token Bearer não configurado"}
         
         try:
-            payload = {"type": "card"}
-            
             logger.info(f"[PagBank] Gerando chave pública para criptografia de cartões")
+            logger.info(f"[PagBank] URL: {self.base_url}/public-keys/card")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    f"{self.base_url}/public-keys",
-                    json=payload,
+                response = await client.get(  # ✅ Corrigido: GET ao invés de POST
+                    f"{self.base_url}/public-keys/card",
                     headers=self.headers
                 )
             
