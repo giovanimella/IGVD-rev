@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Video, Save, Power, Gift, Users, Link, Loader, CheckCircle, Clock } from 'lucide-react';
+import { Video, Save, Power, Gift, Users, Link, Loader, CheckCircle, Clock, Calendar, Download, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { toast } from 'sonner';
 
 const AdminLive = () => {
   const [settings, setSettings] = useState(null);
-  const [participations, setParticipations] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [sessionDetails, setSessionDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [toggling, setToggling] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [ending, setEnding] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -20,12 +24,12 @@ const AdminLive = () => {
 
   const fetchData = async () => {
     try {
-      const [settingsRes, participationsRes] = await Promise.all([
+      const [settingsRes, sessionsRes] = await Promise.all([
         axios.get(`${API_URL}/api/live/admin/settings`),
-        axios.get(`${API_URL}/api/live/admin/participations`)
+        axios.get(`${API_URL}/api/live/admin/sessions`)
       ]);
       setSettings(settingsRes.data);
-      setParticipations(participationsRes.data);
+      setSessions(sessionsRes.data);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       toast.error('Erro ao carregar configurações');
@@ -51,22 +55,93 @@ const AdminLive = () => {
     }
   };
 
-  const handleToggle = async () => {
-    setToggling(true);
+  const handleStartLive = async () => {
+    if (!settings?.meeting_link) {
+      toast.error('Configure o link do Google Meet primeiro!');
+      return;
+    }
+    
+    setStarting(true);
     try {
-      const response = await axios.post(`${API_URL}/api/live/admin/toggle`);
-      setSettings(prev => ({ ...prev, is_active: response.data.is_active }));
-      toast.success(response.data.message);
+      const response = await axios.post(`${API_URL}/api/live/admin/start`);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        fetchData();
+      }
     } catch (error) {
-      toast.error('Erro ao alterar status da live');
+      const msg = error.response?.data?.detail || 'Erro ao iniciar live';
+      toast.error(msg);
     } finally {
-      setToggling(false);
+      setStarting(false);
+    }
+  };
+
+  const handleEndLive = async () => {
+    if (!window.confirm('Tem certeza que deseja encerrar a live?')) return;
+    
+    setEnding(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/live/admin/end`);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        fetchData();
+      }
+    } catch (error) {
+      toast.error('Erro ao encerrar live');
+    } finally {
+      setEnding(false);
+    }
+  };
+
+  const loadSessionDetails = async (sessionId) => {
+    if (selectedSession === sessionId) {
+      setSelectedSession(null);
+      setSessionDetails(null);
+      return;
+    }
+    
+    setSelectedSession(sessionId);
+    setLoadingDetails(true);
+    
+    try {
+      const response = await axios.get(`${API_URL}/api/live/admin/sessions/${sessionId}`);
+      setSessionDetails(response.data);
+    } catch (error) {
+      toast.error('Erro ao carregar detalhes');
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const exportSession = async (sessionId) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/live/admin/sessions/${sessionId}/export`);
+      
+      // Criar e baixar arquivo CSV
+      const blob = new Blob([response.data.csv_content], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `lista_presenca_${sessionId}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Lista exportada com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao exportar lista');
     }
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleString('pt-BR');
+  };
+
+  const formatDateShort = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   if (loading) {
@@ -86,25 +161,39 @@ const AdminLive = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-outfit font-bold text-slate-900">Gerenciar Live</h1>
-            <p className="text-slate-600 mt-1">Configure as lives semanais e acompanhe as participações</p>
+            <p className="text-slate-600 mt-1">Configure e gerencie as lives semanais</p>
           </div>
           
-          {/* Botão Ativar/Desativar */}
-          <Button
-            onClick={handleToggle}
-            disabled={toggling}
-            className={settings?.is_active 
-              ? 'bg-red-500 hover:bg-red-600' 
-              : 'bg-green-500 hover:bg-green-600'
-            }
-          >
-            {toggling ? (
-              <Loader className="w-4 h-4 mr-2 animate-spin" />
+          {/* Botões de Controle */}
+          <div className="flex gap-3">
+            {settings?.is_active ? (
+              <Button
+                onClick={handleEndLive}
+                disabled={ending}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                {ending ? (
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Power className="w-4 h-4 mr-2" />
+                )}
+                Encerrar Live
+              </Button>
             ) : (
-              <Power className="w-4 h-4 mr-2" />
+              <Button
+                onClick={handleStartLive}
+                disabled={starting}
+                className="bg-green-500 hover:bg-green-600"
+              >
+                {starting ? (
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Video className="w-4 h-4 mr-2" />
+                )}
+                Iniciar Nova Live
+              </Button>
             )}
-            {settings?.is_active ? 'Desativar Live' : 'Ativar Live'}
-          </Button>
+          </div>
         </div>
 
         {/* Status Card */}
@@ -131,8 +220,8 @@ const AdminLive = () => {
               </div>
               <p className={settings?.is_active ? 'text-white/80' : 'text-slate-500'}>
                 {settings?.is_active 
-                  ? `${settings?.today_participations || 0} participações hoje`
-                  : 'Live desativada'
+                  ? `${settings?.current_session_participations || 0} participantes nesta sessão`
+                  : 'Live desativada - Clique em "Iniciar Nova Live" para começar'
                 }
               </p>
             </div>
@@ -200,9 +289,6 @@ const AdminLive = () => {
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 font-mono text-sm"
               placeholder="https://meet.google.com/xxx-xxxx-xxx"
             />
-            <p className="text-xs text-slate-500 mt-1">
-              Cole aqui o link da sua reunião do Google Meet
-            </p>
           </div>
 
           <div className="flex justify-end">
@@ -222,52 +308,130 @@ const AdminLive = () => {
           </div>
         </div>
 
-        {/* Participações Recentes */}
+        {/* Histórico de Sessões */}
         <div className="bg-white rounded-xl border border-slate-200">
           <div className="p-6 border-b border-slate-200">
             <h2 className="text-xl font-outfit font-semibold text-slate-900 flex items-center gap-2">
-              <Users className="w-5 h-5 text-cyan-500" />
-              Participações Recentes ({participations.length})
+              <Calendar className="w-5 h-5 text-cyan-500" />
+              Histórico de Lives ({sessions.length})
             </h2>
+            <p className="text-sm text-slate-600 mt-1">
+              Clique em uma sessão para ver a lista de presença
+            </p>
           </div>
 
-          {participations.length === 0 ? (
+          {sessions.length === 0 ? (
             <div className="p-12 text-center">
               <Clock className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-600">Nenhuma participação registrada ainda</p>
+              <p className="text-slate-600">Nenhuma live realizada ainda</p>
+              <p className="text-sm text-slate-500 mt-1">Clique em "Iniciar Nova Live" para começar</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Usuário</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Pontos</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Data/Hora</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {participations.map((p) => (
-                    <tr key={p.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-medium text-slate-900">{p.user_name}</p>
-                          <p className="text-sm text-slate-500">{p.user_email}</p>
+            <div className="divide-y divide-slate-200">
+              {sessions.map((session) => (
+                <div key={session.id}>
+                  {/* Cabeçalho da Sessão */}
+                  <div 
+                    className="p-4 hover:bg-slate-50 cursor-pointer flex items-center justify-between"
+                    onClick={() => loadSessionDetails(session.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        session.is_active ? 'bg-red-100' : 'bg-slate-100'
+                      }`}>
+                        <Video className={`w-5 h-5 ${session.is_active ? 'text-red-500' : 'text-slate-500'}`} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-slate-900">{session.title}</h3>
+                          {session.is_active && (
+                            <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full">
+                              Em andamento
+                            </span>
+                          )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="flex items-center gap-1 text-green-600 font-medium">
-                          <Gift className="w-4 h-4" />
-                          +{p.points_earned}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-slate-600">
-                        {formatDate(p.participated_at)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <p className="text-sm text-slate-500">
+                          {formatDateShort(session.started_at)} • {session.participants_count || 0} participantes
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          exportSession(session.id);
+                        }}
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Exportar
+                      </Button>
+                      {selectedSession === session.id ? (
+                        <ChevronUp className="w-5 h-5 text-slate-400" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-slate-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Detalhes da Sessão (Lista de Presença) */}
+                  {selectedSession === session.id && (
+                    <div className="bg-slate-50 border-t border-slate-200 p-4">
+                      {loadingDetails ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader className="w-6 h-6 animate-spin text-cyan-500" />
+                        </div>
+                      ) : sessionDetails ? (
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-semibold text-slate-900">
+                              Lista de Presença ({sessionDetails.total_participants} participantes)
+                            </h4>
+                            <span className="text-sm text-green-600">
+                              <Gift className="w-4 h-4 inline mr-1" />
+                              {sessionDetails.total_points_distributed} pontos distribuídos
+                            </span>
+                          </div>
+
+                          {sessionDetails.participants.length === 0 ? (
+                            <p className="text-slate-500 text-center py-4">
+                              Nenhum participante registrado
+                            </p>
+                          ) : (
+                            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                              <table className="w-full">
+                                <thead className="bg-slate-100">
+                                  <tr>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600">#</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600">Nome</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600">Email</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600">Pontos</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600">Horário</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                  {sessionDetails.participants.map((p, index) => (
+                                    <tr key={p.id} className="hover:bg-slate-50">
+                                      <td className="px-4 py-2 text-sm text-slate-500">{index + 1}</td>
+                                      <td className="px-4 py-2 text-sm font-medium text-slate-900">{p.user_name}</td>
+                                      <td className="px-4 py-2 text-sm text-slate-600">{p.user_email}</td>
+                                      <td className="px-4 py-2 text-sm text-green-600">+{p.points_earned}</td>
+                                      <td className="px-4 py-2 text-sm text-slate-500">
+                                        {new Date(p.participated_at).toLocaleTimeString('pt-BR')}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>

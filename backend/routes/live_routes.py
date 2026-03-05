@@ -1,13 +1,12 @@
 """
-Rotas para o sistema de Lives
+Rotas para o sistema de Lives com Sessões
 """
 from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from auth import get_current_user
-from models_live import LiveSettings, LiveSettingsUpdate, LiveParticipation
+from models_live import LiveSettings, LiveSettingsUpdate, LiveSession, LiveParticipation
 import os
-import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,7 +22,6 @@ async def get_live_settings():
     """Obtém as configurações da live"""
     settings = await db.live_settings.find_one({}, {"_id": 0})
     if not settings:
-        # Criar configurações padrão
         default = LiveSettings()
         await db.live_settings.insert_one(default.model_dump())
         return default.model_dump()
@@ -40,13 +38,15 @@ async def get_admin_live_settings(current_user: dict = Depends(get_current_user)
     
     settings = await get_live_settings()
     
-    # Contar participações de hoje
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    today_participations = await db.live_participations.count_documents({
-        "participated_at": {"$gte": today_start.isoformat()}
-    })
-    
-    settings["today_participations"] = today_participations
+    # Contar participações da sessão atual
+    current_session_id = settings.get("current_session_id")
+    if current_session_id:
+        current_participations = await db.live_participations.count_documents({
+            "session_id": current_session_id
+        })
+        settings["current_session_participations"] = current_participations
+    else:
+        settings["current_session_participations"] = 0
     
     return settings
 
@@ -72,42 +72,166 @@ async def update_live_settings(
     return {"success": True, "message": "Configurações atualizadas com sucesso"}
 
 
-@router.post("/admin/toggle")
-async def toggle_live(current_user: dict = Depends(get_current_user)):
-    """Ativa/desativa a live (admin)"""
+@router.post("/admin/start")
+async def start_live(current_user: dict = Depends(get_current_user)):
+    """Inicia uma nova sessão de live (admin)"""
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Acesso negado")
     
     settings = await get_live_settings()
-    new_status = not settings.get("is_active", False)
     
+    # Verificar se já há uma live ativa
+    if settings.get("is_active"):
+        raise HTTPException(status_code=400, detail="Já existe uma live ativa. Encerre-a primeiro.")
+    
+    # Criar nova sessão
+    session = LiveSession(
+        title=settings.get("title", "Live Semanal"),
+        description=settings.get("description"),
+        points_reward=settings.get("points_reward", 10)
+    )
+    
+    await db.live_sessions.insert_one(session.model_dump())
+    
+    # Atualizar settings com a sessão ativa
     await db.live_settings.update_one(
         {},
         {"$set": {
-            "is_active": new_status,
+            "is_active": True,
+            "current_session_id": session.id,
             "updated_at": datetime.now(timezone.utc).isoformat()
         }}
     )
     
+    logger.info(f"[Live] Nova sessão iniciada: {session.id}")
+    
     return {
         "success": True,
-        "is_active": new_status,
-        "message": "Live ativada!" if new_status else "Live desativada!"
+        "message": "Live iniciada com sucesso!",
+        "session_id": session.id
     }
 
 
-@router.get("/admin/participations")
-async def get_live_participations(current_user: dict = Depends(get_current_user)):
-    """Lista as participações em lives (admin)"""
+@router.post("/admin/end")
+async def end_live(current_user: dict = Depends(get_current_user)):
+    """Encerra a sessão de live atual (admin)"""
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Acesso negado")
     
-    participations = await db.live_participations.find(
+    settings = await get_live_settings()
+    
+    if not settings.get("is_active"):
+        raise HTTPException(status_code=400, detail="Não há live ativa no momento")
+    
+    current_session_id = settings.get("current_session_id")
+    
+    # Contar participantes da sessão
+    participants_count = await db.live_participations.count_documents({
+        "session_id": current_session_id
+    })
+    
+    # Atualizar sessão como encerrada
+    if current_session_id:
+        await db.live_sessions.update_one(
+            {"id": current_session_id},
+            {"$set": {
+                "is_active": False,
+                "ended_at": datetime.now(timezone.utc).isoformat(),
+                "participants_count": participants_count
+            }}
+        )
+    
+    # Desativar live nas settings
+    await db.live_settings.update_one(
+        {},
+        {"$set": {
+            "is_active": False,
+            "current_session_id": None,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    logger.info(f"[Live] Sessão encerrada: {current_session_id}, {participants_count} participantes")
+    
+    return {
+        "success": True,
+        "message": f"Live encerrada! {participants_count} participante(s)",
+        "participants_count": participants_count
+    }
+
+
+@router.get("/admin/sessions")
+async def get_live_sessions(current_user: dict = Depends(get_current_user)):
+    """Lista todas as sessões de live (admin)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    sessions = await db.live_sessions.find(
         {},
         {"_id": 0}
-    ).sort("participated_at", -1).limit(100).to_list(100)
+    ).sort("started_at", -1).limit(50).to_list(50)
     
-    return participations
+    return sessions
+
+
+@router.get("/admin/sessions/{session_id}")
+async def get_session_details(
+    session_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtém detalhes de uma sessão específica com lista de participantes (admin)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Buscar sessão
+    session = await db.live_sessions.find_one({"id": session_id}, {"_id": 0})
+    if not session:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    
+    # Buscar participantes
+    participants = await db.live_participations.find(
+        {"session_id": session_id},
+        {"_id": 0}
+    ).sort("participated_at", 1).to_list(500)
+    
+    return {
+        "session": session,
+        "participants": participants,
+        "total_participants": len(participants),
+        "total_points_distributed": sum(p.get("points_earned", 0) for p in participants)
+    }
+
+
+@router.get("/admin/sessions/{session_id}/export")
+async def export_session_participants(
+    session_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Exporta lista de participantes de uma sessão (formato para copiar)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    session = await db.live_sessions.find_one({"id": session_id}, {"_id": 0})
+    if not session:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    
+    participants = await db.live_participations.find(
+        {"session_id": session_id},
+        {"_id": 0}
+    ).sort("participated_at", 1).to_list(500)
+    
+    # Formatar para CSV
+    csv_lines = ["Nome,Email,Pontos,Data/Hora"]
+    for p in participants:
+        csv_lines.append(f"{p['user_name']},{p['user_email']},{p['points_earned']},{p['participated_at']}")
+    
+    return {
+        "session_title": session.get("title"),
+        "session_date": session.get("started_at"),
+        "total_participants": len(participants),
+        "csv_content": "\n".join(csv_lines),
+        "participants": participants
+    }
 
 
 # ==================== USUÁRIO ====================
@@ -123,14 +247,16 @@ async def get_current_live(current_user: dict = Depends(get_current_user)):
             "live": None
         }
     
-    # Verificar se o usuário já participou hoje
+    # Verificar se o usuário já participou nesta sessão
     user_id = current_user["sub"]
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    current_session_id = settings.get("current_session_id")
     
-    already_participated = await db.live_participations.find_one({
-        "user_id": user_id,
-        "participated_at": {"$gte": today_start.isoformat()}
-    })
+    already_participated = None
+    if current_session_id:
+        already_participated = await db.live_participations.find_one({
+            "user_id": user_id,
+            "session_id": current_session_id
+        })
     
     return {
         "has_active_live": True,
@@ -147,13 +273,9 @@ async def get_current_live(current_user: dict = Depends(get_current_user)):
 
 @router.post("/join")
 async def join_live(current_user: dict = Depends(get_current_user)):
-    """
-    Registra a participação na live e dá pontos ao usuário
-    Chamado quando o usuário clica no link da live
-    """
+    """Registra a participação na live e dá pontos ao usuário"""
     user_id = current_user["sub"]
     
-    # Verificar se há live ativa
     settings = await get_live_settings()
     
     if not settings.get("is_active"):
@@ -162,25 +284,26 @@ async def join_live(current_user: dict = Depends(get_current_user)):
     if not settings.get("meeting_link"):
         raise HTTPException(status_code=400, detail="Link da live não configurado")
     
-    # Verificar se o usuário já participou hoje
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    current_session_id = settings.get("current_session_id")
+    if not current_session_id:
+        raise HTTPException(status_code=400, detail="Sessão da live não encontrada")
     
+    # Verificar se o usuário já participou nesta sessão
     already_participated = await db.live_participations.find_one({
         "user_id": user_id,
-        "participated_at": {"$gte": today_start.isoformat()}
+        "session_id": current_session_id
     })
     
     points_earned = 0
     
     if not already_participated:
-        # Registrar participação
         points_earned = settings.get("points_reward", 10)
         
         participation = LiveParticipation(
+            session_id=current_session_id,
             user_id=user_id,
             user_email=current_user.get("email", ""),
             user_name=current_user.get("full_name", ""),
-            live_id=settings.get("id", ""),
             points_earned=points_earned
         )
         
@@ -192,12 +315,18 @@ async def join_live(current_user: dict = Depends(get_current_user)):
             {"$inc": {"points": points_earned}}
         )
         
-        logger.info(f"[Live] Participação registrada: user={user_id}, points={points_earned}")
+        # Atualizar contador da sessão
+        await db.live_sessions.update_one(
+            {"id": current_session_id},
+            {"$inc": {"participants_count": 1}}
+        )
+        
+        logger.info(f"[Live] Participação: user={user_id}, session={current_session_id}, points={points_earned}")
     
     return {
         "success": True,
         "meeting_link": settings.get("meeting_link"),
         "points_earned": points_earned,
         "already_participated": already_participated is not None,
-        "message": f"Você ganhou {points_earned} pontos!" if points_earned > 0 else "Você já participou da live hoje!"
+        "message": f"Você ganhou {points_earned} pontos!" if points_earned > 0 else "Você já participou desta live!"
     }
