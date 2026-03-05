@@ -358,35 +358,32 @@ async def create_subscription(
     phone_number = phone_clean[2:] if len(phone_clean) >= 10 else phone_clean
     
     # Preparar dados do cliente conforme documentação PagBank
-    # Estrutura corrigida baseada na API oficial 2025
+    # Com encrypted_card, NÃO enviar security_code nem holder separadamente!
     customer_data = {
         "name": subscription_request.customer_name[:50],
         "email": subscription_request.customer_email,
         "tax_id": ''.join(filter(str.isdigit, subscription_request.customer_cpf)),
-        "phones": [{  # ✅ Corrigido: "phones" (plural) como array
-            "country_code": "55",  # ✅ Brasil
+        "phones": [{
+            "country_code": "55",
             "area_code": area_code,
             "number": phone_number,
-            "type": "MOBILE"  # ✅ Tipo do telefone
+            "type": "MOBILE"
         }],
-        "billing_info": [{  # ✅ Array de endereços de cobrança
-            "type": "CREDIT_CARD",  # ✅ Tipo para pagamento com cartão
+        "billing_info": [{
+            "type": "CREDIT_CARD",
             "card": {
-                "encrypted": subscription_request.encrypted_card,
-                "security_code": subscription_request.card_security_code,
-                "holder": {
-                    "name": subscription_request.card_holder_name
-                }
+                "encrypted": subscription_request.encrypted_card  # ✅ Apenas o cartão criptografado!
+                # ❌ NÃO enviar security_code nem holder quando usar encrypted!
             },
             "address": {
                 "street": subscription_request.billing_address.get("street", "")[:80],
                 "number": subscription_request.billing_address.get("number", "")[:20],
                 "complement": subscription_request.billing_address.get("complement", "")[:40] or None,
-                "locality": subscription_request.billing_address.get("district", "")[:60],  # ✅ "locality"
+                "locality": subscription_request.billing_address.get("district", "")[:60],
                 "city": subscription_request.billing_address.get("city", "")[:60],
-                "region_code": subscription_request.billing_address.get("state", "")[:2].upper(),  # ✅ "region_code"
-                "country": "BRA",  # ✅ Código do país
-                "postal_code": ''.join(filter(str.isdigit, subscription_request.billing_address.get("zipcode", "")))  # ✅ "postal_code"
+                "region_code": subscription_request.billing_address.get("state", "")[:2].upper(),
+                "country": "BRA",
+                "postal_code": ''.join(filter(str.isdigit, subscription_request.billing_address.get("zipcode", "")))
             }
         }]
     }
@@ -399,9 +396,7 @@ async def create_subscription(
         reference_id=f"user_{user_id}_{uuid.uuid4().hex[:8]}",
         plan_id=plan["pagbank_plan_id"],
         customer_data=customer_data,
-        encrypted_card=subscription_request.encrypted_card,
-        card_holder_name=subscription_request.card_holder_name,
-        card_security_code=subscription_request.card_security_code,  # CVV
+        encrypted_card=subscription_request.encrypted_card,  # Apenas para log/referência
         pro_rata=False
     )
     

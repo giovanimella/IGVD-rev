@@ -283,9 +283,7 @@ class PagBankSubscriptionService:
         reference_id: str,
         plan_id: str,
         customer_data: Dict[str, Any],
-        encrypted_card: str,  # Cartão criptografado pelo SDK frontend
-        card_holder_name: str,
-        card_security_code: str,  # CVV (não criptografado)
+        encrypted_card: str,  # Apenas para log, já está no customer_data
         pro_rata: bool = False
     ) -> Dict[str, Any]:
         """
@@ -294,10 +292,8 @@ class PagBankSubscriptionService:
         Args:
             reference_id: Identificador externo da assinatura
             plan_id: ID do plano no PagBank
-            customer_data: Dados do cliente (conforme estrutura oficial)
-            encrypted_card: Cartão criptografado pelo SDK do PagBank
-            card_holder_name: Nome do titular do cartão
-            card_security_code: CVV do cartão (3 ou 4 dígitos)
+            customer_data: Dados do cliente (com billing_info contendo encrypted_card)
+            encrypted_card: Cartão criptografado (apenas para referência)
             pro_rata: Se deve aplicar proporcionalidade
         
         Returns:
@@ -313,8 +309,8 @@ class PagBankSubscriptionService:
                 "plan": {
                     "id": plan_id
                 },
-                "customer": customer_data,  # Já formatado conforme documentação (com billing_info contendo o cartão)
-                "payment_method": ["CREDIT_CARD"],  # ✅ Apenas o tipo, cartão está em billing_info
+                "customer": customer_data,  # ✅ billing_info já contém encrypted_card (e nada mais!)
+                "payment_method": ["CREDIT_CARD"],
                 "pro_rata": pro_rata
             }
             
