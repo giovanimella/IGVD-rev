@@ -285,6 +285,7 @@ class PagBankSubscriptionService:
         customer_data: Dict[str, Any],
         encrypted_card: str,  # Cartão criptografado pelo SDK frontend
         card_holder_name: str,
+        card_security_code: str,  # CVV (não criptografado)
         pro_rata: bool = False
     ) -> Dict[str, Any]:
         """
@@ -296,6 +297,7 @@ class PagBankSubscriptionService:
             customer_data: Dados do cliente (conforme estrutura oficial)
             encrypted_card: Cartão criptografado pelo SDK do PagBank
             card_holder_name: Nome do titular do cartão
+            card_security_code: CVV do cartão (3 ou 4 dígitos)
             pro_rata: Se deve aplicar proporcionalidade
         
         Returns:
@@ -317,6 +319,7 @@ class PagBankSubscriptionService:
                         "type": "CREDIT_CARD",
                         "card": {
                             "encrypted": encrypted_card,  # Cartão criptografado
+                            "security_code": card_security_code,  # ✅ CVV obrigatório
                             "holder": {
                                 "name": card_holder_name
                             }

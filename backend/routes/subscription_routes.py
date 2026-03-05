@@ -394,6 +394,7 @@ async def create_subscription(
         customer_data=customer_data,
         encrypted_card=subscription_request.encrypted_card,
         card_holder_name=subscription_request.card_holder_name,
+        card_security_code=subscription_request.card_security_code,  # CVV
         pro_rata=False
     )
     

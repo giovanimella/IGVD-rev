@@ -172,12 +172,14 @@ class CreateSubscriptionRequest(BaseModel):
     # Dados do cartão CRIPTOGRAFADO
     encrypted_card: str  # Cartão criptografado pelo SDK do PagBank no frontend
     card_holder_name: str
+    card_security_code: str  # CVV - enviado separadamente (não criptografado)
 
 
 class UpdatePaymentMethodRequest(BaseModel):
     """Atualização do método de pagamento"""
     encrypted_card: str  # Cartão criptografado pelo SDK
     card_holder_name: str
+    card_security_code: str  # CVV
 
 
 # ==================== HISTÓRICO DE PAGAMENTOS ====================

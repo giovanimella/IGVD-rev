@@ -220,7 +220,8 @@ const SubscriptionOnboarding = () => {
           zipcode: formData.billing_address.zipcode.replace(/\D/g, '')
         },
         encrypted_card: encryptedCard, // Cartão criptografado
-        card_holder_name: formData.card_holder_name
+        card_holder_name: formData.card_holder_name,
+        card_security_code: formData.card_cvv // ✅ CVV enviado separadamente
       };
 
       const response = await axios.post(`${API_URL}/api/subscriptions/subscribe`, subscriptionData);
