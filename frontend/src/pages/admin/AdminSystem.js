@@ -286,7 +286,8 @@ const AdminSystem = () => {
       toast.error('Erro ao processar pontos expirados');
     } finally {
       setProcessingExpired(false);
-
+    }
+  };
 
   const addManualPoints = async () => {
     if (!manualPointsData.user_id || !manualPointsData.points || !manualPointsData.description) {
@@ -308,9 +309,6 @@ const AdminSystem = () => {
       console.error('Erro:', error);
     } finally {
       setAddingManualPoints(false);
-    }
-  };
-
     }
   };
 
