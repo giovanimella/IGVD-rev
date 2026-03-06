@@ -236,6 +236,63 @@ async def get_my_points_balance(current_user: dict = Depends(lambda: None)):
     }
 
 
+@router.post("/daily-access")
+async def register_daily_access(current_user: dict = Depends(get_current_user)):
+    """
+    Registra acesso diário do usuário e credita pontos se for o primeiro acesso do dia
+    """
+    user_id = current_user["sub"]
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    
+    # Verificar se já acessou hoje
+    existing_access = await db.daily_access.find_one({
+        "user_id": user_id,
+        "date": today
+    })
+    
+    if existing_access:
+        return {
+            "success": True,
+            "message": "Acesso já registrado hoje",
+            "points_awarded": 0
+        }
+    
+    # Registrar acesso
+    await db.daily_access.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "date": today,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Verificar se deve dar pontos
+    config = await db.system_config.find_one({"id": "system_config"})
+    daily_points = config.get("daily_access_points", 0) if config else 0
+    
+    if daily_points > 0:
+        # Dar pontos
+        await add_points(
+            user_id=user_id,
+            points=daily_points,
+            reason="daily_access",
+            description="Pontos por acesso diário",
+            reference_type="daily_access"
+        )
+        
+        return {
+            "success": True,
+            "message": f"Primeiro acesso do dia! Você ganhou {daily_points} pontos",
+            "points_awarded": daily_points
+        }
+    
+    return {
+        "success": True,
+        "message": "Acesso registrado",
+        "points_awarded": 0
+    }
+
+
+
 @router.get("/my-history")
 async def get_my_points_history(
     limit: int = 50,
@@ -425,7 +482,9 @@ async def get_points_settings(current_user: dict = Depends(get_current_user)):
     config = await db.system_config.find_one({"id": "system_config"})
     
     return {
-        "expiration_months": config.get("points_expiration_months", 12) if config else 12
+        "expiration_months": config.get("points_expiration_months", 12) if config else 12,
+        "daily_access_points": config.get("daily_access_points", 0) if config else 0,
+        "training_completion_points": config.get("training_completion_points", 0) if config else 0
     }
 
 
@@ -433,22 +492,37 @@ async def get_points_settings(current_user: dict = Depends(get_current_user)):
 async def update_points_settings(data: dict, current_user: dict = Depends(require_role(["admin"]))):
     """Admin: Atualiza as configurações de pontos"""
     expiration_months = data.get("points_expiration_months")
+    daily_access_points = data.get("daily_access_points")
+    training_completion_points = data.get("training_completion_points")
+    
+    update_fields = {}
     
     if expiration_months is not None:
         if expiration_months < 0:
             raise HTTPException(status_code=400, detail="Meses de expiração não pode ser negativo")
+        update_fields["points_expiration_months"] = expiration_months
+    
+    if daily_access_points is not None:
+        if daily_access_points < 0:
+            raise HTTPException(status_code=400, detail="Pontos por acesso diário não pode ser negativo")
+        update_fields["daily_access_points"] = daily_access_points
+    
+    if training_completion_points is not None:
+        if training_completion_points < 0:
+            raise HTTPException(status_code=400, detail="Pontos por treinamento não pode ser negativo")
+        update_fields["training_completion_points"] = training_completion_points
+    
+    if update_fields:
+        update_fields["updated_at"] = datetime.now(timezone.utc).isoformat()
         
         await db.system_config.update_one(
             {"id": "system_config"},
-            {"$set": {
-                "points_expiration_months": expiration_months,
-                "updated_at": datetime.now(timezone.utc).isoformat()
-            }},
+            {"$set": update_fields},
             upsert=True
         )
     
     return {
         "success": True,
         "message": "Configurações atualizadas",
-        "expiration_months": expiration_months
+        **update_fields
     }

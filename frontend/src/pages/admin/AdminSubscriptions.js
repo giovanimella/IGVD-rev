@@ -209,6 +209,29 @@ const AdminSubscriptions = () => {
     }
   };
 
+
+  // Reativar assinatura de um usuário
+  const handleReactivateUserSubscription = async (userId, userName) => {
+    if (!window.confirm(`Tem certeza que deseja reativar a assinatura de ${userName}?`)) {
+      return;
+    }
+
+    setCancellingUser(userId);
+    try {
+      const response = await axios.post(`${API_URL}/api/subscriptions/admin/reactivate-subscription/${userId}`);
+      if (response.data.success) {
+        toast.success('Assinatura reativada com sucesso!');
+        fetchData(); // Recarregar dados
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao reativar assinatura';
+      toast.error(errorMsg);
+    } finally {
+      setCancellingUser(null);
+    }
+  };
+
+
   // Inativar plano no PagBank
   const handleInactivatePlan = async (planId) => {
     if (!window.confirm('Tem certeza que deseja INATIVAR este plano? Ele não poderá ser usado para novas assinaturas.')) {
@@ -895,7 +918,22 @@ const AdminSubscriptions = () => {
                           )}
                         </Button>
                       ) : (
-                        <span className="text-xs text-slate-400">Cancelada</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-emerald-600 hover:bg-emerald-50"
+                          onClick={() => handleReactivateUserSubscription(sub.user_id, sub.user_name)}
+                          disabled={cancellingUser === sub.user_id}
+                        >
+                          {cancellingUser === sub.user_id ? (
+                            <Loader className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Reativar
+                            </>
+                          )}
+                        </Button>
                       )}
                     </td>
                   </tr>

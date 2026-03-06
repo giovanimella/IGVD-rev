@@ -871,6 +871,90 @@ async def admin_cancel_subscription(
     }
 
 
+
+@router.post("/my-subscription/reactivate")
+async def reactivate_my_subscription(current_user: dict = Depends(get_current_user)):
+    """
+    Reativa uma assinatura cancelada do usuário logado
+    Permite que o usuário reative sua própria assinatura
+    """
+    user_id = current_user["sub"]
+    
+    # Buscar assinatura
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada")
+    
+    if subscription.get("status") != SubscriptionStatus.CANCELLED:
+        raise HTTPException(status_code=400, detail="Apenas assinaturas canceladas podem ser reativadas")
+    
+    # Reativar localmente
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "status": SubscriptionStatus.ACTIVE,
+            "pagbank_status": "ACTIVE",
+            "reactivated_at": datetime.now(timezone.utc).isoformat(),
+            "reactivated_by": "user",
+            "cancelled_at": None,
+            "cancelled_by": None
+        }}
+    )
+    
+    logger.info(f"[Subscription] Assinatura reativada pelo usuário: user={user_id}")
+    
+    return {
+        "success": True,
+        "message": "Assinatura reativada com sucesso! Você pode continuar acessando a plataforma."
+    }
+
+
+@router.post("/admin/reactivate-subscription/{user_id}")
+async def admin_reactivate_subscription(
+    user_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Reativa a assinatura de um usuário específico (somente admin)
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Buscar assinatura
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada para este usuário")
+    
+    if subscription.get("status") not in [SubscriptionStatus.CANCELLED, SubscriptionStatus.SUSPENDED]:
+        raise HTTPException(status_code=400, detail="Apenas assinaturas canceladas ou suspensas podem ser reativadas")
+    
+    # Reativar localmente
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "status": SubscriptionStatus.ACTIVE,
+            "pagbank_status": "ACTIVE",
+            "reactivated_at": datetime.now(timezone.utc).isoformat(),
+            "reactivated_by": f"admin:{current_user['sub']}",
+            "cancelled_at": None,
+            "cancelled_by": None,
+            "suspended_at": None,
+            "overdue_months": 0,
+            "failed_payments_count": 0
+        }}
+    )
+    
+    logger.info(f"[Admin] Assinatura reativada pelo admin: user={user_id}, admin={current_user['sub']}")
+    
+    return {
+        "success": True,
+        "message": f"Assinatura do usuário reativada com sucesso",
+        "user_id": user_id
+    }
+
+
 # ==================== GERENCIAMENTO DE PLANOS ====================
 
 @router.put("/plans/{plan_id}/inactivate")

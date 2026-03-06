@@ -8,6 +8,7 @@ const SubscriptionStatus = () => {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -46,6 +47,22 @@ const SubscriptionStatus = () => {
       console.error('Erro:', error);
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const reactivateSubscription = async () => {
+    if (!window.confirm('Deseja realmente reativar sua assinatura?')) return;
+    
+    setReactivating(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/subscriptions/my-subscription/reactivate`);
+      toast.success(response.data.message);
+      checkSubscription(); // Atualizar status
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao reativar assinatura');
+      console.error('Erro:', error);
+    } finally {
+      setReactivating(false);
     }
   };
 
@@ -195,6 +212,21 @@ const SubscriptionStatus = () => {
             <p className="text-sm text-orange-700">
               ⚠️ Sua assinatura está suspensa. Entre em contato com o suporte.
             </p>
+          </div>
+        )}
+
+        {subscription.status === 'cancelled' && (
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
+            <p className="text-sm text-slate-700">
+              Sua assinatura foi cancelada. Você pode reativá-la a qualquer momento.
+            </p>
+            <Button
+              onClick={reactivateSubscription}
+              disabled={reactivating}
+              className="w-full bg-emerald-500 hover:bg-emerald-600"
+            >
+              {reactivating ? 'Reativando...' : 'Reativar Assinatura'}
+            </Button>
           </div>
         )}
       </div>

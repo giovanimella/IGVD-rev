@@ -169,6 +169,33 @@ async def calculate_user_campaign_progress(user_id: str, campaign: dict) -> dict
         if user:
             current_value = user.get("points", 0)
     
+    elif metric_type == "presentations":
+        # Total de apresentações no período da campanha
+        presentations = await db.presentations.count_documents({
+            "user_id": user_id,
+            "date": {"$gte": campaign["start_date"], "$lte": campaign["end_date"]}
+        })
+        current_value = presentations
+    
+    elif metric_type == "meetings":
+        # Total de reuniões no período da campanha
+        meetings = await db.meetings.count_documents({
+            "user_id": user_id,
+            "created_at": {"$gte": campaign["start_date"], "$lte": campaign["end_date"]},
+            "status": "closed"
+        })
+        current_value = meetings
+    
+    elif metric_type == "meeting_participants":
+        # Total de participantes cadastrados em reuniões no período
+        meetings = await db.meetings.find({
+            "user_id": user_id,
+            "created_at": {"$gte": campaign["start_date"], "$lte": campaign["end_date"]},
+            "status": "closed"
+        }, {"_id": 0, "participants_count": 1}).to_list(1000)
+        
+        current_value = sum(m.get("participants_count", 0) for m in meetings)
+    
     # Calcular porcentagem de progresso
     progress_percentage = min(100, (current_value / target_value * 100)) if target_value > 0 else 0
     achieved = current_value >= target_value

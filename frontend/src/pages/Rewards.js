@@ -75,25 +75,42 @@ const Rewards = () => {
           <h2 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Recompensas Disponíveis</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rewards.map((reward) => (
-              <div key={reward.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:shadow-lg dark:hover:border-cyan-500/30 transition-all" data-testid={`reward-card-${reward.id}`}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
-                    <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+              <div key={reward.id} className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden hover:shadow-lg dark:hover:border-cyan-500/30 transition-all" data-testid={`reward-card-${reward.id}`}>
+                {/* Imagem da Recompensa */}
+                {reward.image_url && (
+                  <div className="w-full h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                    <img 
+                      src={`${API_URL}${reward.image_url}`}
+                      alt={reward.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.style.display = 'none';
+                      }}
+                    />
                   </div>
-                  <span className="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium">
-                    {reward.required_points} pts
-                  </span>
+                )}
+                
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
+                      <Award className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <span className="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium">
+                      {reward.required_points} pts
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-2">{reward.title}</h3>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{reward.description}</p>
+                  <Button
+                    onClick={() => handleRedeem(reward.id)}
+                    disabled={user?.points < reward.required_points}
+                    data-testid={`redeem-button-${reward.id}`}
+                    className="w-full"
+                  >
+                    {user?.points < reward.required_points ? 'Pontos Insuficientes' : 'Resgatar'}
+                  </Button>
                 </div>
-                <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-2">{reward.title}</h3>
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">{reward.description}</p>
-                <Button
-                  onClick={() => handleRedeem(reward.id)}
-                  disabled={user?.points < reward.required_points}
-                  data-testid={`redeem-button-${reward.id}`}
-                  className="w-full"
-                >
-                  {user?.points < reward.required_points ? 'Pontos Insuficientes' : 'Resgatar'}
-                </Button>
               </div>
             ))}
           </div>

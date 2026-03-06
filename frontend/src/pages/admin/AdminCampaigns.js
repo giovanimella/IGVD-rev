@@ -38,7 +38,10 @@ const AdminCampaigns = () => {
   const METRIC_TYPES = [
     { value: 'frequency', label: 'Frequência de Apresentações', icon: Percent, description: '% de dias com 2+ apresentações' },
     { value: 'average_score', label: 'Média de Notas', icon: Star, description: 'Média das avaliações de módulos' },
-    { value: 'points', label: 'Pontuação', icon: Award, description: 'Total de pontos na plataforma' }
+    { value: 'points', label: 'Pontuação', icon: Award, description: 'Total de pontos na plataforma' },
+    { value: 'presentations', label: 'Total de Apresentações', icon: TrendingUp, description: 'Quantidade de apresentações no período' },
+    { value: 'meetings', label: 'Total de Reuniões', icon: Users, description: 'Quantidade de reuniões finalizadas no período' },
+    { value: 'meeting_participants', label: 'Participantes em Reuniões', icon: Target, description: 'Total de participantes cadastrados em reuniões' }
   ];
 
   const COLORS = [

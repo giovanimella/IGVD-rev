@@ -37,6 +37,8 @@ const AdminSystem = () => {
   const [savingPoints, setSavingPoints] = useState(false);
   const [expiringPointsSummary, setExpiringPointsSummary] = useState(null);
   const [processingExpired, setProcessingExpired] = useState(false);
+  const [manualPointsData, setManualPointsData] = useState({ user_id: '', points: '', description: '' });
+  const [addingManualPoints, setAddingManualPoints] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -284,6 +286,31 @@ const AdminSystem = () => {
       toast.error('Erro ao processar pontos expirados');
     } finally {
       setProcessingExpired(false);
+
+
+  const addManualPoints = async () => {
+    if (!manualPointsData.user_id || !manualPointsData.points || !manualPointsData.description) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+
+    setAddingManualPoints(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/points/admin/add`, {
+        user_id: manualPointsData.user_id,
+        points: parseInt(manualPointsData.points),
+        description: manualPointsData.description
+      });
+      toast.success(response.data.message);
+      setManualPointsData({ user_id: '', points: '', description: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erro ao adicionar pontos');
+      console.error('Erro:', error);
+    } finally {
+      setAddingManualPoints(false);
+    }
+  };
+
     }
   };
 
@@ -1137,7 +1164,7 @@ const AdminSystem = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Meses de Validade
@@ -1155,16 +1182,50 @@ const AdminSystem = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-end">
-                      <Button
-                        onClick={savePointsSettings}
-                        disabled={savingPoints}
-                        className="bg-amber-500 hover:bg-amber-600 w-full"
-                      >
-                        <Save className="w-4 h-4 mr-2" />
-                        {savingPoints ? 'Salvando...' : 'Salvar Configuração'}
-                      </Button>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Pontos por Acesso Diário
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={pointsSettings.daily_access_points || 0}
+                        onChange={(e) => setPointsSettings({ ...pointsSettings, daily_access_points: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                        placeholder="0"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        Pontos ganhos no primeiro acesso do dia
+                      </p>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Pontos por Treinamento
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={pointsSettings.training_completion_points || 0}
+                        onChange={(e) => setPointsSettings({ ...pointsSettings, training_completion_points: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        placeholder="0"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        Pontos ao concluir treinamento presencial
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end mt-4">
+                    <Button
+                      onClick={savePointsSettings}
+                      disabled={savingPoints}
+                      className="bg-amber-500 hover:bg-amber-600"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      {savingPoints ? 'Salvando...' : 'Salvar Todas as Configurações'}
+                    </Button>
                   </div>
                 </div>
 
@@ -1183,6 +1244,75 @@ const AdminSystem = () => {
                     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700/30">
                       <div className="flex items-center gap-3 mb-2">
                         <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+
+
+                {/* Adicionar Pontos Manualmente */}
+                <div className="bg-white dark:bg-[#1b4c51] rounded-lg p-6 border border-slate-200 dark:border-white/10">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                      <Users className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-slate-900 dark:text-white">Adicionar Pontos Manualmente</h4>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Adicione ou remova pontos de um usuário específico</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        ID do Usuário *
+                      </label>
+                      <input
+                        type="text"
+                        value={manualPointsData.user_id}
+                        onChange={(e) => setManualPointsData({ ...manualPointsData, user_id: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+                        placeholder="ID do usuário"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Pontos *
+                      </label>
+                      <input
+                        type="number"
+                        value={manualPointsData.points}
+                        onChange={(e) => setManualPointsData({ ...manualPointsData, points: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+                        placeholder="100 (ou -100 para remover)"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Use valores negativos para remover pontos
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Descrição *
+                      </label>
+                      <input
+                        type="text"
+                        value={manualPointsData.description}
+                        onChange={(e) => setManualPointsData({ ...manualPointsData, description: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+                        placeholder="Motivo da adição/remoção"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end mt-4">
+                    <Button
+                      onClick={addManualPoints}
+                      disabled={addingManualPoints}
+                      className="bg-cyan-500 hover:bg-cyan-600"
+                    >
+                      {addingManualPoints ? 'Processando...' : 'Adicionar/Remover Pontos'}
+                    </Button>
+                  </div>
+                </div>
+
                         <h4 className="font-semibold text-blue-900 dark:text-blue-300">Usuários Afetados</h4>
                       </div>
                       <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">{expiringPointsSummary.total_users_affected || 0}</p>

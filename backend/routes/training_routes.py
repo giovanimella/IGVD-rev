@@ -503,6 +503,23 @@ async def mark_attendance(
                 "training_attended": True
             }}
         )
+        
+        # Dar pontos por conclusão do treinamento
+        config = await db.system_config.find_one({"id": "system_config"})
+        training_points = config.get("training_completion_points", 0) if config else 0
+        
+        if training_points > 0:
+            # Importar função de pontos
+            from routes.points_routes import add_points
+            
+            await add_points(
+                user_id=registration["user_id"],
+                points=training_points,
+                reason="training_completion",
+                description="Pontos por conclusão de treinamento presencial",
+                reference_id=registration_id,
+                reference_type="training"
+            )
     else:
         # Se ausente, manter na etapa mas precisa realocar
         # Limpar inscrição para permitir nova alocação
