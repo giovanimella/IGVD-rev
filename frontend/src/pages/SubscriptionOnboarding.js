@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import StageProgressBar from '../components/StageProgressBar';
 import axios from 'axios';
 import { CreditCard, CheckCircle, AlertCircle, Loader, Lock, Shield, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 
 const SubscriptionOnboarding = () => {
-  const [stageInfo, setStageInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
@@ -43,13 +41,11 @@ const SubscriptionOnboarding = () => {
 
   const fetchData = async () => {
     try {
-      const [stageRes, statusRes, publicKeyRes] = await Promise.all([
-        axios.get(`${API_URL}/api/onboarding/my-stage`),
+      const [statusRes, publicKeyRes] = await Promise.all([
         axios.get(`${API_URL}/api/subscriptions/my-subscription`),
         axios.get(`${API_URL}/api/subscriptions/public-key`) // Endpoint público
       ]);
 
-      setStageInfo(stageRes.data);
       setSubscriptionStatus(statusRes.data);
       
       // Obter chave pública e valor da mensalidade
@@ -289,7 +285,6 @@ const SubscriptionOnboarding = () => {
     return (
       <Layout>
         <div className="space-y-6">
-          <StageProgressBar currentStage={stageInfo?.current_stage} />
           <div className="bg-white rounded-xl border border-green-200 bg-green-50 p-12 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-outfit font-semibold text-slate-900 mb-2">
@@ -310,7 +305,6 @@ const SubscriptionOnboarding = () => {
   return (
     <Layout>
       <div className="space-y-6 max-w-4xl mx-auto">
-        <StageProgressBar currentStage={stageInfo?.current_stage} />
 
         <div>
           <h1 className="text-3xl font-outfit font-bold text-slate-900">Assinatura Mensal</h1>
