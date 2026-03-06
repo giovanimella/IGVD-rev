@@ -440,3 +440,255 @@ async def get_frequency_leaderboard(current_user: dict = Depends(get_current_use
     return leaderboard
 
     return access_stats
+
+
+@router.get("/admin/engagement-metrics")
+async def get_engagement_metrics(current_user: dict = Depends(require_role(["admin"]))):
+    """
+    Retorna métricas de engajamento para o dashboard admin:
+    - Usuários ativos hoje
+    - Usuários ativos na semana
+    - Taxa média de conclusão de módulos
+    - Tempo médio de onboarding
+    """
+    from datetime import datetime, timedelta
+    
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    week_ago = (now - timedelta(days=7)).strftime("%Y-%m-%d")
+    
+    # 1. Usuários ativos hoje (que acessaram hoje)
+    users_active_today = await db.users.count_documents({
+        "role": "licenciado",
+        "last_access_at": {"$gte": today}
+    })
+    
+    # 2. Usuários ativos na semana (últimos 7 dias)
+    users_active_week = await db.users.count_documents({
+        "role": "licenciado",
+        "last_access_at": {"$gte": week_ago}
+    })
+    
+    # 3. Taxa média de conclusão de módulos
+    total_modules = await db.modules.count_documents({})
+    total_licensees = await db.users.count_documents({"role": "licenciado"})
+    
+    if total_licensees > 0 and total_modules > 0:
+        # Calcular quantos módulos cada usuário completou
+        pipeline = [
+            {
+                "$match": {
+                    "completed": True
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$user_id",
+                    "completed_count": {"$sum": 1}
+                }
+            }
+        ]
+        
+        user_completions = await db.user_progress.aggregate(pipeline).to_list(10000)
+        
+        if user_completions:
+            total_completed = sum(u["completed_count"] for u in user_completions)
+            avg_completion_rate = (total_completed / (total_licensees * total_modules)) * 100
+        else:
+            avg_completion_rate = 0
+    else:
+        avg_completion_rate = 0
+    
+    # 4. Tempo médio de onboarding (registro → completo)
+    pipeline_onboarding = [
+        {
+            "$match": {
+                "role": "licenciado",
+                "current_stage": "completo",
+                "created_at": {"$exists": True},
+                "updated_at": {"$exists": True}
+            }
+        }
+    ]
+    
+    completed_users = await db.users.find(pipeline_onboarding[0]["$match"]).to_list(10000)
+    
+    if completed_users:
+        total_days = 0
+        count = 0
+        
+        for user in completed_users:
+            try:
+                created = datetime.fromisoformat(user["created_at"])
+                updated = datetime.fromisoformat(user["updated_at"])
+                days = (updated - created).days
+                if days >= 0:  # Apenas valores válidos
+                    total_days += days
+                    count += 1
+            except:
+                continue
+        
+        avg_onboarding_days = round(total_days / count, 1) if count > 0 else 0
+    else:
+        avg_onboarding_days = 0
+    
+    return {
+        "users_active_today": users_active_today,
+        "users_active_week": users_active_week,
+        "avg_module_completion_rate": round(avg_completion_rate, 1),
+        "avg_onboarding_days": avg_onboarding_days,
+        "total_licensees": total_licensees
+    }
+
+
+@router.get("/admin/financial-metrics")
+async def get_financial_metrics(current_user: dict = Depends(require_role(["admin"]))):
+    """
+    Retorna métricas financeiras para o dashboard admin:
+    - MRR (Receita Mensal Recorrente)
+    - Taxa de Churn (cancelamentos)
+    - Assinaturas próximas do vencimento
+    """
+    from datetime import datetime, timedelta
+    
+    now = datetime.now()
+    current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_month_start = (current_month_start - timedelta(days=1)).replace(day=1)
+    next_7_days = (now + timedelta(days=7)).isoformat()
+    
+    # 1. MRR - Receita Mensal Recorrente (assinaturas ativas)
+    active_subscriptions = await db.user_subscriptions.find({
+        "status": {"$in": ["active", "trial"]}
+    }).to_list(10000)
+    
+    mrr = sum(sub.get("monthly_amount", 0) for sub in active_subscriptions)
+    active_count = len(active_subscriptions)
+    
+    # 2. Taxa de Churn (cancelamentos deste mês)
+    cancelled_this_month = await db.user_subscriptions.count_documents({
+        "status": "cancelled",
+        "cancelled_at": {"$gte": current_month_start.isoformat()}
+    })
+    
+    # Total de assinaturas ativas no início do mês (ativas agora + canceladas este mês)
+    total_start_month = active_count + cancelled_this_month
+    
+    churn_rate = (cancelled_this_month / total_start_month * 100) if total_start_month > 0 else 0
+    
+    # 3. Assinaturas próximas do vencimento (próximos 7 dias)
+    expiring_soon = await db.user_subscriptions.count_documents({
+        "status": {"$in": ["active", "trial"]},
+        "next_billing_date": {"$lte": next_7_days, "$gte": now.isoformat()}
+    })
+    
+    # 4. Assinaturas suspensas/atrasadas
+    suspended_count = await db.user_subscriptions.count_documents({
+        "status": {"$in": ["suspended", "overdue"]}
+    })
+    
+    return {
+        "mrr": round(mrr, 2),
+        "active_subscriptions": active_count,
+        "churn_rate": round(churn_rate, 1),
+        "cancelled_this_month": cancelled_this_month,
+        "expiring_in_7_days": expiring_soon,
+        "suspended_subscriptions": suspended_count
+    }
+
+
+@router.get("/admin/top-content")
+async def get_top_content(current_user: dict = Depends(require_role(["admin"]))):
+    """
+    Retorna os conteúdos mais acessados:
+    - Top 10 módulos mais acessados
+    - Top 10 capítulos mais visualizados
+    """
+    
+    # Top 10 módulos (por número de capítulos iniciados)
+    pipeline_modules = [
+        {
+            "$group": {
+                "_id": "$module_id",
+                "access_count": {"$sum": 1},
+                "unique_users": {"$addToSet": "$user_id"}
+            }
+        },
+        {
+            "$project": {
+                "module_id": "$_id",
+                "access_count": 1,
+                "unique_users_count": {"$size": "$unique_users"}
+            }
+        },
+        {
+            "$sort": {"access_count": -1}
+        },
+        {
+            "$limit": 10
+        }
+    ]
+    
+    top_modules_raw = await db.user_progress.aggregate(pipeline_modules).to_list(10)
+    
+    # Enriquecer com dados dos módulos
+    top_modules = []
+    for item in top_modules_raw:
+        module = await db.modules.find_one({"id": item["module_id"]}, {"_id": 0, "title": 1, "description": 1})
+        if module:
+            top_modules.append({
+                "module_id": item["module_id"],
+                "title": module.get("title", "Módulo"),
+                "access_count": item["access_count"],
+                "unique_users": item["unique_users_count"]
+            })
+    
+    # Top 10 capítulos (por número de acessos)
+    pipeline_chapters = [
+        {
+            "$group": {
+                "_id": "$chapter_id",
+                "access_count": {"$sum": 1},
+                "completed_count": {
+                    "$sum": {"$cond": [{"$eq": ["$completed", True]}, 1, 0]}
+                },
+                "unique_users": {"$addToSet": "$user_id"}
+            }
+        },
+        {
+            "$project": {
+                "chapter_id": "$_id",
+                "access_count": 1,
+                "completed_count": 1,
+                "unique_users_count": {"$size": "$unique_users"}
+            }
+        },
+        {
+            "$sort": {"access_count": -1}
+        },
+        {
+            "$limit": 10
+        }
+    ]
+    
+    top_chapters_raw = await db.user_progress.aggregate(pipeline_chapters).to_list(10)
+    
+    # Enriquecer com dados dos capítulos
+    top_chapters = []
+    for item in top_chapters_raw:
+        chapter = await db.chapters.find_one({"id": item["chapter_id"]}, {"_id": 0, "title": 1, "module_id": 1})
+        if chapter:
+            module = await db.modules.find_one({"id": chapter.get("module_id")}, {"_id": 0, "title": 1})
+            top_chapters.append({
+                "chapter_id": item["chapter_id"],
+                "title": chapter.get("title", "Capítulo"),
+                "module_title": module.get("title", "Módulo") if module else "Módulo",
+                "access_count": item["access_count"],
+                "completed_count": item["completed_count"],
+                "unique_users": item["unique_users_count"],
+                "completion_rate": round((item["completed_count"] / item["access_count"]) * 100, 1) if item["access_count"] > 0 else 0
+            })
+    
+    return {
+        "top_modules": top_modules,
+        "top_chapters": top_chapters
+    }

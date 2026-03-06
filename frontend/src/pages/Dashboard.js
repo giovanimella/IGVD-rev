@@ -7,9 +7,10 @@ import PostsList from '../components/PostsList';
 import SubscriptionStatus from '../components/SubscriptionStatus';
 import LiveCard from '../components/LiveCard';
 import axios from 'axios';
-import { BookOpen, Users, Award, Clock, TrendingUp, Trophy, CheckCircle, Activity, Flame, Target, Calendar, Briefcase, GraduationCap, Bell, MoreHorizontal, Percent, Star } from 'lucide-react';
+import { BookOpen, Users, Award, Clock, TrendingUp, Trophy, CheckCircle, Activity, Flame, Target, Calendar, Briefcase, GraduationCap, Bell, MoreHorizontal, Percent, Star, DollarSign, UserCheck, Send, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -28,6 +29,18 @@ const Dashboard = () => {
   const [todayPresentations, setTodayPresentations] = useState(null);
   const [todayEvents, setTodayEvents] = useState([]);
   const [activeCampaigns, setActiveCampaigns] = useState([]);
+  
+  // Novos estados para métricas admin
+  const [engagementMetrics, setEngagementMetrics] = useState(null);
+  const [financialMetrics, setFinancialMetrics] = useState(null);
+  const [topContent, setTopContent] = useState(null);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [notificationData, setNotificationData] = useState({
+    title: '',
+    message: '',
+    target: 'licensees'
+  });
+  const [sendingNotification, setSendingNotification] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -45,6 +58,9 @@ const Dashboard = () => {
     }
     if (user?.role === 'admin') {
       fetchAdminChartData();
+      fetchEngagementMetrics();
+      fetchFinancialMetrics();
+      fetchTopContent();
     }
   }, []);
 
@@ -69,6 +85,53 @@ const Dashboard = () => {
       setStageDistribution(stageRes.data);
     } catch (error) {
       console.error('Erro ao buscar dados dos gráficos:', error);
+    }
+  };
+
+  const fetchEngagementMetrics = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/stats/admin/engagement-metrics`);
+      setEngagementMetrics(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar métricas de engajamento:', error);
+    }
+  };
+
+  const fetchFinancialMetrics = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/stats/admin/financial-metrics`);
+      setFinancialMetrics(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar métricas financeiras:', error);
+    }
+  };
+
+  const fetchTopContent = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/stats/admin/top-content`);
+      setTopContent(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar top conteúdos:', error);
+    }
+  };
+
+  const handleSendNotification = async () => {
+    if (!notificationData.title || !notificationData.message) {
+      toast.error('Título e mensagem são obrigatórios');
+      return;
+    }
+
+    setSendingNotification(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/notifications/broadcast`, notificationData);
+      toast.success(response.data.message);
+      setShowNotificationModal(false);
+      setNotificationData({ title: '', message: '', target: 'licensees' });
+    } catch (error) {
+      toast.error('Erro ao enviar notificação');
+      console.error('Erro:', error);
+    } finally {
+      setSendingNotification(false);
     }
   };
 
@@ -269,6 +332,91 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Métricas de Engajamento */}
+          <div>
+            <h2 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Métricas de Engajamento</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-emerald-100 dark:hover:border-emerald-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <Activity className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Usuários Ativos Hoje</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{engagementMetrics?.users_active_today || 0}</p>
+              </div>
+
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-teal-100 dark:hover:border-teal-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-teal-100 dark:bg-teal-500/20 rounded-lg flex items-center justify-center">
+                    <UserCheck className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+                  </div>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Usuários Ativos (Semana)</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{engagementMetrics?.users_active_week || 0}</p>
+              </div>
+
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-violet-100 dark:hover:border-violet-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-violet-100 dark:bg-violet-500/20 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+                  </div>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Taxa de Conclusão Média</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{engagementMetrics?.avg_module_completion_rate || 0}%</p>
+              </div>
+
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-pink-100 dark:hover:border-pink-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-pink-100 dark:bg-pink-500/20 rounded-lg flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+                  </div>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Tempo Médio Onboarding</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{engagementMetrics?.avg_onboarding_days || 0} dias</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Métricas Financeiras */}
+          <div>
+            <h2 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Métricas Financeiras</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-green-100 dark:hover:border-green-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  </div>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">MRR (Receita Mensal)</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">R$ {financialMetrics?.mrr?.toFixed(2) || '0.00'}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{financialMetrics?.active_subscriptions || 0} assinaturas ativas</p>
+              </div>
+
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-red-100 dark:hover:border-red-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-red-100 dark:bg-red-500/20 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-red-600 dark:text-red-400" />
+                  </div>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Taxa de Churn</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{financialMetrics?.churn_rate?.toFixed(1) || 0}%</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{financialMetrics?.cancelled_this_month || 0} cancelamentos este mês</p>
+              </div>
+
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6 hover:border-amber-100 dark:hover:border-amber-500/30 transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
+                    <Bell className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                  </div>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">Vencendo em 7 dias</p>
+                <p className="text-3xl font-outfit font-bold text-slate-900 dark:text-white">{financialMetrics?.expiring_in_7_days || 0}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{financialMetrics?.suspended_subscriptions || 0} suspensas</p>
+              </div>
+            </div>
+          </div>
+
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
@@ -344,9 +492,50 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Top Conteúdos */}
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
+              <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Top Conteúdos Mais Acessados</h3>
+              <div className="space-y-3">
+                {topContent?.top_chapters?.slice(0, 5).map((chapter, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-slate-900 dark:text-white truncate">{chapter.title}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{chapter.module_title}</p>
+                    </div>
+                    <div className="flex items-center gap-4 ml-4">
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{chapter.unique_users}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">usuários</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{chapter.completion_rate}%</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">conclusão</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {(!topContent?.top_chapters || topContent.top_chapters.length === 0) && (
+                  <p className="text-center text-slate-500 dark:text-slate-400 py-8">Nenhum dado disponível</p>
+                )}
+              </div>
+            </div>
+
+            {/* Ações Rápidas */}
             <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-100 dark:border-white/5 p-6">
               <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white mb-4">Ações Rápidas</h3>
               <div className="space-y-3">
+                <button
+                  onClick={() => setShowNotificationModal(true)}
+                  className="w-full flex items-center justify-between p-4 rounded-lg bg-cyan-50 dark:bg-cyan-500/10 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 transition-colors border border-cyan-200 dark:border-cyan-500/30"
+                >
+                  <div className="flex items-center gap-3">
+                    <Send className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                    <span className="font-medium text-slate-900 dark:text-white">Enviar Notificação Push</span>
+                  </div>
+                  <svg className="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
                 <Link to="/admin/users" className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <div className="flex items-center gap-3">
                     <Users className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
@@ -377,6 +566,92 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Modal de Notificação */}
+          {showNotificationModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl shadow-xl max-w-lg w-full p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-outfit font-semibold text-slate-900 dark:text-white">Enviar Notificação Push</h3>
+                  <button
+                    onClick={() => setShowNotificationModal(false)}
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Destinatários
+                    </label>
+                    <select
+                      value={notificationData.target}
+                      onChange={(e) => setNotificationData({ ...notificationData, target: e.target.value })}
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+                    >
+                      <option value="licensees">Todos os Licenciados</option>
+                      <option value="supervisors">Todos os Supervisores</option>
+                      <option value="all">Todos os Usuários</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Título *
+                    </label>
+                    <input
+                      type="text"
+                      value={notificationData.title}
+                      onChange={(e) => setNotificationData({ ...notificationData, title: e.target.value })}
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+                      placeholder="Ex: Nova atualização disponível"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Mensagem *
+                    </label>
+                    <textarea
+                      value={notificationData.message}
+                      onChange={(e) => setNotificationData({ ...notificationData, message: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500"
+                      placeholder="Digite a mensagem da notificação..."
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={() => setShowNotificationModal(false)}
+                      className="flex-1 px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleSendNotification}
+                      disabled={sendingNotification}
+                      className="flex-1 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {sendingNotification ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          Enviar Notificação
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </Layout>
     );

@@ -176,6 +176,8 @@ test_plan:
 
 agent_communication:
   - agent: "main"
+    message: "IMPLEMENTAÇÃO COMPLETA DAS MELHORIAS DO DASHBOARD ADMIN E SISTEMA DE PONTOS: ✅ BACKEND: 3 novos endpoints de estatísticas (engajamento com usuários ativos, financeiro com MRR/Churn, top conteúdos), endpoint de broadcast de notificações, sistema de expiração de pontos totalmente integrado. ✅ FRONTEND: Dashboard Admin atualizado com 11 novos cards de métricas (engajamento, financeiro), seção de top conteúdos mais acessados, modal de envio de notificação push, nova aba 'Pontos' no Painel do Sistema para gerenciar expiração. Sistema pronto para uso."
+  - agent: "main"
     message: "Sistema de Mensalidade Recorrente e Reuniões implementado no backend. Aguardando testes."
   - agent: "testing"
     message: "Starting backend testing of sales report endpoints with admin credentials"

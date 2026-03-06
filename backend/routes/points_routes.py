@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
+from auth import get_current_user, require_role
 import os
 import uuid
 
@@ -254,9 +255,8 @@ async def get_my_points_history(
 
 
 @router.get("/user/{user_id}/balance")
-async def get_user_points_balance(user_id: str):
+async def get_user_points_balance(user_id: str, current_user: dict = Depends(require_role(["admin"]))):
     """Admin: Retorna o saldo de pontos de um usuário específico"""
-    from auth import require_role
     
     # Processar pontos expirados primeiro
     await process_expired_points(user_id)
@@ -281,9 +281,8 @@ async def get_user_points_balance(user_id: str):
 
 
 @router.get("/user/{user_id}/history")
-async def get_user_points_history(user_id: str, limit: int = 100):
+async def get_user_points_history(user_id: str, limit: int = 100, current_user: dict = Depends(require_role(["admin"]))):
     """Admin: Retorna o histórico de pontos de um usuário"""
-    from auth import require_role
     
     transactions = await db.points_history.find(
         {"user_id": user_id},
@@ -294,9 +293,8 @@ async def get_user_points_history(user_id: str, limit: int = 100):
 
 
 @router.post("/admin/add")
-async def admin_add_points(data: dict):
+async def admin_add_points(data: dict, current_user: dict = Depends(require_role(["admin"]))):
     """Admin: Adiciona pontos manualmente a um usuário"""
-    from auth import require_role
     
     user_id = data.get("user_id")
     points = data.get("points", 0)
@@ -330,10 +328,8 @@ async def admin_add_points(data: dict):
 
 
 @router.post("/admin/process-expired")
-async def admin_process_expired():
+async def admin_process_expired(current_user: dict = Depends(require_role(["admin"]))):
     """Admin: Processa todos os pontos expirados no sistema"""
-    from auth import require_role
-    
     expired_count = await process_expired_points()
     
     return {
@@ -343,9 +339,8 @@ async def admin_process_expired():
 
 
 @router.get("/admin/expiring-summary")
-async def admin_get_expiring_summary(days: int = 30):
+async def admin_get_expiring_summary(days: int = 30, current_user: dict = Depends(require_role(["admin"]))):
     """Admin: Resumo de pontos que vão expirar nos próximos X dias"""
-    from auth import require_role
     
     now = datetime.now(timezone.utc)
     future = (now + relativedelta(days=days)).isoformat()
@@ -425,7 +420,7 @@ async def admin_get_expiring_summary(days: int = 30):
 
 
 @router.get("/settings")
-async def get_points_settings():
+async def get_points_settings(current_user: dict = Depends(get_current_user)):
     """Retorna as configurações de pontos"""
     config = await db.system_config.find_one({"id": "system_config"})
     
@@ -435,10 +430,8 @@ async def get_points_settings():
 
 
 @router.put("/settings")
-async def update_points_settings(data: dict):
+async def update_points_settings(data: dict, current_user: dict = Depends(require_role(["admin"]))):
     """Admin: Atualiza as configurações de pontos"""
-    from auth import require_role
-    
     expiration_months = data.get("points_expiration_months")
     
     if expiration_months is not None:

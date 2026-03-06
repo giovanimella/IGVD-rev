@@ -31,6 +31,12 @@ const AdminSystem = () => {
   const [webhookStats, setWebhookStats] = useState(null);
   const [logFilter, setLogFilter] = useState('all'); // 'all', 'sandbox', 'production'
   const logoInputRef = useRef(null);
+  
+  // Estados para configuração de pontos
+  const [pointsSettings, setPointsSettings] = useState({ expiration_months: 12 });
+  const [savingPoints, setSavingPoints] = useState(false);
+  const [expiringPointsSummary, setExpiringPointsSummary] = useState(null);
+  const [processingExpired, setProcessingExpired] = useState(false);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -39,6 +45,8 @@ const AdminSystem = () => {
     fetchSystemConfig();
     fetchWebhookLogs();
     fetchWebhookStats();
+    fetchPointsSettings();
+    fetchExpiringPointsSummary();
   }, []);
 
   const fetchSystemStats = async () => {
@@ -229,6 +237,57 @@ const AdminSystem = () => {
     }
   };
 
+  const fetchPointsSettings = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/points/settings`);
+      setPointsSettings(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar configurações de pontos:', error);
+    }
+  };
+
+  const fetchExpiringPointsSummary = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/points/admin/expiring-summary?days=30`);
+      setExpiringPointsSummary(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar resumo de pontos expirando:', error);
+    }
+  };
+
+  const savePointsSettings = async () => {
+    setSavingPoints(true);
+    try {
+      await axios.put(`${API_URL}/api/points/settings`, {
+        points_expiration_months: parseInt(pointsSettings.expiration_months)
+      });
+      toast.success('Configurações de pontos salvas com sucesso!');
+      fetchExpiringPointsSummary();
+    } catch (error) {
+      console.error('Erro ao salvar configurações de pontos:', error);
+      toast.error('Erro ao salvar configurações');
+    } finally {
+      setSavingPoints(false);
+    }
+  };
+
+  const processExpiredPoints = async () => {
+    if (!window.confirm('Processar pontos expirados? Esta ação irá expirar todos os pontos que ultrapassaram a validade configurada.')) return;
+    
+    setProcessingExpired(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/points/admin/process-expired`);
+      toast.success(response.data.message);
+      fetchExpiringPointsSummary();
+    } catch (error) {
+      console.error('Erro ao processar pontos expirados:', error);
+      toast.error('Erro ao processar pontos expirados');
+    } finally {
+      setProcessingExpired(false);
+    }
+  };
+
+
   if (loading) {
     return (
       <Layout>
@@ -335,6 +394,13 @@ const AdminSystem = () => {
               >
                 <ShieldAlert className="w-4 h-4 mr-2" />
                 Segurança
+              </TabsTrigger>
+              <TabsTrigger 
+                value="pontos" 
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
+              >
+                <Award className="w-4 h-4 mr-2" />
+                Pontos
               </TabsTrigger>
             </TabsList>
 
@@ -1050,6 +1116,133 @@ const AdminSystem = () => {
                 </div>
               </div>
             </TabsContent>
+
+            {/* ABA: Pontos */}
+            <TabsContent value="pontos" className="p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Sistema de Pontos com Expiração</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                  Configure a validade dos pontos ganhos pelos licenciados. Cada ponto registra data/hora de ganho e expira individualmente após o período configurado.
+                </p>
+
+                {/* Configuração de Expiração */}
+                <div className="bg-white dark:bg-[#1b4c51] rounded-lg p-6 border border-slate-200 dark:border-white/10">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center">
+                      <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-slate-900 dark:text-white">Validade dos Pontos</h4>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Defina por quantos meses os pontos permanecem válidos</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Meses de Validade
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={pointsSettings.expiration_months}
+                        onChange={(e) => setPointsSettings({ ...pointsSettings, expiration_months: e.target.value })}
+                        className="w-full px-4 py-2 border border-slate-300 dark:border-white/20 rounded-lg bg-white dark:bg-[#142d30] text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+                        placeholder="12"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        {pointsSettings.expiration_months == 0 ? '⚠️ Pontos nunca expiram' : `Pontos expiram após ${pointsSettings.expiration_months} mês(es)`}
+                      </p>
+                    </div>
+
+                    <div className="flex items-end">
+                      <Button
+                        onClick={savePointsSettings}
+                        disabled={savingPoints}
+                        className="bg-amber-500 hover:bg-amber-600 w-full"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        {savingPoints ? 'Salvando...' : 'Salvar Configuração'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Resumo de Pontos Expirando */}
+                {expiringPointsSummary && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-6 border border-amber-200 dark:border-amber-700/30">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        <h4 className="font-semibold text-amber-900 dark:text-amber-300">Pontos Expirando (30 dias)</h4>
+                      </div>
+                      <p className="text-3xl font-bold text-amber-900 dark:text-amber-300">{expiringPointsSummary.total_points_expiring?.toLocaleString() || 0}</p>
+                      <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">pontos totais</p>
+                    </div>
+
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700/30">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <h4 className="font-semibold text-blue-900 dark:text-blue-300">Usuários Afetados</h4>
+                      </div>
+                      <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">{expiringPointsSummary.total_users_affected || 0}</p>
+                      <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">licenciados</p>
+                    </div>
+
+                    <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10">
+                      <Button
+                        onClick={processExpiredPoints}
+                        disabled={processingExpired}
+                        className="w-full bg-red-600 hover:bg-red-700"
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${processingExpired ? 'animate-spin' : ''}`} />
+                        {processingExpired ? 'Processando...' : 'Processar Pontos Expirados'}
+                      </Button>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">
+                        Expira manualmente todos os pontos vencidos
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Top 10 Usuários com Pontos Expirando */}
+                {expiringPointsSummary?.users && expiringPointsSummary.users.length > 0 && (
+                  <div className="bg-white dark:bg-[#1b4c51] rounded-lg p-6 border border-slate-200 dark:border-white/10">
+                    <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Top 10 Usuários com Pontos Expirando</h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="border-b border-slate-200 dark:border-white/10">
+                          <tr>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">Usuário</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">Email</th>
+                            <th className="text-right py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">Pontos Expirando</th>
+                            <th className="text-right py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400">Transações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {expiringPointsSummary.users.slice(0, 10).map((user, index) => (
+                            <tr key={index} className="border-b border-slate-100 dark:border-white/5">
+                              <td className="py-3 px-4 text-sm text-slate-900 dark:text-white">{user.full_name}</td>
+                              <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">{user.email}</td>
+                              <td className="py-3 px-4 text-sm font-semibold text-amber-600 dark:text-amber-400 text-right">{user.total_expiring?.toLocaleString()}</td>
+                              <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 text-right">{user.count}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Informações */}
+                <div className="bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-700/30 rounded-lg p-4">
+                  <p className="text-sm text-cyan-800 dark:text-cyan-300">
+                    💡 <strong>Como funciona:</strong> Cada vez que um usuário ganha pontos, a data/hora é registrada. Os pontos expiram individualmente conforme completam o período configurado. Por exemplo: 100 pontos ganhos em 01/02/2026 expiram em 01/02/2027 (com 12 meses configurados), independente de outros pontos.
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+
           </Tabs>
         </div>
       </div>
