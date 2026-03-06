@@ -32,6 +32,41 @@ async def get_my_profile(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     return user
 
+
+@router.put("/me")
+async def update_my_profile(updates: dict, current_user: dict = Depends(get_current_user)):
+    """Permite que o próprio usuário atualize seu perfil (nome, email, telefone)"""
+    user_id = current_user["sub"]
+    
+    # Campos permitidos para auto-atualização
+    allowed_fields = ["full_name", "email", "phone", "birthday"]
+    filtered_updates = {k: v for k, v in updates.items() if k in allowed_fields}
+    
+    if not filtered_updates:
+        raise HTTPException(status_code=400, detail="Nenhum campo válido para atualizar")
+    
+    # Se está alterando o email, verificar se já existe
+    if "email" in filtered_updates:
+        existing = await db.users.find_one({
+            "email": filtered_updates["email"],
+            "id": {"$ne": user_id}  # Excluir o próprio usuário
+        })
+        if existing:
+            raise HTTPException(status_code=400, detail="Este email já está em uso por outro usuário")
+    
+    filtered_updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": filtered_updates}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    return {"message": "Perfil atualizado com sucesso"}
+
+
 @router.get("/", response_model=list[UserResponse])
 async def get_all_users(current_user: dict = Depends(require_role(["admin", "supervisor"]))):
     users = await db.users.find({}, {"_id": 0, "password_hash": 0, "reset_token": 0}).to_list(1000)

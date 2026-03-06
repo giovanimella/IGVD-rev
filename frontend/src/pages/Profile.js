@@ -94,7 +94,7 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      await axios.put(`${API_URL}/api/users/${user.id}`, {
+      await axios.put(`${API_URL}/api/users/me`, {
         full_name: formData.full_name,
         email: formData.email,
         phone: formData.phone
