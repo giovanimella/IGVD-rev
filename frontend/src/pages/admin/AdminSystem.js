@@ -384,45 +384,45 @@ const AdminSystem = () => {
         {/* Tabs de Configuração */}
         <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden">
           <Tabs defaultValue="gestao" className="w-full">
-            <TabsList className="w-full justify-start border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 rounded-none p-0 flex-wrap">
+            <TabsList className="w-full justify-start bg-slate-50 dark:bg-white/5 rounded-none p-0 flex-wrap h-auto">
               <TabsTrigger 
                 value="gestao" 
-                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:text-cyan-600 dark:data-[state=active]:text-cyan-400 data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 border-b-2 border-transparent rounded-none px-6 py-4 transition-all"
               >
                 <Users className="w-4 h-4 mr-2" />
                 Gestão
               </TabsTrigger>
               <TabsTrigger 
                 value="geral" 
-                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:text-cyan-600 dark:data-[state=active]:text-cyan-400 data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 border-b-2 border-transparent rounded-none px-6 py-4 transition-all"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Configurações
               </TabsTrigger>
               <TabsTrigger 
                 value="conteudo" 
-                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:text-cyan-600 dark:data-[state=active]:text-cyan-400 data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 border-b-2 border-transparent rounded-none px-6 py-4 transition-all"
               >
                 <Megaphone className="w-4 h-4 mr-2" />
                 Conteúdo
               </TabsTrigger>
               <TabsTrigger 
                 value="integracoes" 
-                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:text-cyan-600 dark:data-[state=active]:text-cyan-400 data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 border-b-2 border-transparent rounded-none px-6 py-4 transition-all"
               >
                 <Webhook className="w-4 h-4 mr-2" />
                 Integrações
               </TabsTrigger>
               <TabsTrigger 
                 value="seguranca" 
-                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:text-cyan-600 dark:data-[state=active]:text-cyan-400 data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 border-b-2 border-transparent rounded-none px-6 py-4 transition-all"
               >
                 <ShieldAlert className="w-4 h-4 mr-2" />
                 Segurança
               </TabsTrigger>
               <TabsTrigger 
                 value="pontos" 
-                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 rounded-none px-6 py-4"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1b4c51] data-[state=active]:text-cyan-600 dark:data-[state=active]:text-cyan-400 data-[state=active]:border-b-2 data-[state=active]:border-cyan-500 border-b-2 border-transparent rounded-none px-6 py-4 transition-all"
               >
                 <Award className="w-4 h-4 mr-2" />
                 Pontos
@@ -1231,7 +1231,7 @@ const AdminSystem = () => {
                 {expiringPointsSummary && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-6 border border-amber-200 dark:border-amber-700/30">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-3">
                         <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                         <h4 className="font-semibold text-amber-900 dark:text-amber-300">Pontos Expirando (30 dias)</h4>
                       </div>
@@ -1240,9 +1240,29 @@ const AdminSystem = () => {
                     </div>
 
                     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-700/30">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-3">
                         <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        <h4 className="font-semibold text-blue-900 dark:text-blue-300">Usuários Afetados</h4>
+                      </div>
+                      <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">{expiringPointsSummary.total_users_affected || 0}</p>
+                      <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">licenciados</p>
+                    </div>
 
+                    <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10 flex flex-col justify-center">
+                      <Button
+                        onClick={processExpiredPoints}
+                        disabled={processingExpired}
+                        className="w-full bg-red-600 hover:bg-red-700 mb-3"
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${processingExpired ? 'animate-spin' : ''}`} />
+                        {processingExpired ? 'Processando...' : 'Processar Pontos Expirados'}
+                      </Button>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+                        Expira manualmente todos os pontos vencidos
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Adicionar Pontos Manualmente */}
                 <div className="bg-white dark:bg-[#1b4c51] rounded-lg p-6 border border-slate-200 dark:border-white/10">
@@ -1310,28 +1330,6 @@ const AdminSystem = () => {
                     </Button>
                   </div>
                 </div>
-
-                        <h4 className="font-semibold text-blue-900 dark:text-blue-300">Usuários Afetados</h4>
-                      </div>
-                      <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">{expiringPointsSummary.total_users_affected || 0}</p>
-                      <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">licenciados</p>
-                    </div>
-
-                    <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-6 border border-slate-200 dark:border-white/10">
-                      <Button
-                        onClick={processExpiredPoints}
-                        disabled={processingExpired}
-                        className="w-full bg-red-600 hover:bg-red-700"
-                      >
-                        <RefreshCw className={`w-4 h-4 mr-2 ${processingExpired ? 'animate-spin' : ''}`} />
-                        {processingExpired ? 'Processando...' : 'Processar Pontos Expirados'}
-                      </Button>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 text-center">
-                        Expira manualmente todos os pontos vencidos
-                      </p>
-                    </div>
-                  </div>
-                )}
 
                 {/* Top 10 Usuários com Pontos Expirando */}
                 {expiringPointsSummary?.users && expiringPointsSummary.users.length > 0 && (
