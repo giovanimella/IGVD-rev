@@ -5,7 +5,7 @@ Focused test for field sales validation with licensee user
 import requests
 import json
 
-BASE_URL = "https://sweet-shannon-4.preview.emergentagent.com/api"
+BASE_URL = "https://admin-analytics-pro-2.preview.emergentagent.com/api"
 LICENSEE_EMAIL = "test.licensee@ozoxx.com"
 LICENSEE_PASSWORD = "test123"
 

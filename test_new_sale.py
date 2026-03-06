@@ -8,7 +8,7 @@ import json
 import random
 
 # Configurações
-BACKEND_URL = "https://sweet-shannon-4.preview.emergentagent.com"
+BACKEND_URL = "https://admin-analytics-pro-2.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Credenciais do teste

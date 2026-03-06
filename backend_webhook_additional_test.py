@@ -9,7 +9,7 @@ from pymongo import MongoClient
 from datetime import datetime
 
 # Configurações
-BASE_URL = "https://sweet-shannon-4.preview.emergentagent.com/api"
+BASE_URL = "https://admin-analytics-pro-2.preview.emergentagent.com/api"
 MONGO_URL = "mongodb://localhost:27017"
 DB_NAME = "test_database"
 

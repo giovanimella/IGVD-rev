@@ -7,7 +7,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://sweet-shannon-4.preview.emergentagent.com"
+BACKEND_URL = "https://admin-analytics-pro-2.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 ADMIN_EMAIL = "admin@ozoxx.com"
 ADMIN_PASSWORD = "admin123"
