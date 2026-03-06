@@ -484,7 +484,26 @@ class SystemConfig(BaseModel):
     webhook_sandbox_api_key: Optional[str] = None  # API Key para sandbox/testes
     webhook_receive_enabled: bool = False  # Habilitar recebimento de cadastros via API
     
+    # Configurações de Validade de Pontos
+    points_expiration_months: int = 12  # Meses até os pontos expirarem (0 = nunca expira)
+    
     updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+# ==================== HISTÓRICO DE PONTOS ====================
+
+class PointsTransaction(BaseModel):
+    """Registro de cada transação de pontos com data para controle de validade"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    points: int  # Quantidade de pontos (positivo = ganho, negativo = gasto/expirado)
+    reason: str  # Motivo: "module_completion", "badge", "meeting", "live", "challenge", "redemption", "expiration"
+    description: str  # Descrição legível
+    reference_id: Optional[str] = None  # ID do módulo, badge, reunião, etc
+    reference_type: Optional[str] = None  # Tipo: "module", "badge", "meeting", "live", "challenge", "reward"
+    expires_at: Optional[str] = None  # Data de expiração dos pontos
+    expired: bool = False  # Se já foi marcado como expirado
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 # ==================== CHAT DE AULA AO VIVO ====================
 
