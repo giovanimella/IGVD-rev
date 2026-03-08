@@ -106,6 +106,135 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
 
 @router.put("/{user_id}")
 async def update_user(user_id: str, updates: dict, current_user: dict = Depends(require_role(["admin", "supervisor"]))):
+    """
+    Atualiza dados de um usuário. 
+    Admin pode alterar o ID (com cautela - afeta relacionamentos).
+    """
+    # Se está tentando alterar o ID (apenas admin)
+    if "id" in updates and updates["id"] != user_id:
+        if current_user.get("role") != "admin":
+            raise HTTPException(status_code=403, detail="Apenas admin pode alterar o ID do usuário")
+        
+        new_id = updates["id"]
+        
+        # Validar que o novo ID não existe
+        existing = await db.users.find_one({"id": new_id})
+        if existing:
+            raise HTTPException(status_code=400, detail=f"ID '{new_id}' já está em uso por outro usuário")
+        
+        # Verificar se o ID tem formato válido (não vazio, sem espaços)
+        if not new_id or not new_id.strip():
+            raise HTTPException(status_code=400, detail="ID não pode ser vazio")
+        
+        new_id = new_id.strip()
+        
+        # Buscar usuário atual
+        user = await db.users.find_one({"id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        
+        # Atualizar ID em todas as coleções relacionadas
+        # 1. Atualizar o próprio usuário
+        user_copy = dict(user)
+        user_copy["id"] = new_id
+        user_copy["updated_at"] = datetime.now(timezone.utc).isoformat()
+        del user_copy["_id"]
+        
+        # Aplicar outras atualizações
+        for key, value in updates.items():
+            if key != "id":
+                user_copy[key] = value
+        
+        # Se houver senha, fazer hash
+        if "password" in user_copy and user_copy["password"]:
+            user_copy["password_hash"] = get_password_hash(user_copy["password"])
+            del user_copy["password"]
+        
+        # Inserir com novo ID e deletar antigo
+        await db.users.insert_one(user_copy)
+        await db.users.delete_one({"id": user_id})
+        
+        # Atualizar relacionamentos em outras coleções
+        # 2. User Progress
+        await db.user_progress.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 3. User Assessments
+        await db.user_assessments.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 4. Redemptions
+        await db.redemptions.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 5. Points History
+        await db.points_history.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 6. Notifications
+        await db.notifications.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 7. Training Registrations
+        await db.training_registrations.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 8. Subscriptions
+        await db.user_subscriptions.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 9. Presentations
+        await db.presentations.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 10. Meetings
+        await db.meetings.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 11. Posts (Timeline)
+        await db.posts.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 12. Comments
+        await db.comments.update_many(
+            {"user_id": user_id},
+            {"$set": {"user_id": new_id}}
+        )
+        
+        # 13. Atualizar supervisor_id em usuários que têm este como supervisor
+        await db.users.update_many(
+            {"supervisor_id": user_id},
+            {"$set": {"supervisor_id": new_id}}
+        )
+        
+        return {
+            "message": "ID do usuário atualizado com sucesso em todas as coleções",
+            "old_id": user_id,
+            "new_id": new_id,
+            "warning": "Verifique integrações externas que possam usar o ID antigo"
+        }
+    
+    # Atualização normal (sem mudança de ID)
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
     
     # Se houver senha, fazer hash
