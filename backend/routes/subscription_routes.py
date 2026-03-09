@@ -528,7 +528,7 @@ async def create_subscription(
     if pagbank_customer_id:
         # SOLUÇÃO PARA CUSTOMER EXISTENTE:
         # 1. Atualizar dados cadastrais (nome, email, telefone)
-        # 2. Atualizar dados do cartão (billing_info)
+        # 2. Tentar atualizar dados do cartão (billing_info) - não bloqueia se falhar
         # 3. Criar a assinatura com apenas o ID
         logger.info(f"[Subscription] Customer existente encontrado: {pagbank_customer_id}")
         
@@ -548,8 +548,9 @@ async def create_subscription(
         else:
             logger.info(f"[Subscription] Dados cadastrais atualizados com sucesso!")
         
-        # 2. Atualizar billing_info do customer com o novo cartão
-        logger.info(f"[Subscription] Atualizando billing_info do customer...")
+        # 2. Tentar atualizar billing_info do customer com o novo cartão
+        # Se falhar, usará o cartão já cadastrado no PagBank
+        logger.info(f"[Subscription] Tentando atualizar billing_info do customer...")
         update_result = await service.update_customer_billing_info(
             customer_id=pagbank_customer_id,
             encrypted_card=subscription_request.encrypted_card,
@@ -557,14 +558,13 @@ async def create_subscription(
         )
         
         if not update_result.get("success"):
+            # Não bloquear - customer já tem cartão cadastrado no PagBank
+            # A assinatura será criada usando o cartão existente
             error_msg = update_result.get("error", "Erro ao atualizar dados do cartão")
-            logger.error(f"[Subscription] Erro ao atualizar billing_info: {error_msg}")
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Erro ao atualizar dados do cartão: {error_msg}"
-            )
-        
-        logger.info(f"[Subscription] Billing_info atualizado com sucesso!")
+            logger.warning(f"[Subscription] Aviso: Não foi possível atualizar billing_info: {error_msg}")
+            logger.info(f"[Subscription] Continuando com cartão já cadastrado no PagBank...")
+        else:
+            logger.info(f"[Subscription] Billing_info atualizado com sucesso!")
         
         # 3. Criar assinatura usando apenas o ID do customer
         customer_data = {
