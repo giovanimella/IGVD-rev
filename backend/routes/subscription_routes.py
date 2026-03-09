@@ -526,7 +526,30 @@ async def create_subscription(
     
     # Preparar dados do cliente conforme documentação PagBank (2024/2025)
     if pagbank_customer_id:
-        # Se já existe customer, usar APENAS o ID (não enviar dados completos)
+        # SOLUÇÃO PARA CUSTOMER EXISTENTE:
+        # Primeiro, atualizar os dados do cartão (billing_info) no customer existente
+        # Depois, criar a assinatura com apenas o ID
+        logger.info(f"[Subscription] Customer existente encontrado: {pagbank_customer_id}")
+        logger.info(f"[Subscription] Atualizando billing_info do customer antes de criar assinatura...")
+        
+        # Atualizar billing_info do customer com o novo cartão
+        update_result = await service.update_customer_billing_info(
+            customer_id=pagbank_customer_id,
+            encrypted_card=subscription_request.encrypted_card,
+            security_code=subscription_request.security_code
+        )
+        
+        if not update_result.get("success"):
+            error_msg = update_result.get("error", "Erro ao atualizar dados do cartão")
+            logger.error(f"[Subscription] Erro ao atualizar billing_info: {error_msg}")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Erro ao atualizar dados do cartão: {error_msg}"
+            )
+        
+        logger.info(f"[Subscription] Billing_info atualizado com sucesso!")
+        
+        # Agora criar assinatura usando apenas o ID do customer
         customer_data = {
             "id": pagbank_customer_id
         }
