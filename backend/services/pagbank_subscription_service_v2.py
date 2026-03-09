@@ -806,18 +806,18 @@ class PagBankSubscriptionService:
         
         try:
             # Payload conforme documentação PagBank
-            # billing_info é um array de objetos
-            # Testando com security_code separado do encrypted (necessário para validação)
+            # IMPORTANTE: Quando usar "encrypted", NÃO enviar nenhum outro parâmetro!
+            # Docs: "Caso este parâmetro seja preenchido, nenhum outro parâmetro deverá ser enviado."
             payload = [{
                 "type": "CREDIT_CARD",
                 "card": {
-                    "encrypted": encrypted_card,
-                    "security_code": security_code  # Obrigatório para validação
+                    "encrypted": encrypted_card
                 }
             }]
             
             logger.info(f"[PagBank] Atualizando billing_info do customer: {customer_id}")
-            logger.info(f"[PagBank] Payload: type=CREDIT_CARD, encrypted_length={len(encrypted_card) if encrypted_card else 0}, security_code_length={len(security_code) if security_code else 0}")
+            logger.info(f"[PagBank] Encrypted card (primeiros 50 chars): {encrypted_card[:50] if encrypted_card else 'VAZIO'}...")
+            logger.info(f"[PagBank] Encrypted card length: {len(encrypted_card) if encrypted_card else 0}")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.put(
