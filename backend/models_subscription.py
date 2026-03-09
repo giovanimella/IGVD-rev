@@ -180,6 +180,10 @@ class CreateSubscriptionRequest(BaseModel):
     
     # ID do plano (opcional - se não informado, usa o plano ativo padrão)
     plan_id: Optional[str] = None
+    
+    # Aceite dos termos
+    terms_accepted: Optional[bool] = False
+    terms_id: Optional[str] = None
 
 
 class UpdatePaymentMethodRequest(BaseModel):

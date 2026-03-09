@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import axios from 'axios';
-import { CreditCard, CheckCircle, AlertCircle, Loader, Lock, Shield, Calendar } from 'lucide-react';
+import { CreditCard, CheckCircle, AlertCircle, Loader, Lock, Shield, Calendar, FileText, ExternalLink } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 
@@ -11,6 +11,11 @@ const SubscriptionOnboarding = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [settings, setSettings] = useState(null);
   const [publicKey, setPublicKey] = useState(null); // Chave pública para criptografia
+  
+  // Termos e condições
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [activeTerm, setActiveTerm] = useState(null);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -41,9 +46,13 @@ const SubscriptionOnboarding = () => {
 
   const fetchData = async () => {
     try {
-      const [statusRes, publicKeyRes] = await Promise.all([
+      const token = localStorage.getItem('token');
+      const [statusRes, publicKeyRes, termsRes] = await Promise.all([
         axios.get(`${API_URL}/api/subscriptions/my-subscription`),
-        axios.get(`${API_URL}/api/subscriptions/public-key`) // Endpoint público
+        axios.get(`${API_URL}/api/subscriptions/public-key`),
+        axios.get(`${API_URL}/api/terms/active`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: { term: null } })) // Se não tiver termos, continuar
       ]);
 
       setSubscriptionStatus(statusRes.data);
@@ -51,6 +60,11 @@ const SubscriptionOnboarding = () => {
       // Obter chave pública e valor da mensalidade
       setPublicKey(publicKeyRes.data.public_key);
       setSettings({ monthly_fee: publicKeyRes.data.monthly_fee });
+      
+      // Obter termos ativos
+      if (termsRes.data?.term) {
+        setActiveTerm(termsRes.data.term);
+      }
       
       // Pré-preencher com dados do usuário
       const user = JSON.parse(localStorage.getItem('user'));
@@ -139,6 +153,13 @@ const SubscriptionOnboarding = () => {
     setSubscribing(true);
 
     try {
+      // Validação dos termos
+      if (activeTerm && !termsAccepted) {
+        toast.error('Você precisa aceitar os Termos e Condições para continuar');
+        setSubscribing(false);
+        return;
+      }
+
       // Validações básicas
       if (!formData.customer_name || !formData.customer_email || !formData.customer_cpf) {
         toast.error('Preencha todos os campos obrigatórios');
@@ -219,7 +240,9 @@ const SubscriptionOnboarding = () => {
           zipcode: formData.billing_address.zipcode.replace(/\D/g, '')
         },
         encrypted_card: encryptedCard,      // Cartão criptografado
-        security_code: formData.card_cvv    // CVV vai separado!
+        security_code: formData.card_cvv,   // CVV vai separado!
+        terms_accepted: termsAccepted,      // Aceite dos termos
+        terms_id: activeTerm?.id || null    // ID do termo aceito
       };
 
       const response = await axios.post(`${API_URL}/api/subscriptions/subscribe`, subscriptionData);
@@ -614,6 +637,99 @@ const SubscriptionOnboarding = () => {
               </p>
             </div>
           </div>
+
+          {/* Termos e Condições */}
+          {activeTerm && (
+            <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-6 border border-slate-200 dark:border-white/10">
+              <div className="flex items-start gap-4">
+                <div className="flex items-center h-6">
+                  <input
+                    type="checkbox"
+                    id="terms-checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 cursor-pointer"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="terms-checkbox" className="text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+                    Li e concordo com os{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 underline font-medium inline-flex items-center gap-1"
+                    >
+                      Termos e Condições
+                      <ExternalLink className="w-3 h-3" />
+                    </button>
+                    {' '}da plataforma.
+                  </label>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <FileText className="w-3 h-3 inline mr-1" />
+                    {activeTerm.title} - Versão {activeTerm.version}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal de Termos */}
+          {showTermsModal && activeTerm && (
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+                {/* Header */}
+                <div style={{ background: 'linear-gradient(to right, rgb(58, 145, 155), rgb(27, 76, 81))' }} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-white">{activeTerm.title}</h2>
+                        <p className="text-white/80 text-sm">Versão {activeTerm.version}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowTermsModal(false)}
+                      className="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 max-h-[60vh] overflow-y-auto">
+                  <div 
+                    className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300"
+                    dangerouslySetInnerHTML={{ __html: activeTerm.content }}
+                  />
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Ao aceitar, você concorda com todos os termos acima.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        setTermsAccepted(true);
+                        setShowTermsModal(false);
+                      }}
+                      style={{ background: 'linear-gradient(to right, rgb(58, 145, 155), rgb(27, 76, 81))' }}
+                      className="text-white hover:opacity-90"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Li e Aceito
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Botão de Submissão */}
           <div className="flex items-center justify-between pt-4">

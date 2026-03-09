@@ -493,6 +493,7 @@ async def sync_pagbank_plans(current_user: dict = Depends(get_current_user)):
 @router.post("/subscribe")
 async def create_subscription(
     subscription_request: CreateSubscriptionRequest,
+    request: Request,
     background_tasks: BackgroundTasks,
     current_user: dict = Depends(get_current_user)
 ):
@@ -668,6 +669,44 @@ async def create_subscription(
         )
     else:
         await db.user_subscriptions.insert_one(subscription.model_dump())
+    
+    # Registrar aceite dos termos (se houver)
+    if subscription_request.terms_accepted and subscription_request.terms_id:
+        try:
+            # Obter IP do cliente
+            client_ip = request.client.host if request.client else "N/A"
+            # Verificar headers de proxy (X-Forwarded-For, X-Real-IP)
+            forwarded_for = request.headers.get("X-Forwarded-For")
+            if forwarded_for:
+                client_ip = forwarded_for.split(",")[0].strip()
+            else:
+                real_ip = request.headers.get("X-Real-IP")
+                if real_ip:
+                    client_ip = real_ip
+            
+            terms_acceptance = {
+                "id": str(uuid.uuid4()),
+                "user_id": user_id,
+                "user_email": current_user["email"],
+                "term_id": subscription_request.terms_id,
+                "accepted_at": datetime.now(timezone.utc).isoformat(),
+                "ip_address": client_ip,
+                "accepted_via": "subscription_onboarding",
+                "subscription_id": subscription.id
+            }
+            await db.terms_acceptances.insert_one(terms_acceptance)
+            
+            # Atualizar usuário com flag de termos aceitos
+            await db.users.update_one(
+                {"id": user_id},
+                {"$set": {
+                    "terms_accepted": True,
+                    "terms_accepted_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            logger.info(f"[Subscription] Termos aceitos registrados para user={user_id}, IP={client_ip}")
+        except Exception as e:
+            logger.warning(f"[Subscription] Erro ao registrar aceite dos termos: {e}")
     
     # Atualizar onboarding do usuário - avançar para etapa "acolhimento"
     await db.users.update_one(
