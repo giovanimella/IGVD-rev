@@ -39,6 +39,13 @@ const Layout = ({ children, hideRankingSidebar = false }) => {
         return;
       }
       
+      // IMPORTANTE: Só verificar assinatura se o usuário já aceitou os termos
+      // Isso garante a sequência: Termos -> Assinatura
+      if (!user.terms_accepted) {
+        setSubscriptionChecked(true);
+        return; // O TermsAcceptanceModal será exibido primeiro
+      }
+      
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(`${API_URL}/api/subscriptions/my-subscription`, {
@@ -75,7 +82,7 @@ const Layout = ({ children, hideRankingSidebar = false }) => {
     };
     
     checkSubscription();
-  }, [user, location.pathname, isExemptPath]);
+  }, [user, user?.terms_accepted, location.pathname, isExemptPath]);
   
   const handleSubscribe = () => {
     // Redirecionar diretamente para a página de assinatura mensal
