@@ -96,7 +96,7 @@ const Layout = ({ children, hideRankingSidebar = false }) => {
       {/* Modal */}
       <div className="relative bg-white dark:bg-[#1b4c51] rounded-3xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden animate-in fade-in zoom-in duration-300">
         {/* Header com gradiente */}
-        <div className="bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 p-6 text-white">
+        <div style={{ background: 'linear-gradient(to right, rgb(58, 145, 155), rgb(27, 76, 81))' }} className="p-6 text-white">
           <div className="flex items-center justify-center mb-4">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
               <Sparkles className="w-8 h-8" />
@@ -143,7 +143,8 @@ const Layout = ({ children, hideRankingSidebar = false }) => {
           <div className="space-y-3">
             <button
               onClick={handleSubscribe}
-              className="w-full py-4 px-6 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+              style={{ background: 'linear-gradient(to right, rgb(58, 145, 155), rgb(27, 76, 81))' }}
+              className="w-full py-4 px-6 text-white font-bold rounded-xl transition-all transform hover:scale-[1.02] hover:opacity-90 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
             >
               <CreditCard className="w-5 h-5" />
               Assinar Agora
