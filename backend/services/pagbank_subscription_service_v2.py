@@ -807,15 +807,19 @@ class PagBankSubscriptionService:
         try:
             # Payload conforme documentação PagBank
             # billing_info é um array de objetos
+            # Testando diferentes formatos conforme documentação
             payload = [{
                 "type": "CREDIT_CARD",
                 "card": {
-                    "encrypted": encrypted_card,
-                    "security_code": security_code
+                    "encrypted": encrypted_card
+                    # Nota: security_code já está incluído no encrypted_card
+                    # quando criptografado via SDK PagSeguro.encryptCard()
                 }
             }]
             
             logger.info(f"[PagBank] Atualizando billing_info do customer: {customer_id}")
+            logger.info(f"[PagBank] Payload type: {type(payload)}")
+            logger.info(f"[PagBank] Encrypted card length: {len(encrypted_card) if encrypted_card else 0}")
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.put(
