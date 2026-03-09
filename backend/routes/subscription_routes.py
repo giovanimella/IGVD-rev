@@ -505,52 +505,33 @@ async def create_subscription(
     area_code = phone_clean[:2] if len(phone_clean) >= 10 else "11"
     phone_number = phone_clean[2:] if len(phone_clean) >= 10 else phone_clean
     
-    # IMPORTANTE: Verificar se já existe um customer_id para reutilizar
-    # Isso previne erro de tax_id duplicado ao reativar assinatura
+    # Limpar CPF
+    cpf_clean = ''.join(filter(str.isdigit, subscription_request.customer_cpf))
+    
+    # =========================================================================
+    # LÓGICA CORRIGIDA DE CUSTOMER:
+    # 
+    # 1. Se o USUÁRIO ATUAL já tem pagbank_customer_id salvo no NOSSO banco:
+    #    -> Usar esse customer_id (pertence a ele)
+    #    -> Atualizar billing_info com o novo cartão
+    #
+    # 2. Se o usuário NÃO tem pagbank_customer_id:
+    #    -> Criar um NOVO customer no PagBank com os dados fornecidos
+    #    -> Se der erro de CPF duplicado, significa que o CPF já está em uso
+    #       por outro customer (possivelmente de outro usuário ou teste anterior)
+    #
+    # IMPORTANTE: NÃO reutilizar customer de outro usuário apenas por ter o mesmo CPF!
+    # =========================================================================
+    
     pagbank_customer_id = None
     
+    # Verificar se o usuário atual já tem um customer_id associado no nosso banco
     if existing and existing.get("pagbank_customer_id"):
-        # Reutilizar customer existente
         pagbank_customer_id = existing.get("pagbank_customer_id")
-        logger.info(f"[Subscription] Reutilizando customer existente: {pagbank_customer_id}")
-    else:
-        # Tentar buscar customer por CPF no PagBank
-        cpf_clean = ''.join(filter(str.isdigit, subscription_request.customer_cpf))
-        search_result = await service.list_customers(cpf=cpf_clean)
+        logger.info(f"[Subscription] Usuário já tem customer_id associado: {pagbank_customer_id}")
         
-        if search_result.get("success") and search_result.get("customers"):
-            customers = search_result.get("customers", [])
-            if len(customers) > 0:
-                pagbank_customer_id = customers[0].get("id")
-                logger.info(f"[Subscription] Customer encontrado no PagBank: {pagbank_customer_id}")
-    
-    # Preparar dados do cliente conforme documentação PagBank (2024/2025)
-    if pagbank_customer_id:
-        # SOLUÇÃO PARA CUSTOMER EXISTENTE:
-        # 1. Atualizar dados cadastrais (nome, email, telefone)
-        # 2. Tentar atualizar dados do cartão (billing_info) - não bloqueia se falhar
-        # 3. Criar a assinatura com apenas o ID
-        logger.info(f"[Subscription] Customer existente encontrado: {pagbank_customer_id}")
-        
-        # 1. Atualizar dados cadastrais do customer (nome, email, telefone)
-        logger.info(f"[Subscription] Atualizando dados cadastrais do customer...")
-        update_customer_result = await service.update_customer(
-            customer_id=pagbank_customer_id,
-            name=subscription_request.customer_name[:150],
-            email=subscription_request.customer_email,
-            phone_area=area_code,
-            phone_number=phone_number
-        )
-        
-        if not update_customer_result.get("success"):
-            # Log do erro mas não bloqueia - dados cadastrais não são críticos
-            logger.warning(f"[Subscription] Aviso: Não foi possível atualizar dados cadastrais: {update_customer_result.get('error')}")
-        else:
-            logger.info(f"[Subscription] Dados cadastrais atualizados com sucesso!")
-        
-        # 2. Tentar atualizar billing_info do customer com o novo cartão
-        # Se falhar, usará o cartão já cadastrado no PagBank
-        logger.info(f"[Subscription] Tentando atualizar billing_info do customer...")
+        # Atualizar billing_info com o novo cartão (não atualizar dados cadastrais!)
+        logger.info(f"[Subscription] Atualizando apenas billing_info do customer...")
         update_result = await service.update_customer_billing_info(
             customer_id=pagbank_customer_id,
             encrypted_card=subscription_request.encrypted_card,
@@ -558,43 +539,36 @@ async def create_subscription(
         )
         
         if not update_result.get("success"):
-            # Não bloquear - customer já tem cartão cadastrado no PagBank
-            # A assinatura será criada usando o cartão existente
-            error_msg = update_result.get("error", "Erro ao atualizar dados do cartão")
-            logger.warning(f"[Subscription] Aviso: Não foi possível atualizar billing_info: {error_msg}")
-            logger.info(f"[Subscription] Continuando com cartão já cadastrado no PagBank...")
+            error_msg = update_result.get("error", "Erro ao atualizar cartão")
+            logger.warning(f"[Subscription] Aviso: {error_msg} - Continuando com cartão existente...")
         else:
             logger.info(f"[Subscription] Billing_info atualizado com sucesso!")
         
-        # 3. Criar assinatura usando apenas o ID do customer
+        # Usar apenas o ID do customer
         customer_data = {
             "id": pagbank_customer_id
         }
-        logger.info(f"[Subscription] Usando customer existente: {pagbank_customer_id}")
     else:
-        # Se não existe, criar novo customer com dados completos
-        # ESTRUTURA CORRETA:
-        # - phones usa "country" e "area" (não "country_code" e "area_code")
-        # - billing_info vai no CUSTOMER com o cartão criptografado
-        # - security_code vai separado no PAYMENT_METHOD
+        # Usuário não tem customer_id - criar novo customer com todos os dados
+        logger.info(f"[Subscription] Criando NOVO customer para o usuário...")
         customer_data = {
-            "name": subscription_request.customer_name[:50],
+            "name": subscription_request.customer_name[:150],
             "email": subscription_request.customer_email,
-            "tax_id": ''.join(filter(str.isdigit, subscription_request.customer_cpf)),
+            "tax_id": cpf_clean,
             "phones": [{
-                "country": "55",   # country, não country_code!
-                "area": area_code, # area, não area_code!
+                "country": "55",
+                "area": area_code,
                 "number": phone_number,
                 "type": "MOBILE"
             }],
             "billing_info": [{
                 "type": "CREDIT_CARD",
                 "card": {
-                    "encrypted": subscription_request.encrypted_card  # Cartão criptografado
+                    "encrypted": subscription_request.encrypted_card
                 }
             }]
         }
-        logger.info(f"[Subscription] Criando novo customer para CPF: {subscription_request.customer_cpf}")
+        logger.info(f"[Subscription] Customer data preparado para CPF: {cpf_clean}")
     
     result = await service.create_subscription(
         reference_id=f"user_{user_id}_{uuid.uuid4().hex[:8]}",
@@ -609,6 +583,14 @@ async def create_subscription(
         error_msg = result.get("error", "Erro ao criar assinatura")
         error_detail = result.get("raw_response", {})
         logger.error(f"[Subscription] Erro PagBank: {error_msg} - {error_detail}")
+        
+        # Verificar se é erro de CPF duplicado
+        if "tax_id" in error_msg.lower() or "tax_ID" in str(error_detail):
+            raise HTTPException(
+                status_code=400, 
+                detail="Este CPF já está cadastrado no PagBank. Se você já teve uma assinatura anterior, entre em contato com o suporte."
+            )
+        
         raise HTTPException(status_code=400, detail=error_msg)
     
     # Criar registro de assinatura
