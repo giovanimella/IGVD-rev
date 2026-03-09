@@ -22,7 +22,7 @@ const Layout = ({ children, hideRankingSidebar = false }) => {
   const showRanking = !hideRankingSidebar && (user?.role === 'licenciado' || user?.role === 'supervisor');
   
   // Rotas onde o modal não deve aparecer
-  const exemptPaths = ['/profile', '/onboarding/payment', '/subscription'];
+  const exemptPaths = ['/profile', '/onboarding/payment', '/onboarding/subscription', '/subscription'];
   const isExemptPath = exemptPaths.some(path => location.pathname.startsWith(path));
   
   useEffect(() => {
@@ -78,7 +78,8 @@ const Layout = ({ children, hideRankingSidebar = false }) => {
   }, [user, location.pathname, isExemptPath]);
   
   const handleSubscribe = () => {
-    navigate('/onboarding/payment');
+    // Redirecionar para Profile com aba financeiro e parâmetro para abrir assinatura
+    navigate('/profile?tab=financial&action=subscribe');
   };
   
   const handleGoToProfile = () => {
