@@ -212,6 +212,24 @@ async def get_public_key():
     }
 
 
+# Alias para compatibilidade com frontend
+@router.get("/pagbank-public-key")
+async def get_pagbank_public_key():
+    """
+    Alias para /public-key - compatibilidade com frontend
+    """
+    settings = await get_subscription_settings()
+    
+    public_key = settings.get("pagbank_public_key")
+    monthly_fee = settings.get("monthly_fee", 49.90)
+    
+    return {
+        "public_key": public_key,
+        "monthly_fee": monthly_fee,
+        "has_public_key": bool(public_key)
+    }
+
+
 @router.put("/settings")
 async def update_settings(
     updates: SubscriptionSettingsUpdate,
