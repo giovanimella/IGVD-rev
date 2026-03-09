@@ -1,11 +1,9 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import SubscriptionGuard from './SubscriptionGuard';
 
-export const PrivateRoute = ({ children, roles = [], skipSubscriptionCheck = false }) => {
+export const PrivateRoute = ({ children, roles = [] }) => {
   const { user, loading } = useAuth();
-  const location = useLocation();
 
   if (loading) {
     return (
@@ -21,19 +19,6 @@ export const PrivateRoute = ({ children, roles = [], skipSubscriptionCheck = fal
 
   if (roles.length > 0 && !roles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
-  }
-
-  // Rotas que não precisam de verificação de assinatura
-  const noSubscriptionCheckPaths = ['/profile', '/onboarding/payment', '/subscription'];
-  const isExemptPath = noSubscriptionCheckPaths.some(path => location.pathname.startsWith(path));
-
-  // Se é licenciado e não está em rota exempta, verificar assinatura
-  if (user.role === 'licenciado' && !skipSubscriptionCheck && !isExemptPath) {
-    return (
-      <SubscriptionGuard>
-        {children}
-      </SubscriptionGuard>
-    );
   }
 
   return children;
