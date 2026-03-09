@@ -654,10 +654,13 @@ async def sync_my_subscription_status(current_user: dict = Depends(get_current_u
         "SUSPENDED": SubscriptionStatus.SUSPENDED,
         "OVERDUE": SubscriptionStatus.OVERDUE,
         "CANCELED": SubscriptionStatus.CANCELLED,
+        "CANCELLED": SubscriptionStatus.CANCELLED,  # Variação do PagBank
         "TRIAL": SubscriptionStatus.TRIAL
     }
     
     new_status = status_mapping.get(pagbank_status, subscription.get("status"))
+    
+    logger.info(f"[Subscription] Sincronização: PagBank status={pagbank_status}, mapeado para={new_status}")
     
     # Atualizar no banco local se mudou
     update_data = {
@@ -749,8 +752,10 @@ async def check_my_subscription(current_user: dict = Depends(get_current_user)):
 @router.post("/my-subscription/cancel")
 async def cancel_my_subscription(current_user: dict = Depends(get_current_user)):
     """
-    Cancela a assinatura do usuário logado
-    O usuário pode cancelar sua própria assinatura a qualquer momento
+    Suspende a assinatura do usuário logado (não cancela definitivamente)
+    O usuário pode suspender sua assinatura e reativá-la depois a qualquer momento
+    
+    IMPORTANTE: Usa SUSPEND (não CANCEL) para permitir reativação futura
     """
     user_id = current_user["sub"]
     
@@ -760,8 +765,12 @@ async def cancel_my_subscription(current_user: dict = Depends(get_current_user))
     if not subscription:
         raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada")
     
-    if subscription.get("status") == SubscriptionStatus.CANCELLED:
-        raise HTTPException(status_code=400, detail="Assinatura já está cancelada")
+    current_status = subscription.get("status")
+    if current_status == SubscriptionStatus.SUSPENDED:
+        raise HTTPException(status_code=400, detail="Assinatura já está suspensa")
+    
+    if current_status == SubscriptionStatus.CANCELLED:
+        raise HTTPException(status_code=400, detail="Assinatura já está cancelada. Entre em contato com o suporte para reativar.")
     
     pagbank_subscription_id = subscription.get("pagbank_subscription_id")
     
@@ -770,35 +779,36 @@ async def cancel_my_subscription(current_user: dict = Depends(get_current_user))
         await db.user_subscriptions.update_one(
             {"user_id": user_id},
             {"$set": {
-                "status": SubscriptionStatus.CANCELLED,
-                "cancelled_at": datetime.now(timezone.utc).isoformat(),
-                "cancelled_by": "user"
+                "status": SubscriptionStatus.SUSPENDED,
+                "suspended_at": datetime.now(timezone.utc).isoformat(),
+                "suspended_by": "user"
             }}
         )
+        logger.info(f"[Subscription] Assinatura suspensa localmente: user={user_id}")
         return {
             "success": True,
-            "message": "Assinatura cancelada localmente"
+            "message": "Assinatura suspensa localmente"
         }
     
-    # Cancelar no PagBank
+    # SUSPENDER no PagBank (não cancelar!)
     service = await get_pagbank_subscription_service()
-    result = await service.cancel_subscription(pagbank_subscription_id)
+    result = await service.suspend_subscription(pagbank_subscription_id)
     
     if not result.get("success"):
-        logger.error(f"[Subscription] Erro ao cancelar no PagBank: {result.get('error')}")
-        # Mesmo com erro no PagBank, cancelar localmente
+        logger.error(f"[Subscription] Erro ao suspender no PagBank: {result.get('error')}")
+        # Mesmo com erro no PagBank, suspender localmente
         await db.user_subscriptions.update_one(
             {"user_id": user_id},
             {"$set": {
-                "status": SubscriptionStatus.CANCELLED,
-                "cancelled_at": datetime.now(timezone.utc).isoformat(),
-                "cancelled_by": "user",
-                "cancel_error": result.get("error")
+                "status": SubscriptionStatus.SUSPENDED,
+                "suspended_at": datetime.now(timezone.utc).isoformat(),
+                "suspended_by": "user",
+                "suspend_error": result.get("error")
             }}
         )
         return {
             "success": True,
-            "message": "Assinatura cancelada localmente (erro ao cancelar no PagBank)",
+            "message": "Assinatura suspensa localmente (erro ao suspender no PagBank)",
             "pagbank_error": result.get("error")
         }
     
@@ -806,18 +816,18 @@ async def cancel_my_subscription(current_user: dict = Depends(get_current_user))
     await db.user_subscriptions.update_one(
         {"user_id": user_id},
         {"$set": {
-            "status": SubscriptionStatus.CANCELLED,
-            "pagbank_status": "CANCELED",
-            "cancelled_at": datetime.now(timezone.utc).isoformat(),
-            "cancelled_by": "user"
+            "status": SubscriptionStatus.SUSPENDED,
+            "pagbank_status": "SUSPENDED",
+            "suspended_at": datetime.now(timezone.utc).isoformat(),
+            "suspended_by": "user"
         }}
     )
     
-    logger.info(f"[Subscription] Assinatura cancelada: user={user_id}, pagbank_id={pagbank_subscription_id}")
+    logger.info(f"[Subscription] Assinatura SUSPENSA no PagBank: user={user_id}, pagbank_id={pagbank_subscription_id}")
     
     return {
         "success": True,
-        "message": "Assinatura cancelada com sucesso"
+        "message": "Assinatura suspensa com sucesso. Você pode reativá-la a qualquer momento."
     }
 
 
@@ -827,7 +837,298 @@ async def admin_cancel_subscription(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Cancela a assinatura de um usuário específico (somente admin)
+    Suspende a assinatura de um usuário específico (somente admin)
+    Usa SUSPEND para permitir reativação futura
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Buscar assinatura do usuário
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada para este usuário")
+    
+    current_status = subscription.get("status")
+    if current_status == SubscriptionStatus.SUSPENDED:
+        raise HTTPException(status_code=400, detail="Assinatura já está suspensa")
+    
+    pagbank_subscription_id = subscription.get("pagbank_subscription_id")
+    
+    if pagbank_subscription_id:
+        # SUSPENDER no PagBank (não cancelar!)
+        service = await get_pagbank_subscription_service()
+        result = await service.suspend_subscription(pagbank_subscription_id)
+        
+        if not result.get("success"):
+            logger.warning(f"[Admin] Erro ao suspender no PagBank: {result.get('error')}")
+    
+    # Atualizar no banco local
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "status": SubscriptionStatus.SUSPENDED,
+            "pagbank_status": "SUSPENDED",
+            "suspended_at": datetime.now(timezone.utc).isoformat(),
+            "suspended_by": f"admin:{current_user['sub']}"
+        }}
+    )
+    
+    logger.info(f"[Admin] Assinatura SUSPENSA pelo admin: user={user_id}, admin={current_user['sub']}")
+    
+    return {
+        "success": True,
+        "message": "Assinatura do usuário suspensa com sucesso",
+        "user_id": user_id
+    }
+
+
+
+@router.post("/my-subscription/reactivate")
+async def reactivate_my_subscription(current_user: dict = Depends(get_current_user)):
+    """
+    Reativa uma assinatura suspensa do usuário logado
+    Permite que o usuário reative sua própria assinatura no PagBank
+    """
+    user_id = current_user["sub"]
+    
+    # Buscar assinatura
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada")
+    
+    current_status = subscription.get("status")
+    
+    if current_status == SubscriptionStatus.ACTIVE:
+        raise HTTPException(status_code=400, detail="Assinatura já está ativa")
+    
+    if current_status not in [SubscriptionStatus.SUSPENDED, SubscriptionStatus.CANCELLED]:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Assinatura não pode ser reativada no estado atual: {current_status}"
+        )
+    
+    pagbank_subscription_id = subscription.get("pagbank_subscription_id")
+    
+    if not pagbank_subscription_id:
+        # Se não tem ID do PagBank, apenas atualiza localmente
+        await db.user_subscriptions.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "status": SubscriptionStatus.ACTIVE,
+                "reactivated_at": datetime.now(timezone.utc).isoformat(),
+                "reactivated_by": "user",
+                "suspended_at": None,
+                "suspended_by": None,
+                "cancelled_at": None,
+                "cancelled_by": None
+            }}
+        )
+        logger.info(f"[Subscription] Assinatura reativada localmente: user={user_id}")
+        return {
+            "success": True,
+            "message": "Assinatura reativada localmente"
+        }
+    
+    # ATIVAR no PagBank
+    service = await get_pagbank_subscription_service()
+    result = await service.activate_subscription(pagbank_subscription_id)
+    
+    if not result.get("success"):
+        logger.error(f"[Subscription] Erro ao ativar no PagBank: {result.get('error')}")
+        
+        # Se o erro for porque já está ativa, considerar sucesso
+        error_msg = result.get("error", "").lower()
+        if "already active" in error_msg or "já ativa" in error_msg:
+            await db.user_subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {
+                    "status": SubscriptionStatus.ACTIVE,
+                    "pagbank_status": "ACTIVE",
+                    "reactivated_at": datetime.now(timezone.utc).isoformat(),
+                    "reactivated_by": "user",
+                    "suspended_at": None,
+                    "suspended_by": None
+                }}
+            )
+            return {
+                "success": True,
+                "message": "Assinatura já está ativa no PagBank"
+            }
+        
+        # Tentar reativar localmente mesmo com erro
+        await db.user_subscriptions.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "status": SubscriptionStatus.ACTIVE,
+                "reactivated_at": datetime.now(timezone.utc).isoformat(),
+                "reactivated_by": "user",
+                "reactivate_error": result.get("error"),
+                "suspended_at": None,
+                "suspended_by": None
+            }}
+        )
+        
+        return {
+            "success": True,
+            "message": "Assinatura reativada localmente. Por favor, sincronize com o PagBank.",
+            "pagbank_error": result.get("error"),
+            "warning": "Houve um erro ao comunicar com o PagBank. Use o botão 'Sincronizar Status' para verificar."
+        }
+    
+    # Atualizar no banco local
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "status": SubscriptionStatus.ACTIVE,
+            "pagbank_status": "ACTIVE",
+            "reactivated_at": datetime.now(timezone.utc).isoformat(),
+            "reactivated_by": "user",
+            "suspended_at": None,
+            "suspended_by": None,
+            "cancelled_at": None,
+            "cancelled_by": None,
+            "overdue_months": 0,
+            "failed_payments_count": 0
+        }}
+    )
+    
+    logger.info(f"[Subscription] Assinatura ATIVADA no PagBank: user={user_id}, pagbank_id={pagbank_subscription_id}")
+    
+    return {
+        "success": True,
+        "message": "Assinatura reativada com sucesso! Você pode continuar acessando a plataforma."
+    }
+
+
+@router.post("/admin/reactivate-subscription/{user_id}")
+async def admin_reactivate_subscription(
+    user_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Reativa a assinatura de um usuário específico (somente admin)
+    Chama o endpoint ACTIVATE do PagBank para reativar de verdade
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Buscar assinatura
+    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
+    
+    if not subscription:
+        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada para este usuário")
+    
+    current_status = subscription.get("status")
+    
+    if current_status == SubscriptionStatus.ACTIVE:
+        raise HTTPException(status_code=400, detail="Assinatura já está ativa")
+    
+    if current_status not in [SubscriptionStatus.CANCELLED, SubscriptionStatus.SUSPENDED]:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Assinatura não pode ser reativada no estado atual: {current_status}"
+        )
+    
+    pagbank_subscription_id = subscription.get("pagbank_subscription_id")
+    
+    if not pagbank_subscription_id:
+        # Se não tem ID do PagBank, apenas atualiza localmente
+        await db.user_subscriptions.update_one(
+            {"user_id": user_id},
+            {"$set": {
+                "status": SubscriptionStatus.ACTIVE,
+                "reactivated_at": datetime.now(timezone.utc).isoformat(),
+                "reactivated_by": f"admin:{current_user['sub']}",
+                "cancelled_at": None,
+                "cancelled_by": None,
+                "suspended_at": None,
+                "suspended_by": None,
+                "overdue_months": 0,
+                "failed_payments_count": 0
+            }}
+        )
+        logger.info(f"[Admin] Assinatura reativada localmente: user={user_id}")
+        return {
+            "success": True,
+            "message": "Assinatura reativada localmente",
+            "user_id": user_id
+        }
+    
+    # ATIVAR no PagBank
+    service = await get_pagbank_subscription_service()
+    result = await service.activate_subscription(pagbank_subscription_id)
+    
+    if not result.get("success"):
+        logger.error(f"[Admin] Erro ao ativar no PagBank: {result.get('error')}")
+        
+        # Verificar se já está ativa
+        error_msg = result.get("error", "").lower()
+        if "already active" in error_msg or "já ativa" in error_msg:
+            await db.user_subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {
+                    "status": SubscriptionStatus.ACTIVE,
+                    "pagbank_status": "ACTIVE",
+                    "reactivated_at": datetime.now(timezone.utc).isoformat(),
+                    "reactivated_by": f"admin:{current_user['sub']}",
+                    "suspended_at": None,
+                    "suspended_by": None,
+                    "cancelled_at": None,
+                    "cancelled_by": None,
+                    "overdue_months": 0,
+                    "failed_payments_count": 0
+                }}
+            )
+            return {
+                "success": True,
+                "message": "Assinatura já está ativa no PagBank",
+                "user_id": user_id
+            }
+        
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erro ao reativar assinatura no PagBank: {result.get('error')}"
+        )
+    
+    # Atualizar no banco local
+    await db.user_subscriptions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "status": SubscriptionStatus.ACTIVE,
+            "pagbank_status": "ACTIVE",
+            "reactivated_at": datetime.now(timezone.utc).isoformat(),
+            "reactivated_by": f"admin:{current_user['sub']}",
+            "cancelled_at": None,
+            "cancelled_by": None,
+            "suspended_at": None,
+            "suspended_by": None,
+            "overdue_months": 0,
+            "failed_payments_count": 0
+        }}
+    )
+    
+    logger.info(f"[Admin] Assinatura ATIVADA no PagBank: user={user_id}, admin={current_user['sub']}, pagbank_id={pagbank_subscription_id}")
+    
+    return {
+        "success": True,
+        "message": "Assinatura do usuário reativada com sucesso no PagBank",
+        "user_id": user_id
+    }
+
+
+@router.post("/admin/cancel-subscription-permanently/{user_id}")
+async def admin_cancel_subscription_permanently(
+    user_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Cancela DEFINITIVAMENTE a assinatura de um usuário (somente admin)
+    
+    AVISO: Esta operação é IRREVERSÍVEL!
+    A assinatura NÃO poderá ser reativada após cancelamento definitivo.
+    Use o endpoint /admin/cancel-subscription/{user_id} para SUSPENDER (reversível).
     """
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Acesso negado")
@@ -844,12 +1145,12 @@ async def admin_cancel_subscription(
     pagbank_subscription_id = subscription.get("pagbank_subscription_id")
     
     if pagbank_subscription_id:
-        # Cancelar no PagBank
+        # CANCELAR DEFINITIVAMENTE no PagBank
         service = await get_pagbank_subscription_service()
         result = await service.cancel_subscription(pagbank_subscription_id)
         
         if not result.get("success"):
-            logger.warning(f"[Admin] Erro ao cancelar no PagBank: {result.get('error')}")
+            logger.warning(f"[Admin] Erro ao cancelar definitivamente no PagBank: {result.get('error')}")
     
     # Atualizar no banco local
     await db.user_subscriptions.update_one(
@@ -858,100 +1159,18 @@ async def admin_cancel_subscription(
             "status": SubscriptionStatus.CANCELLED,
             "pagbank_status": "CANCELED",
             "cancelled_at": datetime.now(timezone.utc).isoformat(),
-            "cancelled_by": f"admin:{current_user['sub']}"
+            "cancelled_by": f"admin:{current_user['sub']}",
+            "cancellation_type": "permanent"
         }}
     )
     
-    logger.info(f"[Admin] Assinatura cancelada pelo admin: user={user_id}, admin={current_user['sub']}")
+    logger.warning(f"[Admin] Assinatura CANCELADA DEFINITIVAMENTE: user={user_id}, admin={current_user['sub']}")
     
     return {
         "success": True,
-        "message": f"Assinatura do usuário cancelada com sucesso",
-        "user_id": user_id
-    }
-
-
-
-@router.post("/my-subscription/reactivate")
-async def reactivate_my_subscription(current_user: dict = Depends(get_current_user)):
-    """
-    Reativa uma assinatura cancelada do usuário logado
-    Permite que o usuário reative sua própria assinatura
-    """
-    user_id = current_user["sub"]
-    
-    # Buscar assinatura
-    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
-    
-    if not subscription:
-        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada")
-    
-    if subscription.get("status") != SubscriptionStatus.CANCELLED:
-        raise HTTPException(status_code=400, detail="Apenas assinaturas canceladas podem ser reativadas")
-    
-    # Reativar localmente
-    await db.user_subscriptions.update_one(
-        {"user_id": user_id},
-        {"$set": {
-            "status": SubscriptionStatus.ACTIVE,
-            "pagbank_status": "ACTIVE",
-            "reactivated_at": datetime.now(timezone.utc).isoformat(),
-            "reactivated_by": "user",
-            "cancelled_at": None,
-            "cancelled_by": None
-        }}
-    )
-    
-    logger.info(f"[Subscription] Assinatura reativada pelo usuário: user={user_id}")
-    
-    return {
-        "success": True,
-        "message": "Assinatura reativada com sucesso! Você pode continuar acessando a plataforma."
-    }
-
-
-@router.post("/admin/reactivate-subscription/{user_id}")
-async def admin_reactivate_subscription(
-    user_id: str,
-    current_user: dict = Depends(get_current_user)
-):
-    """
-    Reativa a assinatura de um usuário específico (somente admin)
-    """
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Acesso negado")
-    
-    # Buscar assinatura
-    subscription = await db.user_subscriptions.find_one({"user_id": user_id})
-    
-    if not subscription:
-        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada para este usuário")
-    
-    if subscription.get("status") not in [SubscriptionStatus.CANCELLED, SubscriptionStatus.SUSPENDED]:
-        raise HTTPException(status_code=400, detail="Apenas assinaturas canceladas ou suspensas podem ser reativadas")
-    
-    # Reativar localmente
-    await db.user_subscriptions.update_one(
-        {"user_id": user_id},
-        {"$set": {
-            "status": SubscriptionStatus.ACTIVE,
-            "pagbank_status": "ACTIVE",
-            "reactivated_at": datetime.now(timezone.utc).isoformat(),
-            "reactivated_by": f"admin:{current_user['sub']}",
-            "cancelled_at": None,
-            "cancelled_by": None,
-            "suspended_at": None,
-            "overdue_months": 0,
-            "failed_payments_count": 0
-        }}
-    )
-    
-    logger.info(f"[Admin] Assinatura reativada pelo admin: user={user_id}, admin={current_user['sub']}")
-    
-    return {
-        "success": True,
-        "message": f"Assinatura do usuário reativada com sucesso",
-        "user_id": user_id
+        "message": "Assinatura do usuário cancelada DEFINITIVAMENTE (não pode ser reativada)",
+        "user_id": user_id,
+        "warning": "Esta operação é irreversível"
     }
 
 
@@ -1163,9 +1382,12 @@ async def sync_subscriptions_from_pagbank(current_user: dict = Depends(get_curre
         "SUSPENDED": SubscriptionStatus.SUSPENDED,
         "OVERDUE": SubscriptionStatus.OVERDUE,
         "CANCELED": SubscriptionStatus.CANCELLED,
+        "CANCELLED": SubscriptionStatus.CANCELLED,  # Variação do PagBank
         "TRIAL": SubscriptionStatus.TRIAL
     }
     local_status = status_mapping.get(pagbank_status, SubscriptionStatus.PENDING)
+    
+    logger.info(f"[Sync] PagBank status={pagbank_status}, mapeado para={local_status}")
     
     # Extrair info do cartão
     payment_methods = found_subscription.get("payment_method", [])

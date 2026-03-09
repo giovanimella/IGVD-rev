@@ -14,6 +14,7 @@ const FinancialPanel = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showUpdateCard, setShowUpdateCard] = useState(false);
 
@@ -70,19 +71,39 @@ const FinancialPanel = () => {
     try {
       const response = await axios.post(`${API_URL}/api/subscriptions/my-subscription/cancel`);
       if (response.data.success) {
-        toast.success('Assinatura cancelada com sucesso');
+        toast.success('Assinatura suspensa com sucesso. Você pode reativá-la a qualquer momento!');
         setShowCancelConfirm(false);
         // Recarregar dados
         fetchFinancialData();
       } else {
-        toast.error(response.data.message || 'Erro ao cancelar assinatura');
+        toast.error(response.data.message || 'Erro ao suspender assinatura');
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Erro ao cancelar assinatura';
+      const errorMsg = error.response?.data?.detail || 'Erro ao suspender assinatura';
       toast.error(errorMsg);
-      console.error('Erro ao cancelar:', error);
+      console.error('Erro ao suspender:', error);
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setReactivating(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/subscriptions/my-subscription/reactivate`);
+      if (response.data.success) {
+        toast.success('Assinatura reativada com sucesso! Bem-vindo de volta!');
+        // Recarregar dados
+        fetchFinancialData();
+      } else {
+        toast.error(response.data.message || 'Erro ao reativar assinatura');
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao reativar assinatura';
+      toast.error(errorMsg);
+      console.error('Erro ao reativar:', error);
+    } finally {
+      setReactivating(false);
     }
   };
 
@@ -219,12 +240,41 @@ const FinancialPanel = () => {
       )}
 
       {subscription?.status === 'suspended' && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <h4 className="font-semibold text-amber-900 mb-1">Assinatura Suspensa</h4>
+            <p className="text-sm text-amber-800 mb-3">
+              Sua assinatura está temporariamente suspensa. Você pode reativá-la a qualquer momento para voltar a ter acesso total à plataforma.
+            </p>
+            <Button
+              onClick={handleReactivateSubscription}
+              disabled={reactivating}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+            >
+              {reactivating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Reativando...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Reativar Assinatura
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {subscription?.status === 'cancelled' && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
           <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <h4 className="font-semibold text-red-900 mb-1">Conta Suspensa</h4>
+            <h4 className="font-semibold text-red-900 mb-1">Assinatura Cancelada</h4>
             <p className="text-sm text-red-800 mb-3">
-              Sua conta foi suspensa devido a inadimplência. Entre em contato conosco para regularizar.
+              Sua assinatura foi cancelada definitivamente. Entre em contato com o suporte para mais informações.
             </p>
             <div className="flex flex-wrap gap-2 text-sm">
               <a href="mailto:contato@ozoxx.com.br" className="text-red-700 underline">
@@ -326,21 +376,21 @@ const FinancialPanel = () => {
         )}
 
         {/* Ações da Assinatura */}
-        {subscription?.status !== 'cancelled' && (
+        {subscription?.status === 'active' && (
           <div className="px-6 pb-6">
             <div className="border-t border-slate-200 pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-outfit font-semibold text-slate-900">Gerenciar Assinatura</h4>
-                  <p className="text-sm text-slate-600">Cancele sua assinatura a qualquer momento</p>
+                  <p className="text-sm text-slate-600">Suspenda sua assinatura a qualquer momento (você pode reativar depois)</p>
                 </div>
                 <Button
                   variant="outline"
-                  className="text-red-600 border-red-200 hover:bg-red-50"
+                  className="text-amber-600 border-amber-200 hover:bg-amber-50"
                   onClick={() => setShowCancelConfirm(true)}
                 >
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Cancelar Assinatura
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Suspender Assinatura
                 </Button>
               </div>
             </div>
@@ -348,29 +398,32 @@ const FinancialPanel = () => {
         )}
       </div>
 
-      {/* Modal de Confirmação de Cancelamento */}
+      {/* Modal de Confirmação de Cancelamento/Suspensão */}
       {showCancelConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md mx-4 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
+              <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-amber-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-900">Cancelar Assinatura</h3>
-                <p className="text-sm text-slate-600">Esta ação não pode ser desfeita</p>
+                <h3 className="text-lg font-semibold text-slate-900">Suspender Assinatura</h3>
+                <p className="text-sm text-slate-600">Você pode reativar depois</p>
               </div>
             </div>
 
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-red-800">
-                <strong>Atenção:</strong> Ao cancelar sua assinatura, você perderá acesso a todos os benefícios da plataforma:
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-amber-900 mb-2">
+                <strong>Ao suspender sua assinatura:</strong>
               </p>
-              <ul className="text-sm text-red-700 mt-2 space-y-1 list-disc list-inside">
-                <li>Acesso aos treinamentos</li>
-                <li>Participação em reuniões</li>
-                <li>Suporte exclusivo</li>
+              <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
+                <li>Seu acesso aos recursos será pausado temporariamente</li>
+                <li>As cobranças mensais serão interrompidas</li>
+                <li>Você pode reativar a qualquer momento</li>
               </ul>
+              <p className="text-xs text-amber-700 mt-3 font-medium">
+                ✅ Esta é uma suspensão temporária, não um cancelamento definitivo!
+              </p>
             </div>
 
             <div className="flex gap-3">
@@ -383,17 +436,17 @@ const FinancialPanel = () => {
                 Manter Assinatura
               </Button>
               <Button
-                className="flex-1 bg-red-600 hover:bg-red-700"
+                className="flex-1 bg-amber-600 hover:bg-amber-700"
                 onClick={handleCancelSubscription}
                 disabled={cancelling}
               >
                 {cancelling ? (
                   <>
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    Cancelando...
+                    Suspendendo...
                   </>
                 ) : (
-                  'Confirmar Cancelamento'
+                  'Confirmar Suspensão'
                 )}
               </Button>
             </div>
@@ -488,25 +541,24 @@ const FinancialPanel = () => {
         </div>
       </div>
 
-      {/* Cancelar Assinatura */}
+      {/* Cancelar/Suspender Assinatura */}
       {subscription?.status !== 'cancelled' && subscription?.status !== 'suspended' && (
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h4 className="font-outfit font-semibold text-slate-900 mb-2">Cancelar Assinatura</h4>
+          <h4 className="font-outfit font-semibold text-slate-900 mb-2">Suspender Assinatura</h4>
           <p className="text-slate-600 text-sm mb-4">
-            Ao cancelar sua assinatura, você perderá acesso a todos os recursos da plataforma.
-            Esta ação é irreversível.
+            Ao suspender sua assinatura, você perderá acesso temporariamente aos recursos da plataforma, mas poderá reativar a qualquer momento.
           </p>
           <Button
             variant="outline"
-            className="text-red-600 border-red-600 hover:bg-red-50"
+            className="text-amber-600 border-amber-600 hover:bg-amber-50"
             onClick={() => {
-              if (window.confirm('Tem certeza que deseja cancelar sua assinatura? Esta ação é irreversível.')) {
-                toast.info('Entre em contato com o suporte para cancelar: contato@ozoxx.com.br');
+              if (window.confirm('Tem certeza que deseja suspender sua assinatura? Você poderá reativá-la depois.')) {
+                handleCancelSubscription();
               }
             }}
           >
-            <XCircle className="w-4 h-4 mr-2" />
-            Cancelar Assinatura
+            <AlertTriangle className="w-4 h-4 mr-2" />
+            Suspender Assinatura
           </Button>
         </div>
       )}

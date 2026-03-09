@@ -188,9 +188,9 @@ const AdminSubscriptions = () => {
     }
   }, [settings?.pagbank_token]);
 
-  // Cancelar assinatura de um usuário
+  // Suspender assinatura de um usuário
   const handleCancelUserSubscription = async (userId, userName) => {
-    if (!window.confirm(`Tem certeza que deseja cancelar a assinatura de ${userName}?`)) {
+    if (!window.confirm(`Tem certeza que deseja SUSPENDER a assinatura de ${userName}? (Pode ser reativada depois)`)) {
       return;
     }
 
@@ -198,11 +198,11 @@ const AdminSubscriptions = () => {
     try {
       const response = await axios.post(`${API_URL}/api/subscriptions/admin/cancel-subscription/${userId}`);
       if (response.data.success) {
-        toast.success('Assinatura cancelada com sucesso!');
+        toast.success('Assinatura suspensa com sucesso!');
         fetchData(); // Recarregar dados
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Erro ao cancelar assinatura';
+      const errorMsg = error.response?.data?.detail || 'Erro ao suspender assinatura';
       toast.error(errorMsg);
     } finally {
       setCancellingUser(null);
@@ -900,24 +900,7 @@ const AdminSubscriptions = () => {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {sub.status !== 'cancelled' ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 hover:bg-red-50"
-                          onClick={() => handleCancelUserSubscription(sub.user_id, sub.user_name)}
-                          disabled={cancellingUser === sub.user_id}
-                        >
-                          {cancellingUser === sub.user_id ? (
-                            <Loader className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <>
-                              <XCircle className="w-4 h-4 mr-1" />
-                              Cancelar
-                            </>
-                          )}
-                        </Button>
-                      ) : (
+                      {sub.status === 'suspended' || sub.status === 'cancelled' ? (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -931,6 +914,23 @@ const AdminSubscriptions = () => {
                             <>
                               <CheckCircle className="w-4 h-4 mr-1" />
                               Reativar
+                            </>
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-amber-600 hover:bg-amber-50"
+                          onClick={() => handleCancelUserSubscription(sub.user_id, sub.user_name)}
+                          disabled={cancellingUser === sub.user_id}
+                        >
+                          {cancellingUser === sub.user_id ? (
+                            <Loader className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <AlertTriangle className="w-4 h-4 mr-1" />
+                              Suspender
                             </>
                           )}
                         </Button>
