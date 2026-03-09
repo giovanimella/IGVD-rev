@@ -595,10 +595,14 @@ async def create_subscription(
         raise HTTPException(status_code=400, detail=error_msg)
     
     # Criar registro de assinatura
+    # Buscar nome do usuário no banco (token JWT não contém full_name)
+    user_data = await db.users.find_one({"id": user_id}, {"full_name": 1})
+    user_full_name = user_data.get("full_name", current_user.get("email", "")) if user_data else current_user.get("email", "")
+    
     subscription = UserSubscription(
         user_id=user_id,
         user_email=current_user["email"],
-        user_name=current_user["full_name"],
+        user_name=user_full_name,
         plan_id=plan["id"],
         monthly_amount=plan["amount"],
         pagbank_subscription_id=result.get("subscription_id"),
@@ -1556,11 +1560,15 @@ async def sync_subscriptions_from_pagbank(current_user: dict = Depends(get_curre
     local_plan = await db.subscription_plans.find_one({"pagbank_plan_id": plan_id})
     monthly_amount = local_plan.get("amount", 49.90) if local_plan else 49.90
     
+    # Buscar nome do usuário no banco (token JWT pode não ter full_name)
+    user_db = await db.users.find_one({"id": user_id}, {"full_name": 1})
+    user_full_name = user_db.get("full_name", user_email) if user_db else user_email
+    
     # Criar ou atualizar assinatura local
     subscription_data = {
         "user_id": user_id,
         "user_email": user_email,
-        "user_name": current_user.get("full_name", ""),
+        "user_name": user_full_name,
         "plan_id": local_plan.get("id") if local_plan else None,
         "monthly_amount": monthly_amount,
         "pagbank_subscription_id": found_subscription.get("id"),
