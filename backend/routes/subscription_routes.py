@@ -81,19 +81,44 @@ async def check_user_subscription_status(user_id: str) -> dict:
         }
     
     status = subscription.get("status")
+    next_billing_date = subscription.get("next_billing_date")
     
-    # Bloqueado se: SUSPENDED, CANCELLED, ou OVERDUE
-    is_blocked = status in [
-        SubscriptionStatus.SUSPENDED,
-        SubscriptionStatus.CANCELLED,
-        SubscriptionStatus.OVERDUE
-    ]
+    # Verificar se está dentro do período pago (mesmo se SUSPENDED/OVERDUE)
+    is_within_paid_period = False
+    if next_billing_date:
+        try:
+            # Converter para datetime se for string
+            if isinstance(next_billing_date, str):
+                from datetime import datetime
+                next_billing = datetime.fromisoformat(next_billing_date.replace('Z', '+00:00'))
+            else:
+                next_billing = next_billing_date
+            
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            is_within_paid_period = next_billing > now
+        except Exception as e:
+            logger.warning(f"Erro ao verificar data de cobrança: {e}")
     
-    # Ativo se: ACTIVE ou TRIAL
-    has_active = status in [
-        SubscriptionStatus.ACTIVE,
-        SubscriptionStatus.TRIAL
-    ]
+    # Lógica de bloqueio atualizada:
+    # - SUSPENDED/OVERDUE: bloqueado APENAS após a data de próxima cobrança
+    # - CANCELLED: sempre bloqueado
+    # - ACTIVE/TRIAL: nunca bloqueado
+    
+    if status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL]:
+        has_active = True
+        is_blocked = False
+    elif status in [SubscriptionStatus.SUSPENDED, SubscriptionStatus.OVERDUE]:
+        # Se ainda está dentro do período pago, permitir acesso
+        has_active = is_within_paid_period
+        is_blocked = not is_within_paid_period
+    elif status == SubscriptionStatus.CANCELLED:
+        has_active = False
+        is_blocked = True
+    else:
+        # Status desconhecido ou PENDING
+        has_active = status == SubscriptionStatus.PENDING
+        is_blocked = not has_active
     
     return {
         "has_active_subscription": has_active,
@@ -102,6 +127,7 @@ async def check_user_subscription_status(user_id: str) -> dict:
         "overdue_months": subscription.get("overdue_months", 0),
         "next_billing_date": subscription.get("next_billing_date"),
         "monthly_amount": subscription.get("monthly_amount"),
+        "is_within_paid_period": is_within_paid_period,
         "subscription": subscription
     }
 
@@ -908,9 +934,22 @@ async def cancel_my_subscription(current_user: dict = Depends(get_current_user))
     
     logger.info(f"[Subscription] Assinatura SUSPENSA no PagBank: user={user_id}, pagbank_id={pagbank_subscription_id}")
     
+    # Buscar data de próxima cobrança para informar ao usuário
+    next_billing_date = subscription.get("next_billing_date")
+    access_until_msg = ""
+    if next_billing_date:
+        try:
+            if isinstance(next_billing_date, str):
+                from datetime import datetime
+                next_billing = datetime.fromisoformat(next_billing_date.replace('Z', '+00:00'))
+                access_until_msg = f" Você terá acesso até {next_billing.strftime('%d/%m/%Y')}."
+        except:
+            pass
+    
     return {
         "success": True,
-        "message": "Assinatura suspensa com sucesso. Você pode reativá-la a qualquer momento."
+        "message": f"Assinatura suspensa com sucesso.{access_until_msg} Você pode reativá-la a qualquer momento.",
+        "next_billing_date": next_billing_date
     }
 
 

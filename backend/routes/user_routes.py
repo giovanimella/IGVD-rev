@@ -303,7 +303,7 @@ async def get_user_stage_history(
         "user_id": user_id,
         "full_name": user.get("full_name"),
         "current_stage": user.get("current_stage", "registro"),
-        "available_stages": ["registro", "documentos", "pagamento", "treinamento", "acolhimento", "completo"]
+        "available_stages": ["registro", "documentos_pf", "acolhimento", "treinamento_presencial", "vendas_campo", "documentos_pj", "completo"]
     }
 
 @router.delete("/{user_id}")

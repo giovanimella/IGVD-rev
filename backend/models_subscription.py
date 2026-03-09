@@ -280,4 +280,5 @@ class SubscriptionStatusResponse(BaseModel):
     overdue_months: int = 0
     next_billing_date: Optional[str] = None
     monthly_amount: Optional[float] = None
+    is_within_paid_period: bool = False  # Se ainda está dentro do período pago
     subscription: Optional[Dict[str, Any]] = None

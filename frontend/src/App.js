@@ -5,6 +5,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ChatProvider } from './contexts/ChatContext';
 import { PrivateRoute } from './components/PrivateRoute';
+import SubscriptionGuard from './components/SubscriptionGuard';
 import { Toaster } from './components/ui/sonner';
 import ChatWidget from './components/ChatWidget';
 
