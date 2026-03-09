@@ -422,46 +422,6 @@ class PagBankSubscriptionService:
             logger.error(f"[PagBank] Exceção ao criar assinatura: {e}")
             return {"success": False, "error": str(e)}
     
-    async def get_subscription(self, subscription_id: str) -> Dict[str, Any]:
-        """
-        Consulta status de uma assinatura
-        
-        Args:
-            subscription_id: ID da assinatura no PagBank (formato SUBS_XXXXXXXX-...)
-        
-        Returns:
-            Dict com dados da assinatura
-        """
-        if not self.bearer_token:
-            return {"success": False, "error": "Token Bearer não configurado"}
-        
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.get(
-                    f"{self.base_url}/subscriptions/{subscription_id}",
-                    headers=self.headers
-                )
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                return {
-                    "success": True,
-                    "subscription": data,
-                    "status": data.get("status"),
-                    "next_billing_date": data.get("next_invoice_at")
-                }
-            else:
-                return {
-                    "success": False,
-                    "error": f"HTTP {response.status_code}",
-                    "raw_response": response.json() if response.content else {}
-                }
-                
-        except Exception as e:
-            logger.error(f"[PagBank] Erro ao consultar assinatura: {e}")
-            return {"success": False, "error": str(e)}
-    
     async def cancel_subscription(self, subscription_id: str) -> Dict[str, Any]:
         """
         Cancela uma assinatura
@@ -693,6 +653,7 @@ class PagBankSubscriptionService:
                 # Informações do pagamento
                 payment_method = data.get("payment_method", [])
                 card_info = {}
+                
                 if payment_method and len(payment_method) > 0:
                     card = payment_method[0].get("card", {})
                     card_info = {
@@ -717,12 +678,6 @@ class PagBankSubscriptionService:
                     "customer": data.get("customer", {}),
                     "raw_response": data
                 }
-            elif response.status_code == 404:
-                return {
-                    "success": False,
-                    "error": "Assinatura não encontrada",
-                    "error_code": 404
-                }
             else:
                 error_data = response.json() if response.content else {}
                 return {
@@ -734,6 +689,94 @@ class PagBankSubscriptionService:
                 
         except Exception as e:
             logger.error(f"[PagBank] Erro ao consultar assinatura: {e}")
+            return {"success": False, "error": str(e)}
+
+    async def update_customer_billing_info(
+        self, 
+        customer_id: str,
+        encrypted_card: str,
+        security_code: str
+    ) -> Dict[str, Any]:
+        """
+        Atualiza dados de pagamento do assinante (customer)
+        
+        Endpoint: PUT /customers/{customer_id}/billing_info
+        Docs: https://developer.pagbank.com.br/reference/alterar-dados-de-pagamento-do-assinante
+        
+        Args:
+            customer_id: ID do customer no PagBank (formato CUST_XXXX)
+            encrypted_card: Cartão criptografado pelo SDK do PagBank
+            security_code: CVV do cartão
+        
+        Returns:
+            Dict com success e dados do cartão atualizado
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            # Payload conforme documentação PagBank
+            # billing_info é um array de objetos
+            payload = [{
+                "type": "CREDIT_CARD",
+                "card": {
+                    "encrypted": encrypted_card,
+                    "security_code": security_code
+                }
+            }]
+            
+            logger.info(f"[PagBank] Atualizando billing_info do customer: {customer_id}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.put(
+                    f"{self.base_url}/customers/{customer_id}/billing_info",
+                    json=payload,
+                    headers=self.headers
+                )
+            
+            logger.info(f"[PagBank] Status Code: {response.status_code}")
+            logger.info(f"[PagBank] Response: {response.text}")
+            
+            if response.status_code in [200, 201, 204]:
+                # Sucesso - retornar dados do cartão atualizado
+                data = response.json() if response.content else {}
+                
+                # Extrair informações do cartão da resposta
+                billing_info = data.get("billing_info", [])
+                card_info = {}
+                
+                if billing_info and len(billing_info) > 0:
+                    card = billing_info[0].get("card", {})
+                    card_info = {
+                        "card_last_digits": card.get("last_digits"),
+                        "card_brand": card.get("brand"),
+                        "card_first_digits": card.get("first_digits")
+                    }
+                
+                logger.info(f"[PagBank] Cartão atualizado com sucesso: {card_info}")
+                
+                return {
+                    "success": True,
+                    "message": "Cartão atualizado no PagBank",
+                    **card_info,
+                    "raw_response": data
+                }
+            else:
+                error_data = response.json() if response.content else {}
+                error_messages = error_data.get("error_messages", [])
+                error_msg = error_messages[0].get("description", f"HTTP {response.status_code}") if error_messages else f"HTTP {response.status_code}"
+                
+                logger.error(f"[PagBank] Erro ao atualizar billing_info: {response.status_code} - {response.text}")
+                
+                return {
+                    "success": False,
+                    "error": error_msg,
+                    "error_code": response.status_code,
+                    "raw_response": error_data
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Exceção ao atualizar billing_info: {e}")
             return {"success": False, "error": str(e)}
 
     async def list_subscriptions(self, offset: int = 0, limit: int = 100, status: str = None) -> Dict[str, Any]:

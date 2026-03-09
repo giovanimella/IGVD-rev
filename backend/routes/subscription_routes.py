@@ -1335,11 +1335,10 @@ async def update_my_payment_method(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Atualiza o método de pagamento da assinatura
+    Atualiza o método de pagamento da assinatura no PagBank
     
-    NOTA: A API do PagBank não permite atualizar cartão diretamente.
-    É necessário criar uma nova assinatura ou usar o portal do cliente.
-    Este endpoint está preparado para quando a funcionalidade estiver disponível.
+    Endpoint PagBank: PUT /customers/{customer_id}/billing_info
+    Permite atualizar cartão de crédito do assinante
     """
     user_id = current_user["sub"]
     
@@ -1348,21 +1347,52 @@ async def update_my_payment_method(
     if not subscription:
         raise HTTPException(status_code=404, detail="Assinatura não encontrada")
     
-    if subscription["status"] == SubscriptionStatus.CANCELLED:
-        raise HTTPException(status_code=400, detail="Assinatura cancelada")
+    if subscription.get("status") == SubscriptionStatus.CANCELLED:
+        raise HTTPException(status_code=400, detail="Não é possível atualizar cartão de assinatura cancelada")
     
-    # Por enquanto, apenas salvamos localmente
-    # A atualização real deve ser feita através do portal do cliente do PagBank
+    pagbank_customer_id = subscription.get("pagbank_customer_id")
+    
+    if not pagbank_customer_id:
+        raise HTTPException(
+            status_code=400, 
+            detail="Assinatura sem customer_id do PagBank. Entre em contato com o suporte."
+        )
+    
+    logger.info(f"[Subscription] Atualizando cartão: user={user_id}, customer={pagbank_customer_id}")
+    
+    # Atualizar no PagBank
+    service = await get_pagbank_subscription_service()
+    result = await service.update_customer_billing_info(
+        customer_id=pagbank_customer_id,
+        encrypted_card=update_request.encrypted_card,
+        security_code=update_request.card_security_code
+    )
+    
+    if not result.get("success"):
+        error_msg = result.get("error", "Erro ao atualizar cartão")
+        logger.error(f"[Subscription] Erro ao atualizar cartão: {error_msg}")
+        raise HTTPException(status_code=400, detail=error_msg)
+    
+    # Atualizar informações do cartão no banco local
+    card_last_digits = result.get("card_last_digits")
+    card_brand = result.get("card_brand")
+    
     await db.user_subscriptions.update_one(
         {"user_id": user_id},
         {"$set": {
+            "card_last_digits": card_last_digits,
+            "card_brand": card_brand,
             "updated_at": datetime.now(timezone.utc).isoformat()
         }}
     )
     
+    logger.info(f"[Subscription] Cartão atualizado com sucesso: user={user_id}, últimos dígitos={card_last_digits}")
+    
     return {
-        "message": "Para atualizar seu cartão, entre em contato com o suporte",
-        "note": "A API do PagBank atualmente requer que a atualização de cartão seja feita através do portal do cliente"
+        "success": True,
+        "message": "Cartão atualizado com sucesso!",
+        "card_last_digits": card_last_digits,
+        "card_brand": card_brand
     }
 
 

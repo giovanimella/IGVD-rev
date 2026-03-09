@@ -582,23 +582,32 @@ const UpdateCardModal = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     card_number: '',
     card_holder_name: '',
-    card_holder_cpf: '',
-    card_holder_birth_date: '',
     card_expiry: '',
     card_cvv: ''
   });
   const [updating, setUpdating] = useState(false);
+  const [publicKey, setPublicKey] = useState(null);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-  const formatCPF = (value) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
-      .replace(/(-\d{2})\d+?$/, '$1');
-  };
+  // Buscar chave pública do PagBank ao montar componente
+  useEffect(() => {
+    const fetchPublicKey = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/subscriptions/pagbank-public-key`);
+        if (response.data.public_key) {
+          setPublicKey(response.data.public_key);
+        } else {
+          toast.error('Erro ao carregar configuração de pagamento');
+        }
+      } catch (error) {
+        console.error('Erro ao buscar public key:', error);
+        toast.error('Erro ao carregar configuração de pagamento');
+      }
+    };
+
+    fetchPublicKey();
+  }, [API_URL]);
 
   const formatCardNumber = (value) => {
     return value
@@ -616,23 +625,73 @@ const UpdateCardModal = ({ onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!publicKey) {
+      toast.error('Configuração de pagamento não carregada. Recarregue a página.');
+      return;
+    }
+
     setUpdating(true);
 
     try {
-      // Em produção, usar PagBank SDK para gerar token
-      const cardToken = 'TOKEN_SIMULADO_' + Date.now();
+      // Verificar se o SDK do PagBank está carregado
+      if (typeof window.PagSeguro === 'undefined') {
+        toast.error('SDK do PagBank não carregado. Recarregue a página e tente novamente.');
+        setUpdating(false);
+        return;
+      }
 
-      await axios.put(`${API_URL}/api/subscriptions/my-subscription/payment-method`, {
-        card_token: cardToken,
-        card_holder_name: formData.card_holder_name,
-        card_holder_cpf: formData.card_holder_cpf.replace(/\D/g, ''),
-        card_holder_birth_date: formData.card_holder_birth_date
+      toast.info('Criptografando dados do cartão...');
+
+      // Extrair mês e ano da validade
+      const [expMonth, expYear] = formData.card_expiry.split('/');
+      const fullYear = '20' + expYear; // Converter AA para AAAA
+
+      // Criptografar cartão usando SDK do PagBank
+      const cardEncryption = window.PagSeguro.encryptCard({
+        publicKey: publicKey,
+        holder: formData.card_holder_name,
+        number: formData.card_number.replace(/\s/g, ''), // Remover espaços
+        expMonth: expMonth,
+        expYear: fullYear,
+        securityCode: formData.card_cvv
       });
 
-      toast.success('Cartão atualizado com sucesso!');
-      onSuccess();
+      // Verificar se houve erro na criptografia
+      if (cardEncryption.hasErrors) {
+        const errorMessages = cardEncryption.errors.map(err => err.message).join(', ');
+        toast.error(`Erro ao validar cartão: ${errorMessages}`);
+        setUpdating(false);
+        return;
+      }
+
+      const encryptedCard = cardEncryption.encryptedCard;
+
+      if (!encryptedCard) {
+        toast.error('Erro ao criptografar cartão. Tente novamente.');
+        setUpdating(false);
+        return;
+      }
+
+      toast.info('Atualizando cartão...');
+
+      // Enviar para o backend
+      const response = await axios.put(`${API_URL}/api/subscriptions/my-subscription/payment-method`, {
+        encrypted_card: encryptedCard,      // Cartão criptografado
+        card_holder_name: formData.card_holder_name,
+        card_security_code: formData.card_cvv  // CVV separado
+      });
+
+      if (response.data.success) {
+        toast.success('Cartão atualizado com sucesso!');
+        onSuccess();
+      } else {
+        toast.error(response.data.message || 'Erro ao atualizar cartão');
+      }
     } catch (error) {
-      toast.error('Erro ao atualizar cartão');
+      const errorMsg = error.response?.data?.detail || 'Erro ao atualizar cartão';
+      toast.error(errorMsg);
+      console.error('Erro ao atualizar cartão:', error);
     } finally {
       setUpdating(false);
     }
@@ -649,6 +708,16 @@ const UpdateCardModal = ({ onClose, onSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-blue-800">
+                <p className="font-medium mb-1">Atualização Segura</p>
+                <p>Seus dados são criptografados antes de serem enviados. Não armazenamos informações do seu cartão.</p>
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Número do Cartão *
@@ -676,32 +745,6 @@ const UpdateCardModal = ({ onClose, onSuccess }) => {
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
               required
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">CPF do Titular *</label>
-              <input
-                type="text"
-                value={formData.card_holder_cpf}
-                onChange={(e) => setFormData({...formData, card_holder_cpf: formatCPF(e.target.value)})}
-                placeholder="000.000.000-00"
-                maxLength={14}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Data de Nascimento *</label>
-              <input
-                type="date"
-                value={formData.card_holder_birth_date}
-                onChange={(e) => setFormData({...formData, card_holder_birth_date: e.target.value})}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                required
-              />
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -739,7 +782,7 @@ const UpdateCardModal = ({ onClose, onSuccess }) => {
             <Button
               type="submit"
               className="bg-cyan-500 hover:bg-cyan-600"
-              disabled={updating}
+              disabled={updating || !publicKey}
             >
               {updating ? 'Atualizando...' : 'Atualizar Cartão'}
             </Button>
