@@ -1391,6 +1391,19 @@ async def set_default_plan(
         "plan_name": plan["name"]
     }
 
+
+
+
+@router.put("/my-subscription/payment-method")
+async def update_my_payment_method(
+    update_request: UpdatePaymentMethodRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Atualiza o método de pagamento da assinatura no PagBank
+    
+    Endpoint PagBank: PUT /customers/{customer_id}/billing_info
+    Permite atualizar cartão de crédito do assinante
     """
     user_id = current_user["sub"]
     
@@ -1446,7 +1459,6 @@ async def set_default_plan(
         "card_last_digits": card_last_digits,
         "card_brand": card_brand
     }
-
 
 @router.post("/sync-from-pagbank")
 async def sync_subscriptions_from_pagbank(current_user: dict = Depends(get_current_user)):
