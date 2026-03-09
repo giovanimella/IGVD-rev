@@ -7,7 +7,7 @@ import aiohttp
 import json
 
 # Configurações
-BACKEND_URL = "https://admin-analytics-pro-2.preview.emergentagent.com"
+BACKEND_URL = "https://reactivation-bug-fix.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Credenciais do teste

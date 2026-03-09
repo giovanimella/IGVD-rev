@@ -8,7 +8,7 @@ import aiohttp
 import json
 from datetime import datetime, timezone
 
-BACKEND_URL = "https://admin-analytics-pro-2.preview.emergentagent.com"
+BACKEND_URL = "https://reactivation-bug-fix.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 async def test_complete_meeting_flow():
