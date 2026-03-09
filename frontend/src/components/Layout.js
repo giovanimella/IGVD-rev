@@ -78,8 +78,8 @@ const Layout = ({ children, hideRankingSidebar = false }) => {
   }, [user, location.pathname, isExemptPath]);
   
   const handleSubscribe = () => {
-    // Redirecionar para Profile com aba financeiro e parâmetro para abrir assinatura
-    navigate('/profile?tab=financial&action=subscribe');
+    // Redirecionar diretamente para a página de assinatura mensal
+    navigate('/onboarding/subscription');
   };
   
   const handleGoToProfile = () => {
