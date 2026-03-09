@@ -708,12 +708,6 @@ async def create_subscription(
         except Exception as e:
             logger.warning(f"[Subscription] Erro ao registrar aceite dos termos: {e}")
     
-    # Atualizar onboarding do usuário - avançar para etapa "acolhimento"
-    await db.users.update_one(
-        {"id": user_id},
-        {"$set": {"current_stage": "acolhimento"}}
-    )
-    
     return SubscriptionResponse(
         success=True,
         message="Assinatura criada com sucesso! Você agora tem acesso total à plataforma.",
