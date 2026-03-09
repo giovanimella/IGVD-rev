@@ -497,28 +497,56 @@ async def create_subscription(
     area_code = phone_clean[:2] if len(phone_clean) >= 10 else "11"
     phone_number = phone_clean[2:] if len(phone_clean) >= 10 else phone_clean
     
+    # IMPORTANTE: Verificar se já existe um customer_id para reutilizar
+    # Isso previne erro de tax_id duplicado ao reativar assinatura
+    pagbank_customer_id = None
+    
+    if existing and existing.get("pagbank_customer_id"):
+        # Reutilizar customer existente
+        pagbank_customer_id = existing.get("pagbank_customer_id")
+        logger.info(f"[Subscription] Reutilizando customer existente: {pagbank_customer_id}")
+    else:
+        # Tentar buscar customer por CPF no PagBank
+        cpf_clean = ''.join(filter(str.isdigit, subscription_request.customer_cpf))
+        search_result = await service.list_customers(cpf=cpf_clean)
+        
+        if search_result.get("success") and search_result.get("customers"):
+            customers = search_result.get("customers", [])
+            if len(customers) > 0:
+                pagbank_customer_id = customers[0].get("id")
+                logger.info(f"[Subscription] Customer encontrado no PagBank: {pagbank_customer_id}")
+    
     # Preparar dados do cliente conforme documentação PagBank (2024/2025)
-    # ESTRUTURA CORRETA:
-    # - phones usa "country" e "area" (não "country_code" e "area_code")
-    # - billing_info vai no CUSTOMER com o cartão criptografado
-    # - security_code vai separado no PAYMENT_METHOD
-    customer_data = {
-        "name": subscription_request.customer_name[:50],
-        "email": subscription_request.customer_email,
-        "tax_id": ''.join(filter(str.isdigit, subscription_request.customer_cpf)),
-        "phones": [{
-            "country": "55",   # country, não country_code!
-            "area": area_code, # area, não area_code!
-            "number": phone_number,
-            "type": "MOBILE"
-        }],
-        "billing_info": [{
-            "type": "CREDIT_CARD",
-            "card": {
-                "encrypted": subscription_request.encrypted_card  # Cartão criptografado
-            }
-        }]
-    }
+    if pagbank_customer_id:
+        # Se já existe customer, usar APENAS o ID (não enviar dados completos)
+        customer_data = {
+            "id": pagbank_customer_id
+        }
+        logger.info(f"[Subscription] Usando customer existente: {pagbank_customer_id}")
+    else:
+        # Se não existe, criar novo customer com dados completos
+        # ESTRUTURA CORRETA:
+        # - phones usa "country" e "area" (não "country_code" e "area_code")
+        # - billing_info vai no CUSTOMER com o cartão criptografado
+        # - security_code vai separado no PAYMENT_METHOD
+        customer_data = {
+            "name": subscription_request.customer_name[:50],
+            "email": subscription_request.customer_email,
+            "tax_id": ''.join(filter(str.isdigit, subscription_request.customer_cpf)),
+            "phones": [{
+                "country": "55",   # country, não country_code!
+                "area": area_code, # area, não area_code!
+                "number": phone_number,
+                "type": "MOBILE"
+            }],
+            "billing_info": [{
+                "type": "CREDIT_CARD",
+                "card": {
+                    "encrypted": subscription_request.encrypted_card  # Cartão criptografado
+                }
+            }]
+        }
+        logger.info(f"[Subscription] Criando novo customer para CPF: {subscription_request.customer_cpf}")
     
     result = await service.create_subscription(
         reference_id=f"user_{user_id}_{uuid.uuid4().hex[:8]}",
@@ -544,12 +572,15 @@ async def create_subscription(
         monthly_amount=plan["amount"],
         pagbank_subscription_id=result.get("subscription_id"),
         pagbank_subscription_code=result.get("subscription_code"),
+        pagbank_customer_id=result.get("customer_id") or pagbank_customer_id,  # Salvar customer_id para reutilizar depois
         status=SubscriptionStatus.ACTIVE if result.get("status") == "ACTIVE" else SubscriptionStatus.PENDING,
         started_at=datetime.now(timezone.utc).isoformat(),
         next_billing_date=result.get("next_billing_date"),
         card_last_digits=result.get("card_last_digits"),
         card_brand=result.get("card_brand")
     )
+    
+    logger.info(f"[Subscription] Customer ID salvo: {subscription.pagbank_customer_id}")
     
     # Salvar ou atualizar
     if existing:

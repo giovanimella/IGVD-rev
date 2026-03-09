@@ -390,9 +390,13 @@ class PagBankSubscriptionService:
                 
                 logger.info(f"[PagBank] Assinatura criada: id={data.get('id')}")
                 
+                # Extrair customer_id da resposta
+                customer_id = data.get("customer", {}).get("id") if isinstance(data.get("customer"), dict) else None
+                
                 return {
                     "success": True,
                     "subscription_id": data.get("id"),
+                    "customer_id": customer_id,  # ID do customer para reutilizar
                     "status": data.get("status"),
                     "next_billing_date": data.get("next_invoice_at"),
                     "card_last_digits": card_info.get("last_digits"),
@@ -541,6 +545,116 @@ class PagBankSubscriptionService:
         except Exception as e:
             logger.error(f"[PagBank] Erro ao ativar assinatura: {e}")
             return {"success": False, "error": str(e)}
+
+    async def list_customers(self, cpf: str = None, email: str = None, name: str = None) -> Dict[str, Any]:
+        """
+        Lista assinantes (customers) no PagBank
+        
+        Endpoint: GET /customers
+        Docs: https://developer.pagbank.com.br/reference/listar-assinantes
+        
+        Args:
+            cpf: CPF do assinante (sem formatação)
+            email: Email do assinante
+            name: Nome do assinante
+        
+        Returns:
+            Dict com lista de customers
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            params = {}
+            
+            # Parâmetro 'q' aceita CPF, email ou nome
+            if cpf:
+                params["q"] = ''.join(filter(str.isdigit, cpf))
+                logger.info(f"[PagBank] Buscando customer por CPF: {params['q']}")
+            elif email:
+                params["q"] = email
+                logger.info(f"[PagBank] Buscando customer por email: {email}")
+            elif name:
+                params["q"] = name
+                logger.info(f"[PagBank] Buscando customer por nome: {name}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(
+                    f"{self.base_url}/customers",
+                    params=params,
+                    headers=self.headers
+                )
+            
+            logger.info(f"[PagBank] Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                customers = data.get("customers", [])
+                
+                logger.info(f"[PagBank] Encontrados {len(customers)} customer(s)")
+                
+                return {
+                    "success": True,
+                    "customers": customers,
+                    "total": len(customers),
+                    "raw_response": data
+                }
+            else:
+                error_data = response.json() if response.content else {}
+                return {
+                    "success": False,
+                    "error": f"HTTP {response.status_code}",
+                    "raw_response": error_data
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Erro ao listar customers: {e}")
+            return {"success": False, "error": str(e)}
+    
+    async def get_customer(self, customer_id: str) -> Dict[str, Any]:
+        """
+        Consulta um customer específico pelo ID
+        
+        Endpoint: GET /customers/{customer_id}
+        Docs: https://developer.pagbank.com.br/reference/consultar-assinante
+        
+        Args:
+            customer_id: ID do customer no PagBank (formato CUST_XXXX)
+        
+        Returns:
+            Dict com dados do customer
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            logger.info(f"[PagBank] Consultando customer: {customer_id}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(
+                    f"{self.base_url}/customers/{customer_id}",
+                    headers=self.headers
+                )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                return {
+                    "success": True,
+                    "customer": data,
+                    "raw_response": data
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"HTTP {response.status_code}",
+                    "raw_response": response.json() if response.content else {}
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Erro ao consultar customer: {e}")
+            return {"success": False, "error": str(e)}
+
     
     async def get_subscription(self, subscription_id: str) -> Dict[str, Any]:
         """

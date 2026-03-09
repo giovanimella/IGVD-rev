@@ -129,6 +129,7 @@ class UserSubscription(BaseModel):
     # PagBank
     pagbank_subscription_id: Optional[str] = None  # ID da assinatura no PagBank
     pagbank_subscription_code: Optional[str] = None  # Código da assinatura
+    pagbank_customer_id: Optional[str] = None  # ID do customer no PagBank (CUST_XXXX) - para reutilizar
     
     # Status
     status: SubscriptionStatus = SubscriptionStatus.PENDING
