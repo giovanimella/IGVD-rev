@@ -22,7 +22,7 @@ from datetime import datetime
 import sys
 
 # Configurações
-BACKEND_URL = "https://reactivation-bug-fix.preview.emergentagent.com"
+BACKEND_URL = "https://vibrant-morse-1.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Credenciais
