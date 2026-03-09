@@ -473,8 +473,16 @@ async def create_subscription(
                 {"_id": 0}
             )
     else:
-        # Buscar plano ativo padrão
-        plan = await db.subscription_plans.find_one({"is_active": True}, {"_id": 0})
+        # Buscar plano ativo padrão (is_default=True)
+        plan = await db.subscription_plans.find_one(
+            {"is_active": True, "is_default": True}, 
+            {"_id": 0}
+        )
+        
+        # Se não houver plano marcado como padrão, pegar qualquer plano ativo
+        if not plan:
+            plan = await db.subscription_plans.find_one({"is_active": True}, {"_id": 0})
+            logger.warning(f"[Subscription] Nenhum plano padrão definido, usando primeiro plano ativo")
     
     if not plan:
         raise HTTPException(status_code=404, detail="Nenhum plano disponível. Configure um plano primeiro.")
@@ -1329,16 +1337,60 @@ async def delete_plan_local(
     }
 
 
-@router.put("/my-subscription/payment-method")
-async def update_my_payment_method(
-    update_request: UpdatePaymentMethodRequest,
+@router.put("/plans/{plan_id}/set-default")
+async def set_default_plan(
+    plan_id: str,
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Atualiza o método de pagamento da assinatura no PagBank
+    Define um plano como padrão para novas assinaturas (somente admin)
     
-    Endpoint PagBank: PUT /customers/{customer_id}/billing_info
-    Permite atualizar cartão de crédito do assinante
+    Quando um usuário cria assinatura sem especificar plan_id,
+    este plano será usado automaticamente.
+    
+    Apenas 1 plano pode ser padrão por vez.
+    """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Buscar plano por pagbank_plan_id ou id local
+    plan = await db.subscription_plans.find_one({"pagbank_plan_id": plan_id})
+    if not plan:
+        plan = await db.subscription_plans.find_one({"id": plan_id})
+    
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plano não encontrado")
+    
+    if not plan.get("is_active"):
+        raise HTTPException(
+            status_code=400,
+            detail="Não é possível definir um plano inativo como padrão. Ative o plano primeiro."
+        )
+    
+    # Remover is_default de TODOS os outros planos
+    await db.subscription_plans.update_many(
+        {},
+        {"$set": {"is_default": False}}
+    )
+    
+    # Marcar este plano como padrão
+    await db.subscription_plans.update_one(
+        {"id": plan["id"]},
+        {"$set": {
+            "is_default": True,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    logger.info(f"[Admin] Plano definido como padrão: {plan['name']} (id={plan['id']})")
+    
+    return {
+        "success": True,
+        "message": f"Plano '{plan['name']}' definido como padrão para novas assinaturas",
+        "plan_id": plan["id"],
+        "plan_name": plan["name"]
+    }
+
     """
     user_id = current_user["sub"]
     

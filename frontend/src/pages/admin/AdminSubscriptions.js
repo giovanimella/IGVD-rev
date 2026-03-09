@@ -21,6 +21,7 @@ const AdminSubscriptions = () => {
   const [showPlanForm, setShowPlanForm] = useState(false);
   const [cancellingUser, setCancellingUser] = useState(null);
   const [inactivatingPlan, setInactivatingPlan] = useState(null);
+  const [settingDefaultPlan, setSettingDefaultPlan] = useState(null);
   const [newPlan, setNewPlan] = useState({
     name: 'Mensalidade UniOzoxx',
     description: 'Acesso mensal à plataforma de treinamento',
@@ -187,6 +188,27 @@ const AdminSubscriptions = () => {
       fetchPagbankPlans();
     }
   }, [settings?.pagbank_token]);
+
+  // Definir plano como padrão
+  const handleSetDefaultPlan = async (planId, planName) => {
+    if (!window.confirm(`Definir "${planName}" como plano padrão para novas assinaturas?`)) {
+      return;
+    }
+
+    setSettingDefaultPlan(planId);
+    try {
+      const response = await axios.put(`${API_URL}/api/subscriptions/plans/${planId}/set-default`);
+      if (response.data.success) {
+        toast.success(`Plano "${planName}" definido como padrão!`);
+        fetchData(); // Recarregar dados
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Erro ao definir plano padrão';
+      toast.error(errorMsg);
+    } finally {
+      setSettingDefaultPlan(null);
+    }
+  };
 
   // Suspender assinatura de um usuário
   const handleCancelUserSubscription = async (userId, userName) => {
@@ -792,7 +814,11 @@ const AdminSubscriptions = () => {
               plans.map((plan) => (
                 <div
                   key={plan.id}
-                  className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:border-cyan-300 transition-colors"
+                  className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
+                    plan.is_default 
+                      ? 'border-cyan-400 bg-cyan-50 shadow-sm' 
+                      : 'border-slate-200 hover:border-cyan-300'
+                  }`}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
@@ -811,6 +837,11 @@ const AdminSubscriptions = () => {
                       }`}>
                         {plan.is_active ? 'Ativo' : 'Inativo'}
                       </span>
+                      {plan.is_default && (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-cyan-100 text-cyan-700 border border-cyan-300">
+                          ⭐ Plano Padrão
+                        </span>
+                      )}
                       {plan.pagbank_plan_id && (
                         <span className="text-xs text-slate-500 font-mono bg-slate-100 px-2 py-1 rounded">
                           PagBank: {plan.pagbank_plan_id}
@@ -820,7 +851,25 @@ const AdminSubscriptions = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    {/* Aqui você pode adicionar botões de ação futuramente */}
+                    {plan.is_active && !plan.is_default && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-cyan-600 hover:bg-cyan-50"
+                        onClick={() => handleSetDefaultPlan(plan.pagbank_plan_id || plan.id, plan.name)}
+                        disabled={settingDefaultPlan === (plan.pagbank_plan_id || plan.id)}
+                        title="Definir como plano padrão para novas assinaturas"
+                      >
+                        {settingDefaultPlan === (plan.pagbank_plan_id || plan.id) ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <>
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Definir como Padrão
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))
@@ -834,10 +883,19 @@ const AdminSubscriptions = () => {
           </div>
 
           {plans.length > 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-sm text-green-900">
-                <strong>✅ Pronto para uso:</strong> Você tem <strong>{plans.filter(p => p.is_active).length} plano(s) ativo(s)</strong> disponíveis para assinaturas. O plano ativo mais recente será usado automaticamente no onboarding.
-              </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Package className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-900">
+                  <p className="font-semibold mb-2">ℹ️ Como funciona o Plano Padrão</p>
+                  <ul className="space-y-1 text-blue-800">
+                    <li>• O <strong>plano padrão</strong> (marcado com ⭐) será usado automaticamente quando um usuário criar uma assinatura</li>
+                    <li>• Você pode ter <strong>vários planos ativos</strong>, mas apenas <strong>1 plano padrão</strong></li>
+                    <li>• Para trocar o plano padrão, clique em <strong>"Definir como Padrão"</strong> em outro plano</li>
+                    <li>• Se nenhum plano for marcado como padrão, o sistema usará o primeiro plano ativo encontrado</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           )}
         </div>

@@ -98,6 +98,7 @@ class SubscriptionPlan(BaseModel):
     # Configurações
     billing_cycle: str = "monthly"  # Ciclo de cobrança
     is_active: bool = True
+    is_default: bool = False  # Se este é o plano padrão para novas assinaturas
     
     # Timestamps
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
