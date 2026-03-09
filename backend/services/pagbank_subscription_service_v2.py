@@ -691,6 +691,96 @@ class PagBankSubscriptionService:
             logger.error(f"[PagBank] Erro ao consultar assinatura: {e}")
             return {"success": False, "error": str(e)}
 
+    async def update_customer(
+        self, 
+        customer_id: str,
+        name: str = None,
+        email: str = None,
+        phone_area: str = None,
+        phone_number: str = None
+    ) -> Dict[str, Any]:
+        """
+        Atualiza dados cadastrais do assinante (customer)
+        
+        Endpoint: PUT /customers/{customer_id}
+        Docs: https://developer.pagbank.com.br/reference/alterar-dados-cadastrais-do-assinante
+        
+        Args:
+            customer_id: ID do customer no PagBank (formato CUST_XXXX)
+            name: Nome completo do assinante (max 150 caracteres)
+            email: Email válido do assinante (max 60 caracteres)
+            phone_area: DDD do telefone
+            phone_number: Número do telefone
+        
+        Returns:
+            Dict com success e dados atualizados
+        """
+        if not self.bearer_token:
+            return {"success": False, "error": "Token Bearer não configurado"}
+        
+        try:
+            # Montar payload apenas com campos que foram fornecidos
+            payload = {}
+            
+            if name:
+                payload["name"] = name[:150]
+            
+            if email:
+                payload["email"] = email[:60]
+            
+            if phone_area and phone_number:
+                payload["phones"] = [{
+                    "country": "55",
+                    "area": phone_area,
+                    "number": phone_number,
+                    "type": "MOBILE"
+                }]
+            
+            if not payload:
+                return {"success": True, "message": "Nenhum dado para atualizar"}
+            
+            logger.info(f"[PagBank] Atualizando dados cadastrais do customer: {customer_id}")
+            logger.info(f"[PagBank] Payload: {payload}")
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.put(
+                    f"{self.base_url}/customers/{customer_id}",
+                    json=payload,
+                    headers=self.headers
+                )
+            
+            logger.info(f"[PagBank] Status Code: {response.status_code}")
+            logger.info(f"[PagBank] Response: {response.text}")
+            
+            if response.status_code in [200, 201, 204]:
+                data = response.json() if response.content else {}
+                
+                logger.info(f"[PagBank] Dados cadastrais atualizados com sucesso")
+                
+                return {
+                    "success": True,
+                    "message": "Dados cadastrais atualizados",
+                    "customer": data,
+                    "raw_response": data
+                }
+            else:
+                error_data = response.json() if response.content else {}
+                error_messages = error_data.get("error_messages", [])
+                error_msg = error_messages[0].get("description", f"HTTP {response.status_code}") if error_messages else f"HTTP {response.status_code}"
+                
+                logger.error(f"[PagBank] Erro ao atualizar dados cadastrais: {response.status_code} - {response.text}")
+                
+                return {
+                    "success": False,
+                    "error": error_msg,
+                    "error_code": response.status_code,
+                    "raw_response": error_data
+                }
+                
+        except Exception as e:
+            logger.error(f"[PagBank] Exceção ao atualizar dados cadastrais: {e}")
+            return {"success": False, "error": str(e)}
+
     async def update_customer_billing_info(
         self, 
         customer_id: str,

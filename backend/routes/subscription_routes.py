@@ -527,12 +527,29 @@ async def create_subscription(
     # Preparar dados do cliente conforme documentação PagBank (2024/2025)
     if pagbank_customer_id:
         # SOLUÇÃO PARA CUSTOMER EXISTENTE:
-        # Primeiro, atualizar os dados do cartão (billing_info) no customer existente
-        # Depois, criar a assinatura com apenas o ID
+        # 1. Atualizar dados cadastrais (nome, email, telefone)
+        # 2. Atualizar dados do cartão (billing_info)
+        # 3. Criar a assinatura com apenas o ID
         logger.info(f"[Subscription] Customer existente encontrado: {pagbank_customer_id}")
-        logger.info(f"[Subscription] Atualizando billing_info do customer antes de criar assinatura...")
         
-        # Atualizar billing_info do customer com o novo cartão
+        # 1. Atualizar dados cadastrais do customer (nome, email, telefone)
+        logger.info(f"[Subscription] Atualizando dados cadastrais do customer...")
+        update_customer_result = await service.update_customer(
+            customer_id=pagbank_customer_id,
+            name=subscription_request.customer_name[:150],
+            email=subscription_request.customer_email,
+            phone_area=area_code,
+            phone_number=phone_number
+        )
+        
+        if not update_customer_result.get("success"):
+            # Log do erro mas não bloqueia - dados cadastrais não são críticos
+            logger.warning(f"[Subscription] Aviso: Não foi possível atualizar dados cadastrais: {update_customer_result.get('error')}")
+        else:
+            logger.info(f"[Subscription] Dados cadastrais atualizados com sucesso!")
+        
+        # 2. Atualizar billing_info do customer com o novo cartão
+        logger.info(f"[Subscription] Atualizando billing_info do customer...")
         update_result = await service.update_customer_billing_info(
             customer_id=pagbank_customer_id,
             encrypted_card=subscription_request.encrypted_card,
@@ -549,7 +566,7 @@ async def create_subscription(
         
         logger.info(f"[Subscription] Billing_info atualizado com sucesso!")
         
-        # Agora criar assinatura usando apenas o ID do customer
+        # 3. Criar assinatura usando apenas o ID do customer
         customer_data = {
             "id": pagbank_customer_id
         }
