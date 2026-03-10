@@ -49,6 +49,22 @@ class WebhookLicenseeCreate(BaseModel):
     responsible_id: Optional[str] = None  # ID do Responsável - usado para associar ao Supervisor
 
 
+class WebhookLicenseeUpdate(BaseModel):
+    """Modelo para atualização de licenciado via webhook"""
+    id: str  # ID externo do sistema (obrigatório para identificar o usuário)
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    birthday: Optional[str] = None
+    leader_id: Optional[str] = None
+    leader_name: Optional[str] = None
+    kit_type: Optional[str] = None
+    responsible_id: Optional[str] = None  # Permite alterar o supervisor
+    cpf: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+
+
 class WebhookConfigUpdate(BaseModel):
     webhook_url: Optional[str] = None
     webhook_enabled: Optional[bool] = None
@@ -571,6 +587,314 @@ async def webhook_create_licensee(
             "supervisor_matched": supervisor_id is not None,
             "email_sent": email_sent
         }
+    }
+
+
+@router.put("/licensee")
+async def webhook_update_licensee(
+    data: WebhookLicenseeUpdate,
+    _: bool = Depends(verify_production_api_key)
+):
+    """
+    🚀 PRODUÇÃO - Webhook para atualizar dados de licenciado existente.
+    
+    Requer header X-API-Key com a chave de PRODUÇÃO configurada no sistema.
+    
+    ⚠️ IMPORTANTE: O recebimento de atualizações precisa estar HABILITADO no painel admin.
+    
+    O usuário é identificado pelo campo 'id' (ID externo).
+    
+    Campos que podem ser atualizados:
+    - full_name: Nome completo
+    - email: Email (será verificado se não está em uso por outro usuário)
+    - phone: Telefone
+    - birthday: Data de nascimento (YYYY-MM-DD)
+    - leader_id: ID do líder
+    - leader_name: Nome do líder
+    - kit_type: Kit adquirido
+    - responsible_id: ID do Responsável (altera supervisor)
+    - cpf: CPF
+    - city: Cidade
+    - state: Estado
+    """
+    
+    # Verificar se o recebimento está habilitado
+    config = await get_webhook_config()
+    if not config.get("webhook_receive_enabled", False):
+        await db.webhook_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "environment": "production",
+            "type": "incoming",
+            "event": "licensee_update_blocked",
+            "user_id": data.id,
+            "payload": data.model_dump(),
+            "blocked_reason": "Recebimento de atualizações via API está desabilitado",
+            "success": False,
+            "created_at": datetime.now().isoformat()
+        })
+        
+        raise HTTPException(
+            status_code=403, 
+            detail="Recebimento de atualizações via API está desabilitado. Entre em contato com o administrador."
+        )
+    
+    # Buscar usuário pelo ID externo
+    existing_user = await db.users.find_one({"id": data.id})
+    if not existing_user:
+        await db.webhook_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "environment": "production",
+            "type": "incoming",
+            "event": "licensee_update_not_found",
+            "user_id": data.id,
+            "payload": data.model_dump(),
+            "success": False,
+            "created_at": datetime.now().isoformat()
+        })
+        raise HTTPException(status_code=404, detail=f"Usuário com ID '{data.id}' não encontrado")
+    
+    # Verificar se novo email já está em uso por outro usuário
+    if data.email and data.email != existing_user.get("email"):
+        email_in_use = await db.users.find_one({"email": data.email, "id": {"$ne": data.id}})
+        if email_in_use:
+            raise HTTPException(status_code=400, detail=f"Email '{data.email}' já está em uso por outro usuário")
+    
+    # Montar objeto de atualização apenas com campos fornecidos
+    update_data = {}
+    updated_fields = []
+    
+    if data.full_name is not None:
+        update_data["full_name"] = data.full_name
+        updated_fields.append("full_name")
+    
+    if data.email is not None:
+        update_data["email"] = data.email
+        updated_fields.append("email")
+    
+    if data.phone is not None:
+        update_data["phone"] = data.phone
+        updated_fields.append("phone")
+    
+    if data.birthday is not None:
+        # Validar formato
+        try:
+            datetime.strptime(data.birthday, "%Y-%m-%d")
+            update_data["birthday"] = data.birthday
+            updated_fields.append("birthday")
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Data de nascimento '{data.birthday}' inválida. Use formato YYYY-MM-DD")
+    
+    if data.cpf is not None:
+        update_data["cpf"] = data.cpf
+        updated_fields.append("cpf")
+    
+    if data.city is not None:
+        update_data["city"] = data.city
+        updated_fields.append("city")
+    
+    if data.state is not None:
+        update_data["state"] = data.state
+        updated_fields.append("state")
+    
+    if data.leader_id is not None:
+        update_data["leader_id"] = data.leader_id
+        updated_fields.append("leader_id")
+    
+    if data.leader_name is not None:
+        update_data["leader_name"] = data.leader_name
+        updated_fields.append("leader_name")
+    elif data.leader_id is not None:
+        # Se apenas leader_id foi fornecido, buscar nome
+        leader = await db.users.find_one({"id": data.leader_id}, {"_id": 0, "full_name": 1})
+        if leader:
+            update_data["leader_name"] = leader.get("full_name")
+            updated_fields.append("leader_name")
+    
+    if data.kit_type is not None:
+        kit_type = data.kit_type.lower()
+        if kit_type in ["master", "senior"]:
+            update_data["kit_type"] = kit_type
+            updated_fields.append("kit_type")
+    
+    # Processar alteração de supervisor via responsible_id
+    supervisor_updated = False
+    new_supervisor_id = None
+    new_supervisor_name = None
+    
+    if data.responsible_id is not None:
+        if data.responsible_id == "":
+            # Remover supervisor
+            update_data["supervisor_id"] = None
+            update_data["supervisor_name"] = None
+            update_data["responsible_id"] = None
+            supervisor_updated = True
+            updated_fields.extend(["supervisor_id", "supervisor_name", "responsible_id"])
+        else:
+            # Buscar novo supervisor
+            supervisor = await db.users.find_one(
+                {"role": "supervisor", "external_id": data.responsible_id},
+                {"_id": 0, "id": 1, "full_name": 1}
+            )
+            
+            if supervisor:
+                new_supervisor_id = supervisor.get("id")
+                new_supervisor_name = supervisor.get("full_name")
+                update_data["supervisor_id"] = new_supervisor_id
+                update_data["supervisor_name"] = new_supervisor_name
+                update_data["responsible_id"] = data.responsible_id
+                supervisor_updated = True
+                updated_fields.extend(["supervisor_id", "supervisor_name", "responsible_id"])
+    
+    # Adicionar timestamp de atualização
+    update_data["updated_at"] = datetime.now().isoformat()
+    update_data["updated_via_webhook"] = True
+    
+    # Atualizar no banco
+    if update_data:
+        await db.users.update_one(
+            {"id": data.id},
+            {"$set": update_data}
+        )
+    
+    # Registrar log
+    await db.webhook_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "environment": "production",
+        "type": "incoming",
+        "event": "licensee_updated",
+        "user_id": data.id,
+        "payload": data.model_dump(),
+        "updated_fields": updated_fields,
+        "supervisor_updated": supervisor_updated,
+        "new_supervisor_id": new_supervisor_id,
+        "success": True,
+        "created_at": datetime.now().isoformat()
+    })
+    
+    return {
+        "success": True,
+        "message": "Licenciado atualizado com sucesso",
+        "data": {
+            "id": data.id,
+            "updated_fields": updated_fields,
+            "supervisor_updated": supervisor_updated,
+            "new_supervisor_id": new_supervisor_id,
+            "new_supervisor_name": new_supervisor_name
+        }
+    }
+
+
+@router.put("/sandbox/licensee")
+async def webhook_sandbox_update_licensee(
+    data: WebhookLicenseeUpdate,
+    _: bool = Depends(verify_sandbox_api_key)
+):
+    """
+    🧪 SANDBOX - Endpoint para testar atualização de licenciado.
+    
+    Simula a atualização sem modificar dados reais.
+    Use para validar o payload antes de enviar para produção.
+    """
+    
+    # Buscar usuário
+    existing_user = await db.users.find_one({"id": data.id})
+    
+    validation_result = {
+        "user_found": existing_user is not None,
+        "user_email": existing_user.get("email") if existing_user else None,
+        "user_name": existing_user.get("full_name") if existing_user else None,
+        "fields_to_update": [],
+        "warnings": [],
+        "would_update": False
+    }
+    
+    if not existing_user:
+        validation_result["warnings"].append(f"Usuário com ID '{data.id}' não encontrado")
+    else:
+        validation_result["would_update"] = True
+        
+        # Verificar campos que seriam atualizados
+        if data.full_name is not None:
+            validation_result["fields_to_update"].append({
+                "field": "full_name",
+                "old_value": existing_user.get("full_name"),
+                "new_value": data.full_name
+            })
+        
+        if data.email is not None:
+            # Verificar se email está em uso
+            if data.email != existing_user.get("email"):
+                email_in_use = await db.users.find_one({"email": data.email, "id": {"$ne": data.id}})
+                if email_in_use:
+                    validation_result["warnings"].append(f"Email '{data.email}' já está em uso por outro usuário")
+                    validation_result["would_update"] = False
+            
+            validation_result["fields_to_update"].append({
+                "field": "email",
+                "old_value": existing_user.get("email"),
+                "new_value": data.email
+            })
+        
+        if data.phone is not None:
+            validation_result["fields_to_update"].append({
+                "field": "phone",
+                "old_value": existing_user.get("phone"),
+                "new_value": data.phone
+            })
+        
+        if data.birthday is not None:
+            try:
+                datetime.strptime(data.birthday, "%Y-%m-%d")
+                validation_result["fields_to_update"].append({
+                    "field": "birthday",
+                    "old_value": existing_user.get("birthday"),
+                    "new_value": data.birthday
+                })
+            except ValueError:
+                validation_result["warnings"].append(f"Data '{data.birthday}' inválida. Use YYYY-MM-DD")
+                validation_result["would_update"] = False
+        
+        if data.responsible_id is not None:
+            supervisor = await db.users.find_one(
+                {"role": "supervisor", "external_id": data.responsible_id},
+                {"_id": 0, "id": 1, "full_name": 1}
+            )
+            
+            if supervisor:
+                validation_result["fields_to_update"].append({
+                    "field": "supervisor",
+                    "old_value": existing_user.get("supervisor_name"),
+                    "new_value": supervisor.get("full_name")
+                })
+            elif data.responsible_id != "":
+                validation_result["warnings"].append(f"Supervisor com external_id '{data.responsible_id}' não encontrado")
+    
+    # Registrar log do sandbox
+    log_entry = {
+        "id": str(uuid.uuid4()),
+        "environment": "sandbox",
+        "type": "incoming",
+        "event": "licensee_update_test",
+        "user_id": data.id,
+        "payload": data.model_dump(),
+        "validation_result": validation_result,
+        "success": True,
+        "created_at": datetime.now().isoformat()
+    }
+    await db.webhook_logs.insert_one(log_entry)
+    
+    return {
+        "sandbox": True,
+        "success": True,
+        "message": "SANDBOX: Simulação de atualização concluída",
+        "validation": validation_result,
+        "log_id": log_entry["id"],
+        "notes": [
+            f"{'✅' if validation_result['user_found'] else '❌'} Usuário {'encontrado' if validation_result['user_found'] else 'NÃO encontrado'}",
+            f"{'✅' if validation_result['would_update'] else '❌'} Atualização {'seria aceita' if validation_result['would_update'] else 'seria REJEITADA'}",
+            f"📝 {len(validation_result['fields_to_update'])} campo(s) seriam atualizados",
+            "ℹ️ Nenhum dado foi modificado - este é apenas um teste"
+        ]
     }
 
 
