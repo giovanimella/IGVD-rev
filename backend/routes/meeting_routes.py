@@ -197,6 +197,46 @@ async def get_all_stats(current_user: dict = Depends(get_current_user)):
     }
 
 
+@router.get("/{meeting_id}/participants/export")
+async def export_meeting_participants(
+    meeting_id: str,
+    current_user: dict = Depends(require_role(["admin", "supervisor"]))
+):
+    """
+    Exporta a lista de participantes de uma reunião (Admin/Supervisor)
+    Retorna dados formatados para exportação: Nome, Telefone, Email
+    """
+    # Buscar reunião
+    meeting = await db.meetings.find_one(
+        {"id": meeting_id},
+        {"_id": 0}
+    )
+    
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Reunião não encontrada")
+    
+    # Buscar participantes
+    participants = await db.meeting_participants.find(
+        {"meeting_id": meeting_id},
+        {"_id": 0, "name": 1, "phone": 1, "email": 1, "cpf": 1, "created_at": 1}
+    ).sort("name", 1).to_list(1000)
+    
+    return {
+        "meeting": {
+            "id": meeting["id"],
+            "title": meeting["title"],
+            "user_name": meeting["user_name"],
+            "location": meeting["location"],
+            "meeting_date": meeting["meeting_date"],
+            "meeting_time": meeting["meeting_time"],
+            "status": meeting["status"],
+            "participants_count": meeting["participants_count"]
+        },
+        "participants": participants,
+        "export_date": datetime.now(timezone.utc).isoformat()
+    }
+
+
 @router.get("/{meeting_id}")
 async def get_meeting(
     meeting_id: str,

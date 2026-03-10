@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import axios from 'axios';
-import { Save, Users, Trophy, Settings as SettingsIcon, TrendingUp, Loader } from 'lucide-react';
+import { Save, Users, Trophy, Settings as SettingsIcon, TrendingUp, Loader, Download, FileSpreadsheet, X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { toast } from 'sonner';
 
@@ -11,6 +11,9 @@ const AdminMeetings = () => {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [exportingMeeting, setExportingMeeting] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportData, setExportData] = useState(null);
 
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -48,6 +51,123 @@ const AdminMeetings = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleExportParticipants = async (meetingId) => {
+    setExportingMeeting(meetingId);
+    try {
+      const response = await axios.get(`${API_URL}/api/meetings/${meetingId}/participants/export`);
+      setExportData(response.data);
+      setShowExportModal(true);
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      toast.error('Erro ao exportar participantes');
+    } finally {
+      setExportingMeeting(null);
+    }
+  };
+
+  const downloadCSV = () => {
+    if (!exportData) return;
+
+    const { meeting, participants } = exportData;
+    
+    // Criar cabeçalho
+    const headers = ['Nome', 'Telefone', 'Email', 'CPF'];
+    
+    // Criar linhas
+    const rows = participants.map(p => [
+      p.name || '',
+      p.phone || '',
+      p.email || '',
+      p.cpf || ''
+    ]);
+    
+    // Juntar tudo
+    const csvContent = [
+      `Reunião: ${meeting.title}`,
+      `Licenciado: ${meeting.user_name}`,
+      `Local: ${meeting.location}`,
+      `Data: ${new Date(meeting.meeting_date).toLocaleDateString('pt-BR')} às ${meeting.meeting_time}`,
+      `Total de Participantes: ${meeting.participants_count}`,
+      '',
+      headers.join(';'),
+      ...rows.map(row => row.join(';'))
+    ].join('\n');
+    
+    // Criar blob e download
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `participantes_${meeting.title.replace(/\s+/g, '_')}_${meeting.meeting_date}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Arquivo CSV baixado com sucesso!');
+  };
+
+  const printParticipants = () => {
+    if (!exportData) return;
+
+    const { meeting, participants } = exportData;
+    
+    const printContent = `
+      <html>
+        <head>
+          <title>Lista de Participantes - ${meeting.title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { font-size: 18px; margin-bottom: 5px; }
+            .info { font-size: 12px; color: #666; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f5f5f5; font-weight: bold; }
+            tr:nth-child(even) { background-color: #fafafa; }
+            .footer { margin-top: 20px; font-size: 10px; color: #999; }
+          </style>
+        </head>
+        <body>
+          <h1>📋 Lista de Participantes</h1>
+          <div class="info">
+            <strong>Reunião:</strong> ${meeting.title}<br>
+            <strong>Licenciado:</strong> ${meeting.user_name}<br>
+            <strong>Local:</strong> ${meeting.location}<br>
+            <strong>Data:</strong> ${new Date(meeting.meeting_date).toLocaleDateString('pt-BR')} às ${meeting.meeting_time}<br>
+            <strong>Total:</strong> ${meeting.participants_count} participantes
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${participants.map((p, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${p.name || '-'}</td>
+                  <td>${p.phone || '-'}</td>
+                  <td>${p.email || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="footer">
+            Exportado em: ${new Date().toLocaleString('pt-BR')}
+          </div>
+        </body>
+      </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   if (loading) {
@@ -258,6 +378,7 @@ const AdminMeetings = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Participantes</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Pontos</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-slate-600 uppercase">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -299,6 +420,21 @@ const AdminMeetings = () => {
                         <span className="text-slate-400">-</span>
                       )}
                     </td>
+                    <td className="px-6 py-4 text-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleExportParticipants(meeting.id)}
+                        disabled={exportingMeeting === meeting.id || meeting.participants_count === 0}
+                        title={meeting.participants_count === 0 ? 'Sem participantes' : 'Exportar lista de participantes'}
+                      >
+                        {exportingMeeting === meeting.id ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -312,6 +448,119 @@ const AdminMeetings = () => {
             )}
           </div>
         </div>
+
+        {/* Modal de Exportação */}
+        {showExportModal && exportData && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+              {/* Header */}
+              <div style={{ background: 'linear-gradient(to right, rgb(58, 145, 155), rgb(27, 76, 81))' }} className="px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">{exportData.meeting.title}</h2>
+                      <p className="text-white/80 text-sm">
+                        {exportData.meeting.user_name} • {exportData.meeting.participants_count} participantes
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowExportModal(false)}
+                    className="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Info da Reunião */}
+              <div className="px-6 py-4 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div>
+                    <span className="text-slate-500 dark:text-slate-400">Local:</span>
+                    <span className="ml-2 font-medium text-slate-700 dark:text-slate-200">{exportData.meeting.location}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 dark:text-slate-400">Data:</span>
+                    <span className="ml-2 font-medium text-slate-700 dark:text-slate-200">
+                      {new Date(exportData.meeting.meeting_date).toLocaleDateString('pt-BR')} às {exportData.meeting.meeting_time}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 dark:text-slate-400">Status:</span>
+                    <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium ${
+                      exportData.meeting.status === 'closed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {exportData.meeting.status === 'closed' ? 'Fechada' : 'Em Andamento'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lista de Participantes */}
+              <div className="p-6 max-h-[50vh] overflow-y-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-100 dark:bg-slate-700 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase">#</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase">Nome</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase">Telefone</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase">Email</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-600">
+                    {exportData.participants.map((participant, index) => (
+                      <tr key={participant.id || index} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                        <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">{index + 1}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100">{participant.name}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">{participant.phone || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">{participant.email || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {exportData.participants.length === 0 && (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-slate-300 mx-auto mb-2" />
+                    <p className="text-slate-500">Nenhum participante cadastrado</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer com botões */}
+              <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {exportData.participants.length} participantes na lista
+                  </p>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={printParticipants}
+                      disabled={exportData.participants.length === 0}
+                    >
+                      <FileSpreadsheet className="w-4 h-4 mr-2" />
+                      Imprimir
+                    </Button>
+                    <Button
+                      onClick={downloadCSV}
+                      disabled={exportData.participants.length === 0}
+                      style={{ background: 'linear-gradient(to right, rgb(58, 145, 155), rgb(27, 76, 81))' }}
+                      className="text-white hover:opacity-90"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Baixar CSV
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
