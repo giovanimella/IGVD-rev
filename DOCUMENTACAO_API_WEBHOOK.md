@@ -5,8 +5,9 @@
 Esta documentação descreve os endpoints de integração via webhooks da plataforma. A API oferece:
 
 1. **Ambiente SANDBOX** 🧪: Para testes de integração (não cria dados reais)
-2. **Ambiente PRODUÇÃO** 🚀: Para cadastros reais de licenciados
-3. **Webhook de Saída**: Notificações quando licenciados completam o onboarding
+2. **Ambiente PRODUÇÃO** 🚀: Para cadastros e atualizações reais de licenciados
+3. **Atualização de Dados** 🔄: Para sincronizar alterações de dados de licenciados
+4. **Webhook de Saída**: Notificações quando licenciados completam o onboarding
 
 ---
 
@@ -242,6 +243,183 @@ curl -X POST "https://sua-plataforma.com/api/webhook/licensee" \
 | 401 | `Webhook de produção não configurado` | A API Key não foi configurada |
 | 401 | `API Key de produção inválida` | A API Key informada está incorreta |
 | 403 | `Recebimento de cadastros via API está desabilitado` | O admin desativou o recebimento |
+
+---
+
+## 🔄 ATUALIZAÇÃO DE LICENCIADO
+
+Além de cadastrar, a API permite **atualizar dados** de licenciados já existentes. Isso é útil quando os dados são alterados no sistema externo e precisam ser sincronizados.
+
+### 1. Testar Atualização (Sandbox)
+
+**Endpoint:**
+```
+PUT /api/webhook/sandbox/licensee
+```
+
+**Headers:**
+```
+Content-Type: application/json
+X-API-Key: sua_chave_sandbox_aqui
+```
+
+**Body (JSON):**
+
+| Campo | Tipo | Obrigatório | Descrição |
+|-------|------|-------------|-----------|
+| `id` | string | ✅ Sim | ID do licenciado (usado para identificar o usuário) |
+| `full_name` | string | ❌ Não | Novo nome completo |
+| `email` | string | ❌ Não | Novo email (verificação de duplicidade) |
+| `phone` | string | ❌ Não | Novo telefone |
+| `birthday` | string | ❌ Não | Nova data de nascimento (YYYY-MM-DD) |
+| `cpf` | string | ❌ Não | CPF |
+| `city` | string | ❌ Não | Cidade |
+| `state` | string | ❌ Não | Estado (UF) |
+| `leader_id` | string | ❌ Não | Novo ID do líder |
+| `leader_name` | string | ❌ Não | Novo nome do líder |
+| `kit_type` | string | ❌ Não | Tipo de kit (`master` ou `senior`) |
+| `responsible_id` | string | ❌ Não | Novo ID do responsável (altera supervisor) |
+
+> **Nota:** Apenas os campos enviados serão atualizados. Campos não incluídos no payload permanecerão inalterados.
+
+**Exemplo de Requisição (Sandbox):**
+
+```bash
+curl -X PUT "https://sua-plataforma.com/api/webhook/sandbox/licensee" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sua_chave_sandbox_aqui" \
+  -d '{
+    "id": "LIC-12345",
+    "phone": "11888887777",
+    "city": "São Paulo",
+    "state": "SP"
+  }'
+```
+
+**Resposta de Sucesso (Sandbox):**
+
+```json
+{
+  "sandbox": true,
+  "success": true,
+  "message": "SANDBOX: Simulação de atualização concluída",
+  "validation": {
+    "user_found": true,
+    "user_email": "joao@email.com",
+    "user_name": "João da Silva",
+    "fields_to_update": [
+      {
+        "field": "phone",
+        "old_value": "11999998888",
+        "new_value": "11888887777"
+      },
+      {
+        "field": "city",
+        "old_value": null,
+        "new_value": "São Paulo"
+      },
+      {
+        "field": "state",
+        "old_value": null,
+        "new_value": "SP"
+      }
+    ],
+    "warnings": [],
+    "would_update": true
+  },
+  "notes": [
+    "✅ Usuário encontrado",
+    "✅ Atualização seria aceita",
+    "📝 3 campo(s) seriam atualizados",
+    "ℹ️ Nenhum dado foi modificado - este é apenas um teste"
+  ]
+}
+```
+
+---
+
+### 2. Atualizar Licenciado (Produção)
+
+**Endpoint:**
+```
+PUT /api/webhook/licensee
+```
+
+**Headers:**
+```
+Content-Type: application/json
+X-API-Key: sua_chave_producao_aqui
+```
+
+**Body (JSON):** (mesmo formato do sandbox)
+
+**Exemplo de Requisição (Produção):**
+
+```bash
+curl -X PUT "https://sua-plataforma.com/api/webhook/licensee" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sua_chave_producao_aqui" \
+  -d '{
+    "id": "LIC-12345",
+    "full_name": "João da Silva Santos",
+    "phone": "11888887777",
+    "city": "São Paulo",
+    "state": "SP",
+    "responsible_id": "SUP-002"
+  }'
+```
+
+**Resposta de Sucesso (200 OK):**
+
+```json
+{
+  "success": true,
+  "message": "Licenciado atualizado com sucesso",
+  "data": {
+    "id": "LIC-12345",
+    "updated_fields": ["full_name", "phone", "city", "state", "supervisor_id", "supervisor_name", "responsible_id"],
+    "supervisor_updated": true,
+    "new_supervisor_id": "uuid-do-novo-supervisor",
+    "new_supervisor_name": "Novo Supervisor"
+  }
+}
+```
+
+**Respostas de Erro:**
+
+| Código | Mensagem | Descrição |
+|--------|----------|-----------|
+| 400 | `Email 'x@y.com' já está em uso por outro usuário` | O novo email já está sendo usado |
+| 400 | `Data de nascimento 'xxx' inválida. Use formato YYYY-MM-DD` | Formato de data incorreto |
+| 401 | `API Key de produção inválida` | A API Key está incorreta |
+| 403 | `Recebimento de atualizações via API está desabilitado` | O admin desativou atualizações |
+| 404 | `Usuário com ID 'xxx' não encontrado` | O ID informado não existe no sistema |
+
+---
+
+### Alteração de Supervisor via Atualização
+
+Para alterar o supervisor de um licenciado via webhook:
+
+1. Envie o campo `responsible_id` com o novo ID do responsável
+2. O sistema buscará um supervisor com `external_id` igual ao valor informado
+3. Se encontrar, fará a alteração automática
+
+**Exemplo - Alterar Supervisor:**
+```json
+{
+  "id": "LIC-12345",
+  "responsible_id": "SUP-002"
+}
+```
+
+**Exemplo - Remover Supervisor:**
+```json
+{
+  "id": "LIC-12345",
+  "responsible_id": ""
+}
+```
 
 ---
 
