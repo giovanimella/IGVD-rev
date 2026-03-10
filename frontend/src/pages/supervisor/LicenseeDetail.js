@@ -27,7 +27,17 @@ import {
   Bell,
   MoreHorizontal,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  CreditCard,
+  AlertTriangle,
+  TrendingUp,
+  Target,
+  Trophy,
+  MapPin,
+  FileCheck,
+  Shield,
+  DollarSign,
+  CalendarDays
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
@@ -40,6 +50,10 @@ const LicenseeDetail = () => {
   const [redemptions, setRedemptions] = useState([]);
   const [documents, setDocuments] = useState({ documents_pf: {}, documents_pj: {} });
   const [appointments, setAppointments] = useState([]);
+  const [subscription, setSubscription] = useState(null);
+  const [meetings, setMeetings] = useState([]);
+  const [certificates, setCertificates] = useState([]);
+  const [badges, setBadges] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('info');
@@ -71,6 +85,23 @@ const LicenseeDetail = () => {
       
       const userRedemptions = redemptionsRes.data.filter(r => r.user_id === id);
       setRedemptions(userRedemptions);
+
+      // Buscar dados adicionais (assinatura, reuniões, certificados, badges)
+      try {
+        const [subscriptionRes, meetingsRes, certificatesRes, badgesRes] = await Promise.all([
+          axios.get(`${API_URL}/api/subscriptions/user/${id}`).catch(() => ({ data: null })),
+          axios.get(`${API_URL}/api/meetings/user/${id}`).catch(() => ({ data: [] })),
+          axios.get(`${API_URL}/api/analytics/certificates/user/${id}`).catch(() => ({ data: [] })),
+          axios.get(`${API_URL}/api/analytics/badges/user/${id}`).catch(() => ({ data: [] }))
+        ]);
+        
+        setSubscription(subscriptionRes.data);
+        setMeetings(meetingsRes.data || []);
+        setCertificates(certificatesRes.data || []);
+        setBadges(badgesRes.data || []);
+      } catch (err) {
+        console.log('Alguns dados adicionais não puderam ser carregados:', err);
+      }
 
     } catch (error) {
       console.error('Erro ao buscar detalhes:', error);
@@ -378,11 +409,11 @@ const LicenseeDetail = () => {
             <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
               <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
                 <Clock className="w-5 h-5 mr-2 text-slate-600 dark:text-slate-400" />
-                Informações Adicionais
+                Informações Gerais
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="border-l-4 border-blue-500 pl-4">
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Status de Pagamento</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Taxa de Licença</p>
                   <p className="font-semibold text-slate-900 dark:text-white">
                     {licensee.payment_status === 'paid' ? (
                       <span className="text-green-600 dark:text-green-400 flex items-center">
@@ -423,6 +454,238 @@ const LicenseeDetail = () => {
                 </div>
               </div>
             </div>
+
+            {/* Assinatura / Mensalidade */}
+            <div className={`rounded-xl border p-6 ${
+              subscription?.status === 'ACTIVE' || subscription?.status === 'active'
+                ? 'bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200 dark:border-emerald-700/50'
+                : subscription?.status === 'SUSPENDED' || subscription?.status === 'suspended'
+                  ? 'bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-200 dark:border-amber-700/50'
+                  : 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-700/50'
+            }`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white flex items-center">
+                  <CreditCard className="w-5 h-5 mr-2 text-emerald-600 dark:text-emerald-400" />
+                  Assinatura / Mensalidade
+                </h3>
+                {subscription && (
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    subscription.status === 'ACTIVE' || subscription.status === 'active'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300'
+                      : subscription.status === 'SUSPENDED' || subscription.status === 'suspended'
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300'
+                        : subscription.status === 'OVERDUE' || subscription.status === 'overdue'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                          : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                  }`}>
+                    {subscription.status === 'ACTIVE' || subscription.status === 'active' ? '✓ Ativa' :
+                     subscription.status === 'SUSPENDED' || subscription.status === 'suspended' ? '⏸ Suspensa' :
+                     subscription.status === 'OVERDUE' || subscription.status === 'overdue' ? '⚠ Inadimplente' :
+                     subscription.status === 'CANCELLED' || subscription.status === 'cancelled' ? '✗ Cancelada' :
+                     subscription.status === 'PENDING' || subscription.status === 'pending' ? '⏳ Pendente' :
+                     subscription.status}
+                  </span>
+                )}
+              </div>
+
+              {subscription ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white/60 dark:bg-white/5 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Valor Mensal</p>
+                    </div>
+                    <p className="text-xl font-bold text-slate-900 dark:text-white">
+                      R$ {subscription.monthly_amount?.toFixed(2) || '0,00'}
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white/60 dark:bg-white/5 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CalendarDays className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Próxima Cobrança</p>
+                    </div>
+                    <p className="text-lg font-semibold text-slate-900 dark:text-white">
+                      {subscription.next_billing_date 
+                        ? new Date(subscription.next_billing_date).toLocaleDateString('pt-BR')
+                        : '-'}
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white/60 dark:bg-white/5 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Data de Início</p>
+                    </div>
+                    <p className="text-lg font-semibold text-slate-900 dark:text-white">
+                      {subscription.start_date 
+                        ? new Date(subscription.start_date).toLocaleDateString('pt-BR')
+                        : subscription.created_at 
+                          ? new Date(subscription.created_at).toLocaleDateString('pt-BR')
+                          : '-'}
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white/60 dark:bg-white/5 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                      <p className="text-xs text-slate-500 dark:text-slate-400">ID PagBank</p>
+                    </div>
+                    <p className="text-xs font-mono text-slate-700 dark:text-slate-300 break-all">
+                      {subscription.pagbank_subscription_id || '-'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6 bg-white/60 dark:bg-white/5 rounded-lg">
+                  <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-2" />
+                  <p className="text-slate-600 dark:text-slate-400">Nenhuma assinatura encontrada</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-500">O licenciado ainda não possui assinatura ativa</p>
+                </div>
+              )}
+            </div>
+
+            {/* Estatísticas e Métricas */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-4 text-center">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{meetings.length || 0}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Reuniões</p>
+              </div>
+              
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-4 text-center">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Target className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {meetings.reduce((acc, m) => acc + (m.participants_count || 0), 0)}
+                </p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Participantes</p>
+              </div>
+              
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-4 text-center">
+                <div className="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <FileCheck className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{certificates.length || 0}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Certificados</p>
+              </div>
+              
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-4 text-center">
+                <div className="w-12 h-12 bg-rose-100 dark:bg-rose-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Trophy className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+                </div>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">{badges.length || 0}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Badges</p>
+              </div>
+            </div>
+
+            {/* Dados Pessoais Completos */}
+            <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+              <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
+                <User className="w-5 h-5 mr-2 text-slate-600 dark:text-slate-400" />
+                Dados Pessoais Completos
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
+                  <User className="w-5 h-5 text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Nome Completo</p>
+                    <p className="font-medium text-slate-900 dark:text-white">{licensee.full_name}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
+                  <Mail className="w-5 h-5 text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Email</p>
+                    <p className="font-medium text-slate-900 dark:text-white">{licensee.email}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
+                  <Phone className="w-5 h-5 text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Telefone</p>
+                    <p className="font-medium text-slate-900 dark:text-white">{licensee.phone || '-'}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
+                  <FileText className="w-5 h-5 text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">CPF</p>
+                    <p className="font-medium text-slate-900 dark:text-white">{licensee.cpf || '-'}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
+                  <MapPin className="w-5 h-5 text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Cidade / Estado</p>
+                    <p className="font-medium text-slate-900 dark:text-white">
+                      {licensee.city && licensee.state ? `${licensee.city} / ${licensee.state}` : '-'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg">
+                  <Hash className="w-5 h-5 text-slate-400" />
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">ID do Usuário</p>
+                    <p className="font-medium text-slate-900 dark:text-white font-mono text-xs">{licensee.id}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reuniões Recentes */}
+            {meetings.length > 0 && (
+              <div className="bg-white dark:bg-[#1b4c51] rounded-xl border border-slate-200 dark:border-white/10 p-6">
+                <h3 className="text-lg font-outfit font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                  Reuniões Recentes
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 dark:bg-white/5">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 dark:text-slate-400">Título</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 dark:text-slate-400">Data</th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 dark:text-slate-400">Local</th>
+                        <th className="px-4 py-2 text-center text-xs font-medium text-slate-600 dark:text-slate-400">Participantes</th>
+                        <th className="px-4 py-2 text-center text-xs font-medium text-slate-600 dark:text-slate-400">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-white/10">
+                      {meetings.slice(0, 5).map((meeting) => (
+                        <tr key={meeting.id} className="hover:bg-slate-50 dark:hover:bg-white/5">
+                          <td className="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">{meeting.title}</td>
+                          <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">
+                            {new Date(meeting.meeting_date).toLocaleDateString('pt-BR')}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400">{meeting.location}</td>
+                          <td className="px-4 py-3 text-sm text-center font-medium text-slate-900 dark:text-white">
+                            {meeting.participants_count || 0}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              meeting.status === 'closed' 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                            }`}>
+                              {meeting.status === 'closed' ? 'Fechada' : 'Em Andamento'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

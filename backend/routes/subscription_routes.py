@@ -726,6 +726,25 @@ async def get_my_subscription(current_user: dict = Depends(get_current_user)):
     return SubscriptionStatusResponse(**status_info)
 
 
+@router.get("/user/{user_id}")
+async def get_user_subscription(
+    user_id: str,
+    current_user: dict = Depends(require_role(["admin", "supervisor"]))
+):
+    """Obtém a assinatura de um usuário específico (Admin/Supervisor)"""
+    
+    # Buscar assinatura do usuário
+    subscription = await db.user_subscriptions.find_one(
+        {"user_id": user_id},
+        {"_id": 0}
+    )
+    
+    if not subscription:
+        return None
+    
+    return subscription
+
+
 @router.get("/my-payments")
 async def get_my_payments(current_user: dict = Depends(get_current_user)):
     """Obtém o histórico de pagamentos do usuário"""

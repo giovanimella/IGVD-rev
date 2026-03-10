@@ -237,6 +237,22 @@ async def export_meeting_participants(
     }
 
 
+@router.get("/user/{user_id}")
+async def get_user_meetings(
+    user_id: str,
+    current_user: dict = Depends(require_role(["admin", "supervisor"]))
+):
+    """
+    Obtém todas as reuniões de um usuário específico (Admin/Supervisor)
+    """
+    meetings = await db.meetings.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).sort("meeting_date", -1).to_list(100)
+    
+    return meetings
+
+
 @router.get("/{meeting_id}")
 async def get_meeting(
     meeting_id: str,

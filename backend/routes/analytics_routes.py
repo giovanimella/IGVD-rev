@@ -715,3 +715,45 @@ async def get_licensee_detail(
         }
     }
 
+
+@router.get("/certificates/user/{user_id}")
+async def get_user_certificates(
+    user_id: str,
+    current_user: dict = Depends(require_role(["admin", "supervisor"]))
+):
+    """
+    Obtém todos os certificados de um usuário específico (Admin/Supervisor)
+    """
+    certificates = await db.certificates.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).sort("issued_at", -1).to_list(100)
+    
+    return certificates
+
+
+@router.get("/badges/user/{user_id}")
+async def get_user_badges(
+    user_id: str,
+    current_user: dict = Depends(require_role(["admin", "supervisor"]))
+):
+    """
+    Obtém todos os badges de um usuário específico (Admin/Supervisor)
+    """
+    user_badges = await db.user_badges.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Enriquecer com dados dos badges
+    badges = []
+    for ub in user_badges:
+        badge = await db.badges.find_one({"id": ub["badge_id"]}, {"_id": 0})
+        if badge:
+            badges.append({
+                **badge,
+                "earned_at": ub.get("earned_at")
+            })
+    
+    return badges
+
