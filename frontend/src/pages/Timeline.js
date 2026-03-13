@@ -632,7 +632,6 @@ const Timeline = () => {
               </div>
             ))
           )}
-          )}
 
           {/* Load More */}
           {hasMore && posts.length > 0 && (
