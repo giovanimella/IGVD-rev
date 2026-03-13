@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime
 
 # Configuration from frontend/.env
-BASE_URL = "https://vibrant-morse-1.preview.emergentagent.com/api"
+BASE_URL = "https://crm-dev-3.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@ozoxx.com"
 ADMIN_PASSWORD = "admin123"
 

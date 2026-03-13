@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 
 # Configurações
-BASE_URL = "https://vibrant-morse-1.preview.emergentagent.com/api"
+BASE_URL = "https://crm-dev-3.preview.emergentagent.com/api"
 MONGO_URL = "mongodb://localhost:27017"
 DB_NAME = "test_database"
 

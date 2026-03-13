@@ -1,180 +1,133 @@
 <analysis>**original_problem_statement:**
-O usuário solicitou inicialmente duas funcionalidades:
-1.  Um menu dropdown ao clicar na foto de perfil do usuário no canto superior direito, com opções de perfil e logout.
-2.  A correção de um bug no sistema de alteração de etapas de onboarding, onde um administrador não conseguia alterar a etapa de um usuário licenciado corretamente pois as etapas disponíveis estavam desatualizadas.
+The user initially reported a critical issue with the PagBank subscription integration: after applying a fix for reactivating suspended subscriptions, the creation of new subscriptions stopped working.
 
-Durante a sessão, o usuário adicionou vários outros pedidos:
--   Alterar o redirecionamento do logout para a landing page () em vez da página de login.
--   Reorganizar o painel de administração, movendo itens do menu lateral () para uma página centralizada () com abas.
--   Corrigir um erro na página de Relatório de Vendas.
--   Tornar a barra lateral de ranking () recolhível.
--   Criar um novo ranking baseado na média das notas das avaliações.
--   Gerar documentação detalhada sobre as funcionalidades do sistema e os arquivos do sistema de certificados.
--   **A requisição mais recente e principal:** Implementar um pequeno CRM para que os usuários licenciados registrem as apresentações de produtos que realizam. Este sistema deve incluir:
-    -   Um formulário para registrar apresentações com dados do cliente (nome, email, telefone) e uma foto.
-    -   Uma meta de 2 apresentações por dia (exceto fins de semana), com um lembrete no painel do usuário.
-    -   Um novo **ranking de frequência** (principal) que mede a consistência em atingir a meta diária, resetando mensalmente.
-    -   Um sistema de **acompanhamento pós-venda**: se uma apresentação for marcada como vendida, deve criar automaticamente eventos na agenda do usuário para 3 dias, 2 semanas e 1 mês depois. Se não for vendida, criar um lembrete para 1 semana depois.
-    -   Um sistema de **categorias de usuários**, permitindo ao administrador criar categorias e associá-las a usuários e módulos, para controlar a visibilidade do conteúdo.
+Throughout the session, the user requested several additional features and changes:
+1.  **Subscription Flow Rework:** Remove the payment step from the onboarding process. Instead, implement a mandatory, non-closable popup for new users who log in without an active subscription, forcing them to subscribe.
+2.  **Access Control:** For users with suspended or overdue subscriptions, block access to all parts of the application *except* the profile/financial page after their currently paid period expires. This allows them to reactivate their subscription.
+3.  **Terms & Conditions:** Change the user acceptance of Terms & Conditions from a separate popup to a mandatory checkbox on the subscription payment page, logging the user's IP, date, and time of acceptance.
+4.  **Meeting Participant Export:** Add a feature for Admins to export the list of participants (name, phone, email) from a specific meeting into a CSV file.
+5.  **Supervisor Dashboard Enhancement:** Improve the dashboard that supervisors use to view their licensees' details by adding more information, such as subscription status, meeting history, and certificates.
+6.  **Webhook Enhancement:** The existing webhook for creating new users from an external system should be enhanced to also support updating the data of existing users.
+7.  **UI/UX Improvements:** Redesign the community timeline to look more like a modern social media feed, including support for clickable hashtags.
+8.  **New Major Features (PRODUCT REQUIREMENTS):**
+    *   **CRM de Prospects:** A mini-CRM within the platform for licensees to manage their sales prospects. It should feature a visual Kanban-style pipeline (like Trello or RD Station), fields for customer data, and sales reporting dashboards. (This is the current priority).
+    *   **Simulador de Ganhos (Earnings Simulator):** A tool for licensees to simulate their potential monthly income based on sales and recruitment. This feature was explicitly **postponed** by the user.
 
-**User's preferred language**:
-Português (Brasil). O próximo agente DEVE responder em português.
+**User's preferred language**: The user communicates in Portuguese (Brazil). The next agent **MUST** respond in **pt-br**.
 
 **what currently exists?**
--   Uma aplicação full-stack (React + FastAPI + MongoDB) funcional com três tipos de usuários: , , e .
--   **Funcionalidades implementadas nesta sessão:** menu de perfil com logout, correção do sistema de etapas de onboarding, reorganização completa do painel do admin com abas, correção de bug na página de vendas, barra de ranking recolhível e um novo ranking por média de notas com um seletor para alternar entre os rankings.
--   **Funcionalidade em desenvolvimento:** A implementação do CRM e do sistema de categorias está em andamento. No backend, os  e arquivos de  foram criados. No frontend, as novas páginas foram criadas e o  e  começaram a ser modificados.
+The project is a full-stack application with a React frontend, FastAPI backend, and MongoDB database. It features a robust user authentication and role system (Admin, Supervisor, Licenciado), an onboarding process for new users, and integration with PagBank for handling recurring subscription payments. Key functionalities include user and meeting management, a community timeline, and a webhook for user creation. All previously reported bugs with the PagBank integration have been resolved, and the subscription flow has been significantly reworked.
 
 **Last working item**:
--   **Last item agent was working:** Implementação do grande recurso de CRM, Ranking de Frequência e Categorias de Usuário. O agente estava no meio da implementação do frontend, especificamente adicionando os cards de lembrete (meta diária de apresentações e compromissos da agenda) no painel do usuário licenciado ().
--   **Status:** IN PROGRESS
--   **Agent Testing Done:** N
--   **Which testing method agent to use?** both. O backend precisa de testes para os novos endpoints de CRM, categorias e ranking. O frontend precisa de testes para a nova página de CRM, a página de gerenciamento de categorias, o painel atualizado e a barra de ranking.
--   **User Testing Done:** N
+*   **Last item agent was working:** The agent was beginning the implementation of the new **CRM de Prospects** feature. It had just gathered and confirmed the initial requirements with the user.
+*   **Status:** NOT STARTED
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Both backend testing agent and frontend testing agent, as this is a major new feature.
+*   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1 (P0):** Concluir a implementação do CRM, Ranking de Frequência e Categorias de Usuário.
-
-**Issues Detail:**
--   **Issue 1: Concluir a implementação do CRM, Ranking de Frequência e Categorias de Usuário.**
-    -   **Attempted fixes:** N/A (É a implementação de um novo recurso).
-    -   **Next debug checklist:**
-        1.  **Backend:**
-            -   Confirmar o registro das novas rotas (, ) no arquivo .
-            -   Implementar a lógica completa de CRUD para apresentações, incluindo o upload de fotos.
-            -   Implementar a lógica completa do ranking de frequência em .
-            -   Implementar a criação automática de eventos na agenda com base no status vendido da apresentação.
-            -   Atualizar os endpoints de usuário e módulo para suportar o filtro por categorias.
-        2.  **Frontend:**
-            -   Finalizar e testar os cards de lembrete no .
-            -   Completar a página , incluindo o formulário de criação com upload de arquivo e a lista de apresentações.
-            -   Completar a página  para o gerenciamento de categorias.
-            -   Adicionar seletores de categoria nas UIs de gerenciamento de usuários e módulos.
-            -   **Adicionar links de navegação** no menu lateral () ou no painel do sistema () para as novas páginas  e .
-    -   **Why fix this issue and what will be achieved with the fix?** É o principal recurso solicitado pelo usuário para incentivar a atividade de vendas e permitir a segmentação de conteúdo.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on other issue:** None
+There are no pending issues or bugs. The work is focused on new feature development.
 
 **In progress Task List**:
--   **Task 1: Implementação do CRM, Ranking de Frequência e Categorias de Usuário.**
-    -   **Where to resume:** O agente acabou de inserir o código JSX para os cards de lembrete no . O próximo passo é validar o registro das rotas do backend e depois continuar o desenvolvimento do frontend, adicionando os links de navegação e finalizando as novas páginas.
-    -   **What will be achieved with this?** Um sistema de CRM para apresentações de vendas, um novo sistema de ranking, acompanhamento pós-venda automatizado e categorização de usuários/conteúdo.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on something:** No.
+*   **Task 1: Implementar CRM de Prospects** (P0 - HIGHEST PRIORITY)
+    *   **Where to resume:** Begin the backend implementation. The plan is to create new database models and API routes. The immediate next step is to create the Pydantic and Motor models for , , and . A good starting point would be creating a new file: .
+    *   **What will be achieved with this?** This will deliver a core new feature requested by the user, allowing licensees to manage their sales pipeline directly within the application.
+    *   **Status:** NOT STARTED
+    *   **Should Test frontend/backend/both after fix?** Both
+    *   **Blocked on something:** No.
 
 **Upcoming and Future Tasks**
--   Nenhuma tarefa futura foi mencionada pelo usuário. O foco total deve ser na conclusão da tarefa atual.
+*   **Upcoming Tasks:**
+    *   **Task 1: Implementar Simulador de Ganhos (Earnings Simulator)** (P1)
+        *   **Description:** Create a tool that allows licensees to calculate potential earnings from sales and recruiting new members, based on commission rules set by an Admin. The user explicitly stated: Deixe o simulador para depois, foca no CRM (Leave the simulator for later, focus on the CRM).
+        *   **File/Method Reference:** This will require new backend endpoints (likely in a new ) and a new frontend page/component.
 
 **Completed work in this session**
--   **Menu Dropdown no Perfil:** Implementado em .
--   **Correção das Etapas de Onboarding:** Corrigido em  e .
--   **Reorganização do Painel do Admin:** Realizado em  e .
--   **Correção do Bug no Relatório de Vendas:** Corrigido em .
--   **Barra Lateral de Ranking Recolhível:** Implementado em .
--   **Novo Ranking por Média de Avaliação:** Implementado em  e .
--   **Correção de Login:** O agente diagnosticou um problema de login devido a um banco de dados vazio e criou o usuário administrador padrão.
+*   **PagBank Integration Fixes:** Resolved multiple critical bugs related to creating and updating subscriptions, including handling existing customers,  issues, and credit card update failures.
+*   **Subscription Flow Overhaul:** Implemented a mandatory subscription popup () for users without an active plan, effectively gating the application.
+*   **Terms & Conditions on Payment Page:** Removed the initial T&C popup and integrated a mandatory checkbox into the subscription page (), with backend logic to log acceptance details ().
+*   **Meeting Participant Export:** Implemented a feature for admins to export a CSV of meeting attendees from the admin panel ( and ).
+*   **Supervisor Dashboard Enhancement:** Added more detailed licensee information (including subscription status) to the supervisor's view ().
+*   **Webhook User Update:** Added new endpoints to  to allow updating existing users via the webhook and updated .
+*   **Community Timeline Redesign:** Revamped the UI of the community feed () to a more modern, social-media-like design with clickable hashtags.
 
 **Earlier issues found/mentioned but not fixed**
--   Avisos de linting no frontend (ex: ) foram identificados, mas não corrigidos por serem considerados não-críticos.
+None. All issues raised by the user in this session were addressed.
 
 **Known issue recurrence from previous fork**
--   N/A
+The initial problem of the session was a regression where a fix for one part of the subscription flow broke another. This was thoroughly investigated and resolved with a more robust logic for handling PagBank customers, which should prevent similar issues.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend:** React, TailwindCSS, shadcn/ui
--   **Backend:** FastAPI, Pydantic, Motor
--   **Database:** MongoDB
--   **Architecture:** Full-stack com serviços gerenciados por backend                          RUNNING   pid 46, uptime 0:00:15
-code-server                      STOPPED   Not started
-frontend                         STOPPED   Feb 13 11:14 AM
-mongodb                          RUNNING   pid 49, uptime 0:00:15
-nginx-code-proxy                 RUNNING   pid 45, uptime 0:00:15
-supervisor> .
+*   **Backend:** FastAPI framework using asynchronous programming with ,  for non-blocking MongoDB access, and  for data modeling and validation.
+*   **Frontend:** React with hooks (, ), React Router for navigation, Axios for API communication, and React Context API for global state management (e.g., authentication).
+*   **Styling:** TailwindCSS for utility-first styling.
+*   **Third-Party Integration:** PagBank API for handling recurring subscription payments.
 
 **key DB schema**
--   : { , , ,  (novo, opcional) }
--   : { ,  (novo, opcional, array de strings) }
--    (novo): { , , , , , ,  }
--    (novo): { ,  }
+*   **users:** 
+*   **meetings:** 
+*   **subscriptions:** 
 
 **changes in tech stack**
--   Nenhuma.
+No changes were made to the core technology stack.
 
 **All files of reference**
--   **Criados:**
-    -   : Para a lógica do CRM de apresentações.
-    -   : Para o gerenciamento de categorias.
-    -   : UI para os licenciados gerenciarem suas apresentações.
-    -   : UI para os administradores gerenciarem as categorias.
-    -   Vários documentos  com resumos e checklists.
--   **Modificados:**
-    -   : Adicionados os models  e ; atualizados os models  e .
-    -   : Adicionados os novos roteadores.
-    -   : Adicionado o endpoint para o ranking de frequência.
-    -   : Adicionado o novo ranking de frequência como principal.
-    -   : Adicionada a lógica e JSX para os cards de lembrete.
+*   ****: Contains the core logic for creating subscriptions, checking status, and handling the new mandatory subscription flow.
+*   ****: This file now contains the critical logic for the mandatory subscription popup that gates access to the application.
+*   ****: The subscription payment page, which now includes the Terms and Conditions acceptance checkbox.
+*   ****: Contains the webhook endpoints for creating and updating users.
+*   ****: The redesigned social-media-style community feed component.
 
 **Areas that need refactoring**:
--   O arquivo  teve o suporte a internacionalização removido como uma correção rápida. Isso pode ser refatorado para usar um contexto de tradução apropriado no futuro.
+The file  was created but ultimately its logic was moved to . The file is now unused and should be deleted to prevent future confusion.
 
 **key api endpoints**
--   **Novos Endpoints:**
-    -    (CRUD)
-    -    (CRUD)
-    -   
+*   : Creates a new user subscription, now also logs terms acceptance.
+*   : Fetches the current user's subscription status, used by the frontend to decide whether to show the mandatory popup.
+*   : Webhook endpoint to update an existing licensee's data.
+*   : Exports a CSV file of a meeting's attendees.
 
 **Critical Info for New Agent**
--   A tarefa principal é a implementação de um grande recurso (CRM + Categorias). O trabalho está pela metade.
--   As credenciais de administrador são  / .
--   O agente anterior pode ter usado o banco de dados  para criar o usuário admin, enquanto o nome correto do banco parece ser . Verifique o arquivo  e certifique-se de estar usando o banco de dados correto.
--   **Importante:** O agente criou as novas páginas (, ) mas **esqueceu de adicionar os links de navegação** na interface. Os usuários não têm como acessar essas páginas. Adicionar esses links deve ser uma das primeiras etapas.
+*   Your primary and immediate task is to begin building the **CRM de Prospects** feature. Start with the backend models and routes as planned. The user has approved a Kanban-style visual pipeline.
+*   **Do not** start working on the Earnings Simulator (). The user has explicitly postponed this task.
+*   All communication with the user must be in **Portuguese (pt-br)**.
+*   The subscription logic in  and  is critical and was the result of extensive debugging. Be cautious if you need to make changes in these areas.
 
 **documents and test reports created in this job**
--   /app/REORGANIZACAO_PAINEL_SISTEMA.md
--   /app/PAINEL_SISTEMA_COMPLETO.md
--   /app/RANKING_SIDEBAR_RECOLHIVEL.md
--   /app/RANKING_AVALIACOES.md
--   /app/MANUAL_COMPLETO_SISTEMA.md
--   /app/CHECKLIST_CERTIFICADOS_PRODUCAO.md
+*    (Updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Usuário:** Pedido de análise completa do sistema para criar um tutorial. - **Concluído**.
-2.  **Usuário:** Pedido de uma lista de arquivos do sistema de certificados. - **Concluído**.
-3.  **Usuário:** Pedido do grande recurso de CRM, ranking e categorias. - **Em Andamento**.
-4.  **Usuário:**  - **Processado**.
-5.  **Usuário:**  - **Processado**.
-6.  **Usuário:** Pedido para tornar a barra de ranking recolhível. - **Concluído**.
-7.  **Usuário:** Pedido de um novo ranking por média de notas. - **Concluído**.
-8.  **Usuário:** Reclamação de que a reorganização do painel admin removeu funções. - **Concluído** (funções restauradas).
-9.  **Usuário:** Relatou erro de login. - **Concluído** (problema de banco de dados vazio corrigido).
-10. **Usuário:** Pedido de reorganização do menu lateral do admin. - **Concluído**.
+1.  **User:** Confirmed CRM requirements (Kanban pipeline, reports) and instructed the agent to focus on the CRM, postponing the earnings simulator. (Acknowledged)
+2.  **Agent:** Asked for clarification on CRM requirements. (Responded by User)
+3.  **User:** Requested two new major features: a CRM and an Earnings Simulator. (In Progress)
+4.  **Agent:** Confirmed a minor UI bug was fixed. (Acknowledged)
+5.  **User:** Reported a minor UI bug ( appearing on a page). (Fixed)
+6.  **Agent:** Announced the completion of the community timeline redesign. (Acknowledged)
+7.  **User:** Requested a UI redesign of the community timeline to look more like a social feed with hashtags. (Completed)
+8.  **Agent:** Confirmed API documentation was updated. (Acknowledged)
+9.  **User:** Asked the agent to update the webhook API documentation. (Completed)
+10. **User:** Requested to enhance the user webhook to support updating users, not just creating them. (Completed)
 
 **Project Health Check:**
--   **Broken:** A funcionalidade de CRM/Categorias está no meio da implementação e, portanto, não está funcional.
--   **Mocked:** N/A.
+*   **Broken:** None. The application is in a stable state with all reported issues resolved.
+*   **Mocked:** None. The PagBank integration points to their sandbox environment.
 
 **3rd Party Integrations**
--   Nenhuma nova integração foi adicionada nesta sessão.
+*   **PagBank Assinaturas:** Handles recurring subscription payments. Requires an API token.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO
--   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** None
--   **Known regressions:** None
+*   **Testing agent used after significant changes:** NO
+*   **Troubleshoot agent used after agent stuck in loop:** NO
+*   **Test files created:** None.
+*   **Known regressions:** A major regression was the starting point of this session, but it has been resolved. No new regressions are known.
 
 **Credentials to test flow:**
--   **Role:** Admin
--   **Email:** 
--   **Password:** 
+*   **Admin:**  / 
+*   **Licenciado (com assinatura):**  / 
+*   **Novo Licenciado (sem assinatura):**  /  (Use this user to test the mandatory subscription popup).
 
 **What agent forgot to execute**
--   O agente **não adicionou links de navegação** na UI para as novas páginas criadas ( e ).
--   A validação do registro das novas rotas do backend em  não foi confirmada.
--   A lógica para criar eventos na agenda com base nos resultados da apresentação (vendido/não vendido) foi planejada, mas não implementada no código do backend.
--   A lógica para filtrar módulos com base na categoria do usuário foi planejada, mas não implementada.</analysis>
+*   The agent created the file  but later made it obsolete by implementing the subscription check directly in . The unused file should have been deleted to clean up the codebase.</analysis>

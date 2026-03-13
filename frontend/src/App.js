@@ -67,6 +67,7 @@ import AdminLandingPage from './pages/admin/AdminLandingPage';
 import Presentations from './pages/Presentations';
 import SubscriptionOnboarding from './pages/SubscriptionOnboarding';
 import Meetings from './pages/Meetings';
+import CRM from './pages/CRM';
 import AdminSubscriptions from './pages/admin/AdminSubscriptions';
 import AdminMeetings from './pages/admin/AdminMeetings';
 import AdminLive from './pages/admin/AdminLive';
@@ -247,6 +248,14 @@ function App() {
             element={
               <PrivateRoute roles={['licenciado']}>
                 <Meetings />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/crm"
+            element={
+              <PrivateRoute roles={['licenciado']}>
+                <CRM />
               </PrivateRoute>
             }
           />

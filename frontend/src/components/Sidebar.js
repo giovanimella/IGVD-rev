@@ -31,7 +31,8 @@ import {
   Globe,
   Tag,
   CreditCard,
-  Video
+  Video,
+  UserPlus
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -147,6 +148,7 @@ const Sidebar = () => {
   const licenseeLinks = [
     { path: '/dashboard', icon: Home, label: 'Início' },
     { path: '/modules', icon: BookOpen, label: 'Meus Módulos' },
+    { path: '/crm', icon: UserPlus, label: 'CRM Prospects' },
     { path: '/presentations', icon: Target, label: 'Apresentações' },
     { path: '/meetings', icon: Users, label: 'Reuniões' },
     { path: '/timeline', icon: MessagesSquare, label: 'Comunidade' },
